@@ -1,69 +1,276 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useAuth } from '@/context/AuthContext';
+import {
+  Film,
+  Music,
+  BookOpen,
+  Megaphone,
+  Sparkles,
+  ArrowRight,
+  Tv,
+  CheckCircle2,
+  TrendingUp,
+  ShieldCheck,
+  Zap,
+} from 'lucide-react';
+
+export default function LandingPage() {
+  const { user, profile } = useAuth();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="w-full">
+      {/* HERO SECTION */}
+      <section className="relative overflow-hidden py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
+        {/* Subtle Brand Ambient Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#FF0080]/10 rounded-full blur-3xl pointer-events-none -z-10" />
+
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#333336] border border-[#454549] text-xs font-semibold text-[#FF0080] mb-6">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>The Next Generation Multi-Format Entertainment Hub</span>
+        </div>
+
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight sm:leading-none">
+          Stream. Listen. Read.{' '}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF0080] to-purple-400">
+            Create.
+          </span>
+        </h1>
+
+        <p className="mt-6 text-base sm:text-xl text-[#B8B8BD] max-w-2xl mx-auto leading-relaxed">
+          Yarrowplay unites cinematic video series, high-fidelity music streaming, insightful blogs, and direct creator monetization on one unified, high-speed platform.
+        </p>
+
+        <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4">
+          {user ? (
+            <Link
+              href="/home"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white font-semibold text-base transition-all shadow-lg active:scale-95"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              <span>Go to Content Feed</span>
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/register"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white font-semibold text-base transition-all shadow-lg active:scale-95"
+              >
+                <span>Get Started Free</span>
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#333336] hover:bg-[#3A3A3E] border border-[#454549] text-white font-semibold text-base transition-all"
+              >
+                Sign In
+              </Link>
+            </>
+          )}
+        </div>
+
+        {/* Feature Pill Highlights */}
+        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+          {[
+            { icon: Film, label: 'Video Series & Singles', desc: '4K ready streaming' },
+            { icon: Music, label: 'Music & Audio', desc: 'Lossless & full lyrics' },
+            { icon: BookOpen, label: 'Creator Blogs', desc: 'Rich editorial articles' },
+            { icon: Megaphone, label: 'Authentic Ads', desc: 'Non-intrusive sponsor cards' },
+          ].map((item, idx) => (
+            <div
+              key={idx}
+              className="p-4 rounded-2xl bg-[#333336]/60 border border-[#454549] text-left hover:border-[#FF0080]/50 transition-colors"
             >
-              Learning
-            </a>{" "}
-            center.
+              <item.icon className="w-6 h-6 text-[#FF0080] mb-2" />
+              <h3 className="text-sm font-semibold text-white">{item.label}</h3>
+              <p className="text-xs text-[#85858B] mt-0.5">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CONTENT FORMATS SHOWCASE */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#454549]">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white">
+            Built For Seamless Multi-Format Discovery
+          </h2>
+          <p className="text-sm text-[#85858B] mt-2">
+            No need to jump between five different apps. Enjoy video, music, and written content side-by-side.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Card 1: Video */}
+          <div className="bg-[#333336] border border-[#454549] rounded-2xl p-6 flex flex-col justify-between">
+            <div>
+              <div className="w-12 h-12 rounded-xl bg-[#FF0080]/15 text-[#FF0080] flex items-center justify-center mb-4">
+                <Film className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Episodic Series & Videos</h3>
+              <p className="text-sm text-[#B8B8BD] leading-relaxed">
+                Enjoy mini-series and movies with gesture controls, playback speed controls, and auto-rotation on mobile devices.
+              </p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-[#454549]">
+              <span className="text-xs font-semibold text-[#FF0080] flex items-center gap-1">
+                Cloudinary Powered Streaming <Zap className="w-3.5 h-3.5" />
+              </span>
+            </div>
+          </div>
+
+          {/* Card 2: Audio */}
+          <div className="bg-[#333336] border border-[#454549] rounded-2xl p-6 flex flex-col justify-between">
+            <div>
+              <div className="w-12 h-12 rounded-xl bg-[#FF0080]/15 text-[#FF0080] flex items-center justify-center mb-4">
+                <Music className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Music & Audio Experience</h3>
+              <p className="text-sm text-[#B8B8BD] leading-relaxed">
+                Spotify-inspired persistent player with background playback, synchronized lyrics, queue management, and album collections.
+              </p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-[#454549]">
+              <span className="text-xs font-semibold text-[#FF0080] flex items-center gap-1">
+                Persistent Audio Engine <Zap className="w-3.5 h-3.5" />
+              </span>
+            </div>
+          </div>
+
+          {/* Card 3: Blogs */}
+          <div className="bg-[#333336] border border-[#454549] rounded-2xl p-6 flex flex-col justify-between">
+            <div>
+              <div className="w-12 h-12 rounded-xl bg-[#FF0080]/15 text-[#FF0080] flex items-center justify-center mb-4">
+                <BookOpen className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Community Blogs & Stories</h3>
+              <p className="text-sm text-[#B8B8BD] leading-relaxed">
+                Read creator essays, production notes, track commentaries, and articles with instant reactions and discussion threads.
+              </p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-[#454549]">
+              <span className="text-xs font-semibold text-[#FF0080] flex items-center gap-1">
+                Open Publishing for Creators <Zap className="w-3.5 h-3.5" />
+              </span>
+            </div>
+          </div>
         </div>
-      </main>
+      </section>
+
+      {/* CREATOR & ADVERTISER DUAL SECTION */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#454549]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Creator Studio Card */}
+          <div className="bg-[#333336] border border-[#454549] rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF0080]/10 rounded-full blur-2xl pointer-events-none" />
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF0080]/15 text-[#FF0080] text-xs font-bold uppercase mb-4">
+                <Film className="w-3.5 h-3.5" />
+                For Content Creators
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Creator Studio & Deep Analytics
+              </h3>
+              <p className="text-sm text-[#B8B8BD] leading-relaxed mb-6">
+                Upload entire series with multi-episode forms or release audio albums in minutes. Track views, watch duration, audience retention, likes, shares, and earnings from verified event data.
+              </p>
+              <ul className="space-y-2.5 text-xs text-[#B8B8BD]">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#22C55E]" />
+                  Multi-episode series batch upload pipeline
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#22C55E]" />
+                  Direct-to-cloud signed Cloudinary ingestion
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#22C55E]" />
+                  Video boosting controls for increased reach
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-8">
+              <Link
+                href="/register"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-[#FF0080] hover:text-white transition-colors"
+              >
+                <span>Join as Content Creator</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Advertiser Studio Card */}
+          <div className="bg-[#333336] border border-[#454549] rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl pointer-events-none" />
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/15 text-purple-400 text-xs font-bold uppercase mb-4">
+                <Megaphone className="w-3.5 h-3.5" />
+                For Brands & Advertisers
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Transparent Sponsored Content
+              </h3>
+              <p className="text-sm text-[#B8B8BD] leading-relaxed mb-6">
+                Launch targeted media campaigns that blend cleanly into the feed with prominent, honest <span className="text-[#FF0080] font-semibold">Sponsored</span> tags. Zero disguised clickbait.
+              </p>
+              <ul className="space-y-2.5 text-xs text-[#B8B8BD]">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#22C55E]" />
+                  Upload custom creatives (Images & Videos)
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#22C55E]" />
+                  Real-time impression and verified click tracking
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#22C55E]" />
+                  Dedicated Advertiser Studio dashboard
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-8">
+              <Link
+                href="/register"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-[#FF0080] hover:text-white transition-colors"
+              >
+                <span>Launch an Advertiser Campaign</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FINAL CALL TO ACTION */}
+      <section className="py-20 px-4 max-w-4xl mx-auto text-center border-t border-[#454549]">
+        <div className="relative w-16 h-16 mx-auto mb-4">
+          <Image
+            src="/logo.png"
+            alt="Yarrowplay"
+            fill
+            className="object-contain"
+          />
+        </div>
+        <h2 className="text-3xl font-extrabold text-white mb-4">
+          Start Streaming and Publishing Today
+        </h2>
+        <p className="text-sm text-[#B8B8BD] max-w-md mx-auto mb-8">
+          Join thousands of viewers and creators on the modern media platform.
+        </p>
+        <Link
+          href="/register"
+          className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white font-bold text-base transition-all shadow-xl active:scale-95"
+        >
+          <span>Create Your Free Account</span>
+          <ArrowRight className="w-5 h-5" />
+        </Link>
+      </section>
     </div>
   );
 }
