@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Blog, Comment } from '@/types/database';
 import {
   Heart,
+  ThumbsUp,
   ThumbsDown,
   Share2,
   Bookmark,
@@ -19,6 +20,7 @@ import {
   Check,
   Send,
   User,
+  Trash2,
 } from 'lucide-react';
 
 export default function BlogReaderPage() {
@@ -44,11 +46,51 @@ export default function BlogReaderPage() {
     const fetchBlogData = async () => {
       setIsLoading(true);
       try {
-        const { data: b } = await supabase
+        // Parallelize blog, comments, reaction, and favorite queries
+        const blogPromise = supabase
           .from('blogs')
           .select('*, author:profiles(*)')
           .eq('id', blogId)
           .single();
+
+        const commentsPromise = supabase
+          .from('comments')
+          .select('*, user:profiles(*)')
+          .eq('content_type', 'blog')
+          .eq('content_id', blogId)
+          .order('created_at', { ascending: false });
+
+        const reactionPromise = user
+          ? supabase
+              .from('reactions')
+              .select('reaction_type')
+              .eq('user_id', user.id)
+              .eq('content_type', 'blog')
+              .eq('content_id', blogId)
+              .maybeSingle()
+          : Promise.resolve({ data: null });
+
+        const favoritePromise = user
+          ? supabase
+              .from('favorites')
+              .select('id')
+              .eq('user_id', user.id)
+              .eq('content_type', 'blog')
+              .eq('content_id', blogId)
+              .maybeSingle()
+          : Promise.resolve({ data: null });
+
+        const [
+          { data: b },
+          { data: comms },
+          { data: reaction },
+          { data: fav },
+        ] = await Promise.all([
+          blogPromise,
+          commentsPromise,
+          reactionPromise,
+          favoritePromise,
+        ]);
 
         if (b) {
           setBlog(b as Blog);
@@ -56,36 +98,9 @@ export default function BlogReaderPage() {
           setDislikesCount(b.dislikes_count || 0);
         }
 
-        // Fetch comments
-        const { data: comms } = await supabase
-          .from('comments')
-          .select('*, user:profiles(*)')
-          .eq('content_type', 'blog')
-          .eq('content_id', blogId)
-          .order('created_at', { ascending: false });
         setComments((comms as Comment[]) || []);
-
-        if (user) {
-          const { data: reaction } = await supabase
-            .from('reactions')
-            .select('reaction_type')
-            .eq('user_id', user.id)
-            .eq('content_type', 'blog')
-            .eq('content_id', blogId)
-            .maybeSingle();
-
-          if (reaction) setUserReaction(reaction.reaction_type as any);
-
-          const { data: fav } = await supabase
-            .from('favorites')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('content_type', 'blog')
-            .eq('content_id', blogId)
-            .maybeSingle();
-
-          setIsFavorite(!!fav);
-        }
+        if (reaction) setUserReaction(reaction.reaction_type as any);
+        setIsFavorite(!!fav);
       } catch {
         // ignore
       } finally {
@@ -118,6 +133,20 @@ export default function BlogReaderPage() {
         setUserReaction(data.userReaction);
         setLikesCount(data.likesCount);
         setDislikesCount(data.dislikesCount);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!user) return;
+    try {
+      const res = await fetch(`/api/comments?id=${commentId}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setComments((prev) => prev.filter((c) => c.id !== commentId));
       }
     } catch {
       // ignore
@@ -251,31 +280,34 @@ export default function BlogReaderPage() {
           <div className="flex items-center bg-[#333336] rounded-xl border border-[#454549] overflow-hidden">
             <button
               onClick={() => handleReaction('like')}
+              title="Like"
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${
                 userReaction === 'like' ? 'text-[#FF0080] bg-[#FF0080]/15' : 'text-[#B8B8BD] hover:text-white'
               }`}
             >
-              <Heart className="w-4 h-4" />
+              <ThumbsUp className={`w-4 h-4 ${userReaction === 'like' ? 'fill-current' : ''}`} />
               <span>{likesCount}</span>
             </button>
             <div className="w-px h-4 bg-[#454549]" />
             <button
               onClick={() => handleReaction('dislike')}
+              title="Dislike"
               className={`px-3 py-1.5 text-xs font-semibold transition-colors ${
                 userReaction === 'dislike' ? 'text-[#EF4444] bg-[#EF4444]/15' : 'text-[#B8B8BD] hover:text-white'
               }`}
             >
-              <ThumbsDown className="w-4 h-4" />
+              <ThumbsDown className={`w-4 h-4 ${userReaction === 'dislike' ? 'fill-current' : ''}`} />
             </button>
           </div>
 
           <button
             onClick={handleToggleFavorite}
+            title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
             className={`p-2 rounded-xl border transition-colors ${
-              isFavorite ? 'bg-[#FF0080] text-white border-[#FF0080]' : 'bg-[#333336] border-[#454549] text-[#B8B8BD]'
+              isFavorite ? 'bg-[#FF0080] text-white border-[#FF0080]' : 'bg-[#333336] border-[#454549] text-[#B8B8BD] hover:text-white'
             }`}
           >
-            <Bookmark className="w-4 h-4" />
+            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
           </button>
 
           <button
@@ -345,7 +377,19 @@ export default function BlogReaderPage() {
               <div key={c.id} className="p-3 bg-[#2B2B2D] rounded-xl border border-[#454549] text-xs">
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-semibold text-white">{c.user?.display_name || 'Reader'}</span>
-                  <span className="text-[10px] text-[#85858B]">{new Date(c.created_at).toLocaleDateString()}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-[#85858B]">{new Date(c.created_at).toLocaleDateString()}</span>
+                    {user && (user.id === c.user_id || user.id === blog?.author_id) && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteComment(c.id)}
+                        title="Delete comment"
+                        className="text-[#85858B] hover:text-[#EF4444] transition-colors p-0.5 rounded cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <p className="text-[#B8B8BD]">{c.content}</p>
               </div>

@@ -10,6 +10,7 @@ import { VideoPlayer } from '@/components/media/VideoPlayer';
 import { Video, Comment } from '@/types/database';
 import {
   Heart,
+  ThumbsUp,
   ThumbsDown,
   Share2,
   Bookmark,
@@ -20,6 +21,7 @@ import {
   Send,
   Layers,
   Film,
+  Trash2,
 } from 'lucide-react';
 
 export default function VideoDetailPage() {
@@ -38,6 +40,7 @@ export default function VideoDetailPage() {
   const [likesCount, setLikesCount] = useState(0);
   const [dislikesCount, setDislikesCount] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -47,12 +50,62 @@ export default function VideoDetailPage() {
     const fetchVideoData = async () => {
       setIsLoading(true);
       try {
-        // 1. Fetch video record
-        const { data: vid } = await supabase
+        // Parallelize primary queries: video record, comments, and user-specific states
+        const videoPromise = supabase
           .from('videos')
           .select('*, creator:profiles(*), series:content_series(*)')
           .eq('id', videoId)
           .single();
+
+        const commentsPromise = supabase
+          .from('comments')
+          .select('*, user:profiles(*)')
+          .eq('content_type', 'video')
+          .eq('content_id', videoId)
+          .order('created_at', { ascending: false });
+
+        const reactionPromise = user
+          ? supabase
+              .from('reactions')
+              .select('reaction_type')
+              .eq('user_id', user.id)
+              .eq('content_type', 'video')
+              .eq('content_id', videoId)
+              .maybeSingle()
+          : Promise.resolve({ data: null });
+
+        const favoritePromise = user
+          ? supabase
+              .from('favorites')
+              .select('id')
+              .eq('user_id', user.id)
+              .eq('content_type', 'video')
+              .eq('content_id', videoId)
+              .maybeSingle()
+          : Promise.resolve({ data: null });
+
+        const watchlistPromise = user
+          ? supabase
+              .from('watchlists')
+              .select('id')
+              .eq('user_id', user.id)
+              .eq('video_id', videoId)
+              .maybeSingle()
+          : Promise.resolve({ data: null });
+
+        const [
+          { data: vid },
+          { data: comms },
+          { data: reaction },
+          { data: fav },
+          { data: watchItem },
+        ] = await Promise.all([
+          videoPromise,
+          commentsPromise,
+          reactionPromise,
+          favoritePromise,
+          watchlistPromise,
+        ]);
 
         if (vid) {
           setVideo(vid as Video);
@@ -70,39 +123,10 @@ export default function VideoDetailPage() {
           }
         }
 
-        // 2. Fetch comments
-        const { data: comms } = await supabase
-          .from('comments')
-          .select('*, user:profiles(*)')
-          .eq('content_type', 'video')
-          .eq('content_id', videoId)
-          .order('created_at', { ascending: false });
         setComments((comms as Comment[]) || []);
-
-        // 3. If logged in, fetch user's reaction & favorite
-        if (user) {
-          const { data: reaction } = await supabase
-            .from('reactions')
-            .select('reaction_type')
-            .eq('user_id', user.id)
-            .eq('content_type', 'video')
-            .eq('content_id', videoId)
-            .maybeSingle();
-
-          if (reaction) {
-            setUserReaction(reaction.reaction_type as any);
-          }
-
-          const { data: fav } = await supabase
-            .from('favorites')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('content_type', 'video')
-            .eq('content_id', videoId)
-            .maybeSingle();
-
-          setIsFavorite(!!fav);
-        }
+        if (reaction) setUserReaction(reaction.reaction_type as any);
+        setIsFavorite(!!fav);
+        setIsWatchlisted(!!watchItem);
       } catch {
         // ignore
       } finally {
@@ -160,6 +184,45 @@ export default function VideoDetailPage() {
       if (res.ok) {
         const data = await res.json();
         setIsFavorite(data.isFavorite);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleToggleWatchlist = async () => {
+    if (!user) {
+      window.location.href = `/login?redirect=/videos/${videoId}`;
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/watchlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content_type: 'video',
+          content_id: videoId,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsWatchlisted(data.isWatchlisted);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!user) return;
+    try {
+      const res = await fetch(`/api/comments?id=${commentId}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setComments((prev) => prev.filter((c) => c.id !== commentId));
       }
     } catch {
       // ignore
@@ -311,38 +374,54 @@ export default function VideoDetailPage() {
                 <div className="flex items-center bg-[#333336] rounded-xl border border-[#454549] overflow-hidden">
                   <button
                     onClick={() => handleReaction('like')}
+                    title="Like"
                     className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors ${
                       userReaction === 'like'
                         ? 'text-[#FF0080] bg-[#FF0080]/15'
                         : 'text-[#B8B8BD] hover:text-white'
                     }`}
                   >
-                    <Heart className="w-4 h-4" />
+                    <ThumbsUp className={`w-4 h-4 ${userReaction === 'like' ? 'fill-current' : ''}`} />
                     <span>{likesCount}</span>
                   </button>
                   <div className="w-px h-5 bg-[#454549]" />
                   <button
                     onClick={() => handleReaction('dislike')}
+                    title="Dislike"
                     className={`px-3 py-2 text-xs font-semibold transition-colors ${
                       userReaction === 'dislike'
                         ? 'text-[#EF4444] bg-[#EF4444]/15'
                         : 'text-[#B8B8BD] hover:text-white'
                     }`}
                   >
-                    <ThumbsDown className="w-4 h-4" />
+                    <ThumbsDown className={`w-4 h-4 ${userReaction === 'dislike' ? 'fill-current' : ''}`} />
                   </button>
                 </div>
 
                 {/* Favorite */}
                 <button
                   onClick={handleToggleFavorite}
+                  title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
                   className={`p-2 rounded-xl border transition-colors ${
                     isFavorite
                       ? 'bg-[#FF0080] text-white border-[#FF0080]'
                       : 'bg-[#333336] border-[#454549] text-[#B8B8BD] hover:text-white'
                   }`}
                 >
-                  <Bookmark className="w-4 h-4" />
+                  <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+                </button>
+
+                {/* Watchlist */}
+                <button
+                  onClick={handleToggleWatchlist}
+                  title={isWatchlisted ? 'Remove from Watchlist' : 'Add to Watchlist'}
+                  className={`p-2 rounded-xl border transition-colors ${
+                    isWatchlisted
+                      ? 'bg-[#FF0080] text-white border-[#FF0080]'
+                      : 'bg-[#333336] border-[#454549] text-[#B8B8BD] hover:text-white'
+                  }`}
+                >
+                  <Bookmark className={`w-4 h-4 ${isWatchlisted ? 'fill-current' : ''}`} />
                 </button>
 
                 {/* Share */}
@@ -421,9 +500,21 @@ export default function VideoDetailPage() {
                       <span className="font-semibold text-white">
                         {comm.user?.display_name || 'Viewer'}
                       </span>
-                      <span className="text-[10px] text-[#85858B]">
-                        {new Date(comm.created_at).toLocaleDateString()}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-[#85858B]">
+                          {new Date(comm.created_at).toLocaleDateString()}
+                        </span>
+                        {user && (user.id === comm.user_id || user.id === video?.creator_id) && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteComment(comm.id)}
+                            title="Delete comment"
+                            className="text-[#85858B] hover:text-[#EF4444] transition-colors p-0.5 rounded cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <p className="text-[#B8B8BD] leading-relaxed">{comm.content}</p>
                   </div>

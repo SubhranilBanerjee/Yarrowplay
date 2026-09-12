@@ -1,6 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+export async function GET(req: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const { searchParams } = new URL(req.url);
+    const contentType = searchParams.get('content_type');
+    const contentId = searchParams.get('content_id');
+
+    if (!contentType || !contentId) {
+      return NextResponse.json({ error: 'Missing content_type or content_id' }, { status: 400 });
+    }
+
+    let userReaction: 'like' | 'dislike' | null = null;
+    if (user) {
+      const { data: existing } = await supabase
+        .from('reactions')
+        .select('reaction_type')
+        .eq('user_id', user.id)
+        .eq('content_type', contentType)
+        .eq('content_id', contentId)
+        .maybeSingle();
+
+      if (existing) {
+        userReaction = existing.reaction_type as any;
+      }
+    }
+
+    return NextResponse.json({ userReaction });
+  } catch (error: any) {
+    return NextResponse.json({ error: error?.message || 'Failed to fetch reaction' }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient();

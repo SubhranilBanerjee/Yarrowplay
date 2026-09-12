@@ -142,9 +142,11 @@ export interface Favorite {
 export interface Watchlist {
   id: string;
   user_id: string;
-  video_id: string;
+  video_id?: string | null;
+  audio_id?: string | null;
   created_at: string;
   video?: Video;
+  audio?: AudioTrack;
 }
 
 export interface Comment {

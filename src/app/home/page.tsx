@@ -22,75 +22,80 @@ export default function HomePage() {
     setErrorMsg(null);
 
     try {
-      // 1. Fetch public published videos with creator profiles
-      const { data: videosData, error: videosErr } = await supabase
-        .from('videos')
-        .select('*, creator:profiles(*)')
-        .eq('visibility', 'public')
-        .eq('status', 'published')
-        .order('created_at', { ascending: false });
-
-      // 2. Fetch active boosts to identify boosted videos
       const nowIso = new Date().toISOString();
-      const { data: activeBoosts } = await supabase
-        .from('video_boosts')
-        .select('video_id')
-        .eq('status', 'active')
-        .lte('start_date', nowIso)
-        .gte('end_date', nowIso);
 
-      const boostedIds = new Set((activeBoosts || []).map((b) => b.video_id));
+      // Parallelize all 5 feed queries
+      const [
+        { data: videosData },
+        { data: activeBoosts },
+        { data: audiosData },
+        { data: blogsData },
+        { data: campaignsData },
+      ] = await Promise.all([
+        supabase
+          .from('videos')
+          .select('*, creator:profiles(*)')
+          .eq('visibility', 'public')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false }),
 
-      const taggedVideos = (videosData || []).map((v) => ({
+        supabase
+          .from('video_boosts')
+          .select('video_id')
+          .eq('status', 'active')
+          .lte('start_date', nowIso)
+          .gte('end_date', nowIso),
+
+        supabase
+          .from('audios')
+          .select('*, creator:profiles(*)')
+          .eq('visibility', 'public')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false }),
+
+        supabase
+          .from('blogs')
+          .select('*, author:profiles(*)')
+          .eq('status', 'published')
+          .order('published_at', { ascending: false }),
+
+        supabase
+          .from('advertiser_campaigns')
+          .select('*, advertiser:profiles(*)')
+          .eq('status', 'active')
+          .lte('start_date', nowIso)
+          .gte('end_date', nowIso),
+      ]);
+
+      const boostedIds = new Set((activeBoosts || []).map((b: any) => b.video_id));
+
+      const taggedVideos = (videosData || []).map((v: any) => ({
         ...v,
         type: 'video' as const,
         boosted: boostedIds.has(v.id),
       }));
 
-      // 3. Fetch public published audios
-      const { data: audiosData } = await supabase
-        .from('audios')
-        .select('*, creator:profiles(*)')
-        .eq('visibility', 'public')
-        .eq('status', 'published')
-        .order('created_at', { ascending: false });
-
-      const taggedAudios: UnifiedMediaItem[] = (audiosData || []).map((a) => ({
+      const taggedAudios: UnifiedMediaItem[] = (audiosData || []).map((a: any) => ({
         ...a,
         type: 'audio' as const,
       }));
 
       setAllAudios((audiosData as AudioTrack[]) || []);
 
-      // 4. Fetch published blogs
-      const { data: blogsData } = await supabase
-        .from('blogs')
-        .select('*, author:profiles(*)')
-        .eq('status', 'published')
-        .order('published_at', { ascending: false });
-
-      const taggedBlogs: UnifiedMediaItem[] = (blogsData || []).map((b) => ({
+      const taggedBlogs: UnifiedMediaItem[] = (blogsData || []).map((b: any) => ({
         ...b,
         type: 'blog' as const,
       }));
 
-      // 5. Fetch active advertiser campaigns
-      const { data: campaignsData } = await supabase
-        .from('advertiser_campaigns')
-        .select('*, advertiser:profiles(*)')
-        .eq('status', 'active')
-        .lte('start_date', nowIso)
-        .gte('end_date', nowIso);
-
-      const taggedAds: UnifiedMediaItem[] = (campaignsData || []).map((c) => ({
+      const taggedAds: UnifiedMediaItem[] = (campaignsData || []).map((c: any) => ({
         ...c,
         type: 'ad' as const,
       }));
 
       // 6. Merge and interleave feed (Boosted videos prioritized, Ads paced, etc.)
       const combined: UnifiedMediaItem[] = [];
-      const nonBoostedVideos = taggedVideos.filter((v) => !v.boosted);
-      const boostedVideos = taggedVideos.filter((v) => v.boosted);
+      const nonBoostedVideos = taggedVideos.filter((v: any) => !v.boosted);
+      const boostedVideos = taggedVideos.filter((v: any) => v.boosted);
 
       // Start with boosted items at top (if any)
       combined.push(...boostedVideos);

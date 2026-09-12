@@ -1,6 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+export async function GET(req: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ isFavorite: false });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const contentType = searchParams.get('content_type');
+    const contentId = searchParams.get('content_id');
+
+    if (!contentType || !contentId) {
+      return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
+    }
+
+    const { data: existing } = await supabase
+      .from('favorites')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('content_type', contentType)
+      .eq('content_id', contentId)
+      .maybeSingle();
+
+    return NextResponse.json({ isFavorite: !!existing });
+  } catch (error: any) {
+    return NextResponse.json({ error: error?.message || 'Failed to check favorite' }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient();

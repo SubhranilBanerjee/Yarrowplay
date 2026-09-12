@@ -79,7 +79,7 @@ export default function CreatorAnalyticsPage() {
         .eq('creator_id', user.id)
         .eq('status', 'active');
 
-      const boostedSet = new Set((boosts || []).map((b) => b.video_id));
+      const boostedSet = new Set((boosts || []).map((b: any) => b.video_id));
 
       // 4. Fetch creator earnings
       const { data: earningsData } = await supabase
@@ -95,20 +95,20 @@ export default function CreatorAnalyticsPage() {
         .eq('event_type', 'watch_time');
 
       const watchTimeMap = new Map<string, number>();
-      (watchEvents || []).forEach((e) => {
+      (watchEvents || []).forEach((e: any) => {
         const cur = watchTimeMap.get(e.content_id) || 0;
         watchTimeMap.set(e.content_id, cur + (Number(e.duration_seconds) || 0));
       });
 
       const earningsMap = new Map<string, number>();
-      (earningsData || []).forEach((e) => {
+      (earningsData || []).forEach((e: any) => {
         const cur = earningsMap.get(e.content_id) || 0;
         earningsMap.set(e.content_id, cur + (Number(e.amount) || 0));
       });
 
       const metrics: ContentMetric[] = [];
 
-      (videos || []).forEach((v) => {
+      (videos || []).forEach((v: any) => {
         const durationSecs = watchTimeMap.get(v.id) || (v.views_count * (v.duration_seconds || 45) * 0.4);
         metrics.push({
           id: v.id,
@@ -125,7 +125,7 @@ export default function CreatorAnalyticsPage() {
         });
       });
 
-      (audios || []).forEach((a) => {
+      (audios || []).forEach((a: any) => {
         const durationSecs = watchTimeMap.get(a.id) || (a.views_count * (a.duration_seconds || 180) * 0.6);
         metrics.push({
           id: a.id,

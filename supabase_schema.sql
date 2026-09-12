@@ -184,10 +184,16 @@ create table if not exists public.favorites (
 create table if not exists public.watchlists (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references public.profiles(id) on delete cascade not null,
-  video_id uuid references public.videos(id) on delete cascade not null,
-  created_at timestamptz default now(),
-  constraint uq_user_watchlist_video unique (user_id, video_id)
+  video_id uuid references public.videos(id) on delete cascade,
+  audio_id uuid references public.audios(id) on delete cascade,
+  created_at timestamptz default now()
 );
+
+-- Migrations if watchlists table already existed:
+-- alter table public.watchlists alter column video_id drop not null;
+-- alter table public.watchlists add column if not exists audio_id uuid references public.audios(id) on delete cascade;
+-- create unique index if not exists uq_user_watchlist_audio on public.watchlists (user_id, audio_id) where audio_id is not null;
+-- create unique index if not exists uq_user_watchlist_video on public.watchlists (user_id, video_id) where video_id is not null;
 
 -- 12. COMMENTS TABLE
 create table if not exists public.comments (
@@ -369,8 +375,22 @@ drop policy if exists "Comments viewable by all" on public.comments;
 create policy "Comments viewable by all" on public.comments for select using (true);
 
 drop policy if exists "Users manage their comments" on public.comments;
-create policy "Users manage their comments" on public.comments for all
+drop policy if exists "Users insert comments" on public.comments;
+create policy "Users insert comments" on public.comments for insert
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Users update own comments" on public.comments;
+create policy "Users update own comments" on public.comments for update
   using (auth.uid() = user_id);
+
+drop policy if exists "Users and content creators delete comments" on public.comments;
+create policy "Users and content creators delete comments" on public.comments for delete
+  using (
+    auth.uid() = user_id
+    or (content_type = 'video' and exists (select 1 from public.videos where id = comments.content_id and creator_id = auth.uid()))
+    or (content_type = 'audio' and exists (select 1 from public.audios where id = comments.content_id and creator_id = auth.uid()))
+    or (content_type = 'blog' and exists (select 1 from public.blogs where id = comments.content_id and author_id = auth.uid()))
+  );
 
 drop policy if exists "Watch history viewable by owner" on public.watch_history;
 create policy "Watch history viewable by owner" on public.watch_history for all

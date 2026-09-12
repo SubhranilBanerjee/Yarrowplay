@@ -27,24 +27,26 @@ export default function FavoritesPage() {
           .eq('user_id', user.id);
 
         if (favs && favs.length > 0) {
-          const vidIds = favs.filter((f) => f.content_type === 'video').map((f) => f.content_id);
-          const audIds = favs.filter((f) => f.content_type === 'audio').map((f) => f.content_id);
-          const blgIds = favs.filter((f) => f.content_type === 'blog').map((f) => f.content_id);
+          const vidIds = favs.filter((f: any) => f.content_type === 'video').map((f: any) => f.content_id);
+          const audIds = favs.filter((f: any) => f.content_type === 'audio').map((f: any) => f.content_id);
+          const blgIds = favs.filter((f: any) => f.content_type === 'blog').map((f: any) => f.content_id);
+
+          const [vidsRes, audsRes, blgsRes] = await Promise.all([
+            vidIds.length > 0
+              ? supabase.from('videos').select('*, creator:profiles(*)').in('id', vidIds)
+              : Promise.resolve({ data: [] }),
+            audIds.length > 0
+              ? supabase.from('audios').select('*, creator:profiles(*)').in('id', audIds)
+              : Promise.resolve({ data: [] }),
+            blgIds.length > 0
+              ? supabase.from('blogs').select('*, author:profiles(*)').in('id', blgIds)
+              : Promise.resolve({ data: [] }),
+          ]);
 
           const list: UnifiedMediaItem[] = [];
-
-          if (vidIds.length > 0) {
-            const { data: vids } = await supabase.from('videos').select('*, creator:profiles(*)').in('id', vidIds);
-            (vids || []).forEach((v) => list.push({ ...v, type: 'video' }));
-          }
-          if (audIds.length > 0) {
-            const { data: auds } = await supabase.from('audios').select('*, creator:profiles(*)').in('id', audIds);
-            (auds || []).forEach((a) => list.push({ ...a, type: 'audio' }));
-          }
-          if (blgIds.length > 0) {
-            const { data: blgs } = await supabase.from('blogs').select('*, author:profiles(*)').in('id', blgIds);
-            (blgs || []).forEach((b) => list.push({ ...b, type: 'blog' }));
-          }
+          (vidsRes.data || []).forEach((v: any) => list.push({ ...v, type: 'video' }));
+          (audsRes.data || []).forEach((a: any) => list.push({ ...a, type: 'audio' }));
+          (blgsRes.data || []).forEach((b: any) => list.push({ ...b, type: 'blog' }));
 
           setFavoriteItems(list);
         } else {

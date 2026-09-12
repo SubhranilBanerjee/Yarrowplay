@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
+import { useAuth } from '@/context/AuthContext';
 import {
   Play,
   Pause,
@@ -15,9 +16,14 @@ import {
   ListMusic,
   FileText,
   X,
+  ThumbsUp,
+  ThumbsDown,
+  Heart,
+  Bookmark,
 } from 'lucide-react';
 
 export function AudioPlayerBar() {
+  const { user } = useAuth();
   const {
     currentTrack,
     isPlaying,
@@ -38,6 +44,112 @@ export function AudioPlayerBar() {
   } = useAudioPlayer();
 
   const [activeTab, setActiveTab] = useState<'art' | 'lyrics' | 'queue'>('art');
+  const [userReaction, setUserReaction] = useState<'like' | 'dislike' | null>(null);
+  const [likesCount, setLikesCount] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isWatchlisted, setIsWatchlisted] = useState(false);
+
+  useEffect(() => {
+    if (!currentTrack) return;
+    setLikesCount(currentTrack.likes_count || 0);
+
+    if (!user) {
+      setUserReaction(null);
+      setIsFavorite(false);
+      setIsWatchlisted(false);
+      return;
+    }
+
+    Promise.all([
+      fetch(`/api/reactions?content_type=audio&content_id=${currentTrack.id}`)
+        .then((r) => r.json())
+        .catch(() => ({ userReaction: null })),
+      fetch(`/api/watchlist?content_type=audio&content_id=${currentTrack.id}`)
+        .then((r) => r.json())
+        .catch(() => ({ isWatchlisted: false })),
+      fetch(`/api/favorites?content_type=audio&content_id=${currentTrack.id}`)
+        .then((r) => r.json())
+        .catch(() => ({ isFavorite: false })),
+    ]).then(([rData, wData, fData]) => {
+      if (rData?.userReaction !== undefined) setUserReaction(rData.userReaction);
+      if (wData?.isWatchlisted !== undefined) setIsWatchlisted(wData.isWatchlisted);
+      if (fData?.isFavorite !== undefined) setIsFavorite(fData.isFavorite);
+    });
+  }, [currentTrack?.id, user]);
+
+  const handleReaction = async (type: 'like' | 'dislike') => {
+    if (!currentTrack) return;
+    if (!user) {
+      window.location.href = '/login';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/reactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content_type: 'audio',
+          content_id: currentTrack.id,
+          reaction_type: type,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setUserReaction(data.userReaction);
+        setLikesCount(data.likesCount);
+      }
+    } catch {}
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!currentTrack) return;
+    if (!user) {
+      window.location.href = '/login';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content_type: 'audio',
+          content_id: currentTrack.id,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsFavorite(data.isFavorite);
+      }
+    } catch {}
+  };
+
+  const handleToggleWatchlist = async () => {
+    if (!currentTrack) return;
+    if (!user) {
+      window.location.href = '/login';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/watchlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content_type: 'audio',
+          content_id: currentTrack.id,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsWatchlisted(data.isWatchlisted);
+      }
+    } catch {}
+  };
 
   if (!currentTrack) return null;
 
@@ -142,6 +254,60 @@ export function AudioPlayerBar() {
 
           {/* Right Actions & Volume */}
           <div className="flex items-center gap-3">
+            {/* Reactions & Watchlist in Docked Bar */}
+            <div className="hidden sm:flex items-center gap-1.5">
+              <div className="flex items-center bg-[#3A3A3E] rounded-lg border border-[#454549] overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => handleReaction('like')}
+                  title="Like Audio"
+                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-semibold transition-colors ${
+                    userReaction === 'like' ? 'text-[#FF0080] bg-[#FF0080]/15' : 'text-[#B8B8BD] hover:text-white'
+                  }`}
+                >
+                  <ThumbsUp className={`w-3.5 h-3.5 ${userReaction === 'like' ? 'fill-current' : ''}`} />
+                  <span className="text-[11px]">{likesCount}</span>
+                </button>
+                <div className="w-px h-3.5 bg-[#454549]" />
+                <button
+                  type="button"
+                  onClick={() => handleReaction('dislike')}
+                  title="Dislike Audio"
+                  className={`px-2 py-1 text-xs font-semibold transition-colors ${
+                    userReaction === 'dislike' ? 'text-[#EF4444] bg-[#EF4444]/15' : 'text-[#B8B8BD] hover:text-white'
+                  }`}
+                >
+                  <ThumbsDown className={`w-3.5 h-3.5 ${userReaction === 'dislike' ? 'fill-current' : ''}`} />
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleToggleFavorite}
+                title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                className={`p-1.5 rounded-lg border transition-colors ${
+                  isFavorite
+                    ? 'bg-[#FF0080] text-white border-[#FF0080]'
+                    : 'bg-[#3A3A3E] border-[#454549] text-[#B8B8BD] hover:text-white'
+                }`}
+              >
+                <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-current' : ''}`} />
+              </button>
+
+              <button
+                type="button"
+                onClick={handleToggleWatchlist}
+                title={isWatchlisted ? 'In Watchlist' : 'Add to Watchlist'}
+                className={`p-1.5 rounded-lg border transition-colors ${
+                  isWatchlisted
+                    ? 'bg-[#FF0080] text-white border-[#FF0080]'
+                    : 'bg-[#3A3A3E] border-[#454549] text-[#B8B8BD] hover:text-white'
+                }`}
+              >
+                <Bookmark className={`w-3.5 h-3.5 ${isWatchlisted ? 'fill-current' : ''}`} />
+              </button>
+            </div>
+
             {/* Speed toggle */}
             <button
               onClick={() => {
@@ -263,6 +429,56 @@ export function AudioPlayerBar() {
                       {currentTrack.genre}
                     </span>
                   )}
+
+                  {/* Actions in Fullscreen Player */}
+                  <div className="flex items-center justify-center gap-3 mt-4">
+                    <div className="flex items-center bg-[#333336] rounded-xl border border-[#454549] overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => handleReaction('like')}
+                        title="Like Audio"
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${
+                          userReaction === 'like' ? 'text-[#FF0080] bg-[#FF0080]/15' : 'text-[#B8B8BD] hover:text-white'
+                        }`}
+                      >
+                        <ThumbsUp className={`w-4 h-4 ${userReaction === 'like' ? 'fill-current' : ''}`} />
+                        <span>{likesCount}</span>
+                      </button>
+                      <div className="w-px h-4 bg-[#454549]" />
+                      <button
+                        type="button"
+                        onClick={() => handleReaction('dislike')}
+                        title="Dislike Audio"
+                        className={`px-3 py-1.5 text-xs font-semibold transition-colors ${
+                          userReaction === 'dislike' ? 'text-[#EF4444] bg-[#EF4444]/15' : 'text-[#B8B8BD] hover:text-white'
+                        }`}
+                      >
+                        <ThumbsDown className={`w-4 h-4 ${userReaction === 'dislike' ? 'fill-current' : ''}`} />
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleToggleFavorite}
+                      title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                      className={`p-2 rounded-xl border transition-colors ${
+                        isFavorite ? 'bg-[#FF0080] text-white border-[#FF0080]' : 'bg-[#333336] border-[#454549] text-[#B8B8BD] hover:text-white'
+                      }`}
+                    >
+                      <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleToggleWatchlist}
+                      title={isWatchlisted ? 'In Watchlist' : 'Add to Watchlist'}
+                      className={`p-2 rounded-xl border transition-colors ${
+                        isWatchlisted ? 'bg-[#FF0080] text-white border-[#FF0080]' : 'bg-[#333336] border-[#454549] text-[#B8B8BD] hover:text-white'
+                      }`}
+                    >
+                      <Bookmark className={`w-4 h-4 ${isWatchlisted ? 'fill-current' : ''}`} />
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

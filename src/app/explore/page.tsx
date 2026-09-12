@@ -21,6 +21,9 @@ function ExploreContent() {
     setIsLoading(true);
     try {
       const items: UnifiedMediaItem[] = [];
+      const trimmed = searchTerm.trim();
+
+      const promises: Promise<any>[] = [];
 
       // Search videos
       if (activeType === 'all' || activeType === 'video') {
@@ -30,12 +33,15 @@ function ExploreContent() {
           .eq('status', 'published')
           .eq('visibility', 'public');
 
-        if (searchTerm.trim()) {
-          vQuery = vQuery.or(`title.ilike.%${searchTerm.trim()}%,description.ilike.%${searchTerm.trim()}%`);
+        if (trimmed) {
+          vQuery = vQuery.or(`title.ilike.%${trimmed}%,description.ilike.%${trimmed}%`);
         }
 
-        const { data: vids } = await vQuery.limit(20);
-        (vids || []).forEach((v) => items.push({ ...v, type: 'video' }));
+        promises.push(
+          vQuery.limit(20).then(({ data }: any) => {
+            (data || []).forEach((v: any) => items.push({ ...v, type: 'video' }));
+          })
+        );
       }
 
       // Search audio
@@ -46,12 +52,15 @@ function ExploreContent() {
           .eq('status', 'published')
           .eq('visibility', 'public');
 
-        if (searchTerm.trim()) {
-          aQuery = aQuery.or(`title.ilike.%${searchTerm.trim()}%,artist_name.ilike.%${searchTerm.trim()}%`);
+        if (trimmed) {
+          aQuery = aQuery.or(`title.ilike.%${trimmed}%,artist_name.ilike.%${trimmed}%`);
         }
 
-        const { data: auds } = await aQuery.limit(20);
-        (auds || []).forEach((a) => items.push({ ...a, type: 'audio' }));
+        promises.push(
+          aQuery.limit(20).then(({ data }: any) => {
+            (data || []).forEach((a: any) => items.push({ ...a, type: 'audio' }));
+          })
+        );
       }
 
       // Search blogs
@@ -61,14 +70,18 @@ function ExploreContent() {
           .select('*, author:profiles(*)')
           .eq('status', 'published');
 
-        if (searchTerm.trim()) {
-          bQuery = bQuery.or(`title.ilike.%${searchTerm.trim()}%,body.ilike.%${searchTerm.trim()}%`);
+        if (trimmed) {
+          bQuery = bQuery.or(`title.ilike.%${trimmed}%,body.ilike.%${trimmed}%`);
         }
 
-        const { data: blgs } = await bQuery.limit(20);
-        (blgs || []).forEach((b) => items.push({ ...b, type: 'blog' }));
+        promises.push(
+          bQuery.limit(20).then(({ data }: any) => {
+            (data || []).forEach((b: any) => items.push({ ...b, type: 'blog' }));
+          })
+        );
       }
 
+      await Promise.all(promises);
       setResults(items);
     } catch {
       // ignore

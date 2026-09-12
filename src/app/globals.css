@@ -52,3 +52,32 @@ body {
 input[type="range"] {
   accent-color: #FF0080;
 }
+
+/* Prevent random blinking text caret on non-editable elements */
+*:not(input):not(textarea):not([contenteditable="true"]) {
+  caret-color: transparent;
+}
+
+input, textarea, [contenteditable="true"] {
+  caret-color: #FF0080;
+}
+
+/* Ensure interactive elements keep pointer cursor and avoid accidental text selection */
+button, a, [role="button"], label[for], select {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Prevent text cursor when hovering inside clickable cards or buttons */
+.cursor-pointer,
+.cursor-pointer * {
+  cursor: pointer;
+}
+
+/* UI navigation and control areas should not trigger text selection cursors */
+header, aside, nav, [role="toolbar"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+

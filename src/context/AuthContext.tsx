@@ -27,7 +27,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClient();
 
-  const fetchProfile = async (userId: string) => {
+  const profileFetchingRef = React.useRef<string | null>(null);
+
+  const fetchProfile = async (userId: string, force = false) => {
+    if (!force && profileFetchingRef.current === userId) return;
+    profileFetchingRef.current = userId;
+
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -62,36 +67,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch {
       // ignore
+    } finally {
+      profileFetchingRef.current = null;
     }
   };
 
   const refreshProfile = async () => {
     if (user) {
-      await fetchProfile(user.id);
+      await fetchProfile(user.id, true);
     }
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const initAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
+        if (session?.user && isMounted) {
           setUser(session.user);
           await fetchProfile(session.user.id);
         }
       } catch {
         // ignore
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     initAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
+      if (!isMounted) return;
       if (session?.user) {
         setUser(session.user);
-        await fetchProfile(session.user.id);
+        if (event !== 'INITIAL_SESSION') {
+          await fetchProfile(session.user.id);
+        }
       } else {
         setUser(null);
         setProfile(null);
@@ -100,6 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);

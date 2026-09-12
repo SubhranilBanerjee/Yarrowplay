@@ -74,64 +74,76 @@ export default function ProfilePage() {
           setEditName(prof.display_name || '');
           setEditBio(prof.bio || '');
 
-          // Fetch uploads
-          const { data: vids } = await supabase
-            .from('videos')
-            .select('*')
-            .eq('creator_id', prof.id)
-            .order('created_at', { ascending: false });
+          // Parallelize primary queries: uploads, favorites, and watchlist
+          const [
+            { data: vids },
+            { data: auds },
+            { data: blgs },
+            { data: favs },
+            { data: wList },
+          ] = await Promise.all([
+            supabase
+              .from('videos')
+              .select('*')
+              .eq('creator_id', prof.id)
+              .order('created_at', { ascending: false }),
+
+            supabase
+              .from('audios')
+              .select('*')
+              .eq('creator_id', prof.id)
+              .order('created_at', { ascending: false }),
+
+            supabase
+              .from('blogs')
+              .select('*')
+              .eq('author_id', prof.id)
+              .order('created_at', { ascending: false }),
+
+            supabase
+              .from('favorites')
+              .select('*')
+              .eq('user_id', prof.id),
+
+            supabase
+              .from('watchlists')
+              .select('video:videos(*, creator:profiles(*))')
+              .eq('user_id', prof.id),
+          ]);
+
           setMyVideos((vids as Video[]) || []);
-
-          const { data: auds } = await supabase
-            .from('audios')
-            .select('*')
-            .eq('creator_id', prof.id)
-            .order('created_at', { ascending: false });
           setMyAudios((auds as AudioTrack[]) || []);
-
-          const { data: blgs } = await supabase
-            .from('blogs')
-            .select('*')
-            .eq('author_id', prof.id)
-            .order('created_at', { ascending: false });
           setMyBlogs((blgs as Blog[]) || []);
-
-          // Fetch Favorites
-          const { data: favs } = await supabase
-            .from('favorites')
-            .select('*')
-            .eq('user_id', prof.id);
-
-          if (favs && favs.length > 0) {
-            const vidIds = favs.filter((f) => f.content_type === 'video').map((f) => f.content_id);
-            const audIds = favs.filter((f) => f.content_type === 'audio').map((f) => f.content_id);
-            const blgIds = favs.filter((f) => f.content_type === 'blog').map((f) => f.content_id);
-
-            const favList: UnifiedMediaItem[] = [];
-
-            if (vidIds.length > 0) {
-              const { data: fVids } = await supabase.from('videos').select('*, creator:profiles(*)').in('id', vidIds);
-              (fVids || []).forEach((v) => favList.push({ ...v, type: 'video' }));
-            }
-            if (audIds.length > 0) {
-              const { data: fAuds } = await supabase.from('audios').select('*, creator:profiles(*)').in('id', audIds);
-              (fAuds || []).forEach((a) => favList.push({ ...a, type: 'audio' }));
-            }
-            if (blgIds.length > 0) {
-              const { data: fBlgs } = await supabase.from('blogs').select('*, author:profiles(*)').in('id', blgIds);
-              (fBlgs || []).forEach((b) => favList.push({ ...b, type: 'blog' }));
-            }
-            setFavoriteItems(favList);
-          }
-
-          // Fetch Watchlist
-          const { data: wList } = await supabase
-            .from('watchlists')
-            .select('video:videos(*, creator:profiles(*))')
-            .eq('user_id', prof.id);
 
           const wVideos = (wList || []).map((w: any) => w.video).filter(Boolean);
           setWatchlistItems(wVideos);
+
+          // Resolve favorites in parallel if any exist
+          if (favs && favs.length > 0) {
+            const vidIds = favs.filter((f: any) => f.content_type === 'video').map((f: any) => f.content_id);
+            const audIds = favs.filter((f: any) => f.content_type === 'audio').map((f: any) => f.content_id);
+            const blgIds = favs.filter((f: any) => f.content_type === 'blog').map((f: any) => f.content_id);
+
+            const [fVidsRes, fAudsRes, fBlgsRes] = await Promise.all([
+              vidIds.length > 0
+                ? supabase.from('videos').select('*, creator:profiles(*)').in('id', vidIds)
+                : Promise.resolve({ data: [] }),
+              audIds.length > 0
+                ? supabase.from('audios').select('*, creator:profiles(*)').in('id', audIds)
+                : Promise.resolve({ data: [] }),
+              blgIds.length > 0
+                ? supabase.from('blogs').select('*, author:profiles(*)').in('id', blgIds)
+                : Promise.resolve({ data: [] }),
+            ]);
+
+            const favList: UnifiedMediaItem[] = [];
+            (fVidsRes.data || []).forEach((v: any) => favList.push({ ...v, type: 'video' }));
+            (fAudsRes.data || []).forEach((a: any) => favList.push({ ...a, type: 'audio' }));
+            (fBlgsRes.data || []).forEach((b: any) => favList.push({ ...b, type: 'blog' }));
+            setFavoriteItems(favList);
+          } else {
+            setFavoriteItems([]);
+          }
         }
       } catch {
         // ignore

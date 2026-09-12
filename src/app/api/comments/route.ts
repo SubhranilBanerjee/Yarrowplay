@@ -72,3 +72,97 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error?.message || 'Failed to post comment' }, { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const commentId = searchParams.get('id');
+
+    if (!commentId) {
+      return NextResponse.json({ error: 'Comment ID is required' }, { status: 400 });
+    }
+
+    // 1. Fetch comment to verify ownership and target content
+    const { data: comment, error: fetchErr } = await supabase
+      .from('comments')
+      .select('*')
+      .eq('id', commentId)
+      .single();
+
+    if (fetchErr || !comment) {
+      return NextResponse.json({ error: 'Comment not found' }, { status: 404 });
+    }
+
+    let isAuthorized = comment.user_id === user.id;
+
+    // 2. If not the comment author, check if user is the content creator / writer
+    if (!isAuthorized) {
+      if (comment.content_type === 'video') {
+        const { data: video } = await supabase
+          .from('videos')
+          .select('creator_id')
+          .eq('id', comment.content_id)
+          .single();
+        if (video && video.creator_id === user.id) {
+          isAuthorized = true;
+        }
+      } else if (comment.content_type === 'audio') {
+        const { data: audio } = await supabase
+          .from('audios')
+          .select('creator_id')
+          .eq('id', comment.content_id)
+          .single();
+        if (audio && audio.creator_id === user.id) {
+          isAuthorized = true;
+        }
+      } else if (comment.content_type === 'blog') {
+        const { data: blog } = await supabase
+          .from('blogs')
+          .select('author_id')
+          .eq('id', comment.content_id)
+          .single();
+        if (blog && blog.author_id === user.id) {
+          isAuthorized = true;
+        }
+      }
+    }
+
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { error: 'You are not authorized to delete this comment' },
+        { status: 403 }
+      );
+    }
+
+    // 3. Delete the comment
+    const { error: deleteErr } = await supabase
+      .from('comments')
+      .delete()
+      .eq('id', commentId);
+
+    if (deleteErr) {
+      return NextResponse.json({ error: deleteErr.message }, { status: 400 });
+    }
+
+    // 4. Decrement comments count on target table
+    const targetTable = comment.content_type === 'video' ? 'videos' : comment.content_type === 'audio' ? 'audios' : 'blogs';
+    const { data: current } = await supabase.from(targetTable).select('comments_count').eq('id', comment.content_id).single();
+    if (current && (current.comments_count || 0) > 0) {
+      await supabase.from(targetTable).update({
+        comments_count: Math.max(0, (current.comments_count || 1) - 1),
+      }).eq('id', comment.content_id);
+    }
+
+    return NextResponse.json({ success: true, deletedId: commentId });
+  } catch (error: any) {
+    return NextResponse.json({ error: error?.message || 'Failed to delete comment' }, { status: 500 });
+  }
+}
+
