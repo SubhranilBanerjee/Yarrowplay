@@ -1,4 +1,6 @@
 import crypto from 'crypto';
+ 
+export const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || process.env.CLOUDINARY_UPLOAD_PRESET || 'Yarrowplay';
 
 export interface CloudinarySignatureParams {
   timestamp: number;

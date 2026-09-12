@@ -20,71 +20,65 @@ export async function uploadMedia(
   onProgress?: UploadProgressCallback
 ): Promise<UploadResult> {
   try {
-    // 1. Get signed credentials from server
-    const signRes = await fetch('/api/upload/sign', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ folder }),
-    });
+    // Direct client-side unsigned upload to Cloudinary using unsigned preset 'Yarrowplay'
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dramabox-stream';
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'Yarrowplay';
 
-    if (signRes.ok) {
-      const signData = await signRes.json();
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('api_key', signData.apiKey);
-      formData.append('timestamp', signData.timestamp.toString());
-      formData.append('signature', signData.signature);
-      formData.append('folder', signData.folder);
+    const targetResourceType = resourceType === 'auto'
+      ? (file.type.startsWith('video/') ? 'video' : file.type.startsWith('audio/') ? 'video' : 'image')
+      : resourceType;
 
-      const targetResourceType = resourceType === 'auto'
-        ? (file.type.startsWith('video/') ? 'video' : file.type.startsWith('audio/') ? 'video' : 'image')
-        : resourceType;
+    const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/${targetResourceType}/upload`;
 
-      const uploadUrl = `https://api.cloudinary.com/v1_1/${signData.cloudName}/${targetResourceType}/upload`;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', uploadPreset);
+    if (folder) {
+      formData.append('folder', folder);
+    }
 
-      return await new Promise<UploadResult>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', uploadUrl);
+    return await new Promise<UploadResult>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', uploadUrl);
 
-        if (xhr.upload && onProgress) {
-          xhr.upload.onprogress = (event) => {
-            if (event.lengthComputable) {
-              const percent = Math.round((event.loaded / event.total) * 100);
-              onProgress(percent);
-            }
-          };
-        }
-
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const res = JSON.parse(xhr.responseText);
-              resolve({
-                secure_url: res.secure_url,
-                public_id: res.public_id,
-                duration: res.duration || 0,
-                width: res.width,
-                height: res.height,
-                format: res.format,
-                bytes: res.bytes,
-                resource_type: res.resource_type,
-              });
-            } catch (e) {
-              reject(new Error('Failed to parse Cloudinary response'));
-            }
-          } else {
-            // Fall back to server upload
-            fallbackUpload(file, resourceType, folder, onProgress).then(resolve).catch(reject);
+      if (xhr.upload && onProgress) {
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            onProgress(percent);
           }
         };
+      }
 
-        xhr.onerror = () => {
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const res = JSON.parse(xhr.responseText);
+            resolve({
+              secure_url: res.secure_url,
+              public_id: res.public_id,
+              duration: res.duration || 0,
+              width: res.width,
+              height: res.height,
+              format: res.format,
+              bytes: res.bytes,
+              resource_type: res.resource_type,
+            });
+          } catch {
+            reject(new Error('Failed to parse Cloudinary response'));
+          }
+        } else {
+          // Fall back to server upload
           fallbackUpload(file, resourceType, folder, onProgress).then(resolve).catch(reject);
-        };
+        }
+      };
 
-        xhr.send(formData);
-      });
-    }
+      xhr.onerror = () => {
+        fallbackUpload(file, resourceType, folder, onProgress).then(resolve).catch(reject);
+      };
+
+      xhr.send(formData);
+    });
   } catch {
     // If sign endpoint failed, attempt fallback upload
   }

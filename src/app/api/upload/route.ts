@@ -20,22 +20,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'dramabox-stream';
-    const apiKey = process.env.CLOUDINARY_API_KEY || '729329983158373';
-    const apiSecret = process.env.CLOUDINARY_API_SECRET || '729329983158373';
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dramabox-stream';
+    const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET || process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'Yarrowplay';
 
-    const timestamp = Math.round(new Date().getTime() / 1000);
-    const paramsToSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
-    const signature = crypto.createHash('sha1').update(paramsToSign).digest('hex');
+    const targetResourceType = resourceType === 'auto'
+      ? (file.type.startsWith('video/') ? 'video' : file.type.startsWith('audio/') ? 'video' : 'image')
+      : resourceType;
 
     const cloudinaryFormData = new FormData();
     cloudinaryFormData.append('file', file);
-    cloudinaryFormData.append('api_key', apiKey);
-    cloudinaryFormData.append('timestamp', timestamp.toString());
-    cloudinaryFormData.append('signature', signature);
-    cloudinaryFormData.append('folder', folder);
+    cloudinaryFormData.append('upload_preset', uploadPreset);
+    if (folder) {
+      cloudinaryFormData.append('folder', folder);
+    }
 
-    const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
+    const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/${targetResourceType}/upload`;
     const response = await fetch(uploadUrl, {
       method: 'POST',
       body: cloudinaryFormData,
