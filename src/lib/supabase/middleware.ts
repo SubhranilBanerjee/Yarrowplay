@@ -9,29 +9,6 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
-  // Protected paths that require any authenticated user
-  const authRequiredPaths = ['/home', '/watchlist', '/favorites', '/playlists', '/blog/studio'];
-  const isAuthRequired = authRequiredPaths.some((p) => pathname.startsWith(p));
-  const isCreatorPath = pathname.startsWith('/creator');
-  const isAdvertiserPath = pathname.startsWith('/advertiser');
-  const isAuthPage = pathname === '/login' || pathname === '/register';
-
-  const allCookies = request.cookies.getAll();
-  const hasAuthCookie = allCookies.some((c) => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'));
-
-  // Quick exit: Not logged in and accessing protected route -> redirect immediately without network call
-  if (!hasAuthCookie && (isAuthRequired || isCreatorPath || isAdvertiserPath)) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    url.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(url);
-  }
-
-  // Quick exit: If path doesn't require auth and isn't login/register, don't block on network
-  if (!isAuthRequired && !isCreatorPath && !isAdvertiserPath && !isAuthPage) {
-    return NextResponse.next({ request });
-  }
-
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -57,25 +34,43 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
+  // Helper to preserve cookies when redirecting
+  const redirectWithCookies = (url: URL) => {
+    const redirectResponse = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
+    });
+    return redirectResponse;
+  };
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Protected paths that require any authenticated user
+  const authRequiredPaths = ['/home', '/watchlist', '/favorites', '/playlists', '/blog/studio'];
+  const isAuthRequired = authRequiredPaths.some((p) => pathname.startsWith(p));
+  const isCreatorPath = pathname.startsWith('/creator');
+  const isAdvertiserPath = pathname.startsWith('/advertiser');
+  const isAuthPage = pathname === '/login' || pathname === '/register';
+
+  // 1. Unauthenticated user trying to access a protected path
   if (!user && (isAuthRequired || isCreatorPath || isAdvertiserPath)) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(url);
+    return redirectWithCookies(url);
   }
 
-  // If user is logged in and accesses auth pages (/login, /register), redirect to /home
+  // 2. Authenticated user trying to access login or register page -> redirect to home
   if (user && isAuthPage) {
     const url = request.nextUrl.clone();
     url.pathname = '/home';
-    return NextResponse.redirect(url);
+    url.searchParams.delete('redirect');
+    return redirectWithCookies(url);
   }
 
-  // Check role restrictions for creator or advertiser paths
+  // 3. Authenticated user accessing role-restricted paths
   if (user && (isCreatorPath || isAdvertiserPath)) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -87,17 +82,18 @@ export async function updateSession(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = '/home';
       url.searchParams.set('error', 'unauthorized_creator_access');
-      return NextResponse.redirect(url);
+      return redirectWithCookies(url);
     }
 
     if (isAdvertiserPath && profile?.role !== 'advertiser') {
       const url = request.nextUrl.clone();
       url.pathname = '/home';
       url.searchParams.set('error', 'unauthorized_advertiser_access');
-      return NextResponse.redirect(url);
+      return redirectWithCookies(url);
     }
   }
 
   return supabaseResponse;
 }
+
 
