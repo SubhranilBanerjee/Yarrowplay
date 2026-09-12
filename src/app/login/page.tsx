@@ -79,6 +79,7 @@ export default function LoginPage() {
               src="/logo.png"
               alt="Yarrowplay"
               fill
+              sizes="48px"
               className="object-contain"
               priority
             />

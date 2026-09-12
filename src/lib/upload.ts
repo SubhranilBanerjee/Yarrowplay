@@ -68,22 +68,28 @@ export async function uploadMedia(
             reject(new Error('Failed to parse Cloudinary response'));
           }
         } else {
-          // Fall back to server upload
-          fallbackUpload(file, resourceType, folder, onProgress).then(resolve).catch(reject);
+          let errorMsg = `Upload failed with status ${xhr.status}`;
+          try {
+            const errRes = JSON.parse(xhr.responseText);
+            if (errRes.error?.message) {
+              errorMsg = errRes.error.message;
+            }
+          } catch {
+            // keep default errorMsg
+          }
+          reject(new Error(errorMsg));
         }
       };
 
       xhr.onerror = () => {
-        fallbackUpload(file, resourceType, folder, onProgress).then(resolve).catch(reject);
+        reject(new Error('Network error during upload to Cloudinary. Check your internet connection and Cloudinary configuration.'));
       };
 
       xhr.send(formData);
     });
-  } catch {
-    // If sign endpoint failed, attempt fallback upload
+  } catch (err: any) {
+    throw new Error(err?.message || 'Media upload failed');
   }
-
-  return fallbackUpload(file, resourceType, folder, onProgress);
 }
 
 async function fallbackUpload(

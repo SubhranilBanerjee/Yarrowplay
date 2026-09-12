@@ -30,6 +30,7 @@ export function Header() {
               src="/logo.png"
               alt="Yarrowplay"
               fill
+              sizes="(max-width: 768px) 32px, 36px"
               className="object-contain"
               priority
             />
@@ -97,6 +98,7 @@ export function Header() {
                         src={profile.avatar_url}
                         alt="Avatar"
                         fill
+                        sizes="28px"
                         className="object-cover"
                       />
                     </div>

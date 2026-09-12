@@ -254,6 +254,7 @@ export default function LandingPage() {
             src="/logo.png"
             alt="Yarrowplay"
             fill
+            sizes="64px"
             className="object-contain"
           />
         </div>
