@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { MediaCard, UnifiedMediaItem } from '@/components/media/MediaCard';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Search, Compass, Film, Music, BookOpen } from 'lucide-react';
+import { Search, Compass, Film, Music, BookOpen, Megaphone } from 'lucide-react';
 
 function ExploreContent() {
   const searchParams = useSearchParams();
@@ -13,7 +13,7 @@ function ExploreContent() {
 
   const supabase = createClient();
   const [searchTerm, setSearchTerm] = useState(initialQuery);
-  const [activeType, setActiveType] = useState<'all' | 'video' | 'audio' | 'blog'>('all');
+  const [activeType, setActiveType] = useState<'all' | 'video' | 'audio' | 'blog' | 'sponsored'>('all');
   const [results, setResults] = useState<UnifiedMediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -77,6 +77,27 @@ function ExploreContent() {
         promises.push(
           bQuery.limit(20).then(({ data }: any) => {
             (data || []).forEach((b: any) => items.push({ ...b, type: 'blog' }));
+          })
+        );
+      }
+
+      // Search campaigns / sponsored
+      if (activeType === 'all' || activeType === 'sponsored') {
+        let cQuery = supabase
+          .from('advertiser_campaigns')
+          .select('*, advertiser:profiles(*)')
+          .eq('status', 'active');
+
+        if (trimmed) {
+          cQuery = cQuery.or(`title.ilike.%${trimmed}%,headline.ilike.%${trimmed}%,description.ilike.%${trimmed}%`);
+        }
+
+        promises.push(
+          cQuery.limit(20).then(({ data }: any) => {
+            const nowMs = Date.now();
+            (data || [])
+              .filter((c: any) => !c.end_date || new Date(c.end_date).getTime() >= nowMs)
+              .forEach((c: any) => items.push({ ...c, type: 'ad' }));
           })
         );
       }
@@ -166,6 +187,18 @@ function ExploreContent() {
         >
           <BookOpen className="w-4 h-4" />
           Blogs
+        </button>
+
+        <button
+          onClick={() => setActiveType('sponsored')}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+            activeType === 'sponsored'
+              ? 'bg-[#FF0080] text-white shadow-md'
+              : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
+          }`}
+        >
+          <Megaphone className="w-4 h-4 text-[#FF0080]" />
+          Sponsored
         </button>
       </div>
 

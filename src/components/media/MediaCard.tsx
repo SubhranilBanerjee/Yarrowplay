@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Play, Heart, Clock, Sparkles, Megaphone, FileText, Music, Trash2 } from 'lucide-react';
+import { Play, Heart, Clock, Sparkles, Megaphone, FileText, Music, Trash2, ExternalLink } from 'lucide-react';
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
 import { Video, AudioTrack, Blog, AdvertiserCampaign } from '@/types/database';
 
@@ -22,6 +22,20 @@ interface MediaCardProps {
 export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
   const { playTrack } = useAudioPlayer();
 
+  useEffect(() => {
+    if (item.type === 'ad' && item.id) {
+      fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content_type: 'ad',
+          content_id: item.id,
+          event_type: 'view',
+        }),
+      }).catch(() => {});
+    }
+  }, [item.id, item.type]);
+
   const formatDuration = (seconds?: number) => {
     if (!seconds) return null;
     const mins = Math.floor(seconds / 60);
@@ -31,15 +45,49 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
 
   // Handle ADVERTISER CAMPAIGN
   if (item.type === 'ad') {
+    const handleAdClick = () => {
+      fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content_type: 'ad',
+          content_id: item.id,
+          event_type: 'click',
+        }),
+      }).catch(() => {});
+    };
+
+    const advertiserName =
+      item.advertiser?.company_name ||
+      item.advertiser?.display_name ||
+      item.advertiser?.username ||
+      'Sponsored Partner';
+
     return (
-      <div className="group relative bg-[#333336] rounded-2xl overflow-hidden border border-[#FF0080]/30 hover:border-[#FF0080] transition-all flex flex-col h-full shadow-lg">
+      <div className="group relative bg-[#333336] rounded-2xl overflow-hidden border border-[#FF0080]/30 hover:border-[#FF0080] transition-all flex flex-col h-full shadow-lg hover:shadow-[#FF0080]/10">
         {/* Thumbnail area: square on mobile */}
-        <div className="relative aspect-square sm:aspect-video w-full bg-[#3A3A3E] overflow-hidden">
-          {item.media_url ? (
+        <a
+          href={item.target_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleAdClick}
+          className="relative aspect-square sm:aspect-video w-full bg-[#3A3A3E] overflow-hidden block cursor-pointer"
+        >
+          {item.media_type === 'video' ? (
+            <video
+              src={item.media_url}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          ) : item.media_url ? (
             <Image
               src={item.media_url}
               alt={item.title}
               fill
+              unoptimized
               className="object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
@@ -49,45 +97,44 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
           )}
 
           {/* Sponsored Badge */}
-          <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur border border-[#FF0080]/60 text-[#FF0080] text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1 shadow">
-            <Megaphone className="w-3 h-3" />
+          <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur border border-[#FF0080]/60 text-[#FF0080] text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1 shadow z-10">
+            <Megaphone className="w-3 h-3 text-[#FF0080]" />
             Sponsored
           </div>
-        </div>
+        </a>
 
         {/* Ad Details */}
-        <div className="p-3.5 flex flex-col flex-1 justify-between">
+        <div className="p-3.5 flex flex-col flex-1 justify-between gap-3">
           <div>
-            <h3 className="text-white font-semibold text-sm line-clamp-1 group-hover:text-[#FF0080] transition-colors">
-              {item.title}
-            </h3>
-            <p className="text-[#B8B8BD] text-xs line-clamp-2 mt-1">
+            <a
+              href={item.target_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleAdClick}
+              className="block group/title"
+            >
+              <h3 className="text-white font-semibold text-sm line-clamp-1 group-hover/title:text-[#FF0080] transition-colors">
+                {item.title}
+              </h3>
+            </a>
+            <p className="text-[#B8B8BD] text-xs line-clamp-2 mt-1 leading-relaxed">
               {item.headline || item.description}
             </p>
           </div>
 
-          <div className="mt-3 pt-2 border-t border-[#454549] flex items-center justify-between">
-            <span className="text-[11px] text-[#85858B] truncate">
-              {item.advertiser?.company_name || 'Sponsored Partner'}
+          <div className="pt-2 border-t border-[#454549] flex items-center justify-between gap-2">
+            <span className="text-[11px] text-[#85858B] truncate font-medium">
+              {advertiserName}
             </span>
             <a
               href={item.target_url}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => {
-                fetch('/api/analytics/track', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    content_type: 'ad',
-                    content_id: item.id,
-                    event_type: 'click',
-                  }),
-                }).catch(() => {});
-              }}
-              className="text-xs font-semibold px-3 py-1 bg-[#FF0080] hover:bg-[#E00071] text-white rounded-lg transition-colors shadow-sm"
+              onClick={handleAdClick}
+              className="text-xs font-semibold px-3 py-1.5 bg-[#FF0080] hover:bg-[#E00071] text-white rounded-lg transition-all shadow-sm shrink-0 inline-flex items-center gap-1.5 active:scale-95"
             >
-              {item.cta_label || 'Learn More'}
+              <span>{item.cta_label || 'Learn More'}</span>
+              <ExternalLink className="w-3 h-3" />
             </a>
           </div>
         </div>

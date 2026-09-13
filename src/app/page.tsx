@@ -1,9 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
+import { createClient } from '@/lib/supabase/client';
+import { MediaCard } from '@/components/media/MediaCard';
+import { AdvertiserCampaign } from '@/types/database';
 import {
   Film,
   Music,
@@ -20,6 +23,31 @@ import {
 
 export default function LandingPage() {
   const { user, profile } = useAuth();
+  const supabase = createClient();
+  const [sponsoredCampaigns, setSponsoredCampaigns] = useState<AdvertiserCampaign[]>([]);
+
+  useEffect(() => {
+    async function loadSponsoredContent() {
+      try {
+        const { data } = await supabase
+          .from('advertiser_campaigns')
+          .select('*, advertiser:profiles(*)')
+          .eq('status', 'active')
+          .order('created_at', { ascending: false });
+
+        const nowMs = Date.now();
+        const valid = (data || []).filter((c: any) => {
+          if (c.end_date && new Date(c.end_date).getTime() < nowMs) return false;
+          return true;
+        });
+
+        setSponsoredCampaigns(valid as AdvertiserCampaign[]);
+      } catch {
+        // ignore
+      }
+    }
+    loadSponsoredContent();
+  }, []);
 
   return (
     <div className="w-full">
@@ -159,6 +187,37 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* FEATURED SPONSORED CONTENT */}
+      {sponsoredCampaigns.length > 0 && (
+        <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#454549]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF0080]/15 text-[#FF0080] text-xs font-bold uppercase tracking-wider mb-2 border border-[#FF0080]/30">
+                <Megaphone className="w-3.5 h-3.5" />
+                Sponsored Content
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white">Partner Spotlight</h2>
+              <p className="text-sm text-[#85858B] mt-1">
+                Featured stories, products, and announcements from verified Yarrowplay partners.
+              </p>
+            </div>
+            <Link
+              href="/advertiser"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#FF0080] hover:text-white transition-colors self-start sm:self-center"
+            >
+              <span>Promote with Us</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {sponsoredCampaigns.map((c) => (
+              <MediaCard key={c.id} item={{ ...c, type: 'ad' }} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* CREATOR & ADVERTISER DUAL SECTION */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#454549]">

@@ -6,14 +6,15 @@ import { createClient } from '@/lib/supabase/client';
 import { MediaCard, UnifiedMediaItem } from '@/components/media/MediaCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Video, AudioTrack, Blog, AdvertiserCampaign } from '@/types/database';
-import { Film, Music, BookOpen, Sparkles, PlusCircle, RefreshCw } from 'lucide-react';
+import { Film, Music, BookOpen, Sparkles, PlusCircle, RefreshCw, Megaphone } from 'lucide-react';
 
 export default function HomePage() {
   const supabase = createClient();
 
-  const [activeFilter, setActiveFilter] = useState<'all' | 'videos' | 'audio' | 'blogs'>('all');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'videos' | 'audio' | 'blogs' | 'sponsored'>('all');
   const [feedItems, setFeedItems] = useState<UnifiedMediaItem[]>([]);
   const [allAudios, setAllAudios] = useState<AudioTrack[]>([]);
+  const [allCampaigns, setAllCampaigns] = useState<AdvertiserCampaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -24,7 +25,7 @@ export default function HomePage() {
     try {
       const nowIso = new Date().toISOString();
 
-      // Parallelize all 5 feed queries
+      // Parallelize all feed queries
       const [
         { data: videosData },
         { data: activeBoosts },
@@ -63,8 +64,7 @@ export default function HomePage() {
           .from('advertiser_campaigns')
           .select('*, advertiser:profiles(*)')
           .eq('status', 'active')
-          .lte('start_date', nowIso)
-          .gte('end_date', nowIso),
+          .order('created_at', { ascending: false }),
       ]);
 
       const boostedIds = new Set((activeBoosts || []).map((b: any) => b.video_id));
@@ -87,12 +87,21 @@ export default function HomePage() {
         type: 'blog' as const,
       }));
 
-      const taggedAds: UnifiedMediaItem[] = (campaignsData || []).map((c: any) => ({
+      // Filter active campaigns by end_date (if end_date specified)
+      const nowMs = Date.now();
+      const validCampaigns = (campaignsData || []).filter((c: any) => {
+        if (c.end_date && new Date(c.end_date).getTime() < nowMs) return false;
+        return true;
+      });
+
+      setAllCampaigns(validCampaigns as AdvertiserCampaign[]);
+
+      const taggedAds: UnifiedMediaItem[] = validCampaigns.map((c: any) => ({
         ...c,
         type: 'ad' as const,
       }));
 
-      // 6. Merge and interleave feed (Boosted videos prioritized, Ads paced, etc.)
+      // Merge and interleave feed (Boosted videos prioritized, Ads paced, all ads included)
       const combined: UnifiedMediaItem[] = [];
       const nonBoostedVideos = taggedVideos.filter((v: any) => !v.boosted);
       const boostedVideos = taggedVideos.filter((v: any) => v.boosted);
@@ -105,19 +114,25 @@ export default function HomePage() {
         (a, b) => new Date(b.created_at || (b as any).published_at).getTime() - new Date(a.created_at || (a as any).published_at).getTime()
       );
 
-      // Insert ads periodically
-      let adIndex = 0;
-      pool.forEach((item, index) => {
-        combined.push(item);
-        if ((index + 1) % 4 === 0 && taggedAds.length > 0) {
-          combined.push(taggedAds[adIndex % taggedAds.length]);
+      // Insert ads periodically and guarantee ALL active campaigns are shown
+      if (pool.length === 0) {
+        combined.push(...taggedAds);
+      } else {
+        let adIndex = 0;
+        pool.forEach((item, index) => {
+          combined.push(item);
+          // Insert ad after the 2nd item (index === 1) or every 3 items thereafter
+          if ((index === 1 || (index > 1 && (index + 1) % 3 === 0)) && adIndex < taggedAds.length) {
+            combined.push(taggedAds[adIndex]);
+            adIndex++;
+          }
+        });
+
+        // Ensure any remaining ads that weren't inserted due to short pool are appended
+        while (adIndex < taggedAds.length) {
+          combined.push(taggedAds[adIndex]);
           adIndex++;
         }
-      });
-
-      // If no organic content but ads exist, display ads
-      if (pool.length === 0 && taggedAds.length > 0) {
-        combined.push(...taggedAds);
       }
 
       setFeedItems(combined);
@@ -134,7 +149,8 @@ export default function HomePage() {
 
   const filteredItems = feedItems.filter((item) => {
     if (activeFilter === 'all') return true;
-    if (activeFilter === 'videos') return item.type === 'video' || item.type === 'ad';
+    if (activeFilter === 'sponsored') return item.type === 'ad';
+    if (activeFilter === 'videos') return item.type === 'video' || (item.type === 'ad' && (item as any).media_type === 'video');
     if (activeFilter === 'audio') return item.type === 'audio';
     if (activeFilter === 'blogs') return item.type === 'blog';
     return true;
@@ -191,6 +207,25 @@ export default function HomePage() {
             <BookOpen className="w-4 h-4" />
             Blogs
           </button>
+
+          <button
+            onClick={() => setActiveFilter('sponsored')}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
+              activeFilter === 'sponsored'
+                ? 'bg-[#FF0080] text-white shadow-md'
+                : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
+            }`}
+          >
+            <Megaphone className="w-4 h-4 text-[#FF0080]" />
+            <span>Sponsored</span>
+            {allCampaigns.length > 0 && (
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                activeFilter === 'sponsored' ? 'bg-white/25 text-white' : 'bg-[#FF0080]/20 text-[#FF0080]'
+              }`}>
+                {allCampaigns.length}
+              </span>
+            )}
+          </button>
         </div>
 
         <button
@@ -234,11 +269,15 @@ export default function HomePage() {
       {/* Empty State */}
       {!isLoading && !errorMsg && filteredItems.length === 0 && (
         <EmptyState
-          icon={Sparkles}
-          title="No content available yet"
-          description="Be the first to bring stories to life by uploading your video, audio, or blog post."
-          actionLabel="Go to Creator Studio"
-          actionHref="/creator/studio"
+          icon={activeFilter === 'sponsored' ? Megaphone : Sparkles}
+          title={activeFilter === 'sponsored' ? 'No sponsored campaigns active' : 'No content available yet'}
+          description={
+            activeFilter === 'sponsored'
+              ? 'Launch your brand campaign to reach viewers across Yarrowplay.'
+              : 'Be the first to bring stories to life by uploading your video, audio, or blog post.'
+          }
+          actionLabel={activeFilter === 'sponsored' ? 'Go to Advertiser Studio' : 'Go to Creator Studio'}
+          actionHref={activeFilter === 'sponsored' ? '/advertiser' : '/creator/studio'}
         />
       )}
 
