@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -21,13 +21,20 @@ import {
   Send,
   User,
   Trash2,
+  Loader2,
 } from 'lucide-react';
 
 export default function BlogReaderPage() {
   const params = useParams();
   const blogId = params?.id as string;
+  const router = useRouter();
   const { user } = useAuth();
   const supabase = createClient();
+
+  const isAdmin = !!user?.email && (
+    user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
+    user.email === 'admin@dramabox.stream'
+  );
 
   const [blog, setBlog] = useState<Blog | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -39,6 +46,11 @@ export default function BlogReaderPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Blog deletion state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!blogId) return;
@@ -150,6 +162,25 @@ export default function BlogReaderPage() {
       }
     } catch {
       // ignore
+    }
+  };
+
+  const handleDeleteBlog = async () => {
+    if (!blog) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      const res = await fetch(`/api/blogs?id=${blog.id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to delete article');
+      }
+      router.push('/blogs');
+    } catch (err: any) {
+      setDeleteError(err.message || 'Failed to delete article');
+      setIsDeleting(false);
     }
   };
 
@@ -316,6 +347,17 @@ export default function BlogReaderPage() {
           >
             {copiedLink ? <Check className="w-4 h-4 text-[#22C55E]" /> : <Share2 className="w-4 h-4" />}
           </button>
+
+          {/* Author or Admin Delete Button */}
+          {user && (user.id === blog.author_id || isAdmin) && (
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              title="Delete article"
+              className="p-2 rounded-xl bg-[#EF4444]/10 border border-[#EF4444]/30 text-[#EF4444] hover:bg-[#EF4444] hover:text-white transition-colors cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -379,7 +421,7 @@ export default function BlogReaderPage() {
                   <span className="font-semibold text-white">{c.user?.display_name || 'Reader'}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] text-[#85858B]">{new Date(c.created_at).toLocaleDateString()}</span>
-                    {user && (user.id === c.user_id || user.id === blog?.author_id) && (
+                    {user && (user.id === c.user_id || user.id === blog?.author_id || isAdmin) && (
                       <button
                         type="button"
                         onClick={() => handleDeleteComment(c.id)}
@@ -397,6 +439,65 @@ export default function BlogReaderPage() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#2B2B2D] border border-[#454549] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-[#EF4444]">
+              <div className="p-3 bg-[#EF4444]/10 rounded-xl">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Delete Article</h3>
+                <p className="text-xs text-[#85858B]">This action cannot be undone</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-[#B8B8BD] leading-relaxed">
+              Are you sure you want to permanently delete <strong className="text-white">"{blog.title}"</strong>? All associated comments and reactions will be permanently deleted.
+            </p>
+
+            {deleteError && (
+              <div className="p-3 rounded-xl bg-[#EF4444]/10 border border-[#EF4444]/20 text-xs text-[#EF4444]">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteError(null);
+                }}
+                className="px-4 py-2 text-xs font-semibold text-[#85858B] hover:text-white transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleDeleteBlog}
+                className="px-4 py-2 rounded-xl bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-semibold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Permanently Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </article>
   );
 }

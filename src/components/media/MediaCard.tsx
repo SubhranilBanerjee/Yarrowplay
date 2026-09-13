@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Play, Heart, Clock, Sparkles, Megaphone, FileText, Music } from 'lucide-react';
+import { Play, Heart, Clock, Sparkles, Megaphone, FileText, Music, Trash2 } from 'lucide-react';
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
 import { Video, AudioTrack, Blog, AdvertiserCampaign } from '@/types/database';
 
@@ -16,9 +16,10 @@ export type UnifiedMediaItem =
 interface MediaCardProps {
   item: UnifiedMediaItem;
   allAudioTracks?: AudioTrack[];
+  onDelete?: () => void;
 }
 
-export function MediaCard({ item, allAudioTracks }: MediaCardProps) {
+export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
   const { playTrack } = useAudioPlayer();
 
   const formatDuration = (seconds?: number) => {
@@ -135,6 +136,22 @@ export function MediaCard({ item, allAudioTracks }: MediaCardProps) {
               <Play className="w-6 h-6 text-white fill-white ml-0.5" />
             </div>
           </div>
+
+          {/* Delete action */}
+          {onDelete && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDelete();
+              }}
+              title="Delete audio"
+              className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-full bg-black/70 hover:bg-[#EF4444] text-[#85858B] hover:text-white backdrop-blur transition-colors cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         <div className="p-3.5 flex flex-col flex-1 justify-between">
@@ -185,6 +202,22 @@ export function MediaCard({ item, allAudioTracks }: MediaCardProps) {
             <FileText className="w-3 h-3 text-[#FF0080]" />
             Blog
           </div>
+
+          {/* Delete action */}
+          {onDelete && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDelete();
+              }}
+              title="Delete article"
+              className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-full bg-black/70 hover:bg-[#EF4444] text-[#85858B] hover:text-white backdrop-blur transition-colors cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         <div className="p-3.5 flex flex-col flex-1 justify-between">
@@ -245,6 +278,22 @@ export function MediaCard({ item, allAudioTracks }: MediaCardProps) {
           )}
         </div>
 
+        {/* Delete action */}
+        {onDelete && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onDelete();
+            }}
+            title="Delete video"
+            className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-full bg-black/70 hover:bg-[#EF4444] text-[#85858B] hover:text-white backdrop-blur transition-colors cursor-pointer"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        )}
+
         {/* Duration */}
         {item.duration_seconds > 0 && (
           <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur text-white text-[10px] font-medium px-2 py-0.5 rounded-md flex items-center gap-1">
@@ -254,7 +303,7 @@ export function MediaCard({ item, allAudioTracks }: MediaCardProps) {
         )}
 
         {/* Play Overlay */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
           <div className="w-12 h-12 rounded-full bg-[#FF0080] flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
             <Play className="w-6 h-6 text-white fill-white ml-0.5" />
           </div>

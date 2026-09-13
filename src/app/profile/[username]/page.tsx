@@ -23,6 +23,8 @@ import {
   Check,
   X,
   BookOpen,
+  Trash2,
+  Loader2,
 } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -48,6 +50,20 @@ export default function ProfilePage() {
   const [avatarUploading, setAvatarUploading] = useState(false);
 
   const isOwnProfile = user && profile && (user.id === profile.id || authProfile?.username === usernameParam);
+  const isAdmin = !!user?.email && (
+    user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
+    user.email === 'admin@dramabox.stream'
+  );
+  const canManageContent = isOwnProfile || isAdmin;
+
+  // Deletion modal state
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string;
+    type: 'video' | 'audio' | 'blog';
+    title: string;
+  } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -174,28 +190,55 @@ export default function ProfilePage() {
   const handleSaveProfile = async () => {
     if (!user) return;
     try {
-      await supabase
+      const { error } = await supabase
         .from('profiles')
         .update({
           display_name: editName.trim(),
           bio: editBio.trim(),
-          updated_at: new Date().toISOString(),
         })
         .eq('id', user.id);
 
-      setProfile((prev) =>
-        prev
-          ? {
-              ...prev,
-              display_name: editName.trim(),
-              bio: editBio.trim(),
-            }
-          : null
-      );
-      setIsEditing(false);
-      await refreshProfile();
+      if (!error) {
+        setProfile((prev) => (prev ? { ...prev, display_name: editName.trim(), bio: editBio.trim() } : null));
+        setIsEditing(false);
+        refreshProfile();
+      }
     } catch {
       // ignore
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      const endpoint =
+        deleteTarget.type === 'video'
+          ? '/api/videos'
+          : deleteTarget.type === 'audio'
+          ? '/api/audios'
+          : '/api/blogs';
+      const res = await fetch(`${endpoint}?id=${deleteTarget.id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || `Failed to delete ${deleteTarget.type}`);
+      }
+
+      if (deleteTarget.type === 'video') {
+        setMyVideos((prev) => prev.filter((v) => v.id !== deleteTarget.id));
+      } else if (deleteTarget.type === 'audio') {
+        setMyAudios((prev) => prev.filter((a) => a.id !== deleteTarget.id));
+      } else if (deleteTarget.type === 'blog') {
+        setMyBlogs((prev) => prev.filter((b) => b.id !== deleteTarget.id));
+      }
+      setDeleteTarget(null);
+    } catch (err: any) {
+      setDeleteError(err.message || 'Failed to delete content');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -407,13 +450,26 @@ export default function ProfilePage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               {myVideos.map((v) => (
-                <MediaCard key={v.id} item={{ ...v, type: 'video' }} />
+                <MediaCard
+                  key={v.id}
+                  item={{ ...v, type: 'video' }}
+                  onDelete={canManageContent ? () => setDeleteTarget({ id: v.id, type: 'video', title: v.title }) : undefined}
+                />
               ))}
               {myAudios.map((a) => (
-                <MediaCard key={a.id} item={{ ...a, type: 'audio' }} />
+                <MediaCard
+                  key={a.id}
+                  item={{ ...a, type: 'audio' }}
+                  allAudioTracks={myAudios}
+                  onDelete={canManageContent ? () => setDeleteTarget({ id: a.id, type: 'audio', title: a.title }) : undefined}
+                />
               ))}
               {myBlogs.map((b) => (
-                <MediaCard key={b.id} item={{ ...b, type: 'blog' }} />
+                <MediaCard
+                  key={b.id}
+                  item={{ ...b, type: 'blog' }}
+                  onDelete={canManageContent ? () => setDeleteTarget({ id: b.id, type: 'blog', title: b.title }) : undefined}
+                />
               ))}
             </div>
           )}
@@ -492,6 +548,69 @@ export default function ProfilePage() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#2B2B2D] border border-[#454549] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-[#EF4444]">
+              <div className="p-3 bg-[#EF4444]/10 rounded-xl">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white capitalize">
+                  Delete {deleteTarget.type}
+                </h3>
+                <p className="text-xs text-[#85858B]">This action cannot be undone</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-[#B8B8BD] leading-relaxed">
+              Are you sure you want to permanently delete{' '}
+              <strong className="text-white">"{deleteTarget.title}"</strong>? All associated comments,
+              reactions, and media references will be permanently removed.
+            </p>
+
+            {deleteError && (
+              <div className="p-3 rounded-xl bg-[#EF4444]/10 border border-[#EF4444]/20 text-xs text-[#EF4444]">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => {
+                  setDeleteTarget(null);
+                  setDeleteError(null);
+                }}
+                className="px-4 py-2 text-xs font-semibold text-[#85858B] hover:text-white transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 rounded-xl bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-semibold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Permanently Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

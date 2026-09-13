@@ -100,9 +100,13 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Comment not found' }, { status: 404 });
     }
 
-    let isAuthorized = comment.user_id === user.id;
+    const isAdmin =
+      user.email === process.env.ADMIN_EMAIL ||
+      user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
-    // 2. If not the comment author, check if user is the content creator / writer
+    let isAuthorized = comment.user_id === user.id || isAdmin;
+
+    // 2. If not comment author or admin, check if user is the content creator / writer
     if (!isAuthorized) {
       if (comment.content_type === 'video') {
         const { data: video } = await supabase

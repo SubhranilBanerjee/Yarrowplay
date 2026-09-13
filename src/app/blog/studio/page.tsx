@@ -1,17 +1,33 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { createClient } from '@/lib/supabase/client';
 import { uploadMedia } from '@/lib/upload';
-import { BookOpen, Upload, CheckCircle, AlertCircle, X, Eye } from 'lucide-react';
+import { Blog } from '@/types/database';
+import {
+  BookOpen,
+  Upload,
+  CheckCircle,
+  AlertCircle,
+  X,
+  Eye,
+  Trash2,
+  Loader2,
+  PenTool,
+  ExternalLink,
+} from 'lucide-react';
 
 export default function BlogStudioPage() {
   const { user, profile } = useAuth();
   const router = useRouter();
   const supabase = createClient();
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'write' | 'articles'>('write');
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Entertainment');
@@ -24,6 +40,18 @@ export default function BlogStudioPage() {
   const [coverUploading, setCoverUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Articles list & deletion state
+  const [articles, setArticles] = useState<Blog[]>([]);
+  const [loadingArticles, setLoadingArticles] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Blog | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const isAdmin = !!user?.email && (
+    user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
+    user.email === 'admin@dramabox.stream'
+  );
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -94,6 +122,53 @@ export default function BlogStudioPage() {
     }
   };
 
+  const fetchMyArticles = async () => {
+    if (!user) return;
+    setLoadingArticles(true);
+    try {
+      let query = supabase
+        .from('blogs')
+        .select('*, author:profiles(*)')
+        .order('created_at', { ascending: false });
+      if (!isAdmin) {
+        query = query.eq('author_id', user.id);
+      }
+      const { data } = await query;
+      setArticles((data as Blog[]) || []);
+    } catch (err) {
+      console.error('Failed to load articles:', err);
+    } finally {
+      setLoadingArticles(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'articles') {
+      fetchMyArticles();
+    }
+  }, [activeTab, user]);
+
+  const handleConfirmDeleteBlog = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      const res = await fetch(`/api/blogs?id=${deleteTarget.id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to delete article');
+      }
+      setArticles((prev) => prev.filter((a) => a.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch (err: any) {
+      setDeleteError(err.message || 'Failed to delete article');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
       <div className="flex items-center justify-between mb-8">
@@ -103,9 +178,36 @@ export default function BlogStudioPage() {
             Blog Studio
           </h1>
           <p className="text-sm text-[#85858B] mt-1">
-            Write and publish editorial articles, track notes, and creative commentaries.
+            Write, manage, and publish editorial articles, track notes, and creative commentaries.
           </p>
         </div>
+      </div>
+
+      {/* Primary Top Tabs: [ Write Article ] [ My Articles ] */}
+      <div className="grid grid-cols-2 gap-3 mb-6 bg-[#333336] p-1.5 rounded-2xl border border-[#454549]">
+        <button
+          onClick={() => setActiveTab('write')}
+          className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
+            activeTab === 'write'
+              ? 'bg-[#FF0080] text-white shadow-lg'
+              : 'text-[#B8B8BD] hover:text-white'
+          }`}
+        >
+          <PenTool className="w-4 h-4" />
+          <span>Write Article</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('articles')}
+          className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
+            activeTab === 'articles'
+              ? 'bg-[#FF0080] text-white shadow-lg'
+              : 'text-[#B8B8BD] hover:text-white'
+          }`}
+        >
+          <BookOpen className="w-4 h-4" />
+          <span>{isAdmin ? 'All Articles' : 'My Articles'}</span>
+        </button>
       </div>
 
       {statusMsg && (
@@ -125,7 +227,11 @@ export default function BlogStudioPage() {
         </div>
       )}
 
-      <div className="bg-[#333336] border border-[#454549] rounded-2xl p-6 sm:p-8 space-y-6">
+      {/* ==================================================== */}
+      {/* WRITE ARTICLE VIEW                                   */}
+      {/* ==================================================== */}
+      {activeTab === 'write' && (
+        <div className="bg-[#333336] border border-[#454549] rounded-2xl p-6 sm:p-8 space-y-6">
         <div>
           <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
             Blog Title *
@@ -242,6 +348,155 @@ export default function BlogStudioPage() {
           </button>
         </div>
       </div>
+    )}
+
+      {/* ==================================================== */}
+      {/* MANAGE ARTICLES VIEW                                 */}
+      {/* ==================================================== */}
+      {activeTab === 'articles' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-[#85858B]">
+              {isAdmin ? 'All Articles Across Platform' : 'Your Published & Draft Articles'} ({articles.length})
+            </h3>
+            {isAdmin && (
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#FF0080]/15 text-[#FF0080] border border-[#FF0080]/30">
+                Admin Mode
+              </span>
+            )}
+          </div>
+
+          {loadingArticles ? (
+            <div className="p-12 text-center text-[#85858B] flex flex-col items-center gap-3">
+              <Loader2 className="w-6 h-6 animate-spin text-[#FF0080]" />
+              <p className="text-xs">Loading articles...</p>
+            </div>
+          ) : articles.length === 0 ? (
+            <div className="bg-[#333336] border border-[#454549] rounded-2xl p-12 text-center text-[#85858B] space-y-3">
+              <BookOpen className="w-10 h-10 mx-auto text-[#85858B]/50" />
+              <p className="text-sm font-semibold text-white">No articles found</p>
+              <p className="text-xs max-w-sm mx-auto">
+                You haven't published any articles yet. Switch to the Write Article tab to get started.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {articles.map((art) => (
+                <div
+                  key={art.id}
+                  className="p-4 bg-[#333336] border border-[#454549] rounded-2xl flex items-center justify-between gap-4 hover:border-[#555559] transition-colors"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="relative w-16 h-12 rounded-xl overflow-hidden bg-[#2B2B2D] shrink-0 border border-[#454549]">
+                      {art.cover_url ? (
+                        <Image src={art.cover_url} alt={art.title} fill className="object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <BookOpen className="w-5 h-5 text-[#85858B]" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-semibold text-white truncate">{art.title}</h4>
+                      <div className="flex items-center gap-2 text-[11px] text-[#85858B] mt-0.5">
+                        <span className="capitalize">{art.status || 'published'}</span>
+                        <span>•</span>
+                        <span>{new Date(art.created_at).toLocaleDateString()}</span>
+                        {isAdmin && art.author && (
+                          <>
+                            <span>•</span>
+                            <span className="text-[#FF0080] truncate">
+                              By {art.author.display_name || art.author.username}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Link
+                      href={`/blogs/${art.id}`}
+                      className="p-2 rounded-xl bg-[#2B2B2D] hover:bg-[#3A3A3E] text-[#B8B8BD] hover:text-white transition-colors cursor-pointer"
+                      title="Read article"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </Link>
+                    <button
+                      onClick={() => setDeleteTarget(art)}
+                      title="Delete article"
+                      className="p-2 rounded-xl bg-[#EF4444]/10 hover:bg-[#EF4444] text-[#EF4444] hover:text-white border border-[#EF4444]/30 transition-colors cursor-pointer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#2B2B2D] border border-[#454549] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-[#EF4444]">
+              <div className="p-3 bg-[#EF4444]/10 rounded-xl">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Delete Article</h3>
+                <p className="text-xs text-[#85858B]">This action cannot be undone</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-[#B8B8BD] leading-relaxed">
+              Are you sure you want to permanently delete{' '}
+              <strong className="text-white">"{deleteTarget.title}"</strong>? All associated comments
+              and reactions will be permanently deleted.
+            </p>
+
+            {deleteError && (
+              <div className="p-3 rounded-xl bg-[#EF4444]/10 border border-[#EF4444]/20 text-xs text-[#EF4444]">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => {
+                  setDeleteTarget(null);
+                  setDeleteError(null);
+                }}
+                className="px-4 py-2 text-xs font-semibold text-[#85858B] hover:text-white transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleConfirmDeleteBlog}
+                className="px-4 py-2 rounded-xl bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-semibold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Permanently Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

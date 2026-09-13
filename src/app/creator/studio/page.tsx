@@ -20,6 +20,9 @@ import {
   X,
   ListPlus,
   ArrowUpRight,
+  FolderOpen,
+  ExternalLink,
+  Loader2,
 } from 'lucide-react';
 
 interface EpisodeDraft {
@@ -50,14 +53,32 @@ export default function CreatorStudioPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  // Primary top tab: 'video' | 'audio'
-  const [primaryTab, setPrimaryTab] = useState<'video' | 'audio'>('video');
+  // Primary top tab: 'video' | 'audio' | 'manage'
+  const [primaryTab, setPrimaryTab] = useState<'video' | 'audio' | 'manage'>('video');
 
   // Video secondary tab: 'series' | 'single'
   const [videoMode, setVideoMode] = useState<'series' | 'single'>('series');
 
   // Audio secondary tab: 'album' | 'single'
   const [audioMode, setAudioMode] = useState<'album' | 'single'>('album');
+
+  // Manage content tab state
+  const [manageSubTab, setManageSubTab] = useState<'videos' | 'audios'>('videos');
+  const [uploadedVideos, setUploadedVideos] = useState<any[]>([]);
+  const [uploadedAudios, setUploadedAudios] = useState<any[]>([]);
+  const [loadingManage, setLoadingManage] = useState(false);
+  const [manageDeleteTarget, setManageDeleteTarget] = useState<{
+    id: string;
+    type: 'video' | 'audio';
+    title: string;
+  } | null>(null);
+  const [isManageDeleting, setIsManageDeleting] = useState(false);
+  const [manageDeleteError, setManageDeleteError] = useState<string | null>(null);
+
+  const isAdmin = !!user?.email && (
+    user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
+    user.email === 'admin@dramabox.stream'
+  );
 
   // --- SERIES STATE ---
   const [seriesTitle, setSeriesTitle] = useState('');
@@ -505,6 +526,61 @@ export default function CreatorStudioPage() {
     }
   };
 
+  const fetchManageContent = async () => {
+    if (!user) return;
+    setLoadingManage(true);
+    try {
+      let vQuery = supabase.from('videos').select('*, creator:profiles(*)').order('created_at', { ascending: false });
+      let aQuery = supabase.from('audios').select('*, creator:profiles(*)').order('created_at', { ascending: false });
+
+      if (!isAdmin) {
+        vQuery = vQuery.eq('creator_id', user.id);
+        aQuery = aQuery.eq('creator_id', user.id);
+      }
+
+      const [{ data: vData }, { data: aData }] = await Promise.all([vQuery, aQuery]);
+      setUploadedVideos(vData || []);
+      setUploadedAudios(aData || []);
+    } catch (err) {
+      console.error('Failed to load manage content:', err);
+    } finally {
+      setLoadingManage(false);
+    }
+  };
+
+  useEffect(() => {
+    if (primaryTab === 'manage') {
+      fetchManageContent();
+    }
+  }, [primaryTab, user]);
+
+  const handleConfirmManageDelete = async () => {
+    if (!manageDeleteTarget) return;
+    setIsManageDeleting(true);
+    setManageDeleteError(null);
+    try {
+      const endpoint = manageDeleteTarget.type === 'video' ? '/api/videos' : '/api/audios';
+      const res = await fetch(`${endpoint}?id=${manageDeleteTarget.id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || `Failed to delete ${manageDeleteTarget.type}`);
+      }
+
+      if (manageDeleteTarget.type === 'video') {
+        setUploadedVideos((prev) => prev.filter((v) => v.id !== manageDeleteTarget.id));
+      } else {
+        setUploadedAudios((prev) => prev.filter((a) => a.id !== manageDeleteTarget.id));
+      }
+      setManageDeleteTarget(null);
+    } catch (err: any) {
+      setManageDeleteError(err.message || 'Failed to delete');
+    } finally {
+      setIsManageDeleting(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
       {/* Studio Header matching mockup */}
@@ -517,11 +593,11 @@ export default function CreatorStudioPage() {
         </p>
       </div>
 
-      {/* Primary Top Tabs: [ Video ] [ Audio ] */}
-      <div className="grid grid-cols-2 gap-3 mb-6 bg-[#333336] p-1.5 rounded-2xl border border-[#454549]">
+      {/* Primary Top Tabs: [ Video ] [ Audio ] [ Manage Content ] */}
+      <div className="grid grid-cols-3 gap-3 mb-6 bg-[#333336] p-1.5 rounded-2xl border border-[#454549]">
         <button
           onClick={() => setPrimaryTab('video')}
-          className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all ${
+          className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
             primaryTab === 'video'
               ? 'bg-[#FF0080] text-white shadow-lg'
               : 'text-[#B8B8BD] hover:text-white'
@@ -533,7 +609,7 @@ export default function CreatorStudioPage() {
 
         <button
           onClick={() => setPrimaryTab('audio')}
-          className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all ${
+          className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
             primaryTab === 'audio'
               ? 'bg-[#FF0080] text-white shadow-lg'
               : 'text-[#B8B8BD] hover:text-white'
@@ -541,6 +617,18 @@ export default function CreatorStudioPage() {
         >
           <Music className="w-4 h-4" />
           <span>Audio</span>
+        </button>
+
+        <button
+          onClick={() => setPrimaryTab('manage')}
+          className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
+            primaryTab === 'manage'
+              ? 'bg-[#FF0080] text-white shadow-lg'
+              : 'text-[#B8B8BD] hover:text-white'
+          }`}
+        >
+          <FolderOpen className="w-4 h-4" />
+          <span>Manage</span>
         </button>
       </div>
 
@@ -1515,6 +1603,246 @@ export default function CreatorStudioPage() {
               </button>
             </form>
           )}
+        </div>
+      )}
+
+      {/* ==================================================== */}
+      {/* MANAGE CONTENT WORKFLOW                              */}
+      {/* ==================================================== */}
+      {primaryTab === 'manage' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setManageSubTab('videos')}
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                  manageSubTab === 'videos'
+                    ? 'bg-[#FF0080] text-white shadow-md'
+                    : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
+                }`}
+              >
+                Videos ({uploadedVideos.length})
+              </button>
+              <button
+                onClick={() => setManageSubTab('audios')}
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                  manageSubTab === 'audios'
+                    ? 'bg-[#FF0080] text-white shadow-md'
+                    : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
+                }`}
+              >
+                Audios ({uploadedAudios.length})
+              </button>
+            </div>
+            {isAdmin && (
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#FF0080]/15 text-[#FF0080] border border-[#FF0080]/30">
+                Admin Mode: All Content
+              </span>
+            )}
+          </div>
+
+          {loadingManage ? (
+            <div className="p-12 text-center text-[#85858B] flex flex-col items-center gap-3">
+              <Loader2 className="w-6 h-6 animate-spin text-[#FF0080]" />
+              <p className="text-xs">Loading uploaded content...</p>
+            </div>
+          ) : manageSubTab === 'videos' ? (
+            uploadedVideos.length === 0 ? (
+              <div className="bg-[#333336] border border-[#454549] rounded-2xl p-12 text-center text-[#85858B] space-y-3">
+                <Film className="w-10 h-10 mx-auto text-[#85858B]/50" />
+                <p className="text-sm font-semibold text-white">No videos found</p>
+                <p className="text-xs max-w-sm mx-auto">
+                  You haven't uploaded any videos yet. Switch to the Video tab to publish your first video.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {uploadedVideos.map((v) => (
+                  <div
+                    key={v.id}
+                    className="p-4 bg-[#333336] border border-[#454549] rounded-2xl flex items-center justify-between gap-4 hover:border-[#555559] transition-colors"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="relative w-16 h-12 rounded-xl overflow-hidden bg-[#2B2B2D] shrink-0 border border-[#454549]">
+                        {v.thumbnail_url ? (
+                          <Image src={v.thumbnail_url} alt={v.title} fill className="object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Film className="w-5 h-5 text-[#85858B]" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-sm font-semibold text-white truncate">{v.title}</h4>
+                        <div className="flex items-center gap-2 text-[11px] text-[#85858B] mt-0.5">
+                          <span>{new Date(v.created_at).toLocaleDateString()}</span>
+                          <span>•</span>
+                          <span>{v.views_count || 0} views</span>
+                          {isAdmin && v.creator && (
+                            <>
+                              <span>•</span>
+                              <span className="text-[#FF0080] truncate">
+                                By {v.creator.display_name || v.creator.username}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <a
+                        href={`/videos/${v.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-2 rounded-xl bg-[#2B2B2D] hover:bg-[#3A3A3E] text-[#B8B8BD] hover:text-white transition-colors cursor-pointer"
+                        title="View video"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                      <button
+                        onClick={() =>
+                          setManageDeleteTarget({
+                            id: v.id,
+                            type: 'video',
+                            title: v.title,
+                          })
+                        }
+                        title="Delete video"
+                        className="p-2 rounded-xl bg-[#EF4444]/10 hover:bg-[#EF4444] text-[#EF4444] hover:text-white border border-[#EF4444]/30 transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+          ) : uploadedAudios.length === 0 ? (
+            <div className="bg-[#333336] border border-[#454549] rounded-2xl p-12 text-center text-[#85858B] space-y-3">
+              <Music className="w-10 h-10 mx-auto text-[#85858B]/50" />
+              <p className="text-sm font-semibold text-white">No audio tracks found</p>
+              <p className="text-xs max-w-sm mx-auto">
+                You haven't uploaded any audio tracks yet. Switch to the Audio tab to upload your music or podcast.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {uploadedAudios.map((a) => (
+                <div
+                  key={a.id}
+                  className="p-4 bg-[#333336] border border-[#454549] rounded-2xl flex items-center justify-between gap-4 hover:border-[#555559] transition-colors"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-[#2B2B2D] shrink-0 border border-[#454549]">
+                      {a.cover_url ? (
+                        <Image src={a.cover_url} alt={a.title} fill className="object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Music className="w-5 h-5 text-[#85858B]" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-semibold text-white truncate">{a.title}</h4>
+                      <div className="flex items-center gap-2 text-[11px] text-[#85858B] mt-0.5">
+                        <span>{a.artist_name || 'Original Artist'}</span>
+                        <span>•</span>
+                        <span>{new Date(a.created_at).toLocaleDateString()}</span>
+                        {isAdmin && a.creator && (
+                          <>
+                            <span>•</span>
+                            <span className="text-[#FF0080] truncate">
+                              By {a.creator.display_name || a.creator.username}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() =>
+                        setManageDeleteTarget({
+                          id: a.id,
+                          type: 'audio',
+                          title: a.title,
+                        })
+                      }
+                      title="Delete audio"
+                      className="p-2 rounded-xl bg-[#EF4444]/10 hover:bg-[#EF4444] text-[#EF4444] hover:text-white border border-[#EF4444]/30 transition-colors cursor-pointer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {manageDeleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#2B2B2D] border border-[#454549] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-[#EF4444]">
+              <div className="p-3 bg-[#EF4444]/10 rounded-xl">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white capitalize">
+                  Delete {manageDeleteTarget.type}
+                </h3>
+                <p className="text-xs text-[#85858B]">This action cannot be undone</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-[#B8B8BD] leading-relaxed">
+              Are you sure you want to permanently delete{' '}
+              <strong className="text-white">"{manageDeleteTarget.title}"</strong>? All associated
+              comments, reactions, and history will be permanently deleted.
+            </p>
+
+            {manageDeleteError && (
+              <div className="p-3 rounded-xl bg-[#EF4444]/10 border border-[#EF4444]/20 text-xs text-[#EF4444]">
+                {manageDeleteError}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={isManageDeleting}
+                onClick={() => {
+                  setManageDeleteTarget(null);
+                  setManageDeleteError(null);
+                }}
+                className="px-4 py-2 text-xs font-semibold text-[#85858B] hover:text-white transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isManageDeleting}
+                onClick={handleConfirmManageDelete}
+                className="px-4 py-2 rounded-xl bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-semibold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                {isManageDeleting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Permanently Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
