@@ -18,12 +18,16 @@ create table if not exists public.profiles (
   username text unique,
   display_name text,
   role text not null check (role in ('viewer', 'creator', 'advertiser')) default 'viewer',
+  sub_role text check (sub_role in ('Professional', 'Student', 'Hobbyist')),
   company_name text,
   avatar_url text,
   bio text,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+-- Migration: add sub_role if table already exists
+alter table public.profiles add column if not exists sub_role text check (sub_role in ('Professional', 'Student', 'Hobbyist'));
 
 -- Trigger to create public.profiles row automatically when auth.users is created
 create or replace function public.handle_new_user()
@@ -32,19 +36,22 @@ declare
   raw_role text;
   raw_name text;
   raw_company text;
+  raw_sub_role text;
   generated_username text;
 begin
   raw_role := coalesce(new.raw_user_meta_data->>'role', 'viewer');
   raw_name := coalesce(new.raw_user_meta_data->>'display_name', new.raw_user_meta_data->>'name', split_part(new.email, '@', 1));
   raw_company := new.raw_user_meta_data->>'company_name';
+  raw_sub_role := new.raw_user_meta_data->>'sub_role';
   generated_username := lower(regexp_replace(raw_name, '[^a-zA-Z0-9]', '', 'g')) || '_' || substr(new.id::text, 1, 6);
 
-  insert into public.profiles (id, email, username, display_name, role, company_name)
-  values (new.id, new.email, generated_username, raw_name, raw_role, raw_company)
+  insert into public.profiles (id, email, username, display_name, role, sub_role, company_name)
+  values (new.id, new.email, generated_username, raw_name, raw_role, raw_sub_role, raw_company)
   on conflict (id) do update set
     email = excluded.email,
     display_name = coalesce(profiles.display_name, excluded.display_name),
     role = coalesce(profiles.role, excluded.role),
+    sub_role = coalesce(profiles.sub_role, excluded.sub_role),
     updated_at = now();
   return new;
 end;
@@ -89,6 +96,8 @@ create table if not exists public.videos (
   duration_seconds numeric default 0,
   visibility text check (visibility in ('public', 'unlisted', 'draft')) default 'public',
   status text check (status in ('processing', 'published', 'archived', 'draft')) default 'published',
+  is_locked boolean default false,
+  price_inr numeric default 0,
   views_count int default 0,
   likes_count int default 0,
   dislikes_count int default 0,
@@ -97,6 +106,36 @@ create table if not exists public.videos (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+-- Migrations: add is_locked / price_inr if table already exists
+alter table public.videos add column if not exists is_locked boolean default false;
+alter table public.videos add column if not exists price_inr numeric default 0;
+
+-- 5b. VIDEO PURCHASES TABLE (Razorpay)
+create table if not exists public.video_purchases (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  video_id uuid references public.videos(id) on delete cascade not null,
+  razorpay_order_id text,
+  razorpay_payment_id text,
+  amount_inr numeric not null,
+  status text check (status in ('pending', 'paid', 'failed')) default 'paid',
+  created_at timestamptz default now(),
+  constraint uq_user_video_purchase unique (user_id, video_id)
+);
+
+alter table public.video_purchases enable row level security;
+
+drop policy if exists "Users see own purchases" on public.video_purchases;
+create policy "Users see own purchases" on public.video_purchases for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "Service inserts purchases" on public.video_purchases;
+create policy "Service inserts purchases" on public.video_purchases for insert
+  with check (auth.uid() = user_id);
+
+create index if not exists idx_video_purchases_user on public.video_purchases(user_id);
+create index if not exists idx_video_purchases_video on public.video_purchases(video_id);
 
 -- 6. AUDIO ALBUMS TABLE
 create table if not exists public.audio_albums (

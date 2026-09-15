@@ -5,13 +5,19 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { User, Video, Megaphone, Mail, Lock, Eye, EyeOff, Building, AlertCircle, CheckCircle } from 'lucide-react';
+import {
+  User, Video, Megaphone, Mail, Lock, Eye, EyeOff, Building,
+  AlertCircle, CheckCircle, ChevronDown,
+} from 'lucide-react';
+
+type CreatorSubRole = 'Professional' | 'Student' | 'Hobbyist';
 
 export default function RegisterPage() {
   const router = useRouter();
   const supabase = createClient();
 
   const [role, setRole] = useState<'viewer' | 'creator' | 'advertiser'>('viewer');
+  const [subRole, setSubRole] = useState<CreatorSubRole>('Professional');
   const [displayName, setDisplayName] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [email, setEmail] = useState('');
@@ -49,17 +55,20 @@ export default function RegisterPage() {
         return;
       }
 
-      // Supabase sign up
+      // Build sign-up metadata
+      const signUpMeta: Record<string, any> = {
+        role,
+        display_name: metadataName.trim(),
+        company_name: role === 'advertiser' ? companyName.trim() : null,
+      };
+      if (role === 'creator') {
+        signUpMeta.sub_role = subRole;
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
-        options: {
-          data: {
-            role,
-            display_name: metadataName.trim(),
-            company_name: role === 'advertiser' ? companyName.trim() : null,
-          },
-        },
+        options: { data: signUpMeta },
       });
 
       if (error) {
@@ -69,16 +78,22 @@ export default function RegisterPage() {
       }
 
       if (data.user) {
-        // Upsert initial profile
-        const username = metadataName.toLowerCase().replace(/[^a-z0-9]/g, '') + '_' + data.user.id.slice(0, 5);
-        await supabase.from('profiles').upsert({
+        const username =
+          metadataName.toLowerCase().replace(/[^a-z0-9]/g, '') + '_' + data.user.id.slice(0, 5);
+
+        const profilePayload: Record<string, any> = {
           id: data.user.id,
           email: data.user.email,
           username,
           display_name: metadataName.trim(),
           role,
           company_name: role === 'advertiser' ? companyName.trim() : null,
-        });
+        };
+        if (role === 'creator') {
+          profilePayload.sub_role = subRole;
+        }
+
+        await supabase.from('profiles').upsert(profilePayload);
 
         setSuccessMsg('Account created successfully! Redirecting...');
         setTimeout(() => {
@@ -99,9 +114,14 @@ export default function RegisterPage() {
     }
   };
 
+  const subRoleDescriptions: Record<CreatorSubRole, string> = {
+    Professional: 'Working professionally in content creation or media',
+    Student: 'Enrolled in an educational program',
+    Hobbyist: 'Creating content as a personal passion project',
+  };
+
   return (
     <div className="min-h-[85vh] flex items-center justify-center p-4">
-      {/* Registration Card - matching screenshot */}
       <div className="w-full max-w-md bg-[#2B2B2D] border border-[#454549] rounded-3xl p-6 sm:p-8 shadow-2xl relative">
         {/* Header Branding */}
         <div className="flex flex-col items-center text-center mb-6">
@@ -219,6 +239,30 @@ export default function RegisterPage() {
                   className="w-full bg-[#333336] text-white placeholder-[#85858B] text-sm rounded-xl pl-10 pr-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080] transition-colors"
                 />
               </div>
+            </div>
+          )}
+
+          {/* Creator Sub-Role Dropdown — only shown for creators */}
+          {role === 'creator' && (
+            <div>
+              <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                CREATOR TYPE
+              </label>
+              <div className="relative">
+                <select
+                  value={subRole}
+                  onChange={(e) => setSubRole(e.target.value as CreatorSubRole)}
+                  className="w-full bg-[#333336] text-white text-sm rounded-xl pl-4 pr-10 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080] transition-colors appearance-none cursor-pointer"
+                >
+                  <option value="Professional">Professional</option>
+                  <option value="Student">Student</option>
+                  <option value="Hobbyist">Hobbyist</option>
+                </select>
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#85858B] pointer-events-none" />
+              </div>
+              <p className="mt-1.5 text-[11px] text-[#85858B] leading-relaxed">
+                {subRoleDescriptions[subRole]}
+              </p>
             </div>
           )}
 

@@ -1,4 +1,5 @@
 export type UserRole = 'viewer' | 'creator' | 'advertiser';
+export type CreatorSubRole = 'Professional' | 'Student' | 'Hobbyist';
 
 export interface Profile {
   id: string;
@@ -6,6 +7,7 @@ export interface Profile {
   username: string | null;
   display_name: string | null;
   role: UserRole;
+  sub_role: CreatorSubRole | null;
   company_name: string | null;
   avatar_url: string | null;
   bio: string | null;
@@ -52,6 +54,8 @@ export interface Video {
   dislikes_count: number;
   shares_count: number;
   comments_count: number;
+  is_locked: boolean;
+  price_inr: number | null;
   created_at: string;
   updated_at: string;
   creator?: Profile;

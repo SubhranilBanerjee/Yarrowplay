@@ -5,16 +5,15 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { MediaCard, UnifiedMediaItem } from '@/components/media/MediaCard';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Video, AudioTrack, Blog, AdvertiserCampaign } from '@/types/database';
-import { Film, Music, BookOpen, Sparkles, PlusCircle, RefreshCw, Megaphone } from 'lucide-react';
+import { Video, AudioTrack, Blog } from '@/types/database';
+import { Film, Music, BookOpen, Sparkles, RefreshCw } from 'lucide-react';
 
 export default function HomePage() {
   const supabase = createClient();
 
-  const [activeFilter, setActiveFilter] = useState<'all' | 'videos' | 'audio' | 'blogs' | 'sponsored'>('all');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'videos' | 'audio' | 'blogs'>('all');
   const [feedItems, setFeedItems] = useState<UnifiedMediaItem[]>([]);
   const [allAudios, setAllAudios] = useState<AudioTrack[]>([]);
-  const [allCampaigns, setAllCampaigns] = useState<AdvertiserCampaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -94,7 +93,6 @@ export default function HomePage() {
         return true;
       });
 
-      setAllCampaigns(validCampaigns as AdvertiserCampaign[]);
 
       const taggedAds: UnifiedMediaItem[] = validCampaigns.map((c: any) => ({
         ...c,
@@ -149,7 +147,6 @@ export default function HomePage() {
 
   const filteredItems = feedItems.filter((item) => {
     if (activeFilter === 'all') return true;
-    if (activeFilter === 'sponsored') return item.type === 'ad';
     if (activeFilter === 'videos') return item.type === 'video' || (item.type === 'ad' && (item as any).media_type === 'video');
     if (activeFilter === 'audio') return item.type === 'audio';
     if (activeFilter === 'blogs') return item.type === 'blog';
@@ -207,25 +204,6 @@ export default function HomePage() {
             <BookOpen className="w-4 h-4" />
             Blogs
           </button>
-
-          <button
-            onClick={() => setActiveFilter('sponsored')}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
-              activeFilter === 'sponsored'
-                ? 'bg-[#FF0080] text-white shadow-md'
-                : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
-            }`}
-          >
-            <Megaphone className="w-4 h-4 text-[#FF0080]" />
-            <span>Sponsored</span>
-            {allCampaigns.length > 0 && (
-              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                activeFilter === 'sponsored' ? 'bg-white/25 text-white' : 'bg-[#FF0080]/20 text-[#FF0080]'
-              }`}>
-                {allCampaigns.length}
-              </span>
-            )}
-          </button>
         </div>
 
         <button
@@ -269,21 +247,17 @@ export default function HomePage() {
       {/* Empty State */}
       {!isLoading && !errorMsg && filteredItems.length === 0 && (
         <EmptyState
-          icon={activeFilter === 'sponsored' ? Megaphone : Sparkles}
-          title={activeFilter === 'sponsored' ? 'No sponsored campaigns active' : 'No content available yet'}
-          description={
-            activeFilter === 'sponsored'
-              ? 'Launch your brand campaign to reach viewers across Yarrowplay.'
-              : 'Be the first to bring stories to life by uploading your video, audio, or blog post.'
-          }
-          actionLabel={activeFilter === 'sponsored' ? 'Go to Advertiser Studio' : 'Go to Creator Studio'}
-          actionHref={activeFilter === 'sponsored' ? '/advertiser' : '/creator/studio'}
+          icon={Sparkles}
+          title="No content available yet"
+          description="Be the first to bring stories to life by uploading your video, audio, or blog post."
+          actionLabel="Go to Creator Studio"
+          actionHref="/creator/studio"
         />
       )}
 
-      {/* Media Grid: Square tiles on mobile, responsive grid on tablet/desktop */}
+      {/* Media Grid: Compact — more columns on desktop */}
       {!isLoading && !errorMsg && filteredItems.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
           {filteredItems.map((item) => (
             <MediaCard key={`${item.type}-${item.id}`} item={item} allAudioTracks={allAudios} />
           ))}

@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Play, Heart, Clock, Sparkles, Megaphone, FileText, Music, Trash2, ExternalLink } from 'lucide-react';
+import { Play, Heart, Clock, FileText, Music, Film, Trash2, ExternalLink } from 'lucide-react';
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
 import { Video, AudioTrack, Blog, AdvertiserCampaign } from '@/types/database';
 
@@ -92,15 +92,10 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-[#85858B]">
-              <Megaphone className="w-8 h-8" />
+              <Film className="w-8 h-8" />
             </div>
           )}
 
-          {/* Sponsored Badge */}
-          <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur border border-[#FF0080]/60 text-[#FF0080] text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1 shadow z-10">
-            <Megaphone className="w-3 h-3 text-[#FF0080]" />
-            Sponsored
-          </div>
         </a>
 
         {/* Ad Details */}
@@ -309,20 +304,12 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
           </div>
         )}
 
-        {/* Video Pill */}
-        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+        {/* Video Type Badge */}
+        <div className="absolute top-2.5 left-2.5">
           <span className="bg-black/70 backdrop-blur text-white text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
             <Play className="w-2.5 h-2.5 text-[#FF0080] fill-current" />
             Video
           </span>
-
-          {/* Boosted Indicator */}
-          {item.boosted && (
-            <span className="bg-gradient-to-r from-[#FF0080] to-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow">
-              <Sparkles className="w-3 h-3" />
-              Boosted
-            </span>
-          )}
         </div>
 
         {/* Delete action */}

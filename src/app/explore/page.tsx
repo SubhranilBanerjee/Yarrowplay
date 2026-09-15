@@ -2,18 +2,18 @@
 
 import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { MediaCard, UnifiedMediaItem } from '@/components/media/MediaCard';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Search, Compass, Film, Music, BookOpen, Megaphone } from 'lucide-react';
+import { Compass, Film, Music, BookOpen, X } from 'lucide-react';
 
 function ExploreContent() {
   const searchParams = useSearchParams();
-  const initialQuery = searchParams.get('q') || '';
+  const query = searchParams.get('q') || '';
 
   const supabase = createClient();
-  const [searchTerm, setSearchTerm] = useState(initialQuery);
-  const [activeType, setActiveType] = useState<'all' | 'video' | 'audio' | 'blog' | 'sponsored'>('all');
+  const [activeType, setActiveType] = useState<'all' | 'video' | 'audio' | 'blog'>('all');
   const [results, setResults] = useState<UnifiedMediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -21,7 +21,7 @@ function ExploreContent() {
     setIsLoading(true);
     try {
       const items: UnifiedMediaItem[] = [];
-      const trimmed = searchTerm.trim();
+      const trimmed = query.trim();
 
       const promises: Promise<any>[] = [];
 
@@ -81,8 +81,8 @@ function ExploreContent() {
         );
       }
 
-      // Search campaigns / sponsored
-      if (activeType === 'all' || activeType === 'sponsored') {
+      // Search campaigns (included in 'all' results)
+      if (activeType === 'all') {
         let cQuery = supabase
           .from('advertiser_campaigns')
           .select('*, advertiser:profiles(*)')
@@ -113,31 +113,31 @@ function ExploreContent() {
 
   useEffect(() => {
     handleSearch();
-  }, [activeType, initialQuery]);
+  }, [activeType, query]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Search Header */}
-      <div className="max-w-2xl mx-auto text-center mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-4">
-          Discover On Yarrowplay
+      {/* Page Header */}
+      <div className="max-w-2xl mx-auto text-center mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          {query ? `Results for "${query}"` : 'Discover On Yarrowplay'}
         </h1>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSearch();
-          }}
-          className="relative w-full"
-        >
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#85858B]" />
-          <input
-            type="text"
-            placeholder="Search by title, artist, genre, or keywords..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[#333336] text-white placeholder-[#85858B] text-sm rounded-2xl pl-12 pr-4 py-3.5 border border-[#454549] focus:outline-none focus:border-[#FF0080] transition-colors shadow-lg"
-          />
-        </form>
+        {query ? (
+          <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#333336] border border-[#454549] text-xs text-[#B8B8BD]">
+            <span>Filter: <strong className="text-white">&ldquo;{query}&rdquo;</strong></span>
+            <Link
+              href="/explore"
+              className="text-[#85858B] hover:text-[#FF0080] inline-flex items-center gap-0.5 ml-1 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Clear</span>
+            </Link>
+          </div>
+        ) : (
+          <p className="text-sm text-[#85858B] mt-1.5">
+            Browse videos, audio tracks, creator blogs, and sponsored partner content.
+          </p>
+        )}
       </div>
 
       {/* Filter Tabs */}
@@ -189,17 +189,6 @@ function ExploreContent() {
           Blogs
         </button>
 
-        <button
-          onClick={() => setActiveType('sponsored')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-            activeType === 'sponsored'
-              ? 'bg-[#FF0080] text-white shadow-md'
-              : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
-          }`}
-        >
-          <Megaphone className="w-4 h-4 text-[#FF0080]" />
-          Sponsored
-        </button>
       </div>
 
       {/* Results */}
@@ -213,15 +202,12 @@ function ExploreContent() {
         <EmptyState
           icon={Compass}
           title="No results found"
-          description={`We couldn't find any content matching "${searchTerm || 'your query'}". Try another search keyword.`}
-          actionLabel="Clear Search"
-          onAction={() => {
-            setSearchTerm('');
-            setActiveType('all');
-          }}
+          description={`We couldn't find any content matching "${query || 'your filter'}". Try another category or search keyword.`}
+          actionLabel="Clear Filter"
+          actionHref="/explore"
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
           {results.map((item) => (
             <MediaCard key={`${item.type}-${item.id}`} item={item} />
           ))}

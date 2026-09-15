@@ -20,7 +20,10 @@ interface VideoPlayerProps {
   title: string;
   posterUrl?: string | null;
   initialProgress?: number;
+  locked?: boolean;
+  priceInr?: number;
   onEnded?: () => void;
+  onUnlockRequest?: () => void;
 }
 
 export function VideoPlayer({
@@ -30,7 +33,10 @@ export function VideoPlayer({
   title,
   posterUrl,
   initialProgress = 0,
+  locked = false,
+  priceInr = 0,
   onEnded,
+  onUnlockRequest,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -230,7 +236,7 @@ export function VideoPlayer({
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => isPlaying && setShowControls(false)}
-      className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden group select-none shadow-2xl"
+      className="relative w-full aspect-[9/16] bg-black rounded-2xl overflow-hidden group select-none shadow-2xl"
     >
       <video
         ref={videoRef}
@@ -363,6 +369,30 @@ export function VideoPlayer({
           </div>
         </div>
       </div>
+
+      {/* Locked Paywall Overlay */}
+      {locked && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm rounded-2xl">
+          <div className="text-center px-6">
+            <div className="w-16 h-16 rounded-full bg-[#FF0080]/15 border border-[#FF0080]/40 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-[#FF0080]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 className="text-white font-bold text-lg mb-1">Premium Episode</h3>
+            <p className="text-[#B8B8BD] text-sm mb-2">This episode requires a one-time unlock.</p>
+            {priceInr > 0 && (
+              <p className="text-[#FF0080] font-bold text-2xl mb-5">₹{priceInr.toFixed(2)}</p>
+            )}
+            <button
+              onClick={onUnlockRequest}
+              className="px-8 py-3 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white font-semibold text-sm transition-all shadow-xl active:scale-95"
+            >
+              Unlock Now
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

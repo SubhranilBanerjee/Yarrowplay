@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import Script from 'next/script';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { VideoPlayer } from '@/components/media/VideoPlayer';
@@ -15,16 +16,179 @@ import {
   Share2,
   Bookmark,
   MessageSquare,
-  Clock,
   Sparkles,
   Check,
   Send,
-  Layers,
   Film,
   Trash2,
   Loader2,
+  LogIn,
+  ChevronDown,
+  ChevronUp,
+  Lock,
+  X,
+  Play,
 } from 'lucide-react';
 
+// ─── Auth-Gate Modal ──────────────────────────────────────────────────────────
+function AuthGateModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-[#2B2B2D] border border-[#454549] rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-5 relative">
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-[#85858B] hover:text-white transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
+        <div className="text-center">
+          <div className="w-14 h-14 rounded-full bg-[#FF0080]/15 border border-[#FF0080]/30 flex items-center justify-center mx-auto mb-4">
+            <LogIn className="w-7 h-7 text-[#FF0080]" />
+          </div>
+          <h3 className="text-white font-bold text-lg">Sign in to Continue</h3>
+          <p className="text-[#85858B] text-sm mt-2 leading-relaxed">
+            Create a free account to like, comment, save, and interact with content on Yarrowplay.
+          </p>
+        </div>
+        <div className="flex flex-col gap-2.5">
+          <Link
+            href={`/login?redirect=${encodeURIComponent(window.location.pathname)}`}
+            className="w-full py-3 px-4 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white text-sm font-semibold text-center transition-all shadow-lg active:scale-[0.99]"
+          >
+            Sign In
+          </Link>
+          <Link
+            href="/register"
+            className="w-full py-3 px-4 rounded-xl bg-[#333336] hover:bg-[#3A3A3E] border border-[#454549] text-white text-sm font-semibold text-center transition-all"
+          >
+            Create Free Account
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Payment Modal ────────────────────────────────────────────────────────────
+function PaymentModal({
+  video,
+  onClose,
+  onSuccess,
+}: {
+  video: Video;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handlePay = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/payments/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ video_id: video.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to create order');
+
+      const Razorpay = (window as any).Razorpay;
+      if (!Razorpay) throw new Error('Payment gateway failed to load. Please refresh and try again.');
+
+      const rzp = new Razorpay({
+        key: data.key_id,
+        amount: data.amount,
+        currency: data.currency,
+        name: 'Yarrowplay',
+        description: data.video_title,
+        order_id: data.order_id,
+        handler: async (response: any) => {
+          const verifyRes = await fetch('/api/payments/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              video_id: video.id,
+            }),
+          });
+          const verifyData = await verifyRes.json();
+          if (!verifyRes.ok) {
+            setError(verifyData.error || 'Payment verification failed');
+          } else {
+            onSuccess();
+          }
+        },
+        prefill: {},
+        theme: { color: '#FF0080' },
+        modal: {
+          ondismiss: () => {
+            setIsLoading(false);
+          },
+        },
+      });
+      rzp.open();
+    } catch (err: any) {
+      setError(err.message || 'Payment failed');
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+      <div className="bg-[#2B2B2D] border border-[#454549] rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-5 relative">
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-[#85858B] hover:text-white transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
+        <div className="text-center">
+          <div className="w-14 h-14 rounded-full bg-[#FF0080]/15 border border-[#FF0080]/30 flex items-center justify-center mx-auto mb-4">
+            <Lock className="w-7 h-7 text-[#FF0080]" />
+          </div>
+          <h3 className="text-white font-bold text-lg">Unlock Episode</h3>
+          <p className="text-[#85858B] text-sm mt-2 leading-relaxed line-clamp-2">
+            {video.title}
+          </p>
+          {video.price_inr && video.price_inr > 0 && (
+            <p className="text-[#FF0080] font-bold text-3xl mt-3">
+              ₹{(video.price_inr as number).toFixed(2)}
+            </p>
+          )}
+          <p className="text-[11px] text-[#85858B] mt-1">One-time payment · Instant access</p>
+        </div>
+
+        {error && (
+          <div className="p-3 rounded-xl bg-[#EF4444]/10 border border-[#EF4444]/20 text-xs text-[#EF4444]">
+            {error}
+          </div>
+        )}
+
+        <button
+          onClick={handlePay}
+          disabled={isLoading}
+          className="w-full py-3 px-4 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white text-sm font-semibold transition-all shadow-lg active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Opening Payment...
+            </>
+          ) : (
+            'Pay with Razorpay'
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function VideoDetailPage() {
   const params = useParams();
   const videoId = params?.id as string;
@@ -39,9 +203,9 @@ export default function VideoDetailPage() {
 
   const [video, setVideo] = useState<Video | null>(null);
   const [seriesEpisodes, setSeriesEpisodes] = useState<Video[]>([]);
+  const [recommendedVideos, setRecommendedVideos] = useState<Video[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
-  const [commentTimestamp, setCommentTimestamp] = useState<number | null>(null);
 
   const [userReaction, setUserReaction] = useState<'like' | 'dislike' | null>(null);
   const [likesCount, setLikesCount] = useState(0);
@@ -50,195 +214,223 @@ export default function VideoDetailPage() {
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPurchased, setIsPurchased] = useState(false);
 
-  // Video deletion state
+  // UI state
+  const [commentsOpen, setCommentsOpen] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!videoId) return;
+  const fetchVideoData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const videoPromise = supabase
+        .from('videos')
+        .select('*, creator:profiles(*), series:content_series(*)')
+        .eq('id', videoId)
+        .single();
 
-    const fetchVideoData = async () => {
-      setIsLoading(true);
-      try {
-        // Parallelize primary queries: video record, comments, and user-specific states
-        const videoPromise = supabase
-          .from('videos')
-          .select('*, creator:profiles(*), series:content_series(*)')
-          .eq('id', videoId)
-          .single();
+      const commentsPromise = supabase
+        .from('comments')
+        .select('*, user:profiles(*)')
+        .eq('content_type', 'video')
+        .eq('content_id', videoId)
+        .order('created_at', { ascending: false });
 
-        const commentsPromise = supabase
-          .from('comments')
-          .select('*, user:profiles(*)')
-          .eq('content_type', 'video')
-          .eq('content_id', videoId)
-          .order('created_at', { ascending: false });
+      const reactionPromise = user
+        ? supabase.from('reactions').select('reaction_type').eq('user_id', user.id).eq('content_type', 'video').eq('content_id', videoId).maybeSingle()
+        : Promise.resolve({ data: null });
 
-        const reactionPromise = user
-          ? supabase
-              .from('reactions')
-              .select('reaction_type')
-              .eq('user_id', user.id)
-              .eq('content_type', 'video')
-              .eq('content_id', videoId)
-              .maybeSingle()
-          : Promise.resolve({ data: null });
+      const favoritePromise = user
+        ? supabase.from('favorites').select('id').eq('user_id', user.id).eq('content_type', 'video').eq('content_id', videoId).maybeSingle()
+        : Promise.resolve({ data: null });
 
-        const favoritePromise = user
-          ? supabase
-              .from('favorites')
-              .select('id')
-              .eq('user_id', user.id)
-              .eq('content_type', 'video')
-              .eq('content_id', videoId)
-              .maybeSingle()
-          : Promise.resolve({ data: null });
+      const watchlistPromise = user
+        ? supabase.from('watchlists').select('id').eq('user_id', user.id).eq('video_id', videoId).maybeSingle()
+        : Promise.resolve({ data: null });
 
-        const watchlistPromise = user
-          ? supabase
-              .from('watchlists')
-              .select('id')
-              .eq('user_id', user.id)
-              .eq('video_id', videoId)
-              .maybeSingle()
-          : Promise.resolve({ data: null });
+      const purchasePromise = user
+        ? supabase.from('video_purchases').select('id').eq('user_id', user.id).eq('video_id', videoId).eq('status', 'paid').maybeSingle()
+        : Promise.resolve({ data: null });
 
-        const [
-          { data: vid },
-          { data: comms },
-          { data: reaction },
-          { data: fav },
-          { data: watchItem },
-        ] = await Promise.all([
-          videoPromise,
-          commentsPromise,
-          reactionPromise,
-          favoritePromise,
-          watchlistPromise,
-        ]);
+      const [
+        { data: vid },
+        { data: comms },
+        { data: reaction },
+        { data: fav },
+        { data: watchItem },
+        { data: purchase },
+      ] = await Promise.all([
+        videoPromise,
+        commentsPromise,
+        reactionPromise,
+        favoritePromise,
+        watchlistPromise,
+        purchasePromise,
+      ]);
 
-        if (vid) {
-          setVideo(vid as Video);
-          setLikesCount(vid.likes_count || 0);
-          setDislikesCount(vid.dislikes_count || 0);
+      if (vid) {
+        setVideo(vid as Video);
+        setLikesCount(vid.likes_count || 0);
+        setDislikesCount(vid.dislikes_count || 0);
 
-          // If part of series, fetch other episodes
-          if (vid.series_id) {
-            const { data: eps } = await supabase
-              .from('videos')
-              .select('*')
-              .eq('series_id', vid.series_id)
-              .order('episode_number', { ascending: true });
-            setSeriesEpisodes((eps as Video[]) || []);
-          }
+        // Fetch series episodes
+        if (vid.series_id) {
+          const { data: eps } = await supabase
+            .from('videos')
+            .select('*')
+            .eq('series_id', vid.series_id)
+            .order('episode_number', { ascending: true });
+          setSeriesEpisodes((eps as Video[]) || []);
         }
 
-        setComments((comms as Comment[]) || []);
-        if (reaction) setUserReaction(reaction.reaction_type as any);
-        setIsFavorite(!!fav);
-        setIsWatchlisted(!!watchItem);
-      } catch {
-        // ignore
-      } finally {
-        setIsLoading(false);
-      }
-    };
+        // Fetch recommended videos (same category/tags, different id)
+        const recQuery = supabase
+          .from('videos')
+          .select('*, creator:profiles(*)')
+          .eq('status', 'published')
+          .eq('visibility', 'public')
+          .neq('id', videoId)
+          .order('views_count', { ascending: false })
+          .limit(8);
 
-    fetchVideoData();
+        if (vid.category) {
+          recQuery.eq('category', vid.category);
+        }
+
+        const { data: recs } = await recQuery;
+        setRecommendedVideos((recs as Video[]) || []);
+      }
+
+      setComments((comms as Comment[]) || []);
+      if (reaction) setUserReaction(reaction.reaction_type as any);
+      setIsFavorite(!!fav);
+      setIsWatchlisted(!!watchItem);
+      setIsPurchased(!!purchase);
+    } catch {
+      // ignore
+    } finally {
+      setIsLoading(false);
+    }
   }, [videoId, user]);
 
-  const handleReaction = async (type: 'like' | 'dislike') => {
+  useEffect(() => {
+    if (!videoId) return;
+    fetchVideoData();
+  }, [fetchVideoData]);
+
+  const requireAuth = (action: () => void) => {
     if (!user) {
-      window.location.href = `/login?redirect=/videos/${videoId}`;
+      setShowAuthModal(true);
       return;
     }
-
-    try {
-      const res = await fetch('/api/reactions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content_type: 'video',
-          content_id: videoId,
-          reaction_type: type,
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setUserReaction(data.userReaction);
-        setLikesCount(data.likesCount);
-        setDislikesCount(data.dislikesCount);
-      }
-    } catch {
-      // ignore
-    }
+    action();
   };
 
-  const handleToggleFavorite = async () => {
-    if (!user) {
-      window.location.href = `/login?redirect=/videos/${videoId}`;
-      return;
-    }
-
-    try {
-      const res = await fetch('/api/favorites', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content_type: 'video',
-          content_id: videoId,
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setIsFavorite(data.isFavorite);
-      }
-    } catch {
-      // ignore
-    }
+  const handleReaction = (type: 'like' | 'dislike') => {
+    requireAuth(async () => {
+      try {
+        const res = await fetch('/api/reactions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content_type: 'video', content_id: videoId, reaction_type: type }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUserReaction(data.userReaction);
+          setLikesCount(data.likesCount);
+          setDislikesCount(data.dislikesCount);
+        }
+      } catch { /* ignore */ }
+    });
   };
 
-  const handleToggleWatchlist = async () => {
-    if (!user) {
-      window.location.href = `/login?redirect=/videos/${videoId}`;
-      return;
-    }
+  const handleToggleFavorite = () => {
+    requireAuth(async () => {
+      try {
+        const res = await fetch('/api/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content_type: 'video', content_id: videoId }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setIsFavorite(data.isFavorite);
+        }
+      } catch { /* ignore */ }
+    });
+  };
 
-    try {
-      const res = await fetch('/api/watchlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content_type: 'video',
-          content_id: videoId,
-        }),
-      });
+  const handleToggleWatchlist = () => {
+    requireAuth(async () => {
+      try {
+        const res = await fetch('/api/watchlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content_type: 'video', content_id: videoId }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setIsWatchlisted(data.isWatchlisted);
+        }
+      } catch { /* ignore */ }
+    });
+  };
 
-      if (res.ok) {
-        const data = await res.json();
-        setIsWatchlisted(data.isWatchlisted);
-      }
-    } catch {
-      // ignore
+  const handleShare = async () => {
+    const url = window.location.href;
+    const shareText = 'Check out this content on Yarrowplay!';
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: video?.title || 'Watch on Yarrowplay',
+          text: shareText,
+          url,
+        });
+        fetch('/api/analytics/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content_type: 'video', content_id: videoId, creator_id: video?.creator_id, event_type: 'share' }),
+        }).catch(() => {});
+        return;
+      } catch { /* fallback */ }
     }
+    // Clipboard fallback
+    await navigator.clipboard.writeText(`${shareText}\n${url}`);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
+
+  const handlePostComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    requireAuth(async () => {
+      if (!newComment.trim()) return;
+      try {
+        const res = await fetch('/api/comments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content_type: 'video', content_id: videoId, content: newComment.trim() }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.comment) {
+            setComments((prev) => [data.comment, ...prev]);
+            setNewComment('');
+          }
+        }
+      } catch { /* ignore */ }
+    });
   };
 
   const handleDeleteComment = async (commentId: string) => {
     if (!user) return;
     try {
-      const res = await fetch(`/api/comments?id=${commentId}`, {
-        method: 'DELETE',
-      });
-      if (res.ok) {
-        setComments((prev) => prev.filter((c) => c.id !== commentId));
-      }
-    } catch {
-      // ignore
-    }
+      const res = await fetch(`/api/comments?id=${commentId}`, { method: 'DELETE' });
+      if (res.ok) setComments((prev) => prev.filter((c) => c.id !== commentId));
+    } catch { /* ignore */ }
   };
 
   const handleDeleteVideo = async () => {
@@ -246,13 +438,9 @@ export default function VideoDetailPage() {
     setIsDeleting(true);
     setDeleteError(null);
     try {
-      const res = await fetch(`/api/videos?id=${videoId}`, {
-        method: 'DELETE',
-      });
+      const res = await fetch(`/api/videos?id=${videoId}`, { method: 'DELETE' });
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to delete video');
-      }
+      if (!res.ok) throw new Error(data.error || 'Failed to delete video');
       router.push('/home');
     } catch (err: any) {
       setDeleteError(err.message || 'Failed to delete video');
@@ -260,76 +448,18 @@ export default function VideoDetailPage() {
     }
   };
 
-  const handleShare = async () => {
-    const url = window.location.href;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: video?.title || 'Watch on Yarrowplay',
-          url,
-        });
-        // Track share in analytics
-        fetch('/api/analytics/track', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content_type: 'video',
-            content_id: videoId,
-            creator_id: video?.creator_id,
-            event_type: 'share',
-          }),
-        }).catch(() => {});
-        return;
-      } catch {
-        // user cancelled or failed, fallback to clipboard
-      }
-    }
-
-    // Fallback: copy link
-    await navigator.clipboard.writeText(url);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2000);
-  };
-
-  const handlePostComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) {
-      window.location.href = `/login?redirect=/videos/${videoId}`;
-      return;
-    }
-
-    if (!newComment.trim()) return;
-
-    try {
-      const res = await fetch('/api/comments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content_type: 'video',
-          content_id: videoId,
-          content: newComment.trim(),
-          timestamp_seconds: commentTimestamp,
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.comment) {
-          setComments((prev) => [data.comment, ...prev]);
-          setNewComment('');
-          setCommentTimestamp(null);
-        }
-      }
-    } catch {
-      // ignore
-    }
-  };
+  // Determine if video is locked for this user
+  const isLocked = !!video?.is_locked && !isPurchased && user?.id !== video?.creator_id && !isAdmin;
 
   if (isLoading) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="aspect-video w-full bg-[#333336] rounded-2xl animate-pulse" />
-        <div className="h-6 bg-[#333336] rounded w-1/3 mt-6 animate-pulse" />
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex-1 max-w-sm mx-auto w-full">
+            <div className="aspect-[9/16] w-full bg-[#333336] rounded-2xl animate-pulse" />
+          </div>
+          <div className="w-full lg:w-72 bg-[#333336] rounded-2xl animate-pulse h-64" />
+        </div>
       </div>
     );
   }
@@ -339,13 +469,8 @@ export default function VideoDetailPage() {
       <div className="max-w-md mx-auto px-4 py-16 text-center">
         <Film className="w-12 h-12 text-[#85858B] mx-auto mb-3" />
         <h2 className="text-xl font-bold text-white mb-2">Video Not Found</h2>
-        <p className="text-xs text-[#85858B] mb-6">
-          This video may have been unpublished or removed.
-        </p>
-        <Link
-          href="/home"
-          className="px-5 py-2.5 rounded-xl bg-[#FF0080] text-white text-xs font-semibold"
-        >
+        <p className="text-xs text-[#85858B] mb-6">This video may have been unpublished or removed.</p>
+        <Link href="/home" className="px-5 py-2.5 rounded-xl bg-[#FF0080] text-white text-xs font-semibold">
           Return to Home Feed
         </Link>
       </div>
@@ -354,62 +479,87 @@ export default function VideoDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Video & Discussion (2 columns) */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Custom Video Player */}
-          <VideoPlayer
-            videoId={video.id}
-            creatorId={video.creator_id}
-            videoUrl={video.video_url}
-            title={video.title}
-            posterUrl={video.thumbnail_url}
-          />
+      {/* ── Main layout: vertical player + episode list side by side ── */}
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-          {/* Title & Metadata */}
+        {/* ── Left column: vertical player + metadata + comments + recommended ── */}
+        <div className="flex-1 min-w-0 space-y-5">
+
+          {/* Breadcrumb */}
+          <nav className="flex items-center gap-1.5 text-xs text-[#85858B] flex-wrap">
+            <Link href="/home" className="hover:text-white transition-colors">Home</Link>
+            {video.series && (
+              <>
+                <span>/</span>
+                <span className="text-[#B8B8BD]">{video.series.title}</span>
+              </>
+            )}
+            <span>/</span>
+            <span className="text-white truncate max-w-[200px]">{video.title}</span>
+          </nav>
+
+          {/* Vertical Video Player — centered, max width for portrait */}
+          <div className="flex justify-center">
+            <div className="w-full max-w-sm">
+              <VideoPlayer
+                videoId={video.id}
+                creatorId={video.creator_id}
+                videoUrl={video.video_url}
+                title={video.title}
+                posterUrl={video.thumbnail_url}
+                locked={isLocked}
+                priceInr={video.price_inr as number | undefined}
+                onUnlockRequest={() => {
+                  if (!user) {
+                    setShowAuthModal(true);
+                  } else {
+                    setShowPaymentModal(true);
+                  }
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Title & Actions */}
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">
               {video.title}
+              {video.episode_number && (
+                <span className="ml-2 text-sm font-normal text-[#85858B]">
+                  · Episode {video.episode_number}
+                </span>
+              )}
             </h1>
 
-            <div className="flex flex-wrap items-center justify-between gap-4 mt-3 pb-4 border-b border-[#454549]">
+            <div className="flex flex-wrap items-center justify-between gap-3 mt-3 pb-4 border-b border-[#454549]">
               {/* Creator Info */}
-              <div className="flex items-center gap-3">
-                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-[#3A3A3E] border border-[#454549]">
+              <div className="flex items-center gap-2.5">
+                <div className="relative w-9 h-9 rounded-full overflow-hidden bg-[#3A3A3E] border border-[#454549] shrink-0">
                   {video.creator?.avatar_url ? (
-                    <Image
-                      src={video.creator.avatar_url}
-                      alt={video.creator.display_name || 'Creator'}
-                      fill
-                      className="object-cover"
-                    />
+                    <Image src={video.creator.avatar_url} alt={video.creator.display_name || 'Creator'} fill className="object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-sm font-bold text-[#FF0080]">
+                    <div className="w-full h-full flex items-center justify-center text-xs font-bold text-[#FF0080]">
                       {video.creator?.display_name?.[0] || 'C'}
                     </div>
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">
-                    {video.creator?.display_name || 'Creator'}
-                  </p>
+                  <p className="text-sm font-semibold text-white">{video.creator?.display_name || 'Creator'}</p>
                   <p className="text-[11px] text-[#85858B]">
-                    {video.views_count || 0} views • {new Date(video.created_at).toLocaleDateString()}
+                    {video.views_count || 0} views · {new Date(video.created_at).toLocaleDateString()}
                   </p>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-2">
-                {/* Like / Dislike Group */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Like / Dislike */}
                 <div className="flex items-center bg-[#333336] rounded-xl border border-[#454549] overflow-hidden">
                   <button
                     onClick={() => handleReaction('like')}
                     title="Like"
                     className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors ${
-                      userReaction === 'like'
-                        ? 'text-[#FF0080] bg-[#FF0080]/15'
-                        : 'text-[#B8B8BD] hover:text-white'
+                      userReaction === 'like' ? 'text-[#FF0080] bg-[#FF0080]/15' : 'text-[#B8B8BD] hover:text-white'
                     }`}
                   >
                     <ThumbsUp className={`w-4 h-4 ${userReaction === 'like' ? 'fill-current' : ''}`} />
@@ -420,9 +570,7 @@ export default function VideoDetailPage() {
                     onClick={() => handleReaction('dislike')}
                     title="Dislike"
                     className={`px-3 py-2 text-xs font-semibold transition-colors ${
-                      userReaction === 'dislike'
-                        ? 'text-[#EF4444] bg-[#EF4444]/15'
-                        : 'text-[#B8B8BD] hover:text-white'
+                      userReaction === 'dislike' ? 'text-[#EF4444] bg-[#EF4444]/15' : 'text-[#B8B8BD] hover:text-white'
                     }`}
                   >
                     <ThumbsDown className={`w-4 h-4 ${userReaction === 'dislike' ? 'fill-current' : ''}`} />
@@ -434,9 +582,7 @@ export default function VideoDetailPage() {
                   onClick={handleToggleFavorite}
                   title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
                   className={`p-2 rounded-xl border transition-colors ${
-                    isFavorite
-                      ? 'bg-[#FF0080] text-white border-[#FF0080]'
-                      : 'bg-[#333336] border-[#454549] text-[#B8B8BD] hover:text-white'
+                    isFavorite ? 'bg-[#FF0080] text-white border-[#FF0080]' : 'bg-[#333336] border-[#454549] text-[#B8B8BD] hover:text-white'
                   }`}
                 >
                   <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
@@ -447,29 +593,38 @@ export default function VideoDetailPage() {
                   onClick={handleToggleWatchlist}
                   title={isWatchlisted ? 'Remove from Watchlist' : 'Add to Watchlist'}
                   className={`p-2 rounded-xl border transition-colors ${
-                    isWatchlisted
-                      ? 'bg-[#FF0080] text-white border-[#FF0080]'
-                      : 'bg-[#333336] border-[#454549] text-[#B8B8BD] hover:text-white'
+                    isWatchlisted ? 'bg-[#FF0080] text-white border-[#FF0080]' : 'bg-[#333336] border-[#454549] text-[#B8B8BD] hover:text-white'
                   }`}
                 >
                   <Bookmark className={`w-4 h-4 ${isWatchlisted ? 'fill-current' : ''}`} />
                 </button>
 
-                {/* Share */}
+                {/* Share — available to all users */}
                 <button
                   onClick={handleShare}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#333336] border border-[#454549] text-xs font-semibold text-[#B8B8BD] hover:text-white transition-colors"
                 >
                   {copiedLink ? <Check className="w-4 h-4 text-[#22C55E]" /> : <Share2 className="w-4 h-4" />}
-                  <span>{copiedLink ? 'Copied' : 'Share'}</span>
+                  <span>{copiedLink ? 'Copied!' : 'Share'}</span>
                 </button>
 
-                {/* Delete Video (Creator or Admin) */}
+                {/* Locked purchase button (when logged in but not purchased) */}
+                {video.is_locked && !isPurchased && user && user.id !== video.creator_id && !isAdmin && (
+                  <button
+                    onClick={() => setShowPaymentModal(true)}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white text-xs font-semibold transition-all shadow-lg"
+                  >
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>₹{(video.price_inr as number)?.toFixed(0)}</span>
+                  </button>
+                )}
+
+                {/* Delete (creator or admin) */}
                 {user && (user.id === video.creator_id || isAdmin) && (
                   <button
                     onClick={() => setShowDeleteModal(true)}
                     title="Delete Video"
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#EF4444]/15 border border-[#EF4444]/40 text-[#EF4444] hover:bg-[#EF4444] hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#EF4444]/15 border border-[#EF4444]/40 text-[#EF4444] hover:bg-[#EF4444] hover:text-white text-xs font-semibold transition-all"
                   >
                     <Trash2 className="w-4 h-4" />
                     <span className="hidden sm:inline">Delete</span>
@@ -484,10 +639,7 @@ export default function VideoDetailPage() {
               {video.tags && video.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-[#454549]">
                   {video.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2 py-0.5 rounded-md bg-[#3A3A3E] text-[11px] text-[#85858B]"
-                    >
+                    <span key={tag} className="px-2 py-0.5 rounded-md bg-[#3A3A3E] text-[11px] text-[#85858B]">
                       #{tag}
                     </span>
                   ))}
@@ -496,121 +648,190 @@ export default function VideoDetailPage() {
             </div>
           </div>
 
-          {/* Comments Section */}
-          <div className="bg-[#333336] border border-[#454549] rounded-2xl p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+          {/* ── Collapsible Comments Section ── */}
+          <div className="bg-[#333336] border border-[#454549] rounded-2xl overflow-hidden">
+            <button
+              onClick={() => setCommentsOpen((o) => !o)}
+              className="w-full flex items-center justify-between p-4 hover:bg-[#3A3A3E] transition-colors"
+            >
+              <span className="text-sm font-bold text-white flex items-center gap-2">
                 <MessageSquare className="w-4 h-4 text-[#FF0080]" />
                 Comments ({comments.length})
-              </h3>
-            </div>
-
-            {/* Comment Input */}
-            <form onSubmit={handlePostComment} className="space-y-2">
-              <div className="relative">
-                <textarea
-                  rows={2}
-                  placeholder={user ? 'Add a public comment...' : 'Sign in to comment'}
-                  disabled={!user}
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  className="w-full bg-[#2B2B2D] text-white text-xs rounded-xl p-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
-                />
-              </div>
-
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={!user || !newComment.trim()}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white text-xs font-semibold disabled:opacity-40 transition-colors shadow-md"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Post Comment</span>
-                </button>
-              </div>
-            </form>
-
-            {/* Comment Thread List */}
-            <div className="space-y-3 pt-2">
-              {comments.length === 0 ? (
-                <p className="text-xs text-[#85858B] text-center py-4">
-                  No comments yet. Start the conversation!
-                </p>
+              </span>
+              {commentsOpen ? (
+                <ChevronUp className="w-4 h-4 text-[#85858B]" />
               ) : (
-                comments.map((comm) => (
-                  <div key={comm.id} className="p-3 bg-[#2B2B2D] rounded-xl border border-[#454549] text-xs">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-semibold text-white">
-                        {comm.user?.display_name || 'Viewer'}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-[#85858B]">
-                          {new Date(comm.created_at).toLocaleDateString()}
-                        </span>
-                        {user && (user.id === comm.user_id || user.id === video?.creator_id || isAdmin) && (
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteComment(comm.id)}
-                            title="Delete comment"
-                            className="text-[#85858B] hover:text-[#EF4444] transition-colors p-0.5 rounded cursor-pointer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    <p className="text-[#B8B8BD] leading-relaxed">{comm.content}</p>
-                  </div>
-                ))
+                <ChevronDown className="w-4 h-4 text-[#85858B]" />
               )}
-            </div>
+            </button>
+
+            {commentsOpen && (
+              <div className="px-4 pb-4 space-y-4 border-t border-[#454549]">
+                {/* Comment Input */}
+                {user ? (
+                  <form onSubmit={handlePostComment} className="space-y-2 pt-4">
+                    <div className="relative">
+                      <textarea
+                        rows={2}
+                        placeholder="Add a public comment..."
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        className="w-full bg-[#2B2B2D] text-white text-xs rounded-xl p-3 border border-[#454549] focus:outline-none focus:border-[#FF0080] resize-none"
+                      />
+                    </div>
+                    <div className="flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={!newComment.trim()}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white text-xs font-semibold disabled:opacity-40 transition-colors shadow-md"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                        <span>Post Comment</span>
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="pt-4 flex items-center justify-between gap-3 p-3 bg-[#2B2B2D] rounded-xl border border-[#454549]">
+                    <p className="text-xs text-[#85858B]">Sign in to join the conversation</p>
+                    <button
+                      onClick={() => setShowAuthModal(true)}
+                      className="text-xs font-semibold text-[#FF0080] hover:underline shrink-0"
+                    >
+                      Sign In
+                    </button>
+                  </div>
+                )}
+
+                {/* Comment Thread */}
+                <div className="space-y-3">
+                  {comments.length === 0 ? (
+                    <p className="text-xs text-[#85858B] text-center py-4">No comments yet. Start the conversation!</p>
+                  ) : (
+                    comments.map((comm) => (
+                      <div key={comm.id} className="p-3 bg-[#2B2B2D] rounded-xl border border-[#454549] text-xs">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="font-semibold text-white">{comm.user?.display_name || 'Viewer'}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-[#85858B]">
+                              {new Date(comm.created_at).toLocaleDateString()}
+                            </span>
+                            {user && (user.id === comm.user_id || user.id === video?.creator_id || isAdmin) && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteComment(comm.id)}
+                                title="Delete comment"
+                                className="text-[#85858B] hover:text-[#EF4444] transition-colors p-0.5 rounded cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-[#B8B8BD] leading-relaxed">{comm.content}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* ── Recommended Videos ── */}
+          {recommendedVideos.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-3">
+                <Sparkles className="w-4 h-4 text-[#FF0080]" />
+                Recommended
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {recommendedVideos.map((rv) => (
+                  <Link
+                    key={rv.id}
+                    href={`/videos/${rv.id}`}
+                    className="group relative bg-[#333336] rounded-xl overflow-hidden border border-[#454549] hover:border-[#FF0080] transition-all shadow-sm"
+                  >
+                    <div className="relative aspect-video bg-[#3A3A3E] overflow-hidden">
+                      {rv.thumbnail_url ? (
+                        <Image src={rv.thumbnail_url} alt={rv.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[#85858B]">
+                          <Play className="w-6 h-6" />
+                        </div>
+                      )}
+                      {rv.is_locked && (
+                        <div className="absolute top-1.5 right-1.5 bg-black/70 backdrop-blur p-1 rounded-md">
+                          <Lock className="w-3 h-3 text-[#FF0080]" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-2">
+                      <p className="text-white text-xs font-semibold line-clamp-2 group-hover:text-[#FF0080] transition-colors leading-tight">
+                        {rv.title}
+                      </p>
+                      <p className="text-[10px] text-[#85858B] mt-1">{rv.creator?.display_name || 'Creator'}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Sidebar: Series Episodes or Recommended (1 column) */}
-        <div className="space-y-4">
-          {video.series && (
-            <div className="bg-[#333336] border border-[#454549] rounded-2xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Layers className="w-4 h-4 text-[#FF0080]" />
-                <h3 className="text-sm font-bold text-white truncate">{video.series.title}</h3>
+        {/* ── Right Sidebar: Episode List (grid of numbers) ── */}
+        {video.series && seriesEpisodes.length > 0 && (
+          <div className="w-full lg:w-72 shrink-0">
+            <div className="bg-[#333336] border border-[#454549] rounded-2xl p-4 sticky top-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-white">Episodes</h3>
+                <span className="text-xs text-[#85858B]">
+                  {video.episode_number}/{seriesEpisodes.length}
+                </span>
               </div>
-              <p className="text-xs text-[#85858B] mb-4">
-                Series Episodes ({seriesEpisodes.length})
-              </p>
+              <p className="text-xs text-[#85858B] mb-3 truncate">{video.series.title}</p>
 
-              <div className="space-y-2">
+              {/* Episode Number Grid */}
+              <div className="grid grid-cols-5 gap-1.5 max-h-[70vh] overflow-y-auto pr-1 scrollbar-thin">
                 {seriesEpisodes.map((ep) => {
                   const isCurrent = ep.id === video.id;
+                  const epLocked = !!ep.is_locked && !isPurchased && user?.id !== video.creator_id && !isAdmin;
                   return (
                     <Link
                       key={ep.id}
                       href={`/videos/${ep.id}`}
-                      className={`flex items-center gap-3 p-2 rounded-xl transition-colors ${
+                      title={ep.title}
+                      className={`relative aspect-square flex items-center justify-center rounded-lg text-xs font-bold transition-all border ${
                         isCurrent
-                          ? 'bg-[#FF0080]/20 border border-[#FF0080]/40 text-white'
-                          : 'hover:bg-[#3A3A3E] text-[#B8B8BD]'
+                          ? 'bg-[#FF0080] text-white border-[#FF0080] shadow-lg shadow-[#FF0080]/30'
+                          : 'bg-[#2B2B2D] text-[#B8B8BD] border-[#454549] hover:border-[#FF0080] hover:text-white'
                       }`}
                     >
-                      <div className="relative w-16 h-10 rounded-lg overflow-hidden bg-[#2B2B2D] shrink-0 border border-[#454549]">
-                        {ep.thumbnail_url && (
-                          <Image src={ep.thumbnail_url} alt={ep.title} fill className="object-cover" />
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold truncate text-white">{ep.title}</p>
-                        <p className="text-[10px] text-[#85858B]">
-                          Episode {ep.episode_number || 1}
-                        </p>
-                      </div>
+                      {epLocked ? (
+                        <Lock className="w-3 h-3 text-[#FF0080]/80" />
+                      ) : (
+                        ep.episode_number || '?'
+                      )}
                     </Link>
                   );
                 })}
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
+
+      {/* ── Modals ── */}
+      {showAuthModal && <AuthGateModal onClose={() => setShowAuthModal(false)} />}
+
+      {showPaymentModal && video && (
+        <PaymentModal
+          video={video}
+          onClose={() => setShowPaymentModal(false)}
+          onSuccess={() => {
+            setShowPaymentModal(false);
+            setIsPurchased(true);
+          }}
+        />
+      )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
@@ -625,25 +846,19 @@ export default function VideoDetailPage() {
                 <p className="text-xs text-[#85858B]">This action cannot be undone</p>
               </div>
             </div>
-
             <p className="text-sm text-[#B8B8BD] leading-relaxed">
               Are you sure you want to permanently delete <strong className="text-white">"{video.title}"</strong>? All associated comments, reactions, and history will be permanently deleted.
             </p>
-
             {deleteError && (
               <div className="p-3 rounded-xl bg-[#EF4444]/10 border border-[#EF4444]/20 text-xs text-[#EF4444]">
                 {deleteError}
               </div>
             )}
-
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 type="button"
                 disabled={isDeleting}
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setDeleteError(null);
-                }}
+                onClick={() => { setShowDeleteModal(false); setDeleteError(null); }}
                 className="px-4 py-2 text-xs font-semibold text-[#85858B] hover:text-white transition-colors cursor-pointer"
               >
                 Cancel
@@ -655,15 +870,9 @@ export default function VideoDetailPage() {
                 className="px-4 py-2 rounded-xl bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-semibold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {isDeleting ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Deleting...
-                  </>
+                  <><Loader2 className="w-3.5 h-3.5 animate-spin" />Deleting...</>
                 ) : (
-                  <>
-                    <Trash2 className="w-3.5 h-3.5" />
-                    Permanently Delete
-                  </>
+                  <><Trash2 className="w-3.5 h-3.5" />Permanently Delete</>
                 )}
               </button>
             </div>
