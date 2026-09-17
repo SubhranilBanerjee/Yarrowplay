@@ -69,16 +69,16 @@ export default function BlogsFeedPage() {
       </div>
 
       {/* Categories */}
-      <div className="flex items-center gap-2 pb-6 overflow-x-auto">
+      <div className="flex items-center gap-2.5 pb-6 overflow-x-auto scrollbar-none">
         {['all', 'Entertainment', 'Music', 'Technology', 'Culture', 'Film Review', 'Tutorial'].map(
           (cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold capitalize transition-all shrink-0 ${
+              className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold capitalize transition-all shrink-0 ${
                 selectedCategory === cat
-                  ? 'bg-[#FF0080] text-white shadow-md'
-                  : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
+                  ? 'theme-active-pill'
+                  : 'theme-inactive-pill'
               }`}
             >
               {cat}

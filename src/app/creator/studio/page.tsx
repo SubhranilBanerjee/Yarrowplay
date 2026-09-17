@@ -588,19 +588,19 @@ export default function CreatorStudioPage() {
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
           Creator Studio
         </h1>
-        <p className="text-sm text-[#85858B] mt-1">
+        <p className="text-sm text-[var(--text-muted)] mt-1">
           Create and upload your content. Bring your stories to life!
         </p>
       </div>
 
       {/* Primary Top Tabs: [ Video ] [ Audio ] [ Manage Content ] */}
-      <div className="grid grid-cols-3 gap-3 mb-6 bg-[#333336] p-1.5 rounded-2xl border border-[#454549]">
+      <div className="grid grid-cols-3 gap-3 mb-6 bg-[var(--glass-surface)] p-1.5 rounded-2xl border border-[var(--glass-border)]">
         <button
           onClick={() => setPrimaryTab('video')}
           className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
             primaryTab === 'video'
-              ? 'bg-[#FF0080] text-white shadow-lg'
-              : 'text-[#B8B8BD] hover:text-white'
+              ? 'bg-[var(--color-pink)] text-white shadow-lg'
+              : 'text-[var(--text-secondary)] hover:text-white'
           }`}
         >
           <Film className="w-4 h-4" />
@@ -611,8 +611,8 @@ export default function CreatorStudioPage() {
           onClick={() => setPrimaryTab('audio')}
           className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
             primaryTab === 'audio'
-              ? 'bg-[#FF0080] text-white shadow-lg'
-              : 'text-[#B8B8BD] hover:text-white'
+              ? 'bg-[var(--color-pink)] text-white shadow-lg'
+              : 'text-[var(--text-secondary)] hover:text-white'
           }`}
         >
           <Music className="w-4 h-4" />
@@ -623,8 +623,8 @@ export default function CreatorStudioPage() {
           onClick={() => setPrimaryTab('manage')}
           className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
             primaryTab === 'manage'
-              ? 'bg-[#FF0080] text-white shadow-lg'
-              : 'text-[#B8B8BD] hover:text-white'
+              ? 'bg-[var(--color-pink)] text-white shadow-lg'
+              : 'text-[var(--text-secondary)] hover:text-white'
           }`}
         >
           <FolderOpen className="w-4 h-4" />
@@ -661,8 +661,8 @@ export default function CreatorStudioPage() {
               onClick={() => setVideoMode('series')}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                 videoMode === 'series'
-                  ? 'bg-[#FF0080] text-white shadow-md'
-                  : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
+                  ? 'bg-[var(--color-pink)] text-white shadow-md'
+                  : 'bg-[var(--glass-surface)] text-[var(--text-secondary)] hover:text-white border border-[var(--glass-border)]'
               }`}
             >
               Series
@@ -671,8 +671,8 @@ export default function CreatorStudioPage() {
               onClick={() => setVideoMode('single')}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                 videoMode === 'single'
-                  ? 'bg-[#FF0080] text-white shadow-md'
-                  : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
+                  ? 'bg-[var(--color-pink)] text-white shadow-md'
+                  : 'bg-[var(--glass-surface)] text-[var(--text-secondary)] hover:text-white border border-[var(--glass-border)]'
               }`}
             >
               Single Video
@@ -683,14 +683,14 @@ export default function CreatorStudioPage() {
           {videoMode === 'series' && (
             <form onSubmit={handleSubmitSeries} className="space-y-6">
               {/* Create Series Card */}
-              <div className="bg-[#333336] border border-[#454549] rounded-2xl p-6">
+              <div className="bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 rounded-lg bg-[#FF0080]/15 text-[#FF0080]">
+                  <div className="p-2 rounded-lg bg-[var(--color-pink)]/15 text-[var(--color-pink)]">
                     <Layers className="w-5 h-5" />
                   </div>
                   <div>
                     <h2 className="text-base font-bold text-white">Create Series</h2>
-                    <p className="text-xs text-[#85858B]">
+                    <p className="text-xs text-[var(--text-muted)]">
                       Upload multiple episodes to create a series.
                     </p>
                   </div>
@@ -698,7 +698,7 @@ export default function CreatorStudioPage() {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                    <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                       Series Title *
                     </label>
                     <input
@@ -707,12 +707,12 @@ export default function CreatorStudioPage() {
                       placeholder="e.g. The Last Kingdom"
                       value={seriesTitle}
                       onChange={(e) => setSeriesTitle(e.target.value)}
-                      className="w-full bg-[#2B2B2D] text-white placeholder-[#85858B] text-sm rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080] transition-colors"
+                      className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)] transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                    <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                       Series Description *
                     </label>
                     <textarea
@@ -721,19 +721,19 @@ export default function CreatorStudioPage() {
                       placeholder="Tell us about your series..."
                       value={seriesDesc}
                       onChange={(e) => setSeriesDesc(e.target.value)}
-                      className="w-full bg-[#2B2B2D] text-white placeholder-[#85858B] text-sm rounded-xl p-4 border border-[#454549] focus:outline-none focus:border-[#FF0080] transition-colors"
+                      className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl p-4 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)] transition-colors"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                         Category
                       </label>
                       <select
                         value={seriesCategory}
                         onChange={(e) => setSeriesCategory(e.target.value)}
-                        className="w-full bg-[#2B2B2D] text-white text-sm rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080] transition-colors"
+                        className="w-full bg-[var(--bg-secondary)] text-white text-sm rounded-xl px-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)] transition-colors"
                       >
                         <option value="Drama">Drama</option>
                         <option value="Action">Action</option>
@@ -747,7 +747,7 @@ export default function CreatorStudioPage() {
                     </div>
 
                     <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                         Tags (comma separated)
                       </label>
                       <input
@@ -755,23 +755,23 @@ export default function CreatorStudioPage() {
                         placeholder="e.g. Action, Drama, Thriller"
                         value={seriesTags}
                         onChange={(e) => setSeriesTags(e.target.value)}
-                        className="w-full bg-[#2B2B2D] text-white placeholder-[#85858B] text-sm rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080] transition-colors"
+                        className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)] transition-colors"
                       />
                     </div>
                   </div>
 
                   {/* Cover / Poster Upload */}
                   <div>
-                    <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                    <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                       Cover Thumbnail (JPG, PNG max 5MB)
                     </label>
                     <div className="flex items-center gap-4">
-                      <label className="flex-1 border-2 border-dashed border-[#454549] hover:border-[#FF0080] rounded-2xl p-6 text-center cursor-pointer bg-[#2B2B2D]/50 transition-colors">
-                        <Upload className="w-6 h-6 text-[#FF0080] mx-auto mb-2" />
+                      <label className="flex-1 border-2 border-dashed border-[var(--glass-border)] hover:border-[var(--color-pink)] rounded-2xl p-6 text-center cursor-pointer bg-[var(--bg-secondary)]/50 transition-colors">
+                        <Upload className="w-6 h-6 text-[var(--color-pink)] mx-auto mb-2" />
                         <span className="text-xs text-white font-medium block">
                           {seriesCoverUploading ? 'Uploading cover...' : 'Upload Cover Image'}
                         </span>
-                        <span className="text-[11px] text-[#85858B]">JPG, PNG (max 5MB)</span>
+                        <span className="text-[11px] text-[var(--text-muted)]">JPG, PNG (max 5MB)</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -781,7 +781,7 @@ export default function CreatorStudioPage() {
                       </label>
 
                       {seriesCoverUrl && (
-                        <div className="relative w-28 h-28 rounded-xl overflow-hidden border border-[#454549] shrink-0">
+                        <div className="relative w-28 h-28 rounded-xl overflow-hidden border border-[var(--glass-border)] shrink-0">
                           <Image
                             src={seriesCoverUrl}
                             alt="Cover preview"
@@ -803,20 +803,20 @@ export default function CreatorStudioPage() {
               </div>
 
               {/* Episodes Section matching mockup */}
-              <div className="bg-[#333336] border border-[#454549] rounded-2xl p-6 space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-[#454549]">
+              <div className="bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl p-6 space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-[var(--glass-border)]">
                   <div>
                     <h2 className="text-base font-bold text-white flex items-center gap-2">
-                      <Film className="w-4 h-4 text-[#FF0080]" />
+                      <Film className="w-4 h-4 text-[var(--color-pink)]" />
                       Episodes
                     </h2>
-                    <p className="text-xs text-[#85858B]">Add details for each episode</p>
+                    <p className="text-xs text-[var(--text-muted)]">Add details for each episode</p>
                   </div>
 
                   <button
                     type="button"
                     onClick={addEpisode}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#FF0080] text-[#FF0080] hover:bg-[#FF0080]/15 text-xs font-semibold transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--color-pink)] text-[var(--color-pink)] hover:bg-[var(--color-pink)]/15 text-xs font-semibold transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                     Add Episode
@@ -828,14 +828,14 @@ export default function CreatorStudioPage() {
                   {episodes.map((ep, idx) => (
                     <div
                       key={ep.id}
-                      className="bg-[#2B2B2D] border border-[#454549] rounded-xl p-4 space-y-4 relative"
+                      className="bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-xl p-4 space-y-4 relative"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-full bg-[#3A3A3E] text-xs font-bold text-white flex items-center justify-center border border-[#454549]">
+                          <span className="w-6 h-6 rounded-full bg-[var(--glass-surface-elevated)] text-xs font-bold text-white flex items-center justify-center border border-[var(--glass-border)]">
                             {idx + 1}
                           </span>
-                          <span className="text-xs font-semibold text-[#B8B8BD]">
+                          <span className="text-xs font-semibold text-[var(--text-secondary)]">
                             Episode #{idx + 1}
                           </span>
                         </div>
@@ -844,7 +844,7 @@ export default function CreatorStudioPage() {
                           <button
                             type="button"
                             onClick={() => removeEpisode(ep.id)}
-                            className="text-[#85858B] hover:text-[#EF4444] transition-colors p-1"
+                            className="text-[var(--text-muted)] hover:text-[#EF4444] transition-colors p-1"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -853,7 +853,7 @@ export default function CreatorStudioPage() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-[11px] uppercase font-semibold text-[#85858B] mb-1">
+                          <label className="block text-[11px] uppercase font-semibold text-[var(--text-muted)] mb-1">
                             Episode Title *
                           </label>
                           <input
@@ -867,12 +867,12 @@ export default function CreatorStudioPage() {
                                 prev.map((item) => (item.id === ep.id ? { ...item, title: val } : item))
                               );
                             }}
-                            className="w-full bg-[#333336] text-white text-xs rounded-xl px-3 py-2.5 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                            className="w-full bg-[var(--glass-surface)] text-white text-xs rounded-xl px-3 py-2.5 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)]"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] uppercase font-semibold text-[#85858B] mb-1">
+                          <label className="block text-[11px] uppercase font-semibold text-[var(--text-muted)] mb-1">
                             Summary *
                           </label>
                           <textarea
@@ -885,20 +885,20 @@ export default function CreatorStudioPage() {
                                 prev.map((item) => (item.id === ep.id ? { ...item, summary: val } : item))
                               );
                             }}
-                            className="w-full bg-[#333336] text-white text-xs rounded-xl px-3 py-2 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                            className="w-full bg-[var(--glass-surface)] text-white text-xs rounded-xl px-3 py-2 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)]"
                           />
                         </div>
                       </div>
 
                       {/* Episode Media Uploads */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[#3A3A3E]">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[var(--glass-surface-elevated)]">
                         {/* Video Upload Area */}
                         <div>
-                          <label className="block text-[11px] uppercase font-semibold text-[#85858B] mb-1">
+                          <label className="block text-[11px] uppercase font-semibold text-[var(--text-muted)] mb-1">
                             Upload Video (MP4, MOV max 1GB)
                           </label>
                           {ep.videoUrl ? (
-                            <div className="p-3 bg-[#333336] rounded-xl border border-[#22C55E]/40 flex items-center justify-between">
+                            <div className="p-3 bg-[var(--glass-surface)] rounded-xl border border-[#22C55E]/40 flex items-center justify-between">
                               <span className="text-xs text-[#22C55E] flex items-center gap-1.5 truncate">
                                 <CheckCircle className="w-4 h-4 shrink-0" />
                                 Video Ready
@@ -912,20 +912,20 @@ export default function CreatorStudioPage() {
                                     )
                                   )
                                 }
-                                className="text-xs text-[#85858B] hover:text-[#EF4444]"
+                                className="text-xs text-[var(--text-muted)] hover:text-[#EF4444]"
                               >
                                 Replace
                               </button>
                             </div>
                           ) : (
-                            <label className="block border border-dashed border-[#454549] hover:border-[#FF0080] rounded-xl p-4 text-center cursor-pointer bg-[#333336]/40 transition-colors">
-                              <Upload className="w-5 h-5 text-[#FF0080] mx-auto mb-1" />
+                            <label className="block border border-dashed border-[var(--glass-border)] hover:border-[var(--color-pink)] rounded-xl p-4 text-center cursor-pointer bg-[var(--glass-surface)]/40 transition-colors">
+                              <Upload className="w-5 h-5 text-[var(--color-pink)] mx-auto mb-1" />
                               <span className="text-xs text-white block font-medium">
                                 {ep.videoUploading
                                   ? `Uploading (${ep.videoProgress}%)...`
                                   : 'Upload Video'}
                               </span>
-                              <span className="text-[10px] text-[#85858B]">MP4, MOV (max 1GB)</span>
+                              <span className="text-[10px] text-[var(--text-muted)]">MP4, MOV (max 1GB)</span>
                               <input
                                 type="file"
                                 accept="video/*"
@@ -942,11 +942,11 @@ export default function CreatorStudioPage() {
 
                         {/* Thumbnail Upload Area */}
                         <div>
-                          <label className="block text-[11px] uppercase font-semibold text-[#85858B] mb-1">
+                          <label className="block text-[11px] uppercase font-semibold text-[var(--text-muted)] mb-1">
                             Thumbnail (JPG, PNG max 5MB)
                           </label>
                           {ep.thumbnailUrl ? (
-                            <div className="relative h-20 w-full rounded-xl overflow-hidden border border-[#454549]">
+                            <div className="relative h-20 w-full rounded-xl overflow-hidden border border-[var(--glass-border)]">
                               <Image
                                 src={ep.thumbnailUrl}
                                 alt="Episode thumbnail"
@@ -968,12 +968,12 @@ export default function CreatorStudioPage() {
                               </button>
                             </div>
                           ) : (
-                            <label className="block border border-dashed border-[#454549] hover:border-[#FF0080] rounded-xl p-4 text-center cursor-pointer bg-[#333336]/40 transition-colors">
-                              <Upload className="w-5 h-5 text-[#FF0080] mx-auto mb-1" />
+                            <label className="block border border-dashed border-[var(--glass-border)] hover:border-[var(--color-pink)] rounded-xl p-4 text-center cursor-pointer bg-[var(--glass-surface)]/40 transition-colors">
+                              <Upload className="w-5 h-5 text-[var(--color-pink)] mx-auto mb-1" />
                               <span className="text-xs text-white block font-medium">
                                 {ep.thumbUploading ? 'Uploading...' : 'Upload Thumbnail'}
                               </span>
-                              <span className="text-[10px] text-[#85858B]">JPG, PNG (max 5MB)</span>
+                              <span className="text-[10px] text-[var(--text-muted)]">JPG, PNG (max 5MB)</span>
                               <input
                                 type="file"
                                 accept="image/*"
@@ -997,7 +997,7 @@ export default function CreatorStudioPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white font-bold text-sm tracking-wide transition-all shadow-xl active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl bg-[var(--color-pink)] hover:bg-[var(--color-magenta)] text-white font-bold text-sm tracking-wide transition-all shadow-xl active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Upload className="w-4 h-4" />
                 <span>{isSubmitting ? 'Publishing Series...' : 'Upload Series'}</span>
@@ -1007,9 +1007,9 @@ export default function CreatorStudioPage() {
 
           {/* ----------------- SINGLE VIDEO FORM ----------------- */}
           {videoMode === 'single' && (
-            <form onSubmit={handleSubmitSingleVideo} className="bg-[#333336] border border-[#454549] rounded-2xl p-6 space-y-5">
+            <form onSubmit={handleSubmitSingleVideo} className="bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl p-6 space-y-5">
               <div>
-                <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                   Video Title *
                 </label>
                 <input
@@ -1018,12 +1018,12 @@ export default function CreatorStudioPage() {
                   placeholder="e.g. Masterclass on Cinematography"
                   value={singleVideoTitle}
                   onChange={(e) => setSingleVideoTitle(e.target.value)}
-                  className="w-full bg-[#2B2B2D] text-white placeholder-[#85858B] text-sm rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                  className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                   Description *
                 </label>
                 <textarea
@@ -1032,19 +1032,19 @@ export default function CreatorStudioPage() {
                   placeholder="Detailed description of this video..."
                   value={singleVideoDesc}
                   onChange={(e) => setSingleVideoDesc(e.target.value)}
-                  className="w-full bg-[#2B2B2D] text-white placeholder-[#85858B] text-sm rounded-xl p-4 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                  className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl p-4 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)]"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                     Category
                   </label>
                   <select
                     value={singleVideoCategory}
                     onChange={(e) => setSingleVideoCategory(e.target.value)}
-                    className="w-full bg-[#2B2B2D] text-white text-sm rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                    className="w-full bg-[var(--bg-secondary)] text-white text-sm rounded-xl px-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)]"
                   >
                     <option value="Entertainment">Entertainment</option>
                     <option value="Music">Music</option>
@@ -1056,7 +1056,7 @@ export default function CreatorStudioPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                     Tags (comma separated)
                   </label>
                   <input
@@ -1064,7 +1064,7 @@ export default function CreatorStudioPage() {
                     placeholder="e.g. Tutorial, Camera, 4K"
                     value={singleVideoTags}
                     onChange={(e) => setSingleVideoTags(e.target.value)}
-                    className="w-full bg-[#2B2B2D] text-white placeholder-[#85858B] text-sm rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                    className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)]"
                   />
                 </div>
               </div>
@@ -1072,25 +1072,25 @@ export default function CreatorStudioPage() {
               {/* Upload Video & Thumbnail */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                     Video Upload * (MP4, MOV max 1GB)
                   </label>
                   {singleVideoUrl ? (
-                    <div className="p-4 bg-[#2B2B2D] rounded-xl border border-[#22C55E]/40 flex items-center justify-between">
+                    <div className="p-4 bg-[var(--bg-secondary)] rounded-xl border border-[#22C55E]/40 flex items-center justify-between">
                       <span className="text-xs text-[#22C55E] flex items-center gap-2">
                         <CheckCircle className="w-4 h-4" /> Video Uploaded
                       </span>
                       <button
                         type="button"
                         onClick={() => setSingleVideoUrl('')}
-                        className="text-xs text-[#85858B] hover:text-[#EF4444]"
+                        className="text-xs text-[var(--text-muted)] hover:text-[#EF4444]"
                       >
                         Change
                       </button>
                     </div>
                   ) : (
-                    <label className="block border-2 border-dashed border-[#454549] hover:border-[#FF0080] rounded-2xl p-6 text-center cursor-pointer bg-[#2B2B2D]/50 transition-colors">
-                      <Upload className="w-6 h-6 text-[#FF0080] mx-auto mb-2" />
+                    <label className="block border-2 border-dashed border-[var(--glass-border)] hover:border-[var(--color-pink)] rounded-2xl p-6 text-center cursor-pointer bg-[var(--bg-secondary)]/50 transition-colors">
+                      <Upload className="w-6 h-6 text-[var(--color-pink)] mx-auto mb-2" />
                       <span className="text-xs text-white font-medium block">
                         {singleVideoUploading
                           ? `Uploading (${singleVideoProgress}%)...`
@@ -1124,11 +1124,11 @@ export default function CreatorStudioPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                     Thumbnail Upload (JPG, PNG max 5MB)
                   </label>
                   {singleVideoThumbUrl ? (
-                    <div className="relative h-24 rounded-xl overflow-hidden border border-[#454549]">
+                    <div className="relative h-24 rounded-xl overflow-hidden border border-[var(--glass-border)]">
                       <Image
                         src={singleVideoThumbUrl}
                         alt="Thumbnail preview"
@@ -1144,8 +1144,8 @@ export default function CreatorStudioPage() {
                       </button>
                     </div>
                   ) : (
-                    <label className="block border-2 border-dashed border-[#454549] hover:border-[#FF0080] rounded-2xl p-6 text-center cursor-pointer bg-[#2B2B2D]/50 transition-colors">
-                      <Upload className="w-6 h-6 text-[#FF0080] mx-auto mb-2" />
+                    <label className="block border-2 border-dashed border-[var(--glass-border)] hover:border-[var(--color-pink)] rounded-2xl p-6 text-center cursor-pointer bg-[var(--bg-secondary)]/50 transition-colors">
+                      <Upload className="w-6 h-6 text-[var(--color-pink)] mx-auto mb-2" />
                       <span className="text-xs text-white font-medium block">
                         {singleThumbUploading ? 'Uploading...' : 'Select Thumbnail'}
                       </span>
@@ -1177,7 +1177,7 @@ export default function CreatorStudioPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white font-bold text-sm tracking-wide transition-all shadow-xl active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl bg-[var(--color-pink)] hover:bg-[var(--color-magenta)] text-white font-bold text-sm tracking-wide transition-all shadow-xl active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Upload className="w-4 h-4" />
                 <span>{isSubmitting ? 'Uploading Video...' : 'Upload Video'}</span>
@@ -1198,8 +1198,8 @@ export default function CreatorStudioPage() {
               onClick={() => setAudioMode('album')}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                 audioMode === 'album'
-                  ? 'bg-[#FF0080] text-white shadow-md'
-                  : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
+                  ? 'bg-[var(--color-pink)] text-white shadow-md'
+                  : 'bg-[var(--glass-surface)] text-[var(--text-secondary)] hover:text-white border border-[var(--glass-border)]'
               }`}
             >
               Album
@@ -1208,8 +1208,8 @@ export default function CreatorStudioPage() {
               onClick={() => setAudioMode('single')}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                 audioMode === 'single'
-                  ? 'bg-[#FF0080] text-white shadow-md'
-                  : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
+                  ? 'bg-[var(--color-pink)] text-white shadow-md'
+                  : 'bg-[var(--glass-surface)] text-[var(--text-secondary)] hover:text-white border border-[var(--glass-border)]'
               }`}
             >
               Single
@@ -1219,11 +1219,11 @@ export default function CreatorStudioPage() {
           {/* ----------------- ALBUM FORM ----------------- */}
           {audioMode === 'album' && (
             <form onSubmit={handleSubmitAlbum} className="space-y-6">
-              <div className="bg-[#333336] border border-[#454549] rounded-2xl p-6 space-y-4">
+              <div className="bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl p-6 space-y-4">
                 <h2 className="text-base font-bold text-white">Upload Album</h2>
 
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                     Album / Playlist Name *
                   </label>
                   <input
@@ -1232,13 +1232,13 @@ export default function CreatorStudioPage() {
                     placeholder="e.g. Midnight Thoughts"
                     value={albumTitle}
                     onChange={(e) => setAlbumTitle(e.target.value)}
-                    className="w-full bg-[#2B2B2D] text-white placeholder-[#85858B] text-sm rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                    className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)]"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                    <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                       Artist / Creator
                     </label>
                     <input
@@ -1246,18 +1246,18 @@ export default function CreatorStudioPage() {
                       placeholder="e.g. Alex Vance"
                       value={albumArtist}
                       onChange={(e) => setAlbumArtist(e.target.value)}
-                      className="w-full bg-[#2B2B2D] text-white placeholder-[#85858B] text-sm rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                      className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                    <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                       Genre
                     </label>
                     <select
                       value={albumGenre}
                       onChange={(e) => setAlbumGenre(e.target.value)}
-                      className="w-full bg-[#2B2B2D] text-white text-sm rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                      className="w-full bg-[var(--bg-secondary)] text-white text-sm rounded-xl px-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)]"
                     >
                       <option value="Pop">Pop</option>
                       <option value="Hip-Hop">Hip-Hop</option>
@@ -1271,7 +1271,7 @@ export default function CreatorStudioPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                     Description
                   </label>
                   <textarea
@@ -1279,18 +1279,18 @@ export default function CreatorStudioPage() {
                     placeholder="Album description..."
                     value={albumDesc}
                     onChange={(e) => setAlbumDesc(e.target.value)}
-                    className="w-full bg-[#2B2B2D] text-white placeholder-[#85858B] text-sm rounded-xl p-4 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                    className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl p-4 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)]"
                   />
                 </div>
 
                 {/* Album Cover Art */}
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                     Poster / Cover Art (JPG, PNG max 5MB)
                   </label>
                   <div className="flex items-center gap-4">
-                    <label className="flex-1 border-2 border-dashed border-[#454549] hover:border-[#FF0080] rounded-2xl p-6 text-center cursor-pointer bg-[#2B2B2D]/50 transition-colors">
-                      <Upload className="w-6 h-6 text-[#FF0080] mx-auto mb-2" />
+                    <label className="flex-1 border-2 border-dashed border-[var(--glass-border)] hover:border-[var(--color-pink)] rounded-2xl p-6 text-center cursor-pointer bg-[var(--bg-secondary)]/50 transition-colors">
+                      <Upload className="w-6 h-6 text-[var(--color-pink)] mx-auto mb-2" />
                       <span className="text-xs text-white font-medium block">
                         {albumCoverUploading ? 'Uploading cover...' : 'Upload Cover Image'}
                       </span>
@@ -1316,7 +1316,7 @@ export default function CreatorStudioPage() {
                     </label>
 
                     {albumCoverUrl && (
-                      <div className="relative w-28 h-28 rounded-xl overflow-hidden border border-[#454549] shrink-0">
+                      <div className="relative w-28 h-28 rounded-xl overflow-hidden border border-[var(--glass-border)] shrink-0">
                         <Image
                           src={albumCoverUrl}
                           alt="Album cover preview"
@@ -1337,16 +1337,16 @@ export default function CreatorStudioPage() {
               </div>
 
               {/* Tracks Section */}
-              <div className="bg-[#333336] border border-[#454549] rounded-2xl p-6 space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-[#454549]">
+              <div className="bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl p-6 space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-[var(--glass-border)]">
                   <h2 className="text-base font-bold text-white flex items-center gap-2">
-                    <Music className="w-4 h-4 text-[#FF0080]" />
+                    <Music className="w-4 h-4 text-[var(--color-pink)]" />
                     Tracks
                   </h2>
                   <button
                     type="button"
                     onClick={addTrack}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#FF0080] text-[#FF0080] hover:bg-[#FF0080]/15 text-xs font-semibold transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--color-pink)] text-[var(--color-pink)] hover:bg-[var(--color-pink)]/15 text-xs font-semibold transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                     Add Track
@@ -1357,10 +1357,10 @@ export default function CreatorStudioPage() {
                   {albumTracks.map((trk, idx) => (
                     <div
                       key={trk.id}
-                      className="bg-[#2B2B2D] border border-[#454549] rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                      className="bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
                     >
                       <div className="flex items-center gap-3 flex-1 w-full sm:w-auto">
-                        <span className="text-xs font-bold text-[#85858B] w-6">{idx + 1}</span>
+                        <span className="text-xs font-bold text-[var(--text-muted)] w-6">{idx + 1}</span>
                         <input
                           type="text"
                           required
@@ -1372,7 +1372,7 @@ export default function CreatorStudioPage() {
                               prev.map((item) => (item.id === trk.id ? { ...item, title: val } : item))
                             );
                           }}
-                          className="flex-1 bg-[#333336] text-white text-xs rounded-lg px-3 py-2 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                          className="flex-1 bg-[var(--glass-surface)] text-white text-xs rounded-lg px-3 py-2 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)]"
                         />
                       </div>
 
@@ -1382,8 +1382,8 @@ export default function CreatorStudioPage() {
                             <CheckCircle className="w-4 h-4" /> Ready
                           </span>
                         ) : (
-                          <label className="px-3 py-1.5 rounded-lg bg-[#3A3A3E] hover:bg-[#404045] text-white text-xs font-medium cursor-pointer transition-colors flex items-center gap-1.5">
-                            <Upload className="w-3.5 h-3.5 text-[#FF0080]" />
+                          <label className="px-3 py-1.5 rounded-lg bg-[var(--glass-surface-elevated)] hover:bg-[#404045] text-white text-xs font-medium cursor-pointer transition-colors flex items-center gap-1.5">
+                            <Upload className="w-3.5 h-3.5 text-[var(--color-pink)]" />
                             <span>{trk.uploading ? `Uploading (${trk.progress}%)...` : 'Upload Audio'}</span>
                             <input
                               type="file"
@@ -1402,7 +1402,7 @@ export default function CreatorStudioPage() {
                           <button
                             type="button"
                             onClick={() => removeTrack(trk.id)}
-                            className="text-[#85858B] hover:text-[#EF4444] p-1"
+                            className="text-[var(--text-muted)] hover:text-[#EF4444] p-1"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -1416,7 +1416,7 @@ export default function CreatorStudioPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white font-bold text-sm tracking-wide transition-all shadow-xl active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl bg-[var(--color-pink)] hover:bg-[var(--color-magenta)] text-white font-bold text-sm tracking-wide transition-all shadow-xl active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Upload className="w-4 h-4" />
                 <span>{isSubmitting ? 'Uploading Album...' : 'Upload Album'}</span>
@@ -1426,9 +1426,9 @@ export default function CreatorStudioPage() {
 
           {/* ----------------- SINGLE AUDIO FORM ----------------- */}
           {audioMode === 'single' && (
-            <form onSubmit={handleSubmitSingleAudio} className="bg-[#333336] border border-[#454549] rounded-2xl p-6 space-y-4">
+            <form onSubmit={handleSubmitSingleAudio} className="bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl p-6 space-y-4">
               <div>
-                <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                   Track Title *
                 </label>
                 <input
@@ -1437,13 +1437,13 @@ export default function CreatorStudioPage() {
                   placeholder="e.g. Neon Horizon"
                   value={singleAudioTitle}
                   onChange={(e) => setSingleAudioTitle(e.target.value)}
-                  className="w-full bg-[#2B2B2D] text-white placeholder-[#85858B] text-sm rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                  className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)]"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                     Artist / Creator
                   </label>
                   <input
@@ -1451,18 +1451,18 @@ export default function CreatorStudioPage() {
                     placeholder="e.g. Alex Vance"
                     value={singleAudioArtist}
                     onChange={(e) => setSingleAudioArtist(e.target.value)}
-                    className="w-full bg-[#2B2B2D] text-white placeholder-[#85858B] text-sm rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                    className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                     Genre
                   </label>
                   <select
                     value={singleAudioGenre}
                     onChange={(e) => setSingleAudioGenre(e.target.value)}
-                    className="w-full bg-[#2B2B2D] text-white text-sm rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                    className="w-full bg-[var(--bg-secondary)] text-white text-sm rounded-xl px-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)]"
                   >
                     <option value="Acoustic">Acoustic</option>
                     <option value="Pop">Pop</option>
@@ -1476,7 +1476,7 @@ export default function CreatorStudioPage() {
               </div>
 
               <div>
-                <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                   Lyrics (optional)
                 </label>
                 <textarea
@@ -1484,32 +1484,32 @@ export default function CreatorStudioPage() {
                   placeholder="Paste lyrics here..."
                   value={singleAudioLyrics}
                   onChange={(e) => setSingleAudioLyrics(e.target.value)}
-                  className="w-full bg-[#2B2B2D] text-white placeholder-[#85858B] text-sm rounded-xl p-4 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                  className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl p-4 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)]"
                 />
               </div>
 
               {/* Uploads */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                     Audio File *
                   </label>
                   {singleAudioUrl ? (
-                    <div className="p-4 bg-[#2B2B2D] rounded-xl border border-[#22C55E]/40 flex items-center justify-between">
+                    <div className="p-4 bg-[var(--bg-secondary)] rounded-xl border border-[#22C55E]/40 flex items-center justify-between">
                       <span className="text-xs text-[#22C55E] flex items-center gap-2">
                         <CheckCircle className="w-4 h-4" /> Audio Uploaded
                       </span>
                       <button
                         type="button"
                         onClick={() => setSingleAudioUrl('')}
-                        className="text-xs text-[#85858B] hover:text-[#EF4444]"
+                        className="text-xs text-[var(--text-muted)] hover:text-[#EF4444]"
                       >
                         Change
                       </button>
                     </div>
                   ) : (
-                    <label className="block border-2 border-dashed border-[#454549] hover:border-[#FF0080] rounded-2xl p-6 text-center cursor-pointer bg-[#2B2B2D]/50 transition-colors">
-                      <Upload className="w-6 h-6 text-[#FF0080] mx-auto mb-2" />
+                    <label className="block border-2 border-dashed border-[var(--glass-border)] hover:border-[var(--color-pink)] rounded-2xl p-6 text-center cursor-pointer bg-[var(--bg-secondary)]/50 transition-colors">
+                      <Upload className="w-6 h-6 text-[var(--color-pink)] mx-auto mb-2" />
                       <span className="text-xs text-white font-medium block">
                         {singleAudioUploading
                           ? `Uploading (${singleAudioProgress}%)...`
@@ -1543,11 +1543,11 @@ export default function CreatorStudioPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                     Cover / Poster Art (JPG, PNG max 5MB)
                   </label>
                   {singleAudioCoverUrl ? (
-                    <div className="relative h-24 rounded-xl overflow-hidden border border-[#454549]">
+                    <div className="relative h-24 rounded-xl overflow-hidden border border-[var(--glass-border)]">
                       <Image
                         src={singleAudioCoverUrl}
                         alt="Cover preview"
@@ -1563,8 +1563,8 @@ export default function CreatorStudioPage() {
                       </button>
                     </div>
                   ) : (
-                    <label className="block border-2 border-dashed border-[#454549] hover:border-[#FF0080] rounded-2xl p-6 text-center cursor-pointer bg-[#2B2B2D]/50 transition-colors">
-                      <Upload className="w-6 h-6 text-[#FF0080] mx-auto mb-2" />
+                    <label className="block border-2 border-dashed border-[var(--glass-border)] hover:border-[var(--color-pink)] rounded-2xl p-6 text-center cursor-pointer bg-[var(--bg-secondary)]/50 transition-colors">
+                      <Upload className="w-6 h-6 text-[var(--color-pink)] mx-auto mb-2" />
                       <span className="text-xs text-white font-medium block">
                         {singleAudioCoverUploading ? 'Uploading...' : 'Select Cover Art'}
                       </span>
@@ -1596,7 +1596,7 @@ export default function CreatorStudioPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white font-bold text-sm tracking-wide transition-all shadow-xl active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl bg-[var(--color-pink)] hover:bg-[var(--color-magenta)] text-white font-bold text-sm tracking-wide transition-all shadow-xl active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Upload className="w-4 h-4" />
                 <span>{isSubmitting ? 'Uploading Track...' : 'Upload Audio'}</span>
@@ -1617,8 +1617,8 @@ export default function CreatorStudioPage() {
                 onClick={() => setManageSubTab('videos')}
                 className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   manageSubTab === 'videos'
-                    ? 'bg-[#FF0080] text-white shadow-md'
-                    : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
+                    ? 'bg-[var(--color-pink)] text-white shadow-md'
+                    : 'bg-[var(--glass-surface)] text-[var(--text-secondary)] hover:text-white border border-[var(--glass-border)]'
                 }`}
               >
                 Videos ({uploadedVideos.length})
@@ -1627,29 +1627,29 @@ export default function CreatorStudioPage() {
                 onClick={() => setManageSubTab('audios')}
                 className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   manageSubTab === 'audios'
-                    ? 'bg-[#FF0080] text-white shadow-md'
-                    : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
+                    ? 'bg-[var(--color-pink)] text-white shadow-md'
+                    : 'bg-[var(--glass-surface)] text-[var(--text-secondary)] hover:text-white border border-[var(--glass-border)]'
                 }`}
               >
                 Audios ({uploadedAudios.length})
               </button>
             </div>
             {isAdmin && (
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#FF0080]/15 text-[#FF0080] border border-[#FF0080]/30">
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[var(--color-pink)]/15 text-[var(--color-pink)] border border-[var(--color-pink)]/30">
                 Admin Mode: All Content
               </span>
             )}
           </div>
 
           {loadingManage ? (
-            <div className="p-12 text-center text-[#85858B] flex flex-col items-center gap-3">
-              <Loader2 className="w-6 h-6 animate-spin text-[#FF0080]" />
+            <div className="p-12 text-center text-[var(--text-muted)] flex flex-col items-center gap-3">
+              <Loader2 className="w-6 h-6 animate-spin text-[var(--color-pink)]" />
               <p className="text-xs">Loading uploaded content...</p>
             </div>
           ) : manageSubTab === 'videos' ? (
             uploadedVideos.length === 0 ? (
-              <div className="bg-[#333336] border border-[#454549] rounded-2xl p-12 text-center text-[#85858B] space-y-3">
-                <Film className="w-10 h-10 mx-auto text-[#85858B]/50" />
+              <div className="bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl p-12 text-center text-[var(--text-muted)] space-y-3">
+                <Film className="w-10 h-10 mx-auto text-[var(--text-muted)]/50" />
                 <p className="text-sm font-semibold text-white">No videos found</p>
                 <p className="text-xs max-w-sm mx-auto">
                   You haven't uploaded any videos yet. Switch to the Video tab to publish your first video.
@@ -1660,28 +1660,28 @@ export default function CreatorStudioPage() {
                 {uploadedVideos.map((v) => (
                   <div
                     key={v.id}
-                    className="p-4 bg-[#333336] border border-[#454549] rounded-2xl flex items-center justify-between gap-4 hover:border-[#555559] transition-colors"
+                    className="p-4 bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl flex items-center justify-between gap-4 hover:border-[#555559] transition-colors"
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
-                      <div className="relative w-16 h-12 rounded-xl overflow-hidden bg-[#2B2B2D] shrink-0 border border-[#454549]">
+                      <div className="relative w-16 h-12 rounded-xl overflow-hidden bg-[var(--bg-secondary)] shrink-0 border border-[var(--glass-border)]">
                         {v.thumbnail_url ? (
                           <Image src={v.thumbnail_url} alt={v.title} fill className="object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <Film className="w-5 h-5 text-[#85858B]" />
+                            <Film className="w-5 h-5 text-[var(--text-muted)]" />
                           </div>
                         )}
                       </div>
                       <div className="min-w-0">
                         <h4 className="text-sm font-semibold text-white truncate">{v.title}</h4>
-                        <div className="flex items-center gap-2 text-[11px] text-[#85858B] mt-0.5">
+                        <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)] mt-0.5">
                           <span>{new Date(v.created_at).toLocaleDateString()}</span>
                           <span>•</span>
                           <span>{v.views_count || 0} views</span>
                           {isAdmin && v.creator && (
                             <>
                               <span>•</span>
-                              <span className="text-[#FF0080] truncate">
+                              <span className="text-[var(--color-pink)] truncate">
                                 By {v.creator.display_name || v.creator.username}
                               </span>
                             </>
@@ -1695,7 +1695,7 @@ export default function CreatorStudioPage() {
                         href={`/videos/${v.id}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="p-2 rounded-xl bg-[#2B2B2D] hover:bg-[#3A3A3E] text-[#B8B8BD] hover:text-white transition-colors cursor-pointer"
+                        className="p-2 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--glass-surface-elevated)] text-[var(--text-secondary)] hover:text-white transition-colors cursor-pointer"
                         title="View video"
                       >
                         <ExternalLink className="w-4 h-4" />
@@ -1719,8 +1719,8 @@ export default function CreatorStudioPage() {
               </div>
             )
           ) : uploadedAudios.length === 0 ? (
-            <div className="bg-[#333336] border border-[#454549] rounded-2xl p-12 text-center text-[#85858B] space-y-3">
-              <Music className="w-10 h-10 mx-auto text-[#85858B]/50" />
+            <div className="bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl p-12 text-center text-[var(--text-muted)] space-y-3">
+              <Music className="w-10 h-10 mx-auto text-[var(--text-muted)]/50" />
               <p className="text-sm font-semibold text-white">No audio tracks found</p>
               <p className="text-xs max-w-sm mx-auto">
                 You haven't uploaded any audio tracks yet. Switch to the Audio tab to upload your music or podcast.
@@ -1731,28 +1731,28 @@ export default function CreatorStudioPage() {
               {uploadedAudios.map((a) => (
                 <div
                   key={a.id}
-                  className="p-4 bg-[#333336] border border-[#454549] rounded-2xl flex items-center justify-between gap-4 hover:border-[#555559] transition-colors"
+                  className="p-4 bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl flex items-center justify-between gap-4 hover:border-[#555559] transition-colors"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-[#2B2B2D] shrink-0 border border-[#454549]">
+                    <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-[var(--bg-secondary)] shrink-0 border border-[var(--glass-border)]">
                       {a.cover_url ? (
                         <Image src={a.cover_url} alt={a.title} fill className="object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Music className="w-5 h-5 text-[#85858B]" />
+                          <Music className="w-5 h-5 text-[var(--text-muted)]" />
                         </div>
                       )}
                     </div>
                     <div className="min-w-0">
                       <h4 className="text-sm font-semibold text-white truncate">{a.title}</h4>
-                      <div className="flex items-center gap-2 text-[11px] text-[#85858B] mt-0.5">
+                      <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)] mt-0.5">
                         <span>{a.artist_name || 'Original Artist'}</span>
                         <span>•</span>
                         <span>{new Date(a.created_at).toLocaleDateString()}</span>
                         {isAdmin && a.creator && (
                           <>
                             <span>•</span>
-                            <span className="text-[#FF0080] truncate">
+                            <span className="text-[var(--color-pink)] truncate">
                               By {a.creator.display_name || a.creator.username}
                             </span>
                           </>
@@ -1786,7 +1786,7 @@ export default function CreatorStudioPage() {
       {/* Delete Confirmation Modal */}
       {manageDeleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#2B2B2D] border border-[#454549] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+          <div className="bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-3 text-[#EF4444]">
               <div className="p-3 bg-[#EF4444]/10 rounded-xl">
                 <Trash2 className="w-6 h-6" />
@@ -1795,11 +1795,11 @@ export default function CreatorStudioPage() {
                 <h3 className="text-lg font-bold text-white capitalize">
                   Delete {manageDeleteTarget.type}
                 </h3>
-                <p className="text-xs text-[#85858B]">This action cannot be undone</p>
+                <p className="text-xs text-[var(--text-muted)]">This action cannot be undone</p>
               </div>
             </div>
 
-            <p className="text-sm text-[#B8B8BD] leading-relaxed">
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
               Are you sure you want to permanently delete{' '}
               <strong className="text-white">"{manageDeleteTarget.title}"</strong>? All associated
               comments, reactions, and history will be permanently deleted.
@@ -1819,7 +1819,7 @@ export default function CreatorStudioPage() {
                   setManageDeleteTarget(null);
                   setManageDeleteError(null);
                 }}
-                className="px-4 py-2 text-xs font-semibold text-[#85858B] hover:text-white transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-[var(--text-muted)] hover:text-white transition-colors cursor-pointer"
               >
                 Cancel
               </button>

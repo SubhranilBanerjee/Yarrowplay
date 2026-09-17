@@ -1,0 +1,149 @@
+/* ==========================================================================
+   YARROWPLAY THEME SPECIFICATION
+   All theme colors, gradients, glowing shadows, borders, and glassy surfaces 
+   are controlled from this single file.
+   ========================================================================== */
+
+:root {
+  /* --- Primary Backgrounds --- */
+  --bg-primary: #080014;
+  --bg-secondary: #100020;
+  --bg-tertiary: #16042d;
+  
+  /* --- Glass Surfaces --- */
+  --glass-surface-subtle: rgba(22, 4, 45, 0.45);
+  --glass-surface: rgba(25, 7, 51, 0.65);
+  --glass-surface-elevated: rgba(38, 12, 75, 0.75);
+  --glass-surface-hover: rgba(52, 18, 98, 0.85);
+  --glass-border: rgba(161, 0, 255, 0.22);
+  --glass-border-subtle: rgba(161, 0, 255, 0.12);
+  --glass-border-hover: rgba(224, 0, 255, 0.6);
+  --glass-border-active: rgba(255, 32, 217, 0.8);
+  
+  /* --- Neon & Brand Accent Colors --- */
+  --color-purple-dark: #7C00FF;
+  --color-purple-bright: #A100FF;
+  --color-magenta: #E000FF;
+  --color-pink: #FF20D9;
+  --color-pink-light: #FF5CE1;
+  --color-neon-blue: #4D7BFF;
+  
+  /* --- Text & Content Colors --- */
+  --text-primary: #FFFFFF;
+  --text-secondary: #B9A9D6;
+  --text-muted: #7E6F9E;
+  --text-dim: #544570;
+  
+  /* --- Status Colors --- */
+  --status-success: #10B981;
+  --status-warning: #F59E0B;
+  --status-error: #EF4444;
+  
+  /* --- Gradients --- */
+  --gradient-brand-primary: linear-gradient(135deg, #7C00FF 0%, #A100FF 35%, #E000FF 70%, #FF20D9 100%);
+  --gradient-button: linear-gradient(135deg, #9300EE 0%, #C800EE 50%, #FF20D9 100%);
+  --gradient-button-hover: linear-gradient(135deg, #A414FF 0%, #DB15FF 50%, #FF45DE 100%);
+  --gradient-active-pill: linear-gradient(135deg, #A100FF 0%, #E000FF 100%);
+  --gradient-card-border: linear-gradient(135deg, rgba(224, 0, 255, 0.4) 0%, rgba(124, 0, 255, 0.15) 50%, rgba(255, 32, 217, 0.3) 100%);
+  --gradient-text: linear-gradient(135deg, #FFFFFF 30%, #E000FF 80%, #FF20D9 100%);
+  --gradient-text-pure: linear-gradient(90deg, #A100FF 0%, #E000FF 50%, #FF20D9 100%);
+  --gradient-overlay-card: linear-gradient(180deg, rgba(8, 0, 20, 0.1) 0%, rgba(8, 0, 20, 0.85) 75%, rgba(8, 0, 20, 0.98) 100%);
+  --gradient-hero-ambient: radial-gradient(circle at 85% 20%, rgba(161, 0, 255, 0.28) 0%, rgba(224, 0, 255, 0.12) 35%, transparent 65%);
+  --gradient-bottom-ambient: radial-gradient(circle at 15% 90%, rgba(124, 0, 255, 0.18) 0%, transparent 60%);
+
+  /* --- Shadows & Glows --- */
+  --glow-button: 0 0 20px rgba(224, 0, 255, 0.45);
+  --glow-button-hover: 0 0 30px rgba(255, 32, 217, 0.65);
+  --glow-pill-active: 0 0 22px rgba(161, 0, 255, 0.55), 0 0 45px rgba(224, 0, 255, 0.25);
+  --glow-card: 0 8px 32px 0 rgba(8, 0, 20, 0.65);
+  --glow-card-hover: 0 12px 40px 0 rgba(161, 0, 255, 0.35), 0 0 1px 1px rgba(224, 0, 255, 0.4);
+  --glow-card-featured: 0 0 30px rgba(161, 0, 255, 0.4), inset 0 0 20px rgba(224, 0, 255, 0.15);
+  --glow-icon: 0 0 12px rgba(224, 0, 255, 0.6);
+  --glow-search-focus: 0 0 0 2px rgba(224, 0, 255, 0.35), 0 0 25px rgba(161, 0, 255, 0.3);
+
+  /* --- Border Radius --- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-2xl: 28px;
+  --radius-full: 9999px;
+}
+
+/* ==========================================================================
+   Reusable Utility Classes matching Theme Variables
+   ========================================================================== */
+
+.theme-bg-ambient {
+  background-color: var(--bg-primary);
+  background-image: var(--gradient-hero-ambient), var(--gradient-bottom-ambient);
+  background-attachment: fixed;
+}
+
+.theme-glass-card {
+  background-color: var(--glass-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glow-card);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-glass-card:hover {
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--glow-card-hover);
+  background-color: var(--glass-surface-hover);
+  transform: translateY(-2px);
+}
+
+.theme-glass-card-static {
+  background-color: var(--glass-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glow-card);
+}
+
+.theme-neon-button {
+  background: var(--gradient-button);
+  color: var(--text-primary);
+  box-shadow: var(--glow-button);
+  transition: all 0.2s ease;
+}
+
+.theme-neon-button:hover {
+  background: var(--gradient-button-hover);
+  box-shadow: var(--glow-button-hover);
+  transform: scale(1.02);
+}
+
+.theme-neon-button:active {
+  transform: scale(0.98);
+}
+
+.theme-active-pill {
+  background: var(--gradient-active-pill);
+  color: var(--text-primary);
+  box-shadow: var(--glow-pill-active);
+}
+
+.theme-inactive-pill {
+  background-color: var(--glass-surface-subtle);
+  color: var(--text-secondary);
+  border: 1px solid var(--glass-border-subtle);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+}
+
+.theme-inactive-pill:hover {
+  background-color: var(--glass-surface-elevated);
+  color: var(--text-primary);
+  border-color: var(--glass-border);
+}
+
+.theme-gradient-heading {
+  background: var(--gradient-text-pure);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark h-full">
-      <body className="min-h-full bg-[#2B2B2D] text-white flex flex-col antialiased">
+      <body className="min-h-full theme-bg-ambient text-white flex flex-col antialiased selection:bg-[#E000FF]/30 selection:text-white">
         <AuthProvider>
           <AudioPlayerProvider>
             <Header />

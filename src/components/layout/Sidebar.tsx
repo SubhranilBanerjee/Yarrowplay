@@ -50,8 +50,8 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-64 shrink-0 bg-[#2B2B2D] border-r border-[#454549] min-h-[calc(100vh-61px)] p-4 select-none">
-      <div className="space-y-1">
+    <aside className="hidden md:flex flex-col w-64 shrink-0 bg-[var(--bg-primary)]/80 backdrop-blur-xl border-r border-[var(--glass-border)] min-h-[calc(100vh-61px)] p-4 select-none">
+      <div className="space-y-1.5">
         {navItems
           .filter((item) => item.show)
           .map((item) => {
@@ -62,15 +62,15 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 ${
+                className={`flex items-center gap-3.5 px-4 py-3 rounded-2xl font-medium text-sm transition-all duration-200 ${
                   isActive
-                    ? 'bg-[#FF0080] text-white shadow-md'
-                    : 'text-[#B8B8BD] hover:bg-[#333336] hover:text-white'
+                    ? 'theme-active-pill font-semibold'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--glass-surface)] hover:text-white hover:border hover:border-[var(--glass-border)]'
                 }`}
               >
                 <Icon
                   className={`w-5 h-5 transition-colors ${
-                    isActive ? 'text-white' : item.highlight ? 'text-[#FF0080]' : 'text-[#85858B]'
+                    isActive ? 'text-white' : item.highlight ? 'text-[var(--color-pink)]' : 'text-[var(--text-muted)]'
                   }`}
                 />
                 <span>{item.label}</span>
@@ -79,25 +79,27 @@ export function Sidebar() {
           })}
       </div>
 
-      <div className="mt-auto pt-6 border-t border-[#454549] space-y-1">
+      <div className="mt-auto pt-6 border-t border-[var(--glass-border-subtle)] space-y-1">
         {user ? (
           <Link
             href={`/profile/${profile?.username || user.id}`}
-            className={`flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all ${
+            className={`flex items-center gap-3.5 px-4 py-3 rounded-2xl font-medium text-sm transition-all ${
               pathname.startsWith('/profile')
-                ? 'bg-[#3A3A3E] text-white'
-                : 'text-[#B8B8BD] hover:bg-[#333336] hover:text-white'
+                ? 'theme-active-pill'
+                : 'text-[var(--text-secondary)] bg-[var(--glass-surface-subtle)] border border-[var(--glass-border-subtle)] hover:bg-[var(--glass-surface)] hover:border-[var(--glass-border)] hover:text-white'
             }`}
           >
-            <User className="w-5 h-5 text-[#85858B]" />
-            <span className="truncate">{profile?.display_name || 'My Profile'}</span>
+            <div className="w-7 h-7 rounded-full bg-[var(--color-purple-bright)]/20 border border-[var(--color-purple-bright)]/40 flex items-center justify-center text-[var(--color-pink)] text-xs font-bold shrink-0">
+              {profile?.display_name ? profile.display_name[0].toUpperCase() : 'U'}
+            </div>
+            <span className="truncate flex-1">{profile?.display_name || 'My Profile'}</span>
           </Link>
         ) : (
-          <div className="p-4 rounded-xl bg-[#333336] border border-[#454549] text-center">
-            <p className="text-xs text-[#B8B8BD] mb-3">Join Yarrowplay to like, upload and comment.</p>
+          <div className="p-4 rounded-2xl theme-glass-card-static text-center">
+            <p className="text-xs text-[var(--text-secondary)] mb-3 leading-relaxed">Join Yarrowplay to like, upload and comment.</p>
             <Link
               href="/register"
-              className="block w-full text-xs font-semibold py-2 bg-[#FF0080] hover:bg-[#E00071] text-white rounded-lg transition-colors"
+              className="block w-full text-xs font-semibold py-2.5 theme-neon-button rounded-xl transition-all"
             >
               Get Started
             </Link>

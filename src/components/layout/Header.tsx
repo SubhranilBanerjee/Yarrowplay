@@ -21,35 +21,35 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#2B2B2D]/95 backdrop-blur border-b border-[#454549] px-4 md:px-8 py-3">
+    <header className="sticky top-0 z-40 w-full bg-[var(--bg-primary)]/85 backdrop-blur-xl border-b border-[var(--glass-border)] px-4 md:px-8 py-3 transition-colors">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Logo and Brand */}
-        <Link href={user ? '/home' : '/'} className="flex items-center gap-3 shrink-0">
-          <div className="relative w-8 h-8 md:w-9 md:h-9">
+        <Link href={user ? '/home' : '/'} className="flex items-center gap-3 shrink-0 group">
+          <div className="relative w-8 h-8 md:w-9 md:h-9 filter drop-shadow-[0_0_8px_rgba(224,0,255,0.4)]">
             <Image
               src="/logo.png"
               alt="Yarrowplay"
               fill
               sizes="(max-width: 768px) 32px, 36px"
-              className="object-contain"
+              className="object-contain transition-transform group-hover:scale-105"
               priority
             />
           </div>
-          <span className="text-xl md:text-2xl font-bold tracking-tight text-white flex items-center">
-            YARROW<span className="text-[#FF0080]">PLAY</span>
+          <span className="text-xl md:text-2xl font-black tracking-tight text-white flex items-center">
+            YARROW<span className="theme-gradient-heading font-black">PLAY</span>
           </span>
         </Link>
 
         {/* Global Search Bar */}
-        <form onSubmit={handleSearch} className="hidden sm:flex flex-1 max-w-md mx-4">
+        <form onSubmit={handleSearch} className="hidden sm:flex flex-1 max-w-xl mx-4">
           <div className="relative w-full">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#85858B]" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
             <input
               type="text"
               placeholder="Search videos, music, creators, blogs..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#333336] text-white placeholder-[#85858B] text-sm rounded-full pl-10 pr-4 py-2 border border-[#454549] focus:outline-none focus:border-[#FF0080] transition-colors"
+              className="w-full bg-[var(--glass-surface-subtle)] text-white placeholder-[var(--text-muted)] text-sm rounded-full pl-11 pr-4 py-2.5 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-magenta)] focus:ring-2 focus:ring-[var(--color-purple-bright)]/30 focus:bg-[var(--glass-surface)] transition-all"
             />
           </div>
         </form>
@@ -61,7 +61,7 @@ export function Header() {
               {profile?.role === 'creator' && (
                 <Link
                   href="/creator/studio"
-                  className="hidden md:flex items-center gap-2 bg-[#FF0080] hover:bg-[#E00071] text-white text-xs md:text-sm font-medium px-4 py-2 rounded-xl transition-all shadow-sm"
+                  className="hidden md:flex items-center gap-2 theme-neon-button text-xs md:text-sm font-semibold px-4 py-2 rounded-full transition-all"
                 >
                   <Film className="w-4 h-4" />
                   Creator Studio
@@ -71,7 +71,7 @@ export function Header() {
               {profile?.role === 'advertiser' && (
                 <Link
                   href="/advertiser"
-                  className="hidden md:flex items-center gap-2 bg-[#FF0080] hover:bg-[#E00071] text-white text-xs md:text-sm font-medium px-4 py-2 rounded-xl transition-all shadow-sm"
+                  className="hidden md:flex items-center gap-2 theme-neon-button text-xs md:text-sm font-semibold px-4 py-2 rounded-full transition-all"
                 >
                   <Megaphone className="w-4 h-4" />
                   Advertiser Studio
@@ -81,7 +81,7 @@ export function Header() {
               {/* Notification button */}
               <button
                 aria-label="Notifications"
-                className="w-9 h-9 rounded-full bg-[#333336] border border-[#454549] flex items-center justify-center text-[#B8B8BD] hover:text-white transition-colors"
+                className="w-9 h-9 rounded-full bg-[var(--glass-surface-subtle)] border border-[var(--glass-border)] flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:border-[var(--color-magenta)] hover:shadow-[0_0_15px_rgba(224,0,255,0.3)] transition-all"
               >
                 <Bell className="w-4 h-4" />
               </button>
@@ -90,7 +90,7 @@ export function Header() {
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 p-1 rounded-full bg-[#333336] border border-[#454549] hover:border-[#FF0080] transition-colors"
+                  className="flex items-center gap-2 p-1 rounded-full bg-[var(--glass-surface-subtle)] border border-[var(--glass-border)] hover:border-[var(--color-magenta)] hover:shadow-[0_0_15px_rgba(224,0,255,0.3)] transition-all"
                 >
                   {profile?.avatar_url ? (
                     <div className="relative w-7 h-7 rounded-full overflow-hidden">
@@ -103,30 +103,30 @@ export function Header() {
                       />
                     </div>
                   ) : (
-                    <div className="w-7 h-7 rounded-full bg-[#3A3A3E] flex items-center justify-center text-[#B8B8BD]">
+                    <div className="w-7 h-7 rounded-full bg-[var(--color-purple-bright)]/20 flex items-center justify-center text-[var(--color-pink)] text-xs font-bold">
                       <UserIcon className="w-4 h-4" />
                     </div>
                   )}
                 </button>
 
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#333336] border border-[#454549] shadow-2xl py-2 z-50">
-                    <div className="px-4 py-2 border-b border-[#454549]">
+                  <div className="absolute right-0 mt-2 w-56 rounded-2xl theme-glass-card-static border border-[var(--glass-border)] shadow-2xl py-2 z-50">
+                    <div className="px-4 py-2 border-b border-[var(--glass-border-subtle)]">
                       <p className="text-sm font-semibold text-white truncate">
                         {profile?.display_name || user.email}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-[#FF0080]/15 text-[#FF0080]">
+                        <span className="text-xs uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-[var(--color-purple-bright)]/20 text-[var(--color-pink)] border border-[var(--color-purple-bright)]/30">
                           {profile?.role || 'viewer'}
                         </span>
                       </div>
                     </div>
 
-                    <div className="py-1 text-sm text-[#B8B8BD]">
+                    <div className="py-1 text-sm text-[var(--text-secondary)]">
                       <Link
                         href={`/profile/${profile?.username || user.id}`}
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2 px-4 py-2 hover:bg-[#3A3A3E] hover:text-white"
+                        className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--glass-surface-elevated)] hover:text-white"
                       >
                         <UserIcon className="w-4 h-4" />
                         My Profile
@@ -137,7 +137,7 @@ export function Header() {
                           <Link
                             href="/creator/studio"
                             onClick={() => setShowUserMenu(false)}
-                            className="flex items-center gap-2 px-4 py-2 hover:bg-[#3A3A3E] hover:text-white text-[#FF0080]"
+                            className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--glass-surface-elevated)] hover:text-white text-[var(--color-pink)]"
                           >
                             <Film className="w-4 h-4" />
                             Creator Studio
@@ -145,7 +145,7 @@ export function Header() {
                           <Link
                             href="/creator/analytics"
                             onClick={() => setShowUserMenu(false)}
-                            className="flex items-center gap-2 px-4 py-2 hover:bg-[#3A3A3E] hover:text-white"
+                            className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--glass-surface-elevated)] hover:text-white"
                           >
                             <BarChart3 className="w-4 h-4" />
                             Creator Analytics
@@ -157,7 +157,7 @@ export function Header() {
                         <Link
                           href="/advertiser"
                           onClick={() => setShowUserMenu(false)}
-                          className="flex items-center gap-2 px-4 py-2 hover:bg-[#3A3A3E] hover:text-white text-[#FF0080]"
+                          className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--glass-surface-elevated)] hover:text-white text-[var(--color-pink)]"
                         >
                           <Megaphone className="w-4 h-4" />
                           Advertiser Studio
@@ -167,7 +167,7 @@ export function Header() {
                       <Link
                         href="/blog/studio"
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2 px-4 py-2 hover:bg-[#3A3A3E] hover:text-white"
+                        className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--glass-surface-elevated)] hover:text-white"
                       >
                         <BookOpen className="w-4 h-4" />
                         Write Blog
@@ -176,7 +176,7 @@ export function Header() {
                       <Link
                         href="/favorites"
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2 px-4 py-2 hover:bg-[#3A3A3E] hover:text-white"
+                        className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--glass-surface-elevated)] hover:text-white"
                       >
                         Favorites
                       </Link>
@@ -184,19 +184,19 @@ export function Header() {
                       <Link
                         href="/watchlist"
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2 px-4 py-2 hover:bg-[#3A3A3E] hover:text-white"
+                        className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--glass-surface-elevated)] hover:text-white"
                       >
                         Watchlist
                       </Link>
                     </div>
 
-                    <div className="pt-1 border-t border-[#454549]">
+                    <div className="pt-1 border-t border-[var(--glass-border-subtle)]">
                       <button
                         onClick={() => {
                           setShowUserMenu(false);
                           signOut();
                         }}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#EF4444] hover:bg-[#3A3A3E] transition-colors"
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[var(--status-error)] hover:bg-[var(--glass-surface-elevated)] transition-colors"
                       >
                         <LogOut className="w-4 h-4" />
                         Sign Out
@@ -210,13 +210,13 @@ export function Header() {
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="text-sm font-medium text-white hover:text-[#FF0080] px-3 py-1.5 transition-colors"
+                className="text-sm font-semibold text-[var(--text-secondary)] hover:text-white px-3 py-1.5 transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 href="/register"
-                className="text-sm font-medium bg-[#FF0080] hover:bg-[#E00071] text-white px-4 py-2 rounded-xl transition-all"
+                className="text-sm font-semibold theme-neon-button px-4 py-2 rounded-full transition-all"
               >
                 Create Account
               </Link>

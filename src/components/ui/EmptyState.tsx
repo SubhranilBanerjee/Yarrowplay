@@ -20,16 +20,16 @@ export function EmptyState({
   onAction,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center text-center p-8 sm:p-12 rounded-2xl bg-[#333336] border border-[#454549] max-w-lg mx-auto my-8">
-      <div className="w-14 h-14 rounded-2xl bg-[#3A3A3E] border border-[#454549] flex items-center justify-center text-[#FF0080] mb-4">
-        <Icon className="w-7 h-7" />
+    <div className="flex flex-col items-center justify-center text-center p-8 sm:p-12 rounded-3xl theme-glass-card-static max-w-lg mx-auto my-8 border border-[var(--glass-border)]">
+      <div className="w-16 h-16 rounded-2xl bg-[var(--color-purple-bright)]/15 border border-[var(--color-purple-bright)]/30 flex items-center justify-center text-[var(--color-pink)] mb-4 shadow-[0_0_20px_rgba(224,0,255,0.25)]">
+        <Icon className="w-8 h-8" />
       </div>
-      <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
-      <p className="text-sm text-[#85858B] max-w-sm mb-6">{description}</p>
+      <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
+      <p className="text-sm text-[var(--text-secondary)] max-w-sm mb-6 leading-relaxed font-normal">{description}</p>
       {actionLabel && actionHref && (
         <Link
           href={actionHref}
-          className="px-5 py-2.5 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white text-sm font-semibold transition-all shadow-md"
+          className="px-6 py-2.5 rounded-full theme-neon-button text-sm font-semibold transition-all shadow-md"
         >
           {actionLabel}
         </Link>
@@ -37,7 +37,7 @@ export function EmptyState({
       {actionLabel && onAction && !actionHref && (
         <button
           onClick={onAction}
-          className="px-5 py-2.5 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white text-sm font-semibold transition-all shadow-md"
+          className="px-6 py-2.5 rounded-full theme-neon-button text-sm font-semibold transition-all shadow-md"
         >
           {actionLabel}
         </button>

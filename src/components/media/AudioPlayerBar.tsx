@@ -165,7 +165,7 @@ export function AudioPlayerBar() {
   return (
     <>
       {/* Mini Player Bar (Always docked) */}
-      <div className="fixed bottom-14 md:bottom-0 left-0 right-0 z-30 bg-[#333336]/95 backdrop-blur-md border-t border-[#454549] px-4 py-2.5 transition-all">
+      <div className="fixed bottom-14 md:bottom-0 left-0 right-0 z-30 bg-[var(--bg-primary)]/90 backdrop-blur-xl border-t border-[var(--glass-border)] px-4 py-2.5 transition-all">
         {/* Seek Progress Bar */}
         <div
           onClick={(e) => {
@@ -173,13 +173,13 @@ export function AudioPlayerBar() {
             const clickPos = (e.clientX - rect.left) / rect.width;
             seek(clickPos * duration);
           }}
-          className="absolute -top-1 left-0 right-0 h-1.5 bg-[#454549] cursor-pointer group"
+          className="absolute -top-1 left-0 right-0 h-1.5 bg-[var(--glass-surface-subtle)] cursor-pointer group"
         >
           <div
-            className="h-full bg-[#FF0080] group-hover:h-2 transition-all relative"
+            className="h-full bg-gradient-to-r from-[var(--color-purple-bright)] to-[var(--color-pink)] group-hover:h-2 transition-all relative"
             style={{ width: `${progressPercent}%` }}
           >
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-[0_0_8px_rgba(255,32,217,0.8)]" />
           </div>
         </div>
 
@@ -189,7 +189,7 @@ export function AudioPlayerBar() {
             onClick={() => setIsExpanded(true)}
             className="flex items-center gap-3 cursor-pointer min-w-0 max-w-[40%]"
           >
-            <div className="relative w-11 h-11 rounded-lg overflow-hidden bg-[#3A3A3E] shrink-0 border border-[#454549]">
+            <div className="relative w-11 h-11 rounded-xl overflow-hidden bg-[var(--bg-secondary)] shrink-0 border border-[var(--glass-border)]">
               {currentTrack.cover_url ? (
                 <Image
                   src={currentTrack.cover_url}
@@ -198,16 +198,16 @@ export function AudioPlayerBar() {
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-xs text-[#85858B]">
+                <div className="w-full h-full flex items-center justify-center text-xs text-[var(--color-pink)]">
                   ♪
                 </div>
               )}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-white truncate hover:underline">
+              <p className="text-sm font-semibold text-white truncate hover:text-[var(--color-pink)] transition-colors">
                 {currentTrack.title}
               </p>
-              <p className="text-xs text-[#B8B8BD] truncate">
+              <p className="text-xs text-[var(--text-secondary)] truncate">
                 {currentTrack.artist_name}
               </p>
             </div>
@@ -219,7 +219,7 @@ export function AudioPlayerBar() {
               <button
                 onClick={playPrevious}
                 aria-label="Previous Track"
-                className="text-[#B8B8BD] hover:text-white transition-colors"
+                className="text-[var(--text-secondary)] hover:text-white transition-colors"
               >
                 <SkipBack className="w-4 h-4 md:w-5 md:h-5" />
               </button>
@@ -227,7 +227,7 @@ export function AudioPlayerBar() {
               <button
                 onClick={togglePlay}
                 aria-label={isPlaying ? 'Pause' : 'Play'}
-                className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#FF0080] hover:bg-[#E00071] text-white flex items-center justify-center transition-transform active:scale-95 shadow-md"
+                className="w-9 h-9 md:w-10 md:h-10 rounded-full theme-neon-button text-white flex items-center justify-center transition-transform active:scale-95 shadow-md"
               >
                 {isPlaying ? (
                   <Pause className="w-4 h-4 md:w-5 md:h-5 fill-white" />
@@ -239,13 +239,13 @@ export function AudioPlayerBar() {
               <button
                 onClick={playNext}
                 aria-label="Next Track"
-                className="text-[#B8B8BD] hover:text-white transition-colors"
+                className="text-[var(--text-secondary)] hover:text-white transition-colors"
               >
                 <SkipForward className="w-4 h-4 md:w-5 md:h-5" />
               </button>
             </div>
 
-            <div className="hidden sm:flex items-center gap-2 text-[11px] text-[#85858B]">
+            <div className="hidden sm:flex items-center gap-2 text-[11px] text-[var(--text-muted)]">
               <span>{formatTime(currentTime)}</span>
               <span>/</span>
               <span>{formatTime(duration)}</span>
@@ -352,19 +352,19 @@ export function AudioPlayerBar() {
 
       {/* Fullscreen Expandable Player (Spotify-Style) */}
       {isExpanded && (
-        <div className="fixed inset-0 z-50 bg-[#2B2B2D] flex flex-col p-4 md:p-8 overflow-y-auto animate-in fade-in slide-in-from-bottom duration-200">
+        <div className="fixed inset-0 z-50 bg-[var(--bg-primary)]/95 backdrop-blur-2xl flex flex-col p-4 md:p-8 overflow-y-auto animate-in fade-in slide-in-from-bottom duration-200">
           {/* Header */}
-          <div className="flex items-center justify-between max-w-4xl w-full mx-auto pb-4 border-b border-[#454549]">
+          <div className="flex items-center justify-between max-w-4xl w-full mx-auto pb-4 border-b border-[var(--glass-border-subtle)]">
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-wider font-semibold text-[#85858B]">
+              <span className="text-xs uppercase tracking-wider font-semibold text-[var(--text-muted)]">
                 Playing From {currentTrack.genre || 'Audio'}
               </span>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setActiveTab('art')}
-                className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
-                  activeTab === 'art' ? 'bg-[#FF0080] text-white' : 'text-[#B8B8BD] hover:bg-[#333336]'
+                className={`text-xs font-semibold px-4 py-2 rounded-full transition-all ${
+                  activeTab === 'art' ? 'theme-active-pill' : 'theme-inactive-pill'
                 }`}
               >
                 Artwork
@@ -372,8 +372,8 @@ export function AudioPlayerBar() {
               {currentTrack.lyrics && (
                 <button
                   onClick={() => setActiveTab('lyrics')}
-                  className={`flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
-                    activeTab === 'lyrics' ? 'bg-[#FF0080] text-white' : 'text-[#B8B8BD] hover:bg-[#333336]'
+                  className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full transition-all ${
+                    activeTab === 'lyrics' ? 'theme-active-pill' : 'theme-inactive-pill'
                   }`}
                 >
                   <FileText className="w-3.5 h-3.5" />
@@ -382,8 +382,8 @@ export function AudioPlayerBar() {
               )}
               <button
                 onClick={() => setActiveTab('queue')}
-                className={`flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
-                  activeTab === 'queue' ? 'bg-[#FF0080] text-white' : 'text-[#B8B8BD] hover:bg-[#333336]'
+                className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full transition-all ${
+                  activeTab === 'queue' ? 'theme-active-pill' : 'theme-inactive-pill'
                 }`}
               >
                 <ListMusic className="w-3.5 h-3.5" />
@@ -391,7 +391,7 @@ export function AudioPlayerBar() {
               </button>
               <button
                 onClick={() => setIsExpanded(false)}
-                className="p-2 rounded-full hover:bg-[#333336] text-[#B8B8BD] hover:text-white transition-colors"
+                className="p-2 rounded-full hover:bg-[var(--glass-surface-elevated)] text-[var(--text-secondary)] hover:text-white transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -432,25 +432,25 @@ export function AudioPlayerBar() {
 
                   {/* Actions in Fullscreen Player */}
                   <div className="flex items-center justify-center gap-3 mt-4">
-                    <div className="flex items-center bg-[#333336] rounded-xl border border-[#454549] overflow-hidden">
+                    <div className="flex items-center bg-[var(--glass-surface)] rounded-xl border border-[var(--glass-border)] overflow-hidden">
                       <button
                         type="button"
                         onClick={() => handleReaction('like')}
                         title="Like Audio"
                         className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${
-                          userReaction === 'like' ? 'text-[#FF0080] bg-[#FF0080]/15' : 'text-[#B8B8BD] hover:text-white'
+                          userReaction === 'like' ? 'text-[var(--color-pink)] bg-[var(--color-purple-bright)]/20' : 'text-[var(--text-secondary)] hover:text-white'
                         }`}
                       >
                         <ThumbsUp className={`w-4 h-4 ${userReaction === 'like' ? 'fill-current' : ''}`} />
                         <span>{likesCount}</span>
                       </button>
-                      <div className="w-px h-4 bg-[#454549]" />
+                      <div className="w-px h-4 bg-[var(--glass-border)]" />
                       <button
                         type="button"
                         onClick={() => handleReaction('dislike')}
                         title="Dislike Audio"
                         className={`px-3 py-1.5 text-xs font-semibold transition-colors ${
-                          userReaction === 'dislike' ? 'text-[#EF4444] bg-[#EF4444]/15' : 'text-[#B8B8BD] hover:text-white'
+                          userReaction === 'dislike' ? 'text-[var(--status-error)] bg-[var(--status-error)]/20' : 'text-[var(--text-secondary)] hover:text-white'
                         }`}
                       >
                         <ThumbsDown className={`w-4 h-4 ${userReaction === 'dislike' ? 'fill-current' : ''}`} />
@@ -462,7 +462,7 @@ export function AudioPlayerBar() {
                       onClick={handleToggleFavorite}
                       title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
                       className={`p-2 rounded-xl border transition-colors ${
-                        isFavorite ? 'bg-[#FF0080] text-white border-[#FF0080]' : 'bg-[#333336] border-[#454549] text-[#B8B8BD] hover:text-white'
+                        isFavorite ? 'theme-active-pill border-[var(--color-magenta)]' : 'bg-[var(--glass-surface)] border-[var(--glass-border)] text-[var(--text-secondary)] hover:text-white'
                       }`}
                     >
                       <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
@@ -473,7 +473,7 @@ export function AudioPlayerBar() {
                       onClick={handleToggleWatchlist}
                       title={isWatchlisted ? 'In Watchlist' : 'Add to Watchlist'}
                       className={`p-2 rounded-xl border transition-colors ${
-                        isWatchlisted ? 'bg-[#FF0080] text-white border-[#FF0080]' : 'bg-[#333336] border-[#454549] text-[#B8B8BD] hover:text-white'
+                        isWatchlisted ? 'theme-active-pill border-[var(--color-magenta)]' : 'bg-[var(--glass-surface)] border-[var(--glass-border)] text-[var(--text-secondary)] hover:text-white'
                       }`}
                     >
                       <Bookmark className={`w-4 h-4 ${isWatchlisted ? 'fill-current' : ''}`} />
@@ -484,14 +484,14 @@ export function AudioPlayerBar() {
             )}
 
             {activeTab === 'lyrics' && (
-              <div className="w-full h-96 overflow-y-auto bg-[#333336] border border-[#454549] rounded-2xl p-6 text-center whitespace-pre-line text-lg text-white font-medium leading-relaxed">
+              <div className="w-full h-96 overflow-y-auto theme-glass-card-static rounded-3xl p-6 text-center whitespace-pre-line text-lg text-white font-medium leading-relaxed border border-[var(--glass-border)]">
                 {currentTrack.lyrics || 'No lyrics available for this track.'}
               </div>
             )}
 
             {activeTab === 'queue' && (
-              <div className="w-full h-96 overflow-y-auto bg-[#333336] border border-[#454549] rounded-2xl p-4 space-y-2">
-                <h3 className="text-xs uppercase tracking-wider text-[#85858B] px-3 py-1 font-semibold">
+              <div className="w-full h-96 overflow-y-auto theme-glass-card-static rounded-3xl p-4 space-y-2 border border-[var(--glass-border)]">
+                <h3 className="text-xs uppercase tracking-wider text-[var(--text-muted)] px-3 py-1 font-semibold">
                   Upcoming Tracks
                 </h3>
                 {queue.map((track, idx) => (
@@ -499,18 +499,18 @@ export function AudioPlayerBar() {
                     key={`${track.id}-${idx}`}
                     onClick={() => playTrack(track)}
                     className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-colors ${
-                      track.id === currentTrack.id ? 'bg-[#FF0080]/20 text-[#FF0080]' : 'hover:bg-[#3A3A3E] text-white'
+                      track.id === currentTrack.id ? 'bg-[var(--color-purple-bright)]/20 text-[var(--color-pink)] border border-[var(--glass-border)]' : 'hover:bg-[var(--glass-surface-elevated)] text-white'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-[#85858B] w-5 text-right">{idx + 1}</span>
+                      <span className="text-xs text-[var(--text-muted)] w-5 text-right">{idx + 1}</span>
                       <div>
                         <p className="text-sm font-semibold truncate">{track.title}</p>
-                        <p className="text-xs text-[#B8B8BD]">{track.artist_name}</p>
+                        <p className="text-xs text-[var(--text-secondary)]">{track.artist_name}</p>
                       </div>
                     </div>
                     {track.id === currentTrack.id && isPlaying && (
-                      <span className="text-xs text-[#FF0080] font-medium">Playing</span>
+                      <span className="text-xs text-[var(--color-pink)] font-bold">Playing</span>
                     )}
                   </div>
                 ))}
@@ -525,17 +525,17 @@ export function AudioPlayerBar() {
                   const clickPos = (e.clientX - rect.left) / rect.width;
                   seek(clickPos * duration);
                 }}
-                className="w-full h-2 bg-[#454549] rounded-full cursor-pointer group relative"
+                className="w-full h-2 bg-[var(--glass-surface-subtle)] rounded-full cursor-pointer group relative border border-[var(--glass-border-subtle)]"
               >
                 <div
-                  className="h-full bg-[#FF0080] rounded-full relative"
+                  className="h-full bg-gradient-to-r from-[var(--color-purple-bright)] to-[var(--color-pink)] rounded-full relative"
                   style={{ width: `${progressPercent}%` }}
                 >
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full shadow" />
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full shadow-[0_0_10px_rgba(255,32,217,0.8)]" />
                 </div>
               </div>
 
-              <div className="flex justify-between text-xs text-[#85858B]">
+              <div className="flex justify-between text-xs text-[var(--text-muted)]">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
               </div>
@@ -544,14 +544,14 @@ export function AudioPlayerBar() {
               <div className="flex items-center justify-center gap-6 pt-4">
                 <button
                   onClick={playPrevious}
-                  className="p-3 rounded-full hover:bg-[#333336] text-[#B8B8BD] hover:text-white transition-colors"
+                  className="p-3 rounded-full hover:bg-[var(--glass-surface-elevated)] text-[var(--text-secondary)] hover:text-white transition-colors"
                 >
                   <SkipBack className="w-7 h-7" />
                 </button>
 
                 <button
                   onClick={togglePlay}
-                  className="w-16 h-16 rounded-full bg-[#FF0080] hover:bg-[#E00071] text-white flex items-center justify-center transition-transform active:scale-95 shadow-xl"
+                  className="w-16 h-16 rounded-full theme-neon-button text-white flex items-center justify-center transition-transform active:scale-95 shadow-xl"
                 >
                   {isPlaying ? (
                     <Pause className="w-8 h-8 fill-white" />
@@ -562,7 +562,7 @@ export function AudioPlayerBar() {
 
                 <button
                   onClick={playNext}
-                  className="p-3 rounded-full hover:bg-[#333336] text-[#B8B8BD] hover:text-white transition-colors"
+                  className="p-3 rounded-full hover:bg-[var(--glass-surface-elevated)] text-[var(--text-secondary)] hover:text-white transition-colors"
                 >
                   <SkipForward className="w-7 h-7" />
                 </button>

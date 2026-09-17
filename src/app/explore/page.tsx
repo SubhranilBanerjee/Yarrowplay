@@ -118,36 +118,40 @@ function ExploreContent() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Page Header */}
-      <div className="max-w-2xl mx-auto text-center mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-          {query ? `Results for "${query}"` : 'Discover On Yarrowplay'}
+      <div className="max-w-3xl mb-8">
+        <p className="text-[11px] font-extrabold tracking-[0.25em] text-[var(--color-magenta)] uppercase mb-2">
+          Discover · Create · Share
+        </p>
+        <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white flex items-center gap-3 flex-wrap">
+          <span>Discover On</span>
+          <span className="theme-gradient-heading">Yarrowplay</span>
         </h1>
         {query ? (
-          <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#333336] border border-[#454549] text-xs text-[#B8B8BD]">
+          <div className="mt-3 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--glass-surface)] border border-[var(--glass-border)] text-xs text-[var(--text-secondary)]">
             <span>Filter: <strong className="text-white">&ldquo;{query}&rdquo;</strong></span>
             <Link
               href="/explore"
-              className="text-[#85858B] hover:text-[#FF0080] inline-flex items-center gap-0.5 ml-1 transition-colors"
+              className="text-[var(--text-muted)] hover:text-[var(--color-pink)] inline-flex items-center gap-0.5 ml-1 transition-colors"
             >
               <X className="w-3.5 h-3.5" />
               <span>Clear</span>
             </Link>
           </div>
         ) : (
-          <p className="text-sm text-[#85858B] mt-1.5">
+          <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2 font-normal max-w-xl">
             Browse videos, audio tracks, creator blogs, and sponsored partner content.
           </p>
         )}
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center justify-center gap-2 pb-8 overflow-x-auto">
+      <div className="flex items-center gap-2.5 pb-8 overflow-x-auto scrollbar-none">
         <button
           onClick={() => setActiveType('all')}
-          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+          className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 ${
             activeType === 'all'
-              ? 'bg-[#FF0080] text-white shadow-md'
-              : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
+              ? 'theme-active-pill'
+              : 'theme-inactive-pill'
           }`}
         >
           All Formats
@@ -155,10 +159,10 @@ function ExploreContent() {
 
         <button
           onClick={() => setActiveType('video')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 ${
             activeType === 'video'
-              ? 'bg-[#FF0080] text-white shadow-md'
-              : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
+              ? 'theme-active-pill'
+              : 'theme-inactive-pill'
           }`}
         >
           <Film className="w-4 h-4" />
@@ -167,10 +171,10 @@ function ExploreContent() {
 
         <button
           onClick={() => setActiveType('audio')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 ${
             activeType === 'audio'
-              ? 'bg-[#FF0080] text-white shadow-md'
-              : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
+              ? 'theme-active-pill'
+              : 'theme-inactive-pill'
           }`}
         >
           <Music className="w-4 h-4" />
@@ -179,16 +183,15 @@ function ExploreContent() {
 
         <button
           onClick={() => setActiveType('blog')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 ${
             activeType === 'blog'
-              ? 'bg-[#FF0080] text-white shadow-md'
-              : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
+              ? 'theme-active-pill'
+              : 'theme-inactive-pill'
           }`}
         >
           <BookOpen className="w-4 h-4" />
           Blogs
         </button>
-
       </div>
 
       {/* Results */}

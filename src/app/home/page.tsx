@@ -38,9 +38,9 @@ function formatDuration(seconds?: number | null) {
 // ─── Hero Card ──────────────────────────────────────────────────────────────
 function HeroCard({ video }: { video: FeedVideo }) {
   return (
-    <Link href={`/videos/${video.id}`} className="block relative w-full rounded-2xl overflow-hidden group shadow-2xl">
+    <Link href={`/videos/${video.id}`} className="block relative w-full rounded-3xl overflow-hidden group shadow-2xl border border-[var(--glass-border)] hover:border-[var(--color-magenta)] transition-all">
       {/* Thumbnail */}
-      <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-[#1A1A1C]">
+      <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-[var(--bg-secondary)]">
         {video.thumbnail_url ? (
           <Image
             src={video.thumbnail_url}
@@ -50,23 +50,23 @@ function HeroCard({ video }: { video: FeedVideo }) {
             className="object-cover group-hover:scale-105 transition-transform duration-700"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1A1A1C] to-[#2B2B2D]">
-            <Film className="w-16 h-16 text-[#454549]" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--bg-tertiary)]">
+            <Film className="w-16 h-16 text-[var(--color-purple-bright)]" />
           </div>
         )}
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] via-[var(--bg-primary)]/40 to-transparent" />
 
         {/* Top Badges */}
-        <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-          <span className="flex items-center gap-1.5 bg-[#FF0080] text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-lg">
+        <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+          <span className="flex items-center gap-1.5 theme-neon-button text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">
             <Zap className="w-3 h-3" />
             {video.series ? 'Series' : 'Featured'}
           </span>
           {video.genre && (
-            <span className="flex items-center gap-1 bg-black/60 backdrop-blur border border-white/20 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full">
-              <BarChart2 className="w-3 h-3 text-[#FF0080]" />
+            <span className="flex items-center gap-1.5 bg-[var(--bg-primary)]/80 backdrop-blur-md border border-[var(--glass-border)] text-white text-[10px] font-semibold px-3 py-1 rounded-full">
+              <BarChart2 className="w-3 h-3 text-[var(--color-pink)]" />
               {video.genre}
             </span>
           )}
@@ -74,51 +74,51 @@ function HeroCard({ video }: { video: FeedVideo }) {
 
         {/* Center Play Button */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#FF0080] flex items-center justify-center shadow-2xl shadow-[#FF0080]/40 group-hover:scale-110 transition-transform duration-300">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full theme-neon-button flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
             <Play className="w-7 h-7 text-white fill-white ml-1" />
           </div>
         </div>
 
         {/* Bottom Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-4">
+        <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
           {/* Tag row */}
           <div className="flex items-center gap-2 mb-2">
             {video.category && (
-              <span className="bg-[#FF0080] text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded-full">
+              <span className="bg-[var(--color-purple-bright)]/20 border border-[var(--color-purple-bright)]/40 text-[var(--color-pink)] text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full">
                 {video.category}
               </span>
             )}
             {video.tags?.slice(0, 1).map((tag) => (
-              <span key={tag} className="text-[#B8B8BD] text-[10px] font-semibold uppercase">
+              <span key={tag} className="text-[var(--text-secondary)] text-[10px] font-semibold uppercase tracking-wider">
                 {tag}
               </span>
             ))}
           </div>
 
-          <h2 className="text-white font-bold text-lg sm:text-xl leading-tight line-clamp-2 drop-shadow-lg">
+          <h2 className="text-white font-black text-xl sm:text-3xl leading-tight line-clamp-2 drop-shadow-lg">
             {video.title}
           </h2>
-          <p className="text-[#B8B8BD] text-xs mt-1 line-clamp-1">
+          <p className="text-[var(--text-secondary)] text-xs sm:text-sm mt-1.5 line-clamp-1 max-w-2xl font-normal">
             {video.description}
           </p>
 
           {/* Creator + Stats row */}
-          <div className="flex items-center gap-3 mt-2 pt-2 border-t border-white/10">
-            <div className="relative w-6 h-6 rounded-full overflow-hidden bg-[#333336] border border-white/20 shrink-0">
+          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[var(--glass-border-subtle)]">
+            <div className="relative w-7 h-7 rounded-full overflow-hidden bg-[var(--color-purple-bright)]/20 border border-[var(--glass-border)] shrink-0 flex items-center justify-center">
               {video.creator?.avatar_url ? (
                 <Image src={video.creator.avatar_url} alt="" fill className="object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-[8px] font-bold text-[#FF0080]">
+                <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-[var(--color-pink)]">
                   {video.creator?.display_name?.[0] || 'C'}
                 </div>
               )}
             </div>
-            <span className="text-[#B8B8BD] text-[11px] font-medium">
+            <span className="text-[var(--text-secondary)] text-xs font-medium">
               @{video.creator?.username || video.creator?.display_name || 'creator'}
             </span>
             {video.duration_seconds > 0 && (
-              <span className="ml-auto flex items-center gap-1 text-[10px] text-[#85858B]">
-                <Clock className="w-3 h-3" />
+              <span className="ml-auto flex items-center gap-1 text-[11px] text-[var(--text-muted)]">
+                <Clock className="w-3.5 h-3.5" />
                 {formatDuration(video.duration_seconds)}
               </span>
             )}
@@ -134,36 +134,36 @@ function AudioStrip({ track, onPlay }: { track: FeedAudio; onPlay: () => void })
   return (
     <button
       onClick={onPlay}
-      className="w-full flex items-center gap-3 bg-[#2B2B2D] hover:bg-[#333336] border border-[#454549] hover:border-[#FF0080]/50 rounded-2xl px-4 py-3 transition-all group text-left"
+      className="w-full flex items-center gap-3.5 theme-glass-card rounded-2xl px-4 py-3 transition-all group text-left border border-[var(--glass-border)] hover:border-[var(--color-magenta)]"
     >
       {/* Cover */}
-      <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-[#333336] shrink-0 border border-[#454549]">
+      <div className="relative w-11 h-11 rounded-xl overflow-hidden bg-[var(--bg-secondary)] shrink-0 border border-[var(--glass-border-subtle)]">
         {track.cover_url ? (
           <Image src={track.cover_url} alt={track.title} fill className="object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Music className="w-5 h-5 text-[#FF0080]" />
+          <div className="w-full h-full flex items-center justify-center bg-[var(--color-purple-bright)]/20">
+            <Music className="w-5 h-5 text-[var(--color-pink)]" />
           </div>
         )}
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="text-white text-xs font-semibold truncate group-hover:text-[#FF0080] transition-colors">
+        <p className="text-white text-xs sm:text-sm font-semibold truncate group-hover:text-[var(--color-pink)] transition-colors">
           {track.title}
         </p>
-        <p className="text-[#85858B] text-[10px] truncate">
+        <p className="text-[var(--text-muted)] text-[11px] truncate mt-0.5">
           {track.artist_name || track.creator?.display_name} · {track.genre || 'Audio'}
         </p>
       </div>
 
       {/* Waveform icon + headphones */}
-      <div className="flex items-center gap-2 shrink-0">
-        <BarChart2 className="w-4 h-4 text-[#FF0080]" />
+      <div className="flex items-center gap-2.5 shrink-0">
+        <BarChart2 className="w-4 h-4 text-[var(--color-pink)]" />
         {track.duration_seconds > 0 && (
-          <span className="text-[#85858B] text-[10px]">{formatDuration(track.duration_seconds)}</span>
+          <span className="text-[var(--text-muted)] text-[11px] font-medium">{formatDuration(track.duration_seconds)}</span>
         )}
-        <Headphones className="w-4 h-4 text-[#85858B]" />
+        <Headphones className="w-4 h-4 text-[var(--text-muted)]" />
       </div>
     </button>
   );
@@ -174,16 +174,16 @@ function CompactVideoTile({ video }: { video: FeedVideo }) {
   return (
     <Link href={`/videos/${video.id}`} className="group flex flex-col gap-2">
       {/* Thumbnail */}
-      <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-[#2B2B2D]">
+      <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-[var(--bg-secondary)] border border-[var(--glass-border)] group-hover:border-[var(--color-magenta)] transition-all">
         {video.thumbnail_url ? (
           <Image
             src={video.thumbnail_url}
             alt={video.title}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-[#454549]">
+          <div className="w-full h-full flex items-center justify-center text-[var(--color-purple-bright)] bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--bg-tertiary)]">
             <Film className="w-6 h-6" />
           </div>
         )}
@@ -192,21 +192,21 @@ function CompactVideoTile({ video }: { video: FeedVideo }) {
 
         {/* Duration badge */}
         {video.duration_seconds > 0 && (
-          <div className="absolute top-1.5 left-1.5 bg-black/80 backdrop-blur text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md">
+          <div className="absolute top-2 left-2 bg-[var(--bg-primary)]/80 backdrop-blur-md border border-[var(--glass-border-subtle)] text-[var(--text-secondary)] text-[9px] font-bold px-1.5 py-0.5 rounded-md">
             {formatDuration(video.duration_seconds)}
           </div>
         )}
 
         {/* Lock badge */}
         {video.is_locked && (
-          <div className="absolute top-1.5 right-1.5 bg-black/70 backdrop-blur p-1 rounded-md">
-            <Lock className="w-2.5 h-2.5 text-[#FF0080]" />
+          <div className="absolute top-2 right-2 bg-[var(--bg-primary)]/80 backdrop-blur-md border border-[var(--glass-border)] p-1 rounded-md">
+            <Lock className="w-2.5 h-2.5 text-[var(--color-pink)]" />
           </div>
         )}
 
         {/* Play on hover */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="w-8 h-8 rounded-full bg-[#FF0080] flex items-center justify-center shadow-lg">
+          <div className="w-8 h-8 rounded-full theme-neon-button flex items-center justify-center shadow-lg">
             <Play className="w-4 h-4 text-white fill-white ml-0.5" />
           </div>
         </div>
@@ -214,10 +214,10 @@ function CompactVideoTile({ video }: { video: FeedVideo }) {
 
       {/* Meta */}
       <div>
-        <p className="text-white text-xs font-semibold line-clamp-2 leading-tight group-hover:text-[#FF0080] transition-colors">
+        <p className="text-white text-xs font-semibold line-clamp-2 leading-tight group-hover:text-[var(--color-pink)] transition-colors">
           {video.title}
         </p>
-        <p className="text-[#85858B] text-[10px] mt-0.5 truncate">
+        <p className="text-[var(--text-muted)] text-[10px] mt-0.5 truncate font-normal">
           @{video.creator?.username || video.creator?.display_name || 'creator'}
         </p>
       </div>
@@ -229,23 +229,23 @@ function CompactVideoTile({ video }: { video: FeedVideo }) {
 function CompactBlogTile({ blog }: { blog: FeedBlog }) {
   return (
     <Link href={`/blogs/${blog.id}`} className="group flex flex-col gap-2">
-      <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-[#2B2B2D]">
+      <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-[var(--bg-secondary)] border border-[var(--glass-border)] group-hover:border-[var(--color-magenta)] transition-all">
         {blog.cover_url ? (
-          <Image src={blog.cover_url} alt={blog.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+          <Image src={blog.cover_url} alt={blog.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-[#454549] bg-gradient-to-br from-[#2B2B2D] to-[#333336]">
+          <div className="w-full h-full flex items-center justify-center text-[var(--color-purple-bright)] bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--bg-tertiary)]">
             <BookOpen className="w-6 h-6" />
           </div>
         )}
-        <div className="absolute top-1.5 left-1.5 bg-black/80 backdrop-blur text-[#FF0080] text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase">
+        <div className="absolute top-2 left-2 bg-[var(--bg-primary)]/80 backdrop-blur-md border border-[var(--glass-border)] text-[var(--color-pink)] text-[9px] font-bold px-2 py-0.5 rounded-md uppercase">
           Blog
         </div>
       </div>
       <div>
-        <p className="text-white text-xs font-semibold line-clamp-2 leading-tight group-hover:text-[#FF0080] transition-colors">
+        <p className="text-white text-xs font-semibold line-clamp-2 leading-tight group-hover:text-[var(--color-pink)] transition-colors">
           {blog.title}
         </p>
-        <p className="text-[#85858B] text-[10px] mt-0.5 truncate">
+        <p className="text-[var(--text-muted)] text-[10px] mt-0.5 truncate font-normal">
           @{blog.author?.username || blog.author?.display_name || 'author'}
         </p>
       </div>
@@ -256,17 +256,17 @@ function CompactBlogTile({ blog }: { blog: FeedBlog }) {
 // ─── Section Header ───────────────────────────────────────────────────────────
 function SectionHeader({ title, badge, href }: { title: string; badge?: string; href?: string }) {
   return (
-    <div className="flex items-center justify-between mb-3">
-      <h2 className="text-white font-bold text-base flex items-center gap-2">
-        <Zap className="w-4 h-4 text-[#FF0080]" />
+    <div className="flex items-center justify-between mb-3.5">
+      <h2 className="text-white font-bold text-base sm:text-lg flex items-center gap-2">
+        <Zap className="w-4 h-4 text-[var(--color-pink)]" />
         {title}
       </h2>
       <div className="flex items-center gap-2">
         {badge && (
-          <span className="text-[#85858B] text-[10px] font-bold uppercase tracking-widest">{badge}</span>
+          <span className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest">{badge}</span>
         )}
         {href && (
-          <Link href={href} className="text-[#FF0080] hover:text-white transition-colors">
+          <Link href={href} className="text-[var(--color-pink)] hover:text-white transition-colors">
             <ChevronRight className="w-4 h-4" />
           </Link>
         )}
@@ -277,7 +277,7 @@ function SectionHeader({ title, badge, href }: { title: string; badge?: string; 
 
 // ─── Filter Pills ─────────────────────────────────────────────────────────────
 const FILTERS: { key: FilterType; label: string; icon?: React.ElementType }[] = [
-  { key: 'all', label: 'All' },
+  { key: 'all', label: 'All Formats' },
   { key: 'videos', label: 'Videos', icon: Film },
   { key: 'audio', label: 'Audio', icon: Music },
   { key: 'blogs', label: 'Blogs', icon: BookOpen },
@@ -355,15 +355,15 @@ export default function HomePage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
 
       {/* ── Filter Pills ── */}
-      <div className="flex items-center gap-2 pb-5 overflow-x-auto scrollbar-none">
+      <div className="flex items-center gap-2.5 pb-6 overflow-x-auto scrollbar-none">
         {FILTERS.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             onClick={() => setActiveFilter(key)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all shrink-0 ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all shrink-0 ${
               activeFilter === key
-                ? 'bg-[#FF0080] text-white shadow-lg shadow-[#FF0080]/30'
-                : 'bg-[#2B2B2D] text-[#B8B8BD] hover:text-white border border-[#454549]'
+                ? 'theme-active-pill'
+                : 'theme-inactive-pill'
             }`}
           >
             {Icon && <Icon className="w-3.5 h-3.5" />}
@@ -374,24 +374,24 @@ export default function HomePage() {
         <button
           onClick={fetchFeed}
           aria-label="Refresh"
-          className="ml-auto p-2 rounded-full bg-[#2B2B2D] border border-[#454549] text-[#85858B] hover:text-white transition-colors shrink-0"
+          className="ml-auto p-2.5 rounded-full bg-[var(--glass-surface-subtle)] border border-[var(--glass-border)] text-[var(--text-muted)] hover:text-white hover:border-[var(--color-magenta)] transition-all shrink-0"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#FF0080]' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[var(--color-pink)]' : ''}`} />
         </button>
       </div>
 
       {/* ── Loading Skeleton ── */}
       {isLoading && (
         <div className="space-y-4 animate-pulse">
-          <div className="w-full aspect-[16/9] sm:aspect-[21/9] bg-[#2B2B2D] rounded-2xl" />
-          <div className="h-14 bg-[#2B2B2D] rounded-2xl" />
-          <div className="h-5 bg-[#2B2B2D] rounded w-40" />
+          <div className="w-full aspect-[16/9] sm:aspect-[21/9] bg-[var(--glass-surface)] rounded-3xl" />
+          <div className="h-14 bg-[var(--glass-surface)] rounded-2xl" />
+          <div className="h-5 bg-[var(--glass-surface)] rounded w-40" />
           <div className="grid grid-cols-3 gap-3">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="space-y-2">
-                <div className="aspect-video bg-[#2B2B2D] rounded-xl" />
-                <div className="h-3 bg-[#2B2B2D] rounded w-4/5" />
-                <div className="h-2 bg-[#2B2B2D] rounded w-2/5" />
+                <div className="aspect-video bg-[var(--glass-surface)] rounded-2xl" />
+                <div className="h-3 bg-[var(--glass-surface)] rounded w-4/5" />
+                <div className="h-2 bg-[var(--glass-surface)] rounded w-2/5" />
               </div>
             ))}
           </div>
@@ -401,11 +401,11 @@ export default function HomePage() {
       {/* ── No content ── */}
       {!isLoading && hasNoContent && (
         <div className="text-center py-20">
-          <div className="w-14 h-14 rounded-2xl bg-[#2B2B2D] border border-[#454549] flex items-center justify-center mx-auto mb-4">
-            <Zap className="w-6 h-6 text-[#FF0080]" />
+          <div className="w-16 h-16 rounded-2xl bg-[var(--glass-surface)] border border-[var(--glass-border)] flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[var(--color-purple-bright)]/10">
+            <Zap className="w-8 h-8 text-[var(--color-pink)]" />
           </div>
-          <p className="text-white font-semibold">No content yet</p>
-          <p className="text-[#85858B] text-sm mt-1">Content uploaded by creators will appear here.</p>
+          <p className="text-white font-bold text-lg">No content yet</p>
+          <p className="text-[var(--text-secondary)] text-sm mt-1">Content uploaded by creators will appear here.</p>
         </div>
       )}
 

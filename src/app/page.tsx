@@ -197,39 +197,39 @@ export default function LandingPage() {
   return (
     <div className="w-full">
 
-      {/* ── HERO MARKETING SECTION (original) ── */}
+      {/* ── HERO MARKETING SECTION ── */}
       <section className="relative overflow-hidden py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#FF0080]/10 rounded-full blur-3xl pointer-events-none -z-10" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[var(--color-purple-bright)]/20 rounded-full blur-3xl pointer-events-none -z-10" />
 
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#333336] border border-[#454549] text-xs font-semibold text-[#FF0080] mb-6">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--glass-surface)] border border-[var(--glass-border)] text-xs font-bold text-[var(--color-pink)] mb-6 shadow-sm">
           <Sparkles className="w-3.5 h-3.5" />
           <span>The Next Generation Multi-Format Entertainment Hub</span>
         </div>
 
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight sm:leading-none">
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white max-w-4xl mx-auto leading-tight sm:leading-none">
           Stream. Listen. Read.{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF0080] to-purple-400">
+          <span className="theme-gradient-heading">
             Create.
           </span>
         </h1>
 
-        <p className="mt-6 text-base sm:text-xl text-[#B8B8BD] max-w-2xl mx-auto leading-relaxed">
+        <p className="mt-6 text-base sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed font-normal">
           Yarrowplay unites cinematic video series, high-fidelity music streaming, insightful blogs, and direct creator monetization on one unified, high-speed platform.
         </p>
 
         <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4">
           {user ? (
-            <Link href="/home" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white font-semibold text-base transition-all shadow-lg active:scale-95">
+            <Link href="/home" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full theme-neon-button font-bold text-base transition-all shadow-lg active:scale-95">
               <span>Go to Content Feed</span>
               <ArrowRight className="w-5 h-5" />
             </Link>
           ) : (
             <>
-              <Link href="/register" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white font-semibold text-base transition-all shadow-lg active:scale-95">
+              <Link href="/register" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full theme-neon-button font-bold text-base transition-all shadow-lg active:scale-95">
                 <span>Get Started Free</span>
                 <ArrowRight className="w-5 h-5" />
               </Link>
-              <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#333336] hover:bg-[#3A3A3E] border border-[#454549] text-white font-semibold text-base transition-all">
+              <Link href="/login" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full theme-inactive-pill font-semibold text-base transition-all">
                 Sign In
               </Link>
             </>
@@ -244,10 +244,10 @@ export default function LandingPage() {
             { icon: BookOpen, label: 'Creator Blogs', desc: 'Rich editorial articles' },
             { icon: Megaphone, label: 'Authentic Ads', desc: 'Non-intrusive sponsor cards' },
           ].map((item, idx) => (
-            <div key={idx} className="p-4 rounded-2xl bg-[#333336]/60 border border-[#454549] text-left hover:border-[#FF0080]/50 transition-colors">
-              <item.icon className="w-6 h-6 text-[#FF0080] mb-2" />
-              <h3 className="text-sm font-semibold text-white">{item.label}</h3>
-              <p className="text-xs text-[#85858B] mt-0.5">{item.desc}</p>
+            <div key={idx} className="p-4 rounded-3xl theme-glass-card text-left border border-[var(--glass-border)] hover:border-[var(--color-magenta)] transition-all">
+              <item.icon className="w-6 h-6 text-[var(--color-pink)] mb-2" />
+              <h3 className="text-sm font-bold text-white">{item.label}</h3>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -397,46 +397,46 @@ export default function LandingPage() {
         </section>
       )}
 
-      {/* ── CREATOR & ADVERTISER DUAL SECTION (original) ── */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#454549]">
+      {/* ── CREATOR & ADVERTISER DUAL SECTION ── */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[var(--glass-border-subtle)]">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-[#333336] border border-[#454549] rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF0080]/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="theme-glass-card-static border border-[var(--glass-border)] rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-[var(--color-purple-bright)]/15 rounded-full blur-3xl pointer-events-none" />
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF0080]/15 text-[#FF0080] text-xs font-bold uppercase mb-4">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[var(--color-purple-bright)]/20 text-[var(--color-pink)] text-xs font-bold uppercase mb-4 border border-[var(--color-purple-bright)]/30">
                 <Film className="w-3.5 h-3.5" />For Content Creators
               </div>
               <h3 className="text-2xl font-bold text-white mb-3">Creator Studio & Deep Analytics</h3>
-              <p className="text-sm text-[#B8B8BD] leading-relaxed mb-6">Upload entire series with multi-episode forms or release audio albums in minutes. Track views, watch duration, audience retention, likes, shares, and earnings from verified event data.</p>
-              <ul className="space-y-2.5 text-xs text-[#B8B8BD]">
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 font-normal">Upload entire series with multi-episode forms or release audio albums in minutes. Track views, watch duration, audience retention, likes, shares, and earnings from verified event data.</p>
+              <ul className="space-y-2.5 text-xs text-[var(--text-secondary)] font-normal">
                 {['Multi-episode series batch upload pipeline', 'Direct-to-cloud Cloudinary ingestion (Yarrowplay preset)', 'Video boosting controls for increased reach'].map((item) => (
-                  <li key={item} className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-[#22C55E]" />{item}</li>
+                  <li key={item} className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-[var(--status-success)] shrink-0" />{item}</li>
                 ))}
               </ul>
             </div>
             <div className="mt-8">
-              <Link href="/register" className="inline-flex items-center gap-2 text-sm font-semibold text-[#FF0080] hover:text-white transition-colors">
+              <Link href="/register" className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-pink)] hover:text-white transition-colors">
                 <span>Join as Content Creator</span><ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
 
-          <div className="bg-[#333336] border border-[#454549] rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="theme-glass-card-static border border-[var(--glass-border)] rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-[var(--color-magenta)]/15 rounded-full blur-3xl pointer-events-none" />
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/15 text-purple-400 text-xs font-bold uppercase mb-4">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[var(--color-magenta)]/20 text-[var(--color-pink-light)] text-xs font-bold uppercase mb-4 border border-[var(--color-magenta)]/30">
                 <Megaphone className="w-3.5 h-3.5" />For Brands & Advertisers
               </div>
               <h3 className="text-2xl font-bold text-white mb-3">Transparent Sponsored Content</h3>
-              <p className="text-sm text-[#B8B8BD] leading-relaxed mb-6">Launch targeted media campaigns that blend cleanly into the feed with prominent, honest <span className="text-[#FF0080] font-semibold">Sponsored</span> tags. Zero disguised clickbait.</p>
-              <ul className="space-y-2.5 text-xs text-[#B8B8BD]">
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 font-normal">Launch targeted media campaigns that blend cleanly into the feed with prominent, honest <span className="text-[var(--color-pink)] font-semibold">Sponsored</span> tags. Zero disguised clickbait.</p>
+              <ul className="space-y-2.5 text-xs text-[var(--text-secondary)] font-normal">
                 {['Upload custom creatives (Images & Videos)', 'Real-time impression and verified click tracking', 'Dedicated Advertiser Studio dashboard'].map((item) => (
-                  <li key={item} className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-[#22C55E]" />{item}</li>
+                  <li key={item} className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-[var(--status-success)] shrink-0" />{item}</li>
                 ))}
               </ul>
             </div>
             <div className="mt-8">
-              <Link href="/register" className="inline-flex items-center gap-2 text-sm font-semibold text-[#FF0080] hover:text-white transition-colors">
+              <Link href="/register?role=advertiser" className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-pink)] hover:text-white transition-colors">
                 <span>Launch an Advertiser Campaign</span><ArrowRight className="w-4 h-4" />
               </Link>
             </div>
