@@ -256,25 +256,32 @@ export function AudioPlayerBar() {
           <div className="flex items-center gap-3">
             {/* Reactions & Watchlist in Docked Bar */}
             <div className="hidden sm:flex items-center gap-1.5">
-              <div className="flex items-center bg-[#3A3A3E] rounded-lg border border-[#454549] overflow-hidden">
+              <div
+                className="flex items-center rounded-lg border overflow-hidden backdrop-blur-md"
+                style={{
+                  background: 'var(--glass-surface)',
+                  borderColor: 'var(--glass-border)',
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => handleReaction('like')}
                   title="Like Audio"
-                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-semibold transition-colors ${
-                    userReaction === 'like' ? 'text-[#FF0080] bg-[#FF0080]/15' : 'text-[#B8B8BD] hover:text-white'
+                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-semibold transition-all ${
+                    userReaction === 'like' ? 'text-[var(--color-pink-light)] shadow-inner' : 'text-[var(--text-secondary)] hover:text-white'
                   }`}
+                  style={userReaction === 'like' ? { background: 'var(--neon-purple-glow)' } : undefined}
                 >
                   <ThumbsUp className={`w-3.5 h-3.5 ${userReaction === 'like' ? 'fill-current' : ''}`} />
                   <span className="text-[11px]">{likesCount}</span>
                 </button>
-                <div className="w-px h-3.5 bg-[#454549]" />
+                <div className="w-px h-3.5 bg-white/10" />
                 <button
                   type="button"
                   onClick={() => handleReaction('dislike')}
                   title="Dislike Audio"
-                  className={`px-2 py-1 text-xs font-semibold transition-colors ${
-                    userReaction === 'dislike' ? 'text-[#EF4444] bg-[#EF4444]/15' : 'text-[#B8B8BD] hover:text-white'
+                  className={`px-2 py-1 text-xs font-semibold transition-all ${
+                    userReaction === 'dislike' ? 'text-red-400 bg-red-500/20' : 'text-[var(--text-secondary)] hover:text-white'
                   }`}
                 >
                   <ThumbsDown className={`w-3.5 h-3.5 ${userReaction === 'dislike' ? 'fill-current' : ''}`} />
@@ -285,11 +292,13 @@ export function AudioPlayerBar() {
                 type="button"
                 onClick={handleToggleFavorite}
                 title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-                className={`p-1.5 rounded-lg border transition-colors ${
-                  isFavorite
-                    ? 'bg-[#FF0080] text-white border-[#FF0080]'
-                    : 'bg-[#3A3A3E] border-[#454549] text-[#B8B8BD] hover:text-white'
-                }`}
+                className="p-1.5 rounded-lg border transition-all cursor-pointer"
+                style={{
+                  background: isFavorite ? 'var(--gradient-neon)' : 'var(--glass-surface)',
+                  borderColor: isFavorite ? 'var(--color-pink)' : 'var(--glass-border)',
+                  color: isFavorite ? '#ffffff' : 'var(--text-secondary)',
+                  boxShadow: isFavorite ? 'var(--glow-pink)' : 'none',
+                }}
               >
                 <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-current' : ''}`} />
               </button>
@@ -298,11 +307,13 @@ export function AudioPlayerBar() {
                 type="button"
                 onClick={handleToggleWatchlist}
                 title={isWatchlisted ? 'In Watchlist' : 'Add to Watchlist'}
-                className={`p-1.5 rounded-lg border transition-colors ${
-                  isWatchlisted
-                    ? 'bg-[#FF0080] text-white border-[#FF0080]'
-                    : 'bg-[#3A3A3E] border-[#454549] text-[#B8B8BD] hover:text-white'
-                }`}
+                className="p-1.5 rounded-lg border transition-all cursor-pointer"
+                style={{
+                  background: isWatchlisted ? 'var(--gradient-neon)' : 'var(--glass-surface)',
+                  borderColor: isWatchlisted ? 'var(--color-pink)' : 'var(--glass-border)',
+                  color: isWatchlisted ? '#ffffff' : 'var(--text-secondary)',
+                  boxShadow: isWatchlisted ? 'var(--glow-pink)' : 'none',
+                }}
               >
                 <Bookmark className={`w-3.5 h-3.5 ${isWatchlisted ? 'fill-current' : ''}`} />
               </button>

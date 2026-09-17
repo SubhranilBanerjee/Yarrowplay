@@ -174,7 +174,7 @@ export default function BlogStudioPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <BookOpen className="w-7 h-7 text-[#FF0080]" />
+            <BookOpen className="w-7 h-7 text-[var(--color-pink-light)]" />
             Blog Studio
           </h1>
           <p className="text-sm text-[#85858B] mt-1">
@@ -187,11 +187,21 @@ export default function BlogStudioPage() {
       <div className="grid grid-cols-2 gap-3 mb-6 bg-[#333336] p-1.5 rounded-2xl border border-[#454549]">
         <button
           onClick={() => setActiveTab('write')}
-          className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
+          className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer border"
+          style={
             activeTab === 'write'
-              ? 'bg-[#FF0080] text-white shadow-lg'
-              : 'text-[#B8B8BD] hover:text-white'
-          }`}
+              ? {
+                  background: 'var(--gradient-neon)',
+                  color: '#ffffff',
+                  borderColor: 'var(--color-pink)',
+                  boxShadow: 'var(--glow-purple)',
+                }
+              : {
+                  background: 'var(--glass-surface)',
+                  color: 'var(--text-secondary)',
+                  borderColor: 'var(--glass-border)',
+                }
+          }
         >
           <PenTool className="w-4 h-4" />
           <span>Write Article</span>
@@ -199,11 +209,21 @@ export default function BlogStudioPage() {
 
         <button
           onClick={() => setActiveTab('articles')}
-          className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
+          className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer border"
+          style={
             activeTab === 'articles'
-              ? 'bg-[#FF0080] text-white shadow-lg'
-              : 'text-[#B8B8BD] hover:text-white'
-          }`}
+              ? {
+                  background: 'var(--gradient-neon)',
+                  color: '#ffffff',
+                  borderColor: 'var(--color-pink)',
+                  boxShadow: 'var(--glow-purple)',
+                }
+              : {
+                  background: 'var(--glass-surface)',
+                  color: 'var(--text-secondary)',
+                  borderColor: 'var(--glass-border)',
+                }
+          }
         >
           <BookOpen className="w-4 h-4" />
           <span>{isAdmin ? 'All Articles' : 'My Articles'}</span>
@@ -214,8 +234,8 @@ export default function BlogStudioPage() {
         <div
           className={`mb-6 p-4 rounded-2xl border flex items-center gap-3 text-sm ${
             statusMsg.type === 'success'
-              ? 'bg-[#22C55E]/15 border-[#22C55E]/30 text-[#22C55E]'
-              : 'bg-[#EF4444]/15 border-[#EF4444]/30 text-[#EF4444]'
+              ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+              : 'bg-red-500/15 border-red-500/30 text-red-400'
           }`}
         >
           {statusMsg.type === 'success' ? (
@@ -231,9 +251,15 @@ export default function BlogStudioPage() {
       {/* WRITE ARTICLE VIEW                                   */}
       {/* ==================================================== */}
       {activeTab === 'write' && (
-        <div className="bg-[#333336] border border-[#454549] rounded-2xl p-6 sm:p-8 space-y-6">
+        <div
+          className="rounded-2xl p-6 sm:p-8 space-y-6 border backdrop-blur-xl"
+          style={{
+            background: 'var(--glass-surface)',
+            borderColor: 'var(--glass-border)',
+          }}
+        >
         <div>
-          <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+          <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
             Blog Title *
           </label>
           <input
@@ -242,31 +268,39 @@ export default function BlogStudioPage() {
             placeholder="e.g. Behind the Scenes: The Making of Neon Horizon"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-[#2B2B2D] text-white placeholder-[#85858B] text-base font-semibold rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+            className="w-full text-white placeholder-[var(--text-muted)] text-base font-semibold rounded-xl px-4 py-3 border focus:outline-none transition-all"
+            style={{
+              background: 'var(--glass-surface-heavy)',
+              borderColor: 'var(--glass-border)',
+            }}
           />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+            <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
               Category
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full bg-[#2B2B2D] text-white text-sm rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+              className="w-full text-white text-sm rounded-xl px-4 py-3 border focus:outline-none transition-all cursor-pointer"
+              style={{
+                background: 'var(--glass-surface-heavy)',
+                borderColor: 'var(--glass-border)',
+              }}
             >
-              <option value="Entertainment">Entertainment</option>
-              <option value="Music">Music</option>
-              <option value="Technology">Technology</option>
-              <option value="Culture">Culture</option>
-              <option value="Film Review">Film Review</option>
-              <option value="Tutorial">Tutorial</option>
+              <option value="Entertainment" className="bg-[#100020] text-white">Entertainment</option>
+              <option value="Music" className="bg-[#100020] text-white">Music</option>
+              <option value="Technology" className="bg-[#100020] text-white">Technology</option>
+              <option value="Culture" className="bg-[#100020] text-white">Culture</option>
+              <option value="Film Review" className="bg-[#100020] text-white">Film Review</option>
+              <option value="Tutorial" className="bg-[#100020] text-white">Tutorial</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+            <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
               Tags (comma separated)
             </label>
             <input
@@ -274,30 +308,43 @@ export default function BlogStudioPage() {
               placeholder="e.g. Production, Audio, Directing"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              className="w-full bg-[#2B2B2D] text-white placeholder-[#85858B] text-sm rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+              className="w-full text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border focus:outline-none transition-all"
+              style={{
+                background: 'var(--glass-surface-heavy)',
+                borderColor: 'var(--glass-border)',
+              }}
             />
           </div>
         </div>
 
         {/* Cover Image Upload */}
         <div>
-          <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+          <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
             Cover Image (JPG, PNG max 5MB)
           </label>
           {coverUrl ? (
-            <div className="relative h-44 w-full rounded-2xl overflow-hidden border border-[#454549]">
+            <div
+              className="relative h-44 w-full rounded-2xl overflow-hidden border"
+              style={{ borderColor: 'var(--glass-border)' }}
+            >
               <Image src={coverUrl} alt="Cover preview" fill className="object-cover" />
               <button
                 type="button"
                 onClick={() => setCoverUrl('')}
-                className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 text-white hover:text-[#EF4444]"
+                className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 text-white hover:text-red-400"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <label className="block border-2 border-dashed border-[#454549] hover:border-[#FF0080] rounded-2xl p-6 text-center cursor-pointer bg-[#2B2B2D]/50 transition-colors">
-              <Upload className="w-6 h-6 text-[#FF0080] mx-auto mb-2" />
+            <label
+              className="block border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all"
+              style={{
+                background: 'var(--glass-surface-heavy)',
+                borderColor: 'var(--neon-purple-border)',
+              }}
+            >
+              <Upload className="w-6 h-6 text-[var(--color-pink-light)] mx-auto mb-2" />
               <span className="text-xs text-white font-medium block">
                 {coverUploading ? 'Uploading cover...' : 'Upload Cover Image'}
               </span>
@@ -314,7 +361,7 @@ export default function BlogStudioPage() {
 
         {/* Blog Article Body */}
         <div>
-          <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1.5">
+          <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
             Blog Content (Markdown supported) *
           </label>
           <textarea
@@ -323,17 +370,28 @@ export default function BlogStudioPage() {
             placeholder="Write your story here..."
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            className="w-full bg-[#2B2B2D] text-white placeholder-[#85858B] text-sm rounded-xl p-4 border border-[#454549] focus:outline-none focus:border-[#FF0080] font-sans leading-relaxed"
+            className="w-full text-white placeholder-[var(--text-muted)] text-sm rounded-xl p-4 border focus:outline-none font-sans leading-relaxed transition-all"
+            style={{
+              background: 'var(--glass-surface-heavy)',
+              borderColor: 'var(--glass-border)',
+            }}
           />
         </div>
 
         {/* Publish / Draft Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#454549]">
+        <div
+          className="flex items-center justify-end gap-3 pt-4 border-t"
+          style={{ borderColor: 'var(--glass-border)' }}
+        >
           <button
             type="button"
             disabled={isSubmitting}
             onClick={() => handleSaveBlog('draft')}
-            className="px-5 py-3 rounded-xl bg-[#3A3A3E] hover:bg-[#404045] text-white text-xs font-semibold transition-all disabled:opacity-50"
+            className="px-5 py-3 rounded-xl text-white text-xs font-semibold transition-all disabled:opacity-50 border cursor-pointer"
+            style={{
+              background: 'var(--glass-surface)',
+              borderColor: 'var(--glass-border)',
+            }}
           >
             Save as Draft
           </button>
@@ -342,7 +400,11 @@ export default function BlogStudioPage() {
             type="button"
             disabled={isSubmitting}
             onClick={() => handleSaveBlog('published')}
-            className="px-6 py-3 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white text-xs font-semibold transition-all shadow-md active:scale-95 disabled:opacity-50"
+            className="px-6 py-3 rounded-xl text-white text-xs font-semibold transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
+            style={{
+              background: 'var(--gradient-neon)',
+              boxShadow: 'var(--glow-purple)',
+            }}
           >
             {isSubmitting ? 'Publishing...' : 'Publish Blog'}
           </button>
@@ -356,26 +418,39 @@ export default function BlogStudioPage() {
       {activeTab === 'articles' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-[#85858B]">
+            <h3 className="text-sm font-semibold text-[var(--text-secondary)]">
               {isAdmin ? 'All Articles Across Platform' : 'Your Published & Draft Articles'} ({articles.length})
             </h3>
             {isAdmin && (
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#FF0080]/15 text-[#FF0080] border border-[#FF0080]/30">
+              <span
+                className="px-2.5 py-1 rounded-full text-[10px] font-bold border"
+                style={{
+                  background: 'var(--neon-purple-glow)',
+                  borderColor: 'var(--neon-purple-border)',
+                  color: 'var(--color-pink-light)',
+                }}
+              >
                 Admin Mode
               </span>
             )}
           </div>
 
           {loadingArticles ? (
-            <div className="p-12 text-center text-[#85858B] flex flex-col items-center gap-3">
-              <Loader2 className="w-6 h-6 animate-spin text-[#FF0080]" />
+            <div className="p-12 text-center text-[var(--text-muted)] flex flex-col items-center gap-3">
+              <Loader2 className="w-6 h-6 animate-spin text-[var(--color-pink-light)]" />
               <p className="text-xs">Loading articles...</p>
             </div>
           ) : articles.length === 0 ? (
-            <div className="bg-[#333336] border border-[#454549] rounded-2xl p-12 text-center text-[#85858B] space-y-3">
-              <BookOpen className="w-10 h-10 mx-auto text-[#85858B]/50" />
+            <div
+              className="rounded-2xl p-12 text-center text-[var(--text-muted)] space-y-3 border backdrop-blur-md"
+              style={{
+                background: 'var(--glass-surface)',
+                borderColor: 'var(--glass-border)',
+              }}
+            >
+              <BookOpen className="w-10 h-10 mx-auto opacity-50" />
               <p className="text-sm font-semibold text-white">No articles found</p>
-              <p className="text-xs max-w-sm mx-auto">
+              <p className="text-xs max-w-sm mx-auto text-[var(--text-secondary)]">
                 You haven't published any articles yet. Switch to the Write Article tab to get started.
               </p>
             </div>
@@ -384,28 +459,38 @@ export default function BlogStudioPage() {
               {articles.map((art) => (
                 <div
                   key={art.id}
-                  className="p-4 bg-[#333336] border border-[#454549] rounded-2xl flex items-center justify-between gap-4 hover:border-[#555559] transition-colors"
+                  className="p-4 rounded-2xl flex items-center justify-between gap-4 border transition-all backdrop-blur-md"
+                  style={{
+                    background: 'var(--glass-surface)',
+                    borderColor: 'var(--glass-border)',
+                  }}
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="relative w-16 h-12 rounded-xl overflow-hidden bg-[#2B2B2D] shrink-0 border border-[#454549]">
+                    <div
+                      className="relative w-16 h-12 rounded-xl overflow-hidden shrink-0 border"
+                      style={{
+                        background: 'var(--glass-surface-heavy)',
+                        borderColor: 'var(--glass-border)',
+                      }}
+                    >
                       {art.cover_url ? (
                         <Image src={art.cover_url} alt={art.title} fill className="object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <BookOpen className="w-5 h-5 text-[#85858B]" />
+                          <BookOpen className="w-5 h-5 text-[var(--text-muted)]" />
                         </div>
                       )}
                     </div>
                     <div className="min-w-0">
                       <h4 className="text-sm font-semibold text-white truncate">{art.title}</h4>
-                      <div className="flex items-center gap-2 text-[11px] text-[#85858B] mt-0.5">
+                      <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)] mt-0.5">
                         <span className="capitalize">{art.status || 'published'}</span>
                         <span>•</span>
                         <span>{new Date(art.created_at).toLocaleDateString()}</span>
                         {isAdmin && art.author && (
                           <>
                             <span>•</span>
-                            <span className="text-[#FF0080] truncate">
+                            <span className="text-[var(--color-pink-light)] truncate">
                               By {art.author.display_name || art.author.username}
                             </span>
                           </>
@@ -417,15 +502,20 @@ export default function BlogStudioPage() {
                   <div className="flex items-center gap-2 shrink-0">
                     <Link
                       href={`/blogs/${art.id}`}
-                      className="p-2 rounded-xl bg-[#2B2B2D] hover:bg-[#3A3A3E] text-[#B8B8BD] hover:text-white transition-colors cursor-pointer"
+                      className="p-2 rounded-xl border text-[var(--text-secondary)] hover:text-white transition-colors cursor-pointer"
                       title="Read article"
+                      style={{
+                        background: 'var(--glass-surface-heavy)',
+                        borderColor: 'var(--glass-border)',
+                      }}
                     >
                       <ExternalLink className="w-4 h-4" />
                     </Link>
                     <button
                       onClick={() => setDeleteTarget(art)}
                       title="Delete article"
-                      className="p-2 rounded-xl bg-[#EF4444]/10 hover:bg-[#EF4444] text-[#EF4444] hover:text-white border border-[#EF4444]/30 transition-colors cursor-pointer"
+                      className="p-2 rounded-xl text-red-400 hover:bg-red-600 hover:text-white border border-red-500/30 transition-colors cursor-pointer"
+                      style={{ background: 'rgba(239, 68, 68, 0.12)' }}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -439,26 +529,33 @@ export default function BlogStudioPage() {
 
       {/* Delete Confirmation Modal */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#2B2B2D] border border-[#454549] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center gap-3 text-[#EF4444]">
-              <div className="p-3 bg-[#EF4444]/10 rounded-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
+          <div
+            className="rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border backdrop-blur-xl"
+            style={{
+              background: 'var(--glass-surface-heavy)',
+              borderColor: 'rgba(239, 68, 68, 0.3)',
+              boxShadow: '0 0 25px rgba(239, 68, 68, 0.2)',
+            }}
+          >
+            <div className="flex items-center gap-3 text-red-400">
+              <div className="p-3 bg-red-500/10 rounded-xl border border-red-500/20">
                 <Trash2 className="w-6 h-6" />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-white">Delete Article</h3>
-                <p className="text-xs text-[#85858B]">This action cannot be undone</p>
+                <p className="text-xs text-[var(--text-muted)]">This action cannot be undone</p>
               </div>
             </div>
 
-            <p className="text-sm text-[#B8B8BD] leading-relaxed">
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
               Are you sure you want to permanently delete{' '}
               <strong className="text-white">"{deleteTarget.title}"</strong>? All associated comments
               and reactions will be permanently deleted.
             </p>
 
             {deleteError && (
-              <div className="p-3 rounded-xl bg-[#EF4444]/10 border border-[#EF4444]/20 text-xs text-[#EF4444]">
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400">
                 {deleteError}
               </div>
             )}
@@ -471,7 +568,7 @@ export default function BlogStudioPage() {
                   setDeleteTarget(null);
                   setDeleteError(null);
                 }}
-                className="px-4 py-2 text-xs font-semibold text-[#85858B] hover:text-white transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-[var(--text-muted)] hover:text-white transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -479,7 +576,7 @@ export default function BlogStudioPage() {
                 type="button"
                 disabled={isDeleting}
                 onClick={handleConfirmDeleteBlog}
-                className="px-4 py-2 rounded-xl bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-semibold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer shadow-lg"
               >
                 {isDeleting ? (
                   <>

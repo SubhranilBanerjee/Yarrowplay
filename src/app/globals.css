@@ -60,7 +60,7 @@ input[type="range"] {
 }
 
 input, textarea, [contenteditable="true"] {
-  caret-color: #FF0080;
+  caret-color: var(--color-pink);
 }
 
 /* Ensure interactive elements keep pointer cursor and avoid accidental text selection */

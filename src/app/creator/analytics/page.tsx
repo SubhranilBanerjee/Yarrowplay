@@ -208,37 +208,64 @@ export default function CreatorAnalyticsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <BarChart3 className="w-7 h-7 text-[#FF0080]" />
+            <BarChart3 className="w-7 h-7 text-[var(--color-pink-light)]" />
             Creator Analytics
           </h1>
-          <p className="text-sm text-[#85858B] mt-1">
+          <p className="text-sm text-[var(--text-secondary)] mt-1">
             Real performance telemetry derived from database events and viewer playback sessions.
           </p>
         </div>
 
         {/* Date Filters */}
-        <div className="flex items-center gap-2 bg-[#333336] p-1.5 rounded-xl border border-[#454549] self-start sm:self-auto">
+        <div
+          className="flex items-center gap-2 p-1.5 rounded-xl border self-start sm:self-auto backdrop-blur-md"
+          style={{
+            background: 'var(--glass-surface)',
+            borderColor: 'var(--glass-border)',
+          }}
+        >
           <button
             onClick={() => setDateRange('7d')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              dateRange === '7d' ? 'bg-[#FF0080] text-white' : 'text-[#B8B8BD] hover:text-white'
-            }`}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+            style={
+              dateRange === '7d'
+                ? {
+                    background: 'var(--gradient-neon)',
+                    color: '#ffffff',
+                    boxShadow: 'var(--glow-purple)',
+                  }
+                : { color: 'var(--text-secondary)' }
+            }
           >
             Last 7 Days
           </button>
           <button
             onClick={() => setDateRange('30d')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              dateRange === '30d' ? 'bg-[#FF0080] text-white' : 'text-[#B8B8BD] hover:text-white'
-            }`}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+            style={
+              dateRange === '30d'
+                ? {
+                    background: 'var(--gradient-neon)',
+                    color: '#ffffff',
+                    boxShadow: 'var(--glow-purple)',
+                  }
+                : { color: 'var(--text-secondary)' }
+            }
           >
             Last 30 Days
           </button>
           <button
             onClick={() => setDateRange('all')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              dateRange === 'all' ? 'bg-[#FF0080] text-white' : 'text-[#B8B8BD] hover:text-white'
-            }`}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+            style={
+              dateRange === 'all'
+                ? {
+                    background: 'var(--gradient-neon)',
+                    color: '#ffffff',
+                    boxShadow: 'var(--glow-purple)',
+                  }
+                : { color: 'var(--text-secondary)' }
+            }
           >
             All Time
           </button>
@@ -247,78 +274,126 @@ export default function CreatorAnalyticsPage() {
 
       {/* 8 Primary Telemetry Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div className="bg-[#333336] border border-[#454549] rounded-2xl p-4">
-          <div className="flex items-center justify-between text-[#85858B] mb-2">
+        <div
+          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
+          style={{
+            background: 'var(--glass-surface)',
+            borderColor: 'var(--glass-border)',
+          }}
+        >
+          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
             <span className="text-xs uppercase font-semibold">Total Views</span>
-            <Eye className="w-4 h-4 text-[#FF0080]" />
+            <Eye className="w-4 h-4 text-[var(--color-pink-light)]" />
           </div>
           <p className="text-2xl font-extrabold text-white">{totals.views.toLocaleString()}</p>
-          <span className="text-[11px] text-[#22C55E] mt-1 block">Live stream events</span>
+          <span className="text-[11px] text-emerald-400 mt-1 block">Live stream events</span>
         </div>
 
-        <div className="bg-[#333336] border border-[#454549] rounded-2xl p-4">
-          <div className="flex items-center justify-between text-[#85858B] mb-2">
+        <div
+          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
+          style={{
+            background: 'var(--glass-surface)',
+            borderColor: 'var(--glass-border)',
+          }}
+        >
+          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
             <span className="text-xs uppercase font-semibold">Watch Time</span>
-            <Clock className="w-4 h-4 text-[#FF0080]" />
+            <Clock className="w-4 h-4 text-[var(--color-pink-light)]" />
           </div>
           <p className="text-2xl font-extrabold text-white">
             {totals.watchTimeMinutes.toLocaleString()}{' '}
-            <span className="text-xs font-normal text-[#85858B]">mins</span>
+            <span className="text-xs font-normal text-[var(--text-muted)]">mins</span>
           </p>
-          <span className="text-[11px] text-[#22C55E] mt-1 block">Heartbeat verified</span>
+          <span className="text-[11px] text-emerald-400 mt-1 block">Heartbeat verified</span>
         </div>
 
-        <div className="bg-[#333336] border border-[#454549] rounded-2xl p-4">
-          <div className="flex items-center justify-between text-[#85858B] mb-2">
+        <div
+          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
+          style={{
+            background: 'var(--glass-surface)',
+            borderColor: 'var(--glass-border)',
+          }}
+        >
+          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
             <span className="text-xs uppercase font-semibold">Total Likes</span>
-            <Heart className="w-4 h-4 text-[#FF0080]" />
+            <Heart className="w-4 h-4 text-[var(--color-pink-light)]" />
           </div>
           <p className="text-2xl font-extrabold text-white">{totals.likes.toLocaleString()}</p>
-          <span className="text-[11px] text-[#B8B8BD] mt-1 block">
+          <span className="text-[11px] text-[var(--text-secondary)] mt-1 block">
             {totals.dislikes} dislikes
           </span>
         </div>
 
-        <div className="bg-[#333336] border border-[#454549] rounded-2xl p-4">
-          <div className="flex items-center justify-between text-[#85858B] mb-2">
+        <div
+          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
+          style={{
+            background: 'var(--glass-surface)',
+            borderColor: 'var(--glass-border)',
+          }}
+        >
+          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
             <span className="text-xs uppercase font-semibold">Total Shares</span>
-            <Share2 className="w-4 h-4 text-[#FF0080]" />
+            <Share2 className="w-4 h-4 text-[var(--color-pink-light)]" />
           </div>
           <p className="text-2xl font-extrabold text-white">{totals.shares.toLocaleString()}</p>
-          <span className="text-[11px] text-[#85858B] mt-1 block">Web share & copy links</span>
+          <span className="text-[11px] text-[var(--text-muted)] mt-1 block">Web share & copy links</span>
         </div>
 
-        <div className="bg-[#333336] border border-[#454549] rounded-2xl p-4">
-          <div className="flex items-center justify-between text-[#85858B] mb-2">
+        <div
+          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
+          style={{
+            background: 'var(--glass-surface)',
+            borderColor: 'var(--glass-border)',
+          }}
+        >
+          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
             <span className="text-xs uppercase font-semibold">Comments</span>
-            <MessageSquare className="w-4 h-4 text-[#FF0080]" />
+            <MessageSquare className="w-4 h-4 text-[var(--color-pink-light)]" />
           </div>
           <p className="text-2xl font-extrabold text-white">{totals.comments.toLocaleString()}</p>
-          <span className="text-[11px] text-[#85858B] mt-1 block">Discussions</span>
+          <span className="text-[11px] text-[var(--text-muted)] mt-1 block">Discussions</span>
         </div>
 
-        <div className="bg-[#333336] border border-[#454549] rounded-2xl p-4">
-          <div className="flex items-center justify-between text-[#85858B] mb-2">
+        <div
+          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
+          style={{
+            background: 'var(--glass-surface)',
+            borderColor: 'var(--glass-border)',
+          }}
+        >
+          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
             <span className="text-xs uppercase font-semibold">Published Items</span>
-            <Film className="w-4 h-4 text-[#FF0080]" />
+            <Film className="w-4 h-4 text-[var(--color-pink-light)]" />
           </div>
           <p className="text-2xl font-extrabold text-white">{totals.totalContent}</p>
-          <span className="text-[11px] text-[#85858B] mt-1 block">Videos & Audio</span>
+          <span className="text-[11px] text-[var(--text-muted)] mt-1 block">Videos & Audio</span>
         </div>
 
-        <div className="bg-[#333336] border border-[#454549] rounded-2xl p-4">
-          <div className="flex items-center justify-between text-[#85858B] mb-2">
+        <div
+          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
+          style={{
+            background: 'var(--glass-surface)',
+            borderColor: 'var(--glass-border)',
+          }}
+        >
+          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
             <span className="text-xs uppercase font-semibold">Creator Earnings</span>
-            <DollarSign className="w-4 h-4 text-[#22C55E]" />
+            <DollarSign className="w-4 h-4 text-emerald-400" />
           </div>
           <p className="text-2xl font-extrabold text-white">${totals.earnings.toFixed(2)}</p>
-          <span className="text-[11px] text-[#85858B] mt-1 block">Recorded revenue</span>
+          <span className="text-[11px] text-[var(--text-muted)] mt-1 block">Recorded revenue</span>
         </div>
 
-        <div className="bg-[#333336] border border-[#454549] rounded-2xl p-4">
-          <div className="flex items-center justify-between text-[#85858B] mb-2">
+        <div
+          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
+          style={{
+            background: 'var(--glass-surface)',
+            borderColor: 'var(--glass-border)',
+          }}
+        >
+          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
             <span className="text-xs uppercase font-semibold">Avg Retention</span>
-            <Sparkles className="w-4 h-4 text-[#FF0080]" />
+            <Sparkles className="w-4 h-4 text-[var(--color-pink-light)]" />
           </div>
           <p className="text-2xl font-extrabold text-white">
             {totals.views > 0
@@ -326,31 +401,40 @@ export default function CreatorAnalyticsPage() {
               : 0}
             %
           </p>
-          <span className="text-[11px] text-[#85858B] mt-1 block">Session completion</span>
+          <span className="text-[11px] text-[var(--text-muted)] mt-1 block">Session completion</span>
         </div>
       </div>
 
       {/* Visual Chart: Performance Bars */}
-      <div className="bg-[#333336] border border-[#454549] rounded-2xl p-6 mb-8">
+      <div
+        className="rounded-2xl p-6 mb-8 border backdrop-blur-xl"
+        style={{
+          background: 'var(--glass-surface)',
+          borderColor: 'var(--glass-border)',
+        }}
+      >
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-base font-bold text-white">Audience Engagement by Upload</h2>
-            <p className="text-xs text-[#85858B]">Comparing views against watch duration</p>
+            <p className="text-xs text-[var(--text-muted)]">Comparing views against watch duration</p>
           </div>
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded bg-[#FF0080]" />
-              <span className="text-[#B8B8BD]">Views</span>
+              <span
+                className="w-3 h-3 rounded"
+                style={{ background: 'var(--gradient-neon)' }}
+              />
+              <span className="text-[var(--text-secondary)]">Views</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded bg-purple-500" />
-              <span className="text-[#B8B8BD]">Watch Time (mins)</span>
+              <span className="text-[var(--text-secondary)]">Watch Time (mins)</span>
             </div>
           </div>
         </div>
 
         {contentList.length === 0 ? (
-          <div className="py-12 text-center text-xs text-[#85858B]">
+          <div className="py-12 text-center text-xs text-[var(--text-muted)]">
             No uploaded content yet to chart.
           </div>
         ) : (
@@ -365,14 +449,21 @@ export default function CreatorAnalyticsPage() {
                 <div key={item.id} className="space-y-1.5">
                   <div className="flex justify-between text-xs">
                     <span className="font-semibold text-white truncate max-w-xs">{item.title}</span>
-                    <span className="text-[#85858B]">
+                    <span className="text-[var(--text-muted)]">
                       {item.views} views • {item.watchTimeMinutes} mins
                     </span>
                   </div>
-                  <div className="h-3 bg-[#2B2B2D] rounded-full overflow-hidden flex gap-1">
+                  <div
+                    className="h-3 rounded-full overflow-hidden flex gap-1 p-0.5"
+                    style={{ background: 'var(--glass-surface-heavy)' }}
+                  >
                     <div
-                      className="h-full bg-[#FF0080] rounded-full transition-all duration-500"
-                      style={{ width: `${viewPct}%` }}
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${viewPct}%`,
+                        background: 'var(--gradient-neon)',
+                        boxShadow: 'var(--glow-pink)',
+                      }}
                     />
                     <div
                       className="h-full bg-purple-500 rounded-full transition-all duration-500"
@@ -387,38 +478,74 @@ export default function CreatorAnalyticsPage() {
       </div>
 
       {/* Item-by-Item Telemetry Table */}
-      <div className="bg-[#333336] border border-[#454549] rounded-2xl p-6">
+      <div
+        className="rounded-2xl p-6 border backdrop-blur-xl"
+        style={{
+          background: 'var(--glass-surface)',
+          borderColor: 'var(--glass-border)',
+        }}
+      >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <h2 className="text-base font-bold text-white">Itemized Content Telemetry</h2>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setContentTypeFilter('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer"
+              style={
                 contentTypeFilter === 'all'
-                  ? 'bg-[#FF0080] text-white'
-                  : 'bg-[#2B2B2D] text-[#B8B8BD] hover:text-white'
-              }`}
+                  ? {
+                      background: 'var(--gradient-neon)',
+                      color: '#ffffff',
+                      borderColor: 'var(--color-pink)',
+                      boxShadow: 'var(--glow-purple)',
+                    }
+                  : {
+                      background: 'var(--glass-surface-heavy)',
+                      color: 'var(--text-secondary)',
+                      borderColor: 'var(--glass-border)',
+                    }
+              }
             >
               All
             </button>
             <button
               onClick={() => setContentTypeFilter('video')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer"
+              style={
                 contentTypeFilter === 'video'
-                  ? 'bg-[#FF0080] text-white'
-                  : 'bg-[#2B2B2D] text-[#B8B8BD] hover:text-white'
-              }`}
+                  ? {
+                      background: 'var(--gradient-neon)',
+                      color: '#ffffff',
+                      borderColor: 'var(--color-pink)',
+                      boxShadow: 'var(--glow-purple)',
+                    }
+                  : {
+                      background: 'var(--glass-surface-heavy)',
+                      color: 'var(--text-secondary)',
+                      borderColor: 'var(--glass-border)',
+                    }
+              }
             >
               Videos Only
             </button>
             <button
               onClick={() => setContentTypeFilter('audio')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer"
+              style={
                 contentTypeFilter === 'audio'
-                  ? 'bg-[#FF0080] text-white'
-                  : 'bg-[#2B2B2D] text-[#B8B8BD] hover:text-white'
-              }`}
+                  ? {
+                      background: 'var(--gradient-neon)',
+                      color: '#ffffff',
+                      borderColor: 'var(--color-pink)',
+                      boxShadow: 'var(--glow-purple)',
+                    }
+                  : {
+                      background: 'var(--glass-surface-heavy)',
+                      color: 'var(--text-secondary)',
+                      borderColor: 'var(--glass-border)',
+                    }
+              }
             >
               Audio Only
             </button>
@@ -435,8 +562,11 @@ export default function CreatorAnalyticsPage() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-[#B8B8BD]">
-              <thead className="border-b border-[#454549] text-[#85858B] uppercase">
+            <table className="w-full text-left text-xs text-[var(--text-secondary)]">
+              <thead
+                className="border-b text-[var(--text-muted)] uppercase"
+                style={{ borderColor: 'var(--glass-border)' }}
+              >
                 <tr>
                   <th className="py-3 px-4">Title</th>
                   <th className="py-3 px-4">Type</th>
@@ -448,35 +578,55 @@ export default function CreatorAnalyticsPage() {
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#454549]">
+              <tbody
+                className="divide-y"
+                style={{ borderColor: 'var(--glass-border)' }}
+              >
                 {filteredContent.map((item) => (
-                  <tr key={item.id} className="hover:bg-[#3A3A3E]/50 transition-colors">
+                  <tr key={item.id} className="hover:bg-white/5 transition-colors">
                     <td className="py-3.5 px-4 font-semibold text-white truncate max-w-[200px]">
                       {item.title}
                     </td>
                     <td className="py-3.5 px-4 capitalize">
-                      <span className="px-2 py-0.5 rounded-full bg-[#2B2B2D] border border-[#454549]">
+                      <span
+                        className="px-2 py-0.5 rounded-full border text-[11px]"
+                        style={{
+                          background: 'var(--glass-surface-heavy)',
+                          borderColor: 'var(--glass-border)',
+                        }}
+                      >
                         {item.type}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-white font-medium">{item.views}</td>
                     <td className="py-3.5 px-4">{item.watchTimeMinutes} mins</td>
                     <td className="py-3.5 px-4">
-                      <span className="text-[#22C55E]">{item.likes}</span> /{' '}
-                      <span className="text-[#EF4444]">{item.dislikes}</span>
+                      <span className="text-emerald-400">{item.likes}</span> /{' '}
+                      <span className="text-red-400">{item.dislikes}</span>
                     </td>
                     <td className="py-3.5 px-4">{item.shares}</td>
-                    <td className="py-3.5 px-4 text-[#22C55E] font-medium">${item.earnings.toFixed(2)}</td>
+                    <td className="py-3.5 px-4 text-emerald-400 font-medium">${item.earnings.toFixed(2)}</td>
                     <td className="py-3.5 px-4 text-right">
                       {item.type === 'video' && (
                         item.boosted ? (
-                          <span className="px-2.5 py-1 rounded-lg bg-[#FF0080]/20 text-[#FF0080] font-semibold text-[11px] border border-[#FF0080]/40">
+                          <span
+                            className="px-2.5 py-1 rounded-lg font-semibold text-[11px] border"
+                            style={{
+                              background: 'var(--neon-purple-glow)',
+                              borderColor: 'var(--neon-purple-border)',
+                              color: 'var(--color-pink-light)',
+                            }}
+                          >
                             Boosted
                           </span>
                         ) : (
                           <button
                             onClick={() => handleBoostVideo(item.id)}
-                            className="px-2.5 py-1 rounded-lg bg-[#FF0080] hover:bg-[#E00071] text-white font-semibold text-[11px] transition-all shadow"
+                            className="px-2.5 py-1 rounded-lg text-white font-semibold text-[11px] transition-all cursor-pointer shadow-md"
+                            style={{
+                              background: 'var(--gradient-neon)',
+                              boxShadow: 'var(--glow-purple)',
+                            }}
                           >
                             Boost Video
                           </button>

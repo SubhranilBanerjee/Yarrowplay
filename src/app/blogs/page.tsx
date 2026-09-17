@@ -49,10 +49,10 @@ export default function BlogsFeedPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <BookOpen className="w-7 h-7 text-[#FF0080]" />
+            <BookOpen className="w-7 h-7 text-[var(--color-pink-light)]" />
             Blogs & Stories
           </h1>
-          <p className="text-sm text-[#85858B] mt-1">
+          <p className="text-sm text-[var(--text-secondary)] mt-1">
             Essays, commentaries, and deep dives published by the Yarrowplay creator community.
           </p>
         </div>
@@ -60,7 +60,11 @@ export default function BlogsFeedPage() {
         {user && (
           <Link
             href="/blog/studio"
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white font-semibold text-sm transition-all shadow-md self-start sm:self-auto"
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-white font-semibold text-sm transition-all shadow-md self-start sm:self-auto cursor-pointer"
+            style={{
+              background: 'var(--gradient-neon)',
+              boxShadow: 'var(--glow-purple)',
+            }}
           >
             <Plus className="w-4 h-4" />
             <span>Write a Blog</span>

@@ -154,17 +154,21 @@ export default function AdvertiserStudioPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <Megaphone className="w-7 h-7 text-[#FF0080]" />
+            <Megaphone className="w-7 h-7 text-[var(--color-pink-light)]" />
             Advertiser Studio
           </h1>
-          <p className="text-sm text-[#85858B] mt-1">
+          <p className="text-sm text-[var(--text-secondary)] mt-1">
             Launch verified sponsored campaigns that display honestly across Yarrowplay feeds.
           </p>
         </div>
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white font-semibold text-sm transition-all shadow-md self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-white font-semibold text-sm transition-all shadow-md self-start sm:self-auto cursor-pointer"
+          style={{
+            background: 'var(--gradient-neon)',
+            boxShadow: 'var(--glow-purple)',
+          }}
         >
           <Plus className="w-4 h-4" />
           <span>Launch Campaign</span>
@@ -173,36 +177,60 @@ export default function AdvertiserStudioPage() {
 
       {/* Campaign Summary Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <div className="bg-[#333336] border border-[#454549] rounded-2xl p-5">
-          <div className="flex items-center justify-between text-[#85858B] mb-2">
+        <div
+          className="rounded-2xl p-5 border backdrop-blur-md"
+          style={{
+            background: 'var(--glass-surface)',
+            borderColor: 'var(--glass-border)',
+          }}
+        >
+          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
             <span className="text-xs uppercase font-semibold">Total Impressions</span>
-            <Eye className="w-4 h-4 text-[#FF0080]" />
+            <Eye className="w-4 h-4 text-[var(--color-pink-light)]" />
           </div>
           <p className="text-3xl font-extrabold text-white">{totalImpressions.toLocaleString()}</p>
-          <span className="text-xs text-[#22C55E] mt-1 block">Live Feed Placements</span>
+          <span className="text-xs text-emerald-400 mt-1 block">Live Feed Placements</span>
         </div>
 
-        <div className="bg-[#333336] border border-[#454549] rounded-2xl p-5">
-          <div className="flex items-center justify-between text-[#85858B] mb-2">
+        <div
+          className="rounded-2xl p-5 border backdrop-blur-md"
+          style={{
+            background: 'var(--glass-surface)',
+            borderColor: 'var(--glass-border)',
+          }}
+        >
+          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
             <span className="text-xs uppercase font-semibold">Verified Clicks</span>
-            <MousePointerClick className="w-4 h-4 text-[#FF0080]" />
+            <MousePointerClick className="w-4 h-4 text-[var(--color-pink-light)]" />
           </div>
           <p className="text-3xl font-extrabold text-white">{totalClicks.toLocaleString()}</p>
-          <span className="text-xs text-[#22C55E] mt-1 block">Outbound Traffic</span>
+          <span className="text-xs text-emerald-400 mt-1 block">Outbound Traffic</span>
         </div>
 
-        <div className="bg-[#333336] border border-[#454549] rounded-2xl p-5">
-          <div className="flex items-center justify-between text-[#85858B] mb-2">
+        <div
+          className="rounded-2xl p-5 border backdrop-blur-md"
+          style={{
+            background: 'var(--glass-surface)',
+            borderColor: 'var(--glass-border)',
+          }}
+        >
+          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
             <span className="text-xs uppercase font-semibold">Average CTR</span>
-            <TrendingUp className="w-4 h-4 text-[#FF0080]" />
+            <TrendingUp className="w-4 h-4 text-[var(--color-pink-light)]" />
           </div>
           <p className="text-3xl font-extrabold text-white">{avgCtr}%</p>
-          <span className="text-xs text-[#85858B] mt-1 block">Click-through conversion</span>
+          <span className="text-xs text-[var(--text-muted)] mt-1 block">Click-through conversion</span>
         </div>
       </div>
 
       {/* Campaigns Table or Empty State */}
-      <div className="bg-[#333336] border border-[#454549] rounded-2xl p-6">
+      <div
+        className="rounded-2xl p-6 border backdrop-blur-xl"
+        style={{
+          background: 'var(--glass-surface)',
+          borderColor: 'var(--glass-border)',
+        }}
+      >
         <h2 className="text-base font-bold text-white mb-4">Active & Past Campaigns</h2>
 
         {campaigns.length === 0 ? (
@@ -215,8 +243,11 @@ export default function AdvertiserStudioPage() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-[#B8B8BD]">
-              <thead className="border-b border-[#454549] text-[#85858B] uppercase">
+            <table className="w-full text-left text-xs text-[var(--text-secondary)]">
+              <thead
+                className="border-b text-[var(--text-muted)] uppercase"
+                style={{ borderColor: 'var(--glass-border)' }}
+              >
                 <tr>
                   <th className="py-3 px-4">Creative</th>
                   <th className="py-3 px-4">Title & Headline</th>
@@ -227,34 +258,40 @@ export default function AdvertiserStudioPage() {
                   <th className="py-3 px-4 text-right">Destination</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#454549]">
+              <tbody className="divide-y" style={{ borderColor: 'var(--glass-border)' }}>
                 {campaigns.map((c) => {
                   const ctr = c.impressions > 0 ? ((c.clicks / c.impressions) * 100).toFixed(2) : '0.00';
                   return (
-                    <tr key={c.id} className="hover:bg-[#3A3A3E]/50 transition-colors">
+                    <tr key={c.id} className="hover:bg-white/5 transition-colors">
                       <td className="py-3.5 px-4">
-                        <div className="relative w-14 h-14 rounded-lg overflow-hidden border border-[#454549] bg-[#2B2B2D]">
+                        <div
+                          className="relative w-14 h-14 rounded-lg overflow-hidden border"
+                          style={{
+                            background: 'var(--glass-surface-heavy)',
+                            borderColor: 'var(--glass-border)',
+                          }}
+                        >
                           <Image src={c.media_url} alt={c.title} fill className="object-cover" />
                         </div>
                       </td>
                       <td className="py-3.5 px-4 max-w-xs">
                         <p className="font-semibold text-white truncate">{c.title}</p>
-                        <p className="text-[#85858B] text-[11px] truncate">{c.headline}</p>
+                        <p className="text-[var(--text-muted)] text-[11px] truncate">{c.headline}</p>
                       </td>
                       <td className="py-3.5 px-4">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                           {c.status}
                         </span>
                       </td>
                       <td className="py-3.5 px-4 text-white font-medium">{c.impressions}</td>
                       <td className="py-3.5 px-4 text-white font-medium">{c.clicks}</td>
-                      <td className="py-3.5 px-4 text-[#FF0080] font-semibold">{ctr}%</td>
+                      <td className="py-3.5 px-4 font-semibold text-[var(--color-pink-light)]">{ctr}%</td>
                       <td className="py-3.5 px-4 text-right">
                         <a
                           href={c.target_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[#FF0080] hover:underline"
+                          className="inline-flex items-center gap-1 text-[var(--color-pink-light)] hover:underline"
                         >
                           <span>Visit</span>
                           <ExternalLink className="w-3 h-3" />
@@ -271,22 +308,28 @@ export default function AdvertiserStudioPage() {
 
       {/* Create Campaign Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-[#2B2B2D] border border-[#454549] rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div
+            className="rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border backdrop-blur-xl"
+            style={{
+              background: 'var(--glass-surface-heavy)',
+              borderColor: 'var(--glass-border-light)',
+            }}
+          >
             <button
               onClick={() => setShowCreateModal(false)}
-              className="absolute top-4 right-4 p-2 text-[#85858B] hover:text-white rounded-full hover:bg-[#333336]"
+              className="absolute top-4 right-4 p-2 text-[var(--text-muted)] hover:text-white rounded-full hover:bg-white/10"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="mb-6">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <Megaphone className="w-5 h-5 text-[#FF0080]" />
+                <Megaphone className="w-5 h-5 text-[var(--color-pink-light)]" />
                 Create Advertiser Campaign
               </h2>
-              <p className="text-xs text-[#85858B] mt-1">
-                Your campaign will appear honestly marked as <span className="text-[#FF0080] font-semibold">Sponsored</span> in the feed.
+              <p className="text-xs text-[var(--text-muted)] mt-1">
+                Your campaign will appear honestly marked as <span className="text-[var(--color-pink-light)] font-semibold">Sponsored</span> in the feed.
               </p>
             </div>
 
@@ -294,8 +337,8 @@ export default function AdvertiserStudioPage() {
               <div
                 className={`mb-4 p-3 rounded-xl border text-xs flex items-center gap-2 ${
                   formMsg.type === 'success'
-                    ? 'bg-[#22C55E]/15 border-[#22C55E]/30 text-[#22C55E]'
-                    : 'bg-[#EF4444]/15 border-[#EF4444]/30 text-[#EF4444]'
+                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                    : 'bg-red-500/15 border-red-500/30 text-red-400'
                 }`}
               >
                 {formMsg.type === 'success' ? (
@@ -309,7 +352,7 @@ export default function AdvertiserStudioPage() {
 
             <form onSubmit={handleCreateCampaign} className="space-y-4">
               <div>
-                <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1">
+                <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1">
                   Campaign Title *
                 </label>
                 <input
@@ -318,12 +361,16 @@ export default function AdvertiserStudioPage() {
                   placeholder="e.g. Summer Headphone Launch"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-[#333336] text-white text-xs rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                  className="w-full text-white text-xs rounded-xl px-4 py-3 border focus:outline-none transition-colors"
+                  style={{
+                    background: 'var(--glass-surface)',
+                    borderColor: 'var(--glass-border)',
+                  }}
                 />
               </div>
 
               <div>
-                <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1">
+                <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1">
                   Headline *
                 </label>
                 <input
@@ -332,12 +379,16 @@ export default function AdvertiserStudioPage() {
                   placeholder="e.g. Experience Pure Lossless Sound"
                   value={headline}
                   onChange={(e) => setHeadline(e.target.value)}
-                  className="w-full bg-[#333336] text-white text-xs rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                  className="w-full text-white text-xs rounded-xl px-4 py-3 border focus:outline-none transition-colors"
+                  style={{
+                    background: 'var(--glass-surface)',
+                    borderColor: 'var(--glass-border)',
+                  }}
                 />
               </div>
 
               <div>
-                <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1">
+                <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1">
                   Description
                 </label>
                 <textarea
@@ -345,13 +396,17 @@ export default function AdvertiserStudioPage() {
                   placeholder="Brief promotional copy..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-[#333336] text-white text-xs rounded-xl p-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                  className="w-full text-white text-xs rounded-xl p-3 border focus:outline-none transition-colors resize-none"
+                  style={{
+                    background: 'var(--glass-surface)',
+                    borderColor: 'var(--glass-border)',
+                  }}
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1">
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1">
                     Target URL *
                   </label>
                   <input
@@ -360,47 +415,64 @@ export default function AdvertiserStudioPage() {
                     placeholder="https://yourbrand.com"
                     value={targetUrl}
                     onChange={(e) => setTargetUrl(e.target.value)}
-                    className="w-full bg-[#333336] text-white text-xs rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                    className="w-full text-white text-xs rounded-xl px-4 py-3 border focus:outline-none transition-colors"
+                    style={{
+                      background: 'var(--glass-surface)',
+                      borderColor: 'var(--glass-border)',
+                    }}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1">
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1">
                     Button CTA *
                   </label>
                   <select
                     value={ctaLabel}
                     onChange={(e) => setCtaLabel(e.target.value)}
-                    className="w-full bg-[#333336] text-white text-xs rounded-xl px-4 py-3 border border-[#454549] focus:outline-none focus:border-[#FF0080]"
+                    className="w-full text-white text-xs rounded-xl px-4 py-3 border focus:outline-none transition-colors cursor-pointer"
+                    style={{
+                      background: 'var(--glass-surface)',
+                      borderColor: 'var(--glass-border)',
+                    }}
                   >
-                    <option value="Learn More">Learn More</option>
-                    <option value="Shop Now">Shop Now</option>
-                    <option value="Visit Website">Visit Website</option>
-                    <option value="Get Started">Get Started</option>
-                    <option value="Download">Download</option>
+                    <option value="Learn More" className="bg-[#100020] text-white">Learn More</option>
+                    <option value="Shop Now" className="bg-[#100020] text-white">Shop Now</option>
+                    <option value="Visit Website" className="bg-[#100020] text-white">Visit Website</option>
+                    <option value="Get Started" className="bg-[#100020] text-white">Get Started</option>
+                    <option value="Download" className="bg-[#100020] text-white">Download</option>
                   </select>
                 </div>
               </div>
 
               {/* Creative Upload */}
               <div>
-                <label className="block text-xs uppercase tracking-wider font-semibold text-[#B8B8BD] mb-1">
+                <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1">
                   Creative Image / Poster *
                 </label>
                 {mediaUrl ? (
-                  <div className="relative h-28 rounded-xl overflow-hidden border border-[#454549]">
+                  <div
+                    className="relative h-28 rounded-xl overflow-hidden border"
+                    style={{ borderColor: 'var(--glass-border)' }}
+                  >
                     <Image src={mediaUrl} alt="Creative preview" fill className="object-cover" />
                     <button
                       type="button"
                       onClick={() => setMediaUrl('')}
-                      className="absolute top-2 right-2 p-1 rounded-full bg-black/70 text-white hover:text-[#EF4444]"
+                      className="absolute top-2 right-2 p-1 rounded-full bg-black/70 text-white hover:text-red-400"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
-                  <label className="block border-2 border-dashed border-[#454549] hover:border-[#FF0080] rounded-xl p-5 text-center cursor-pointer bg-[#333336]/40 transition-colors">
-                    <Upload className="w-5 h-5 text-[#FF0080] mx-auto mb-1" />
+                  <label
+                    className="block border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-colors"
+                    style={{
+                      background: 'var(--glass-surface)',
+                      borderColor: 'var(--neon-purple-border)',
+                    }}
+                  >
+                    <Upload className="w-5 h-5 text-[var(--color-pink-light)] mx-auto mb-1" />
                     <span className="text-xs text-white block font-medium">
                       {mediaUploading ? 'Uploading Creative...' : 'Select Creative File'}
                     </span>
@@ -418,7 +490,11 @@ export default function AdvertiserStudioPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full mt-2 py-3.5 px-4 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white text-sm font-semibold tracking-wide transition-all shadow-lg active:scale-[0.99] disabled:opacity-50"
+                className="w-full mt-2 py-3.5 px-4 rounded-xl text-white text-sm font-semibold tracking-wide transition-all shadow-lg active:scale-[0.99] disabled:opacity-50 cursor-pointer"
+                style={{
+                  background: 'var(--gradient-neon)',
+                  boxShadow: 'var(--glow-purple)',
+                }}
               >
                 {isSubmitting ? 'Launching Campaign...' : 'Launch Sponsored Campaign'}
               </button>

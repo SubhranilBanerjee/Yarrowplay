@@ -257,9 +257,15 @@ export function VideoPlayer({
       {!isPlaying && (
         <div
           onClick={togglePlay}
-          className="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer transition-opacity"
+          className="absolute inset-0 flex items-center justify-center bg-black/50 cursor-pointer transition-opacity backdrop-blur-[2px]"
         >
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#FF0080] hover:bg-[#E00071] flex items-center justify-center shadow-2xl transition-transform active:scale-95">
+          <div
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-transform active:scale-95 text-white"
+            style={{
+              background: 'var(--gradient-neon)',
+              boxShadow: 'var(--glow-purple-strong)',
+            }}
+          >
             <Play className="w-8 h-8 sm:w-10 sm:h-10 text-white fill-white ml-1" />
           </div>
         </div>
@@ -267,7 +273,7 @@ export function VideoPlayer({
 
       {/* Bottom Controls Bar */}
       <div
-        className={`absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent transition-opacity duration-300 ${
+        className={`absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/95 via-black/70 to-transparent transition-opacity duration-300 ${
           showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
@@ -277,10 +283,14 @@ export function VideoPlayer({
           className="relative w-full h-1.5 hover:h-2.5 bg-white/20 rounded-full cursor-pointer mb-3 transition-all group/seek"
         >
           <div
-            className="h-full bg-[#FF0080] rounded-full relative"
-            style={{ width: `${progressPercent}%` }}
+            className="h-full rounded-full relative"
+            style={{
+              width: `${progressPercent}%`,
+              background: 'var(--gradient-neon)',
+              boxShadow: 'var(--glow-pink)',
+            }}
           >
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full opacity-0 group-hover/seek:opacity-100 transition-opacity shadow" />
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full opacity-0 group-hover/seek:opacity-100 transition-opacity shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
           </div>
         </div>
 
@@ -290,7 +300,7 @@ export function VideoPlayer({
             <button
               onClick={togglePlay}
               aria-label={isPlaying ? 'Pause' : 'Play'}
-              className="p-1.5 hover:text-[#FF0080] transition-colors"
+              className="p-1.5 hover:text-[var(--color-pink-light)] transition-colors"
             >
               {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
             </button>
@@ -300,7 +310,7 @@ export function VideoPlayer({
               <button
                 onClick={toggleMute}
                 aria-label={isMuted ? 'Unmute' : 'Mute'}
-                className="p-1.5 hover:text-[#FF0080] transition-colors"
+                className="p-1.5 hover:text-[var(--color-pink-light)] transition-colors"
               >
                 {isMuted || volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
               </button>
@@ -311,12 +321,12 @@ export function VideoPlayer({
                 step="0.05"
                 value={isMuted ? 0 : volume}
                 onChange={handleVolumeChange}
-                className="w-16 sm:w-20 h-1 bg-white/30 rounded cursor-pointer"
+                className="w-16 sm:w-20 h-1 bg-white/30 rounded cursor-pointer accent-[var(--color-pink-light)]"
               />
             </div>
 
             {/* Time Stamp */}
-            <div className="text-xs text-[#B8B8BD]">
+            <div className="text-xs text-[var(--text-secondary)]">
               <span>{formatTime(currentTime)}</span> / <span>{formatTime(duration)}</span>
             </div>
           </div>
@@ -333,13 +343,19 @@ export function VideoPlayer({
               </button>
 
               {showSpeedMenu && (
-                <div className="absolute bottom-full right-0 mb-2 py-1 bg-[#333336] border border-[#454549] rounded-xl shadow-xl z-50 text-xs">
+                <div
+                  className="absolute bottom-full right-0 mb-2 py-1 rounded-xl shadow-2xl z-50 text-xs backdrop-blur-xl border"
+                  style={{
+                    background: 'var(--glass-surface-heavy)',
+                    borderColor: 'var(--glass-border)',
+                  }}
+                >
                   {[0.5, 0.75, 1, 1.25, 1.5, 2].map((spd) => (
                     <button
                       key={spd}
                       onClick={() => changeSpeed(spd)}
-                      className={`block w-full text-left px-4 py-1.5 hover:bg-[#3A3A3E] ${
-                        playbackSpeed === spd ? 'text-[#FF0080] font-bold' : 'text-white'
+                      className={`block w-full text-left px-4 py-1.5 hover:bg-white/10 transition-colors ${
+                        playbackSpeed === spd ? 'text-[var(--color-pink-light)] font-bold' : 'text-white'
                       }`}
                     >
                       {spd}x
@@ -353,7 +369,7 @@ export function VideoPlayer({
             <button
               onClick={togglePiP}
               aria-label="Picture in Picture"
-              className="p-1.5 hover:text-[#FF0080] transition-colors hidden sm:block"
+              className="p-1.5 hover:text-[var(--color-pink-light)] transition-colors hidden sm:block"
             >
               <Sparkles className="w-4 h-4" />
             </button>
@@ -362,7 +378,7 @@ export function VideoPlayer({
             <button
               onClick={toggleFullscreen}
               aria-label="Toggle Fullscreen"
-              className="p-1.5 hover:text-[#FF0080] transition-colors"
+              className="p-1.5 hover:text-[var(--color-pink-light)] transition-colors"
             >
               {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
             </button>
@@ -372,21 +388,40 @@ export function VideoPlayer({
 
       {/* Locked Paywall Overlay */}
       {locked && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm rounded-2xl">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md rounded-2xl">
           <div className="text-center px-6">
-            <div className="w-16 h-16 rounded-full bg-[#FF0080]/15 border border-[#FF0080]/40 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-[#FF0080]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border"
+              style={{
+                background: 'var(--neon-purple-glow)',
+                borderColor: 'var(--neon-purple-border)',
+              }}
+            >
+              <svg className="w-8 h-8 text-[var(--color-pink-light)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
             <h3 className="text-white font-bold text-lg mb-1">Premium Episode</h3>
-            <p className="text-[#B8B8BD] text-sm mb-2">This episode requires a one-time unlock.</p>
+            <p className="text-[var(--text-secondary)] text-sm mb-2">This episode requires a one-time unlock.</p>
             {priceInr > 0 && (
-              <p className="text-[#FF0080] font-bold text-2xl mb-5">₹{priceInr.toFixed(2)}</p>
+              <p
+                className="font-extrabold text-3xl mb-5"
+                style={{
+                  background: 'var(--gradient-text)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                ₹{priceInr.toFixed(2)}
+              </p>
             )}
             <button
               onClick={onUnlockRequest}
-              className="px-8 py-3 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white font-semibold text-sm transition-all shadow-xl active:scale-95"
+              className="px-8 py-3 rounded-xl font-semibold text-sm text-white transition-all shadow-xl active:scale-95"
+              style={{
+                background: 'var(--gradient-neon)',
+                boxShadow: 'var(--glow-purple)',
+              }}
             >
               Unlock Now
             </button>

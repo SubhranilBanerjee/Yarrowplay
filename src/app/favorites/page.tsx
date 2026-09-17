@@ -68,10 +68,10 @@ export default function FavoritesPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
-          <Heart className="w-7 h-7 text-[#FF0080]" />
+          <Heart className="w-7 h-7 text-[var(--color-pink-light)]" />
           My Favorites
         </h1>
-        <p className="text-sm text-[#85858B] mt-1">
+        <p className="text-sm text-[var(--text-secondary)] mt-1">
           Your bookmarked videos, music, and blogs saved in your Supabase profile.
         </p>
       </div>
@@ -80,11 +80,21 @@ export default function FavoritesPage() {
       <div className="flex items-center gap-2 mb-6">
         <button
           onClick={() => setActiveTab('video')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border"
+          style={
             activeTab === 'video'
-              ? 'bg-[#FF0080] text-white shadow-md'
-              : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
-          }`}
+              ? {
+                  background: 'var(--gradient-neon)',
+                  color: '#ffffff',
+                  borderColor: 'var(--color-pink)',
+                  boxShadow: 'var(--glow-purple)',
+                }
+              : {
+                  background: 'var(--glass-surface)',
+                  color: 'var(--text-secondary)',
+                  borderColor: 'var(--glass-border)',
+                }
+          }
         >
           <Film className="w-4 h-4" />
           Videos
@@ -92,11 +102,21 @@ export default function FavoritesPage() {
 
         <button
           onClick={() => setActiveTab('audio')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border"
+          style={
             activeTab === 'audio'
-              ? 'bg-[#FF0080] text-white shadow-md'
-              : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
-          }`}
+              ? {
+                  background: 'var(--gradient-neon)',
+                  color: '#ffffff',
+                  borderColor: 'var(--color-pink)',
+                  boxShadow: 'var(--glow-purple)',
+                }
+              : {
+                  background: 'var(--glass-surface)',
+                  color: 'var(--text-secondary)',
+                  borderColor: 'var(--glass-border)',
+                }
+          }
         >
           <Music className="w-4 h-4" />
           Audios
@@ -104,11 +124,21 @@ export default function FavoritesPage() {
 
         <button
           onClick={() => setActiveTab('blog')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border"
+          style={
             activeTab === 'blog'
-              ? 'bg-[#FF0080] text-white shadow-md'
-              : 'bg-[#333336] text-[#B8B8BD] hover:text-white border border-[#454549]'
-          }`}
+              ? {
+                  background: 'var(--gradient-neon)',
+                  color: '#ffffff',
+                  borderColor: 'var(--color-pink)',
+                  boxShadow: 'var(--glow-purple)',
+                }
+              : {
+                  background: 'var(--glass-surface)',
+                  color: 'var(--text-secondary)',
+                  borderColor: 'var(--glass-border)',
+                }
+          }
         >
           <BookOpen className="w-4 h-4" />
           Blogs
@@ -118,7 +148,11 @@ export default function FavoritesPage() {
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-[#333336] rounded-2xl h-64 animate-pulse" />
+            <div
+              key={i}
+              className="rounded-2xl h-64 animate-pulse"
+              style={{ background: 'var(--glass-surface)' }}
+            />
           ))}
         </div>
       ) : filteredItems.length === 0 ? (

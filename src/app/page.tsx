@@ -7,6 +7,8 @@ import { useAuth } from '@/context/AuthContext';
 import { createClient } from '@/lib/supabase/client';
 import { MediaCard } from '@/components/media/MediaCard';
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
+import { NeonPlaySign3D } from '@/components/media/NeonPlaySign3D';
+import { SpaceHeroCanvas } from '@/components/media/SpaceHeroCanvas';
 import { Video, AudioTrack, Blog, AdvertiserCampaign } from '@/types/database';
 import {
   Film,
@@ -40,46 +42,71 @@ function formatDuration(seconds?: number | null) {
 function HeroCard({ video }: { video: FeedVideo }) {
   return (
     <Link href={`/videos/${video.id}`} className="block relative w-full rounded-2xl overflow-hidden group shadow-2xl">
-      <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-[#1A1A1C]">
+      <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
         {video.thumbnail_url ? (
           <Image src={video.thumbnail_url} alt={video.title} fill priority className="object-cover group-hover:scale-105 transition-transform duration-700" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1A1A1C] to-[#2B2B2D]">
-            <Film className="w-16 h-16 text-[#454549]" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--bg-primary)] to-[var(--bg-secondary)]">
+            <Film className="w-16 h-16 text-[var(--text-muted)]" />
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/10" />
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-          <span className="flex items-center gap-1.5 bg-[#FF0080] text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-lg">
+          <span
+            className="flex items-center gap-1.5 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-lg"
+            style={{
+              background: 'var(--gradient-neon)',
+              boxShadow: 'var(--glow-pink)',
+            }}
+          >
             <Zap className="w-3 h-3" />{video.series ? 'Series' : 'Featured'}
           </span>
           {video.genre && (
             <span className="flex items-center gap-1 bg-black/60 backdrop-blur border border-white/20 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full">
-              <BarChart2 className="w-3 h-3 text-[#FF0080]" />{video.genre}
+              <BarChart2 className="w-3 h-3 text-[var(--color-pink-light)]" />{video.genre}
             </span>
           )}
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#FF0080] flex items-center justify-center shadow-2xl shadow-[#FF0080]/40 group-hover:scale-110 transition-transform duration-300">
+          <div
+            className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 text-white"
+            style={{
+              background: 'var(--gradient-neon)',
+              boxShadow: 'var(--glow-purple-strong)',
+            }}
+          >
             <Play className="w-7 h-7 text-white fill-white ml-1" />
           </div>
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <div className="flex items-center gap-2 mb-2">
-            {video.category && <span className="bg-[#FF0080] text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded-full">{video.category}</span>}
-            {video.tags?.slice(0, 1).map((tag) => <span key={tag} className="text-[#B8B8BD] text-[10px] font-semibold uppercase">{tag}</span>)}
+            {video.category && (
+              <span
+                className="text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded-full"
+                style={{ background: 'var(--gradient-neon)' }}
+              >
+                {video.category}
+              </span>
+            )}
+            {video.tags?.slice(0, 1).map((tag) => <span key={tag} className="text-[var(--text-secondary)] text-[10px] font-semibold uppercase">{tag}</span>)}
           </div>
           <h2 className="text-white font-bold text-lg sm:text-xl leading-tight line-clamp-2 drop-shadow-lg">{video.title}</h2>
-          <p className="text-[#B8B8BD] text-xs mt-1 line-clamp-1">{video.description}</p>
+          <p className="text-[var(--text-secondary)] text-xs mt-1 line-clamp-1">{video.description}</p>
           <div className="flex items-center gap-3 mt-2 pt-2 border-t border-white/10">
-            <div className="relative w-6 h-6 rounded-full overflow-hidden bg-[#333336] border border-white/20 shrink-0">
+            <div
+              className="relative w-6 h-6 rounded-full overflow-hidden border shrink-0"
+              style={{
+                background: 'var(--glass-surface-heavy)',
+                borderColor: 'var(--glass-border)',
+              }}
+            >
               {video.creator?.avatar_url
                 ? <Image src={video.creator.avatar_url} alt="" fill className="object-cover" />
-                : <div className="w-full h-full flex items-center justify-center text-[8px] font-bold text-[#FF0080]">{video.creator?.display_name?.[0] || 'C'}</div>}
+                : <div className="w-full h-full flex items-center justify-center text-[8px] font-bold text-[var(--color-pink-light)]">{video.creator?.display_name?.[0] || 'C'}</div>}
             </div>
-            <span className="text-[#B8B8BD] text-[11px] font-medium">@{video.creator?.username || video.creator?.display_name || 'creator'}</span>
+            <span className="text-[var(--text-secondary)] text-[11px] font-medium">@{video.creator?.username || video.creator?.display_name || 'creator'}</span>
             {video.duration_seconds > 0 && (
-              <span className="ml-auto flex items-center gap-1 text-[10px] text-[#85858B]">
+              <span className="ml-auto flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
                 <Clock className="w-3 h-3" />{formatDuration(video.duration_seconds)}
               </span>
             )}
@@ -93,18 +120,31 @@ function HeroCard({ video }: { video: FeedVideo }) {
 // ─── Audio Strip ──────────────────────────────────────────────────────────────
 function AudioStrip({ track, onPlay }: { track: FeedAudio; onPlay: () => void }) {
   return (
-    <button onClick={onPlay} className="w-full flex items-center gap-3 bg-[#2B2B2D] hover:bg-[#333336] border border-[#454549] hover:border-[#FF0080]/50 rounded-2xl px-4 py-3 transition-all group text-left">
-      <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-[#333336] shrink-0 border border-[#454549]">
-        {track.cover_url ? <Image src={track.cover_url} alt={track.title} fill className="object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Music className="w-5 h-5 text-[#FF0080]" /></div>}
+    <button
+      onClick={onPlay}
+      className="w-full flex items-center gap-3 border rounded-2xl px-4 py-3 transition-all group text-left cursor-pointer backdrop-blur-md"
+      style={{
+        background: 'var(--glass-surface)',
+        borderColor: 'var(--glass-border)',
+      }}
+    >
+      <div
+        className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border"
+        style={{
+          background: 'var(--glass-surface-heavy)',
+          borderColor: 'var(--glass-border)',
+        }}
+      >
+        {track.cover_url ? <Image src={track.cover_url} alt={track.title} fill className="object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Music className="w-5 h-5 text-[var(--color-pink-light)]" /></div>}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-white text-xs font-semibold truncate group-hover:text-[#FF0080] transition-colors">{track.title}</p>
-        <p className="text-[#85858B] text-[10px] truncate">{track.artist_name || track.creator?.display_name} · {track.genre || 'Audio'}</p>
+        <p className="text-white text-xs font-semibold truncate group-hover:text-[var(--color-pink-light)] transition-colors">{track.title}</p>
+        <p className="text-[var(--text-muted)] text-[10px] truncate">{track.artist_name || track.creator?.display_name} · {track.genre || 'Audio'}</p>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <BarChart2 className="w-4 h-4 text-[#FF0080]" />
-        {track.duration_seconds > 0 && <span className="text-[#85858B] text-[10px]">{formatDuration(track.duration_seconds)}</span>}
-        <Headphones className="w-4 h-4 text-[#85858B]" />
+        <BarChart2 className="w-4 h-4 text-[var(--color-pink-light)]" />
+        {track.duration_seconds > 0 && <span className="text-[var(--text-muted)] text-[10px]">{formatDuration(track.duration_seconds)}</span>}
+        <Headphones className="w-4 h-4 text-[var(--text-muted)]" />
       </div>
     </button>
   );
@@ -114,24 +154,38 @@ function AudioStrip({ track, onPlay }: { track: FeedAudio; onPlay: () => void })
 function CompactVideoTile({ video }: { video: FeedVideo }) {
   return (
     <Link href={`/videos/${video.id}`} className="group flex flex-col gap-2">
-      <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-[#2B2B2D]">
+      <div
+        className="relative aspect-video w-full rounded-xl overflow-hidden border"
+        style={{
+          background: 'var(--glass-surface)',
+          borderColor: 'var(--glass-border)',
+        }}
+      >
         {video.thumbnail_url
           ? <Image src={video.thumbnail_url} alt={video.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
-          : <div className="w-full h-full flex items-center justify-center text-[#454549]"><Film className="w-6 h-6" /></div>}
+          : <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)]"><Film className="w-6 h-6" /></div>}
         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
         {video.duration_seconds > 0 && (
           <div className="absolute top-1.5 left-1.5 bg-black/80 backdrop-blur text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md">{formatDuration(video.duration_seconds)}</div>
         )}
         {video.is_locked && (
-          <div className="absolute top-1.5 right-1.5 bg-black/70 backdrop-blur p-1 rounded-md"><Lock className="w-2.5 h-2.5 text-[#FF0080]" /></div>
+          <div className="absolute top-1.5 right-1.5 bg-black/70 backdrop-blur p-1 rounded-md"><Lock className="w-2.5 h-2.5 text-[var(--color-pink-light)]" /></div>
         )}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="w-8 h-8 rounded-full bg-[#FF0080] flex items-center justify-center shadow-lg"><Play className="w-4 h-4 text-white fill-white ml-0.5" /></div>
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center shadow-lg text-white"
+            style={{
+              background: 'var(--gradient-neon)',
+              boxShadow: 'var(--glow-purple)',
+            }}
+          >
+            <Play className="w-4 h-4 text-white fill-white ml-0.5" />
+          </div>
         </div>
       </div>
       <div>
-        <p className="text-white text-xs font-semibold line-clamp-2 leading-tight group-hover:text-[#FF0080] transition-colors">{video.title}</p>
-        <p className="text-[#85858B] text-[10px] mt-0.5 truncate">@{video.creator?.username || video.creator?.display_name || 'creator'}</p>
+        <p className="text-white text-xs font-semibold line-clamp-2 leading-tight group-hover:text-[var(--color-pink-light)] transition-colors">{video.title}</p>
+        <p className="text-[var(--text-muted)] text-[10px] mt-0.5 truncate">@{video.creator?.username || video.creator?.display_name || 'creator'}</p>
       </div>
     </Link>
   );
@@ -142,11 +196,11 @@ function SectionHeader({ title, badge, href }: { title: string; badge?: string; 
   return (
     <div className="flex items-center justify-between mb-4">
       <h2 className="text-white font-bold text-lg flex items-center gap-2">
-        <Zap className="w-4 h-4 text-[#FF0080]" />{title}
+        <Zap className="w-4 h-4 text-[var(--color-pink-light)]" />{title}
       </h2>
       <div className="flex items-center gap-2">
-        {badge && <span className="text-[#85858B] text-[10px] font-bold uppercase tracking-widest">{badge}</span>}
-        {href && <Link href={href} className="text-[#FF0080] hover:text-white transition-colors"><ChevronRight className="w-4 h-4" /></Link>}
+        {badge && <span className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest">{badge}</span>}
+        {href && <Link href={href} className="text-[var(--color-pink-light)] hover:text-white transition-colors"><ChevronRight className="w-4 h-4" /></Link>}
       </div>
     </div>
   );
@@ -197,59 +251,103 @@ export default function LandingPage() {
   return (
     <div className="w-full">
 
-      {/* ── HERO MARKETING SECTION ── */}
-      <section className="relative overflow-hidden py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[var(--color-purple-bright)]/20 rounded-full blur-3xl pointer-events-none -z-10" />
+      {/* ── HERO MARKETING SECTION WITH SPACE THEME, PARALLAX SCROLL & DISPLAY HEADLINE ── */}
+      <section className="relative overflow-hidden py-10 sm:py-16 px-3 sm:px-6 lg:px-8 w-full">
+        {/* Space-like watercolor nebula, constellations & scroll-driven plasma stream */}
+        <SpaceHeroCanvas />
 
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--glass-surface)] border border-[var(--glass-border)] text-xs font-bold text-[var(--color-pink)] mb-6 shadow-sm">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>The Next Generation Multi-Format Entertainment Hub</span>
-        </div>
+        {/* Outer Celestial Frame Box (Matching Reference Image 2) */}
+        <div className="relative max-w-6xl mx-auto rounded-none border border-[var(--color-purple-bright)]/40 p-6 sm:p-10 lg:p-12 backdrop-blur-[2px] shadow-[0_0_50px_rgba(124,0,255,0.18)]">
+          {/* Cosmic Corner Bracket Accents */}
+          <div className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 border-t-2 border-l-2 border-[var(--color-pink)]" />
+          <div className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 border-t-2 border-r-2 border-[var(--color-pink)]" />
+          <div className="absolute -bottom-1.5 -left-1.5 w-3.5 h-3.5 border-b-2 border-l-2 border-[var(--color-pink)]" />
+          <div className="absolute -bottom-1.5 -right-1.5 w-3.5 h-3.5 border-b-2 border-r-2 border-[var(--color-pink)]" />
 
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white max-w-4xl mx-auto leading-tight sm:leading-none">
-          Stream. Listen. Read.{' '}
-          <span className="theme-gradient-heading">
-            Create.
-          </span>
-        </h1>
-
-        <p className="mt-6 text-base sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed font-normal">
-          Yarrowplay unites cinematic video series, high-fidelity music streaming, insightful blogs, and direct creator monetization on one unified, high-speed platform.
-        </p>
-
-        <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4">
-          {user ? (
-            <Link href="/home" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full theme-neon-button font-bold text-base transition-all shadow-lg active:scale-95">
-              <span>Go to Content Feed</span>
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-          ) : (
-            <>
-              <Link href="/register" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full theme-neon-button font-bold text-base transition-all shadow-lg active:scale-95">
-                <span>Get Started Free</span>
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link href="/login" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full theme-inactive-pill font-semibold text-base transition-all">
-                Sign In
-              </Link>
-            </>
-          )}
-        </div>
-
-        {/* Feature Pill Highlights */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-          {[
-            { icon: Film, label: 'Video Series & Singles', desc: '4K ready streaming' },
-            { icon: Music, label: 'Music & Audio', desc: 'Lossless & full lyrics' },
-            { icon: BookOpen, label: 'Creator Blogs', desc: 'Rich editorial articles' },
-            { icon: Megaphone, label: 'Authentic Ads', desc: 'Non-intrusive sponsor cards' },
-          ].map((item, idx) => (
-            <div key={idx} className="p-4 rounded-3xl theme-glass-card text-left border border-[var(--glass-border)] hover:border-[var(--color-magenta)] transition-all">
-              <item.icon className="w-6 h-6 text-[var(--color-pink)] mb-2" />
-              <h3 className="text-sm font-bold text-white">{item.label}</h3>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">{item.desc}</p>
+          {/* Top Cosmic Navigation / Status Cue (Matching Reference Image 2) */}
+          <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6 text-[10px] sm:text-xs uppercase tracking-[0.25em] text-[var(--text-muted)] select-none">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-none bg-[var(--color-pink)] animate-pulse" />
+              <span>STATION // 01</span>
             </div>
-          ))}
+            <div className="hidden sm:flex items-center gap-6">
+              <span>CINEMA</span>
+              <span>•</span>
+              <span>AUDIO</span>
+              <span>•</span>
+              <span>WRITERS</span>
+              <span>•</span>
+              <span>COMMUNITY</span>
+            </div>
+            <div className="text-[var(--color-pink-light)] font-mono">LIVE FEED</div>
+          </div>
+
+          {/* Central Stage: Headline & Constant-Motion Play Button */}
+          <div className="flex flex-col items-center justify-center text-center space-y-3 sm:space-y-4">
+            {/* Minimal Upper Tag (Matching 'SEE YOU SPACE' from Reference Image 2) */}
+            <p className="text-xs sm:text-sm md:text-base font-bold uppercase tracking-[0.4em] text-white/95 drop-shadow-[0_0_12px_rgba(255,255,255,0.8)]">
+              STREAM • LISTEN • DISCOVER
+            </p>
+
+            {/* Massive Bold Headline: YARROWPLAY (Matching 'COWBOY' yellow-to-pink gradient display) */}
+            <h1 className="font-black tracking-tight uppercase leading-none py-1 select-none text-5xl sm:text-7xl md:text-8xl lg:text-[7.5rem] xl:text-[8.5rem] filter drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)]">
+              <span className="bg-gradient-to-r from-[#FFE600] via-[#FF6E00] to-[#FF20D9] bg-clip-text text-transparent">
+                YARROWPLAY
+              </span>
+            </h1>
+
+            {/* Minimalist Sub-Label (Matching 'OPEN AIR EVENT AGENCY' from Reference Image 2) */}
+            <p className="text-[11px] sm:text-xs md:text-sm uppercase tracking-[0.3em] text-[var(--text-secondary)] font-semibold max-w-lg">
+              THE NEXT GENERATION MULTI-FORMAT MEDIA PLATFORM
+            </p>
+
+            {/* Constant yet dynamic motion Neon Play Sign */}
+            <div className="w-full max-w-lg pt-4 pb-2">
+              <NeonPlaySign3D />
+            </div>
+
+            {/* Action Buttons (Sharp geometric edges matching sidebar aesthetic) */}
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+              {user ? (
+                <Link
+                  href="/home"
+                  className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-none theme-neon-button font-bold text-xs tracking-widest uppercase transition-all shadow-lg active:scale-95 border border-[var(--color-pink-light)]"
+                >
+                  <span>Explore Content Feed</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/register"
+                    className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-none theme-neon-button font-bold text-xs tracking-widest uppercase transition-all shadow-lg active:scale-95 border border-[var(--color-pink-light)]"
+                  >
+                    <span>Get Started Free</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="inline-flex items-center gap-2 px-8 py-3.5 rounded-none theme-inactive-pill font-semibold text-xs tracking-widest uppercase transition-all border border-[var(--glass-border)]"
+                  >
+                    Sign In
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Bottom Constellation Timeline Bar (Matching Reference Image 2) */}
+          <div className="mt-8 pt-4 border-t border-white/10 flex items-center justify-between text-[9px] sm:text-[11px] uppercase tracking-[0.2em] text-[var(--text-muted)] select-none">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-none bg-[var(--color-pink-light)]" />
+              <span>COSMIC MEDIA NEXUS</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span>LOSSLESS AUDIO</span>
+              <span>4K STREAMING</span>
+              <span>CREATOR MONETIZATION</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -310,10 +408,19 @@ export default function LandingPage() {
                         {b.cover_url
                           ? <Image src={b.cover_url} alt={b.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
                           : <div className="w-full h-full flex items-center justify-center text-[#454549]"><BookOpen className="w-6 h-6" /></div>}
-                        <div className="absolute top-1.5 left-1.5 bg-black/80 backdrop-blur text-[#FF0080] text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase">Blog</div>
+                        <div
+                          className="absolute top-1.5 left-1.5 backdrop-blur text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase border"
+                          style={{
+                            background: 'var(--neon-purple-glow)',
+                            borderColor: 'var(--neon-purple-border)',
+                            color: 'var(--color-pink-light)',
+                          }}
+                        >
+                          Blog
+                        </div>
                       </div>
-                      <p className="text-white text-xs font-semibold line-clamp-2 leading-tight group-hover:text-[#FF0080] transition-colors">{b.title}</p>
-                      <p className="text-[#85858B] text-[10px] -mt-1 truncate">@{b.author?.username || b.author?.display_name || 'author'}</p>
+                      <p className="text-white text-xs font-semibold line-clamp-2 leading-tight group-hover:text-[var(--color-pink-light)] transition-colors">{b.title}</p>
+                      <p className="text-[var(--text-muted)] text-[10px] -mt-1 truncate">@{b.author?.username || b.author?.display_name || 'author'}</p>
                     </Link>
                   ))}
                 </div>
@@ -347,10 +454,10 @@ export default function LandingPage() {
       </section>
 
       {/* ── CONTENT FORMATS SHOWCASE (original) ── */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#454549]">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t" style={{ borderColor: 'var(--glass-border)' }}>
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-white">Built For Seamless Multi-Format Discovery</h2>
-          <p className="text-sm text-[#85858B] mt-2">No need to jump between five different apps. Enjoy video, music, and written content side-by-side.</p>
+          <p className="text-sm text-[var(--text-secondary)] mt-2">No need to jump between five different apps. Enjoy video, music, and written content side-by-side.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
@@ -358,16 +465,30 @@ export default function LandingPage() {
             { icon: Music, title: 'Music & Audio Experience', desc: 'Spotify-inspired persistent player with background playback, synchronized lyrics, queue management, and album collections.', tag: 'Persistent Audio Engine' },
             { icon: BookOpen, title: 'Community Blogs & Stories', desc: 'Read creator essays, production notes, track commentaries, and articles with instant reactions and discussion threads.', tag: 'Open Publishing for Creators' },
           ].map((card) => (
-            <div key={card.title} className="bg-[#333336] border border-[#454549] rounded-2xl p-6 flex flex-col justify-between">
+            <div
+              key={card.title}
+              className="rounded-2xl p-6 flex flex-col justify-between border backdrop-blur-xl transition-all hover:border-[var(--color-purple)]"
+              style={{
+                background: 'var(--glass-surface)',
+                borderColor: 'var(--glass-border)',
+              }}
+            >
               <div>
-                <div className="w-12 h-12 rounded-xl bg-[#FF0080]/15 text-[#FF0080] flex items-center justify-center mb-4">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 border"
+                  style={{
+                    background: 'var(--neon-purple-glow)',
+                    borderColor: 'var(--neon-purple-border)',
+                    color: 'var(--color-pink-light)',
+                  }}
+                >
                   <card.icon className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">{card.title}</h3>
-                <p className="text-sm text-[#B8B8BD] leading-relaxed">{card.desc}</p>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{card.desc}</p>
               </div>
-              <div className="mt-6 pt-4 border-t border-[#454549]">
-                <span className="text-xs font-semibold text-[#FF0080] flex items-center gap-1">{card.tag} <Zap className="w-3.5 h-3.5" /></span>
+              <div className="mt-6 pt-4 border-t" style={{ borderColor: 'var(--glass-border)' }}>
+                <span className="text-xs font-semibold text-[var(--color-pink-light)] flex items-center gap-1">{card.tag} <Zap className="w-3.5 h-3.5" /></span>
               </div>
             </div>
           ))}
@@ -376,16 +497,23 @@ export default function LandingPage() {
 
       {/* ── SPONSORED CONTENT (original, hidden if empty) ── */}
       {sponsoredCampaigns.length > 0 && (
-        <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#454549]">
+        <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t" style={{ borderColor: 'var(--glass-border)' }}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF0080]/15 text-[#FF0080] text-xs font-bold uppercase tracking-wider mb-2 border border-[#FF0080]/30">
+              <div
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 border"
+                style={{
+                  background: 'var(--neon-purple-glow)',
+                  borderColor: 'var(--neon-purple-border)',
+                  color: 'var(--color-pink-light)',
+                }}
+              >
                 <Megaphone className="w-3.5 h-3.5" />Sponsored Content
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-white">Partner Spotlight</h2>
-              <p className="text-sm text-[#85858B] mt-1">Featured stories, products, and announcements from verified Yarrowplay partners.</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">Featured stories, products, and announcements from verified Yarrowplay partners.</p>
             </div>
-            <Link href="/advertiser" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#FF0080] hover:text-white transition-colors self-start sm:self-center">
+            <Link href="/advertiser" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-pink-light)] hover:text-white transition-colors self-start sm:self-center">
               <span>Promote with Us</span><ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -445,13 +573,20 @@ export default function LandingPage() {
       </section>
 
       {/* ── FINAL CTA (original) ── */}
-      <section className="py-20 px-4 max-w-4xl mx-auto text-center border-t border-[#454549]">
+      <section className="py-20 px-4 max-w-4xl mx-auto text-center border-t" style={{ borderColor: 'var(--glass-border)' }}>
         <div className="relative w-16 h-16 mx-auto mb-4">
           <Image src="/logo.png" alt="Yarrowplay" fill sizes="64px" className="object-contain" />
         </div>
         <h2 className="text-3xl font-extrabold text-white mb-4">Start Streaming and Publishing Today</h2>
-        <p className="text-sm text-[#B8B8BD] max-w-md mx-auto mb-8">Join thousands of viewers and creators on the modern media platform.</p>
-        <Link href="/register" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-[#FF0080] hover:bg-[#E00071] text-white font-bold text-base transition-all shadow-xl active:scale-95">
+        <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto mb-8">Join thousands of viewers and creators on the modern media platform.</p>
+        <Link
+          href="/register"
+          className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white font-bold text-base transition-all shadow-xl active:scale-95"
+          style={{
+            background: 'var(--gradient-neon)',
+            boxShadow: 'var(--glow-purple)',
+          }}
+        >
           <span>Create Your Free Account</span><ArrowRight className="w-5 h-5" />
         </Link>
       </section>

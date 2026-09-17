@@ -62,10 +62,10 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3.5 px-4 py-3 rounded-2xl font-medium text-sm transition-all duration-200 ${
+                className={`flex items-center gap-3.5 px-4 py-3 rounded-none font-medium text-sm transition-all duration-200 ${
                   isActive
-                    ? 'theme-active-pill font-semibold'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--glass-surface)] hover:text-white hover:border hover:border-[var(--glass-border)]'
+                    ? 'theme-active-pill font-semibold border-l-4 border-l-[var(--color-pink)] shadow-md'
+                    : 'text-[var(--text-secondary)] border-l-4 border-l-transparent hover:bg-[var(--glass-surface)] hover:text-white hover:border-y hover:border-r hover:border-[var(--glass-border)]'
                 }`}
               >
                 <Icon
@@ -83,23 +83,23 @@ export function Sidebar() {
         {user ? (
           <Link
             href={`/profile/${profile?.username || user.id}`}
-            className={`flex items-center gap-3.5 px-4 py-3 rounded-2xl font-medium text-sm transition-all ${
+            className={`flex items-center gap-3.5 px-4 py-3 rounded-none font-medium text-sm transition-all ${
               pathname.startsWith('/profile')
-                ? 'theme-active-pill'
+                ? 'theme-active-pill border-l-4 border-l-[var(--color-pink)] font-semibold'
                 : 'text-[var(--text-secondary)] bg-[var(--glass-surface-subtle)] border border-[var(--glass-border-subtle)] hover:bg-[var(--glass-surface)] hover:border-[var(--glass-border)] hover:text-white'
             }`}
           >
-            <div className="w-7 h-7 rounded-full bg-[var(--color-purple-bright)]/20 border border-[var(--color-purple-bright)]/40 flex items-center justify-center text-[var(--color-pink)] text-xs font-bold shrink-0">
+            <div className="w-7 h-7 rounded-none bg-[var(--color-purple-bright)]/20 border border-[var(--color-purple-bright)]/40 flex items-center justify-center text-[var(--color-pink)] text-xs font-bold shrink-0">
               {profile?.display_name ? profile.display_name[0].toUpperCase() : 'U'}
             </div>
             <span className="truncate flex-1">{profile?.display_name || 'My Profile'}</span>
           </Link>
         ) : (
-          <div className="p-4 rounded-2xl theme-glass-card-static text-center">
+          <div className="p-4 rounded-none theme-glass-card-static text-center border border-[var(--glass-border)]">
             <p className="text-xs text-[var(--text-secondary)] mb-3 leading-relaxed">Join Yarrowplay to like, upload and comment.</p>
             <Link
               href="/register"
-              className="block w-full text-xs font-semibold py-2.5 theme-neon-button rounded-xl transition-all"
+              className="block w-full text-xs font-semibold py-2.5 theme-neon-button rounded-none transition-all"
             >
               Get Started
             </Link>
