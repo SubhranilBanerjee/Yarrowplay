@@ -21,6 +21,11 @@ export function Sidebar() {
   const pathname = usePathname();
   const { user, profile } = useAuth();
 
+  // Hide sidebar completely unless the user is logged in
+  if (!user) {
+    return null;
+  }
+
   const navItems = [
     { label: 'Home', href: '/home', icon: Home, show: true },
     { label: 'Explore', href: '/explore', icon: Compass, show: true },

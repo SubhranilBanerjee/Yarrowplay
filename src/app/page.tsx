@@ -9,6 +9,9 @@ import { MediaCard } from '@/components/media/MediaCard';
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
 import { NeonPlaySign3D } from '@/components/media/NeonPlaySign3D';
 import { SpaceHeroCanvas } from '@/components/media/SpaceHeroCanvas';
+import { ContentCarousel } from '@/components/media/ContentCarousel';
+import { VideoCarouselCard } from '@/components/media/VideoCarouselCard';
+import { BlogCarouselCard } from '@/components/media/BlogCarouselCard';
 import { Video, AudioTrack, Blog, AdvertiserCampaign } from '@/types/database';
 import {
   Film,
@@ -387,54 +390,46 @@ export default function LandingPage() {
               <AudioStrip track={featuredAudio} onPlay={() => playTrack(featuredAudio, audios)} />
             )}
 
-            {/* Latest Videos Grid */}
+            {/* Latest Videos Carousel */}
             {shortVideos.length > 0 && (
-              <div>
-                <SectionHeader title="Latest Drops" badge="FRESH" href="/explore?type=video" />
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
-                  {shortVideos.map((v) => <CompactVideoTile key={v.id} video={v} />)}
-                </div>
-              </div>
+              <ContentCarousel
+                title="Latest Drops"
+                badge="FRESH"
+                href="/explore?type=video"
+                icon={Zap}
+              >
+                {shortVideos.map((v) => (
+                  <VideoCarouselCard key={v.id} video={v} />
+                ))}
+              </ContentCarousel>
             )}
 
-            {/* Blogs row */}
+            {/* Blogs Carousel */}
             {blogs.length > 0 && (
-              <div>
-                <SectionHeader title="From the Blog" badge="READS" href="/explore?type=blog" />
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                  {blogs.map((b) => (
-                    <Link key={b.id} href={`/blogs/${b.id}`} className="group flex flex-col gap-2">
-                      <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-[#2B2B2D]">
-                        {b.cover_url
-                          ? <Image src={b.cover_url} alt={b.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
-                          : <div className="w-full h-full flex items-center justify-center text-[#454549]"><BookOpen className="w-6 h-6" /></div>}
-                        <div
-                          className="absolute top-1.5 left-1.5 backdrop-blur text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase border"
-                          style={{
-                            background: 'var(--neon-purple-glow)',
-                            borderColor: 'var(--neon-purple-border)',
-                            color: 'var(--color-pink-light)',
-                          }}
-                        >
-                          Blog
-                        </div>
-                      </div>
-                      <p className="text-white text-xs font-semibold line-clamp-2 leading-tight group-hover:text-[var(--color-pink-light)] transition-colors">{b.title}</p>
-                      <p className="text-[var(--text-muted)] text-[10px] -mt-1 truncate">@{b.author?.username || b.author?.display_name || 'author'}</p>
-                    </Link>
-                  ))}
-                </div>
-              </div>
+              <ContentCarousel
+                title="From the Blog"
+                badge="READS"
+                href="/blogs"
+                icon={BookOpen}
+              >
+                {blogs.map((b) => (
+                  <BlogCarouselCard key={b.id} blog={b} />
+                ))}
+              </ContentCarousel>
             )}
 
-            {/* More Videos */}
+            {/* More Videos Carousel */}
             {moreVideos.length > 0 && (
-              <div>
-                <SectionHeader title="More to Watch" badge="TRENDING" href="/explore?type=video" />
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3">
-                  {moreVideos.map((v) => <CompactVideoTile key={v.id} video={v} />)}
-                </div>
-              </div>
+              <ContentCarousel
+                title="More to Watch"
+                badge="TRENDING"
+                href="/explore?type=video"
+                icon={Film}
+              >
+                {moreVideos.map((v) => (
+                  <VideoCarouselCard key={v.id} video={v} />
+                ))}
+              </ContentCarousel>
             )}
 
             {/* More Audio */}

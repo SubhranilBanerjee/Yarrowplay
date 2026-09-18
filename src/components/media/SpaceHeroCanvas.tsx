@@ -150,7 +150,7 @@ export function SpaceHeroCanvas() {
       onMouseMove={handleMouseMove}
       className="absolute inset-0 overflow-hidden pointer-events-none -z-10 select-none"
       style={{
-        background: 'radial-gradient(ellipse at 50% 30%, #150028 0%, #0c0018 50%, #06000e 100%)',
+        background: 'transparent',
       }}
     >
       {/* ── 1. WATERCOLOR NEBULA CLOUD LAYERS (From Reference 1) ── */}
