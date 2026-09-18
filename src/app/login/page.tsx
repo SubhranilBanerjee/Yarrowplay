@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { BottomToast } from '@/components/ui/BottomToast';
 import { Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle, Shield } from 'lucide-react';
 
 export default function LoginPage() {
@@ -71,7 +72,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center p-4">
-      <div className="w-full max-w-md theme-glass-card-static rounded-3xl p-6 sm:p-8 border border-[var(--glass-border)] shadow-2xl relative">
+      <div className="w-full max-w-md theme-form-card p-6 sm:p-8 relative">
         {/* Header Branding */}
         <div className="flex flex-col items-center text-center mb-6">
           <div className="relative w-12 h-12 mb-2 filter drop-shadow-[0_0_12px_rgba(224,0,255,0.4)]">
@@ -98,14 +99,14 @@ export default function LoginPage() {
 
         {/* Error / Success Feedback */}
         {errorMsg && (
-          <div className="mb-4 p-3.5 rounded-2xl bg-[var(--status-error)]/15 border border-[var(--status-error)]/30 text-[var(--status-error)] text-xs flex items-center gap-2">
+          <div className="mb-5 p-3.5 rounded-xl bg-[var(--status-error)]/15 border border-[var(--status-error)]/30 text-[var(--status-error)] text-xs flex items-center gap-2.5">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {successMsg && (
-          <div className="mb-4 p-3.5 rounded-2xl bg-[var(--status-success)]/15 border border-[var(--status-success)]/30 text-[var(--status-success)] text-xs flex items-center gap-2">
+          <div className="mb-5 p-3.5 rounded-xl bg-[var(--status-success)]/15 border border-[var(--status-success)]/30 text-[var(--status-success)] text-xs flex items-center gap-2.5">
             <CheckCircle className="w-4 h-4 shrink-0" />
             <span>{successMsg}</span>
           </div>
@@ -115,24 +116,24 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
-              EMAIL ADDRESS
+              Email Address
             </label>
             <div className="relative">
               <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
               <input
                 type="email"
                 required
-                placeholder="name@example.com"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl pl-10 pr-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-magenta)] focus:ring-2 focus:ring-[var(--color-purple-bright)]/30 transition-all"
+                className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl pl-10 pr-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)] transition-colors"
               />
             </div>
           </div>
 
           <div>
             <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
-              PASSWORD
+              Password
             </label>
             <div className="relative">
               <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
@@ -142,12 +143,12 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl pl-10 pr-10 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-magenta)] focus:ring-2 focus:ring-[var(--color-purple-bright)]/30 transition-all"
+                className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl pl-10 pr-11 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-pink)] transition-colors"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white transition-colors cursor-pointer"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -157,20 +158,38 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full mt-2 py-3 px-4 rounded-xl theme-neon-button text-white text-sm font-bold tracking-wide transition-all shadow-lg active:scale-[0.99] disabled:opacity-50"
+            className="w-full py-3.5 px-4 rounded-xl theme-neon-button font-bold text-sm tracking-wide transition-all shadow-lg active:scale-98 disabled:opacity-50 mt-2 cursor-pointer"
           >
-            {isLoading ? 'Signing In...' : 'Sign In'}
+            {isLoading ? 'SIGNING IN...' : 'SIGN IN'}
           </button>
+
+          {/* Quick Admin fill button */}
+          <div className="pt-2 border-t border-[var(--glass-border)]">
+            <button
+              type="button"
+              onClick={handleFillAdmin}
+              className="w-full py-2 px-3 rounded-lg bg-[var(--glass-surface-subtle)] border border-[var(--glass-border)] hover:border-[var(--color-magenta)] text-[var(--text-secondary)] hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+            >
+              <Shield className="w-3.5 h-3.5 text-[var(--color-pink)]" />
+              <span>Fill Admin Credentials</span>
+            </button>
+          </div>
         </form>
 
         {/* Footer link */}
-        <div className="mt-6 pt-4 border-t border-[var(--glass-border-subtle)] text-center text-xs text-[var(--text-muted)]">
+        <div className="mt-6 text-center text-xs text-[var(--text-secondary)]">
           <span>Don&apos;t have an account? </span>
           <Link href="/register" className="text-[var(--color-pink)] hover:underline font-semibold ml-1">
             Create Account
           </Link>
         </div>
       </div>
+
+      {/* Floating Bottom Toast for errors */}
+      <BottomToast
+        message={errorMsg ? { type: 'error', text: errorMsg } : null}
+        onClose={() => setErrorMsg(null)}
+      />
     </div>
   );
 }

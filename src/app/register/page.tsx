@@ -9,6 +9,7 @@ import {
   User, Video, Megaphone, Mail, Lock, Eye, EyeOff, Building,
   AlertCircle, CheckCircle, ChevronDown,
 } from 'lucide-react';
+import { BottomToast } from '@/components/ui/BottomToast';
 
 type CreatorSubRole = 'Professional' | 'Student' | 'Hobbyist';
 
@@ -132,7 +133,7 @@ function RegisterForm() {
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center p-4">
-      <div className="w-full max-w-md theme-glass-card-static rounded-3xl p-6 sm:p-8 border border-[var(--glass-border)] shadow-2xl relative">
+      <div className="w-full max-w-md theme-form-card p-6 sm:p-8 relative">
         {/* Header Branding */}
         <div className="flex flex-col items-center text-center mb-6">
           <div className="relative w-12 h-12 mb-2 filter drop-shadow-[0_0_12px_rgba(224,0,255,0.4)]">
@@ -342,6 +343,12 @@ function RegisterForm() {
           </Link>
         </div>
       </div>
+
+      {/* Floating Bottom Toast for errors */}
+      <BottomToast
+        message={errorMsg ? { type: 'error', text: errorMsg } : null}
+        onClose={() => setErrorMsg(null)}
+      />
     </div>
   );
 }

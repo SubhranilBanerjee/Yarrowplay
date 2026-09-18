@@ -21,8 +21,8 @@ export function Sidebar() {
   const pathname = usePathname();
   const { user, profile } = useAuth();
 
-  // Hide sidebar completely unless the user is logged in
-  if (!user) {
+  // Hide sidebar on the landing page
+  if (pathname === '/') {
     return null;
   }
 

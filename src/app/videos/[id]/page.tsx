@@ -29,6 +29,7 @@ import {
   X,
   Play,
 } from 'lucide-react';
+import { BottomToast } from '@/components/ui/BottomToast';
 
 // ─── Auth-Gate Modal ──────────────────────────────────────────────────────────
 function AuthGateModal({ onClose }: { onClose: () => void }) {
@@ -268,99 +269,128 @@ export default function VideoDetailPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [toastMsg, setToastMsg] = useState<{ type: 'error' | 'success' | 'info'; text: string } | null>(null);
 
   const fetchVideoData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const videoPromise = supabase
+      // 1. Fetch the main video record with its creator profile
+      const { data: vid, error: vidErr } = await supabase
         .from('videos')
-        .select('*, creator:profiles(*), series:content_series(*)')
+        .select('*, creator:profiles(*)')
         .eq('id', videoId)
-        .single();
+        .maybeSingle();
 
-      const commentsPromise = supabase
-        .from('comments')
-        .select('*, user:profiles(*)')
-        .eq('content_type', 'video')
-        .eq('content_id', videoId)
-        .order('created_at', { ascending: false });
-
-      const reactionPromise = user
-        ? supabase.from('reactions').select('reaction_type').eq('user_id', user.id).eq('content_type', 'video').eq('content_id', videoId).maybeSingle()
-        : Promise.resolve({ data: null });
-
-      const favoritePromise = user
-        ? supabase.from('favorites').select('id').eq('user_id', user.id).eq('content_type', 'video').eq('content_id', videoId).maybeSingle()
-        : Promise.resolve({ data: null });
-
-      const watchlistPromise = user
-        ? supabase.from('watchlists').select('id').eq('user_id', user.id).eq('video_id', videoId).maybeSingle()
-        : Promise.resolve({ data: null });
-
-      const purchasePromise = user
-        ? supabase.from('video_purchases').select('id').eq('user_id', user.id).eq('video_id', videoId).eq('status', 'paid').maybeSingle()
-        : Promise.resolve({ data: null });
-
-      const [
-        { data: vid },
-        { data: comms },
-        { data: reaction },
-        { data: fav },
-        { data: watchItem },
-        { data: purchase },
-      ] = await Promise.all([
-        videoPromise,
-        commentsPromise,
-        reactionPromise,
-        favoritePromise,
-        watchlistPromise,
-        purchasePromise,
-      ]);
+      if (vidErr) {
+        console.error('Error fetching video:', vidErr);
+      }
 
       if (vid) {
+        // Fallback: If creator profile wasn't populated by join, fetch directly
+        if (!vid.creator && vid.creator_id) {
+          try {
+            const { data: prof } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', vid.creator_id)
+              .maybeSingle();
+            if (prof) (vid as any).creator = prof;
+          } catch {
+            // ignore profile fallback error
+          }
+        }
+
+        // Fetch series metadata if part of a series
+        if (vid.series_id) {
+          try {
+            const { data: ser } = await supabase
+              .from('content_series')
+              .select('*')
+              .eq('id', vid.series_id)
+              .maybeSingle();
+            if (ser) (vid as any).series = ser;
+
+            // Fetch other episodes of this series
+            const { data: eps } = await supabase
+              .from('videos')
+              .select('*')
+              .eq('series_id', vid.series_id)
+              .order('episode_number', { ascending: true });
+            setSeriesEpisodes((eps as Video[]) || []);
+          } catch {
+            // ignore series fetch error
+          }
+        }
+
         setVideo(vid as Video);
         setLikesCount(vid.likes_count || 0);
         setDislikesCount(vid.dislikes_count || 0);
 
-        // Fetch series episodes
-        if (vid.series_id) {
-          const { data: eps } = await supabase
-            .from('videos')
-            .select('*')
-            .eq('series_id', vid.series_id)
-            .order('episode_number', { ascending: true });
-          setSeriesEpisodes((eps as Video[]) || []);
-        }
-
         // Fetch recommended videos (same category/tags, different id)
-        const recQuery = supabase
-          .from('videos')
-          .select('*, creator:profiles(*)')
-          .eq('status', 'published')
-          .eq('visibility', 'public')
-          .neq('id', videoId)
-          .order('views_count', { ascending: false })
-          .limit(8);
+        try {
+          const recQuery = supabase
+            .from('videos')
+            .select('*, creator:profiles(*)')
+            .eq('status', 'published')
+            .eq('visibility', 'public')
+            .neq('id', videoId)
+            .order('views_count', { ascending: false })
+            .limit(8);
 
-        if (vid.category) {
-          recQuery.eq('category', vid.category);
+          if (vid.category) {
+            recQuery.eq('category', vid.category);
+          }
+
+          const { data: recs } = await recQuery;
+          setRecommendedVideos((recs as Video[]) || []);
+        } catch {
+          // ignore recommendations error
         }
-
-        const { data: recs } = await recQuery;
-        setRecommendedVideos((recs as Video[]) || []);
       }
 
-      setComments((comms as Comment[]) || []);
-      if (reaction) setUserReaction(reaction.reaction_type as any);
-      setIsFavorite(!!fav);
-      setIsWatchlisted(!!watchItem);
-      setIsPurchased(!!purchase);
-    } catch {
-      // ignore
+      // 2. Fetch comments separately (won't fail video if empty or restricted)
+      try {
+        const { data: comms } = await supabase
+          .from('comments')
+          .select('*, user:profiles(*)')
+          .eq('content_type', 'video')
+          .eq('content_id', videoId)
+          .order('created_at', { ascending: false });
+        setComments((comms as Comment[]) || []);
+      } catch (cErr) {
+        console.warn('Comments fetch error:', cErr);
+      }
+
+      // 3. User-specific social interactions (only if logged in)
+      if (user) {
+        const [
+          { data: reaction },
+          { data: fav },
+          { data: watchItem },
+          { data: purchase },
+        ] = await Promise.all([
+          supabase.from('reactions').select('reaction_type').eq('user_id', user.id).eq('content_type', 'video').eq('content_id', videoId).maybeSingle(),
+          supabase.from('favorites').select('id').eq('user_id', user.id).eq('content_type', 'video').eq('content_id', videoId).maybeSingle(),
+          supabase.from('watchlists').select('id').eq('user_id', user.id).eq('video_id', videoId).maybeSingle(),
+          supabase.from('video_purchases').select('id').eq('user_id', user.id).eq('video_id', videoId).eq('status', 'paid').maybeSingle(),
+        ]);
+
+        if (reaction) setUserReaction(reaction.reaction_type as any);
+        setIsFavorite(!!fav);
+        setIsWatchlisted(!!watchItem);
+        setIsPurchased(!!purchase);
+      } else {
+        setUserReaction(null);
+        setIsFavorite(false);
+        setIsWatchlisted(false);
+        setIsPurchased(false);
+      }
+    } catch (err) {
+      console.error('Video fetch error:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [videoId, user]);
+  }, [videoId, user, supabase]);
 
   useEffect(() => {
     if (!videoId) return;
@@ -488,7 +518,9 @@ export default function VideoDetailPage() {
       if (!res.ok) throw new Error(data.error || 'Failed to delete video');
       router.push('/home');
     } catch (err: any) {
-      setDeleteError(err.message || 'Failed to delete video');
+      const msg = err.message || 'Failed to delete video';
+      setDeleteError(msg);
+      setToastMsg({ type: 'error', text: msg });
       setIsDeleting(false);
     }
   };
@@ -1061,6 +1093,9 @@ export default function VideoDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Floating Bottom Toast */}
+      <BottomToast message={toastMsg} onClose={() => setToastMsg(null)} />
     </div>
   );
 }

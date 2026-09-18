@@ -47,13 +47,6 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // If someone isn't logged in and wants to see the home page, redirect to the landing page
-  if (!user && pathname === '/home') {
-    const url = request.nextUrl.clone();
-    url.pathname = '/';
-    return redirectWithCookies(url);
-  }
-
   // Protected paths that require any authenticated user
   const authRequiredPaths = ['/watchlist', '/favorites', '/playlists', '/blog/studio'];
   const isAuthRequired = authRequiredPaths.some((p) => pathname.startsWith(p));

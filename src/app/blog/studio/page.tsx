@@ -20,6 +20,7 @@ import {
   PenTool,
   ExternalLink,
 } from 'lucide-react';
+import { BottomToast } from '@/components/ui/BottomToast';
 
 export default function BlogStudioPage() {
   const { user, profile } = useAuth();
@@ -251,13 +252,7 @@ export default function BlogStudioPage() {
       {/* WRITE ARTICLE VIEW                                   */}
       {/* ==================================================== */}
       {activeTab === 'write' && (
-        <div
-          className="rounded-2xl p-6 sm:p-8 space-y-6 border backdrop-blur-xl"
-          style={{
-            background: 'var(--glass-surface)',
-            borderColor: 'var(--glass-border)',
-          }}
-        >
+        <div className="theme-form-card p-6 sm:p-8 space-y-6">
         <div>
           <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
             Blog Title *
@@ -594,6 +589,8 @@ export default function BlogStudioPage() {
           </div>
         </div>
       )}
+      {/* Bottom Floating Error & Status Banner */}
+      <BottomToast message={statusMsg} onClose={() => setStatusMsg(null)} />
     </div>
   );
 }

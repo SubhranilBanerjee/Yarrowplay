@@ -18,6 +18,7 @@ import {
   X,
   ExternalLink,
 } from 'lucide-react';
+import { BottomToast } from '@/components/ui/BottomToast';
 
 interface CampaignItem {
   id: string;
@@ -309,13 +310,7 @@ export default function AdvertiserStudioPage() {
       {/* Create Campaign Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div
-            className="rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border backdrop-blur-xl"
-            style={{
-              background: 'var(--glass-surface-heavy)',
-              borderColor: 'var(--glass-border-light)',
-            }}
-          >
+          <div className="theme-form-card max-w-lg w-full p-6 sm:p-8 relative">
             <button
               onClick={() => setShowCreateModal(false)}
               className="absolute top-4 right-4 p-2 text-[var(--text-muted)] hover:text-white rounded-full hover:bg-white/10"
@@ -502,6 +497,8 @@ export default function AdvertiserStudioPage() {
           </div>
         </div>
       )}
+      {/* Bottom Floating Error & Status Banner */}
+      <BottomToast message={formMsg} onClose={() => setFormMsg(null)} />
     </div>
   );
 }

@@ -20,7 +20,7 @@ export function VideoCarouselCard({ video }: { video: Video }) {
       className="group shrink-0 snap-start w-[210px] sm:w-[250px] md:w-[270px] flex flex-col gap-2.5 transition-all"
     >
       {/* Thumbnail with 16:9 aspect ratio */}
-      <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-[var(--bg-secondary)] border border-[var(--glass-border)] group-hover:border-[var(--color-magenta)] shadow-lg group-hover:shadow-[0_0_20px_rgba(224,0,255,0.25)] transition-all">
+      <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-[var(--bg-secondary)] theme-glow-frame transition-all">
         {video.thumbnail_url ? (
           <Image
             src={video.thumbnail_url}

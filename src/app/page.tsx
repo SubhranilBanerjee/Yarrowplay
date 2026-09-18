@@ -12,7 +12,7 @@ import { SpaceHeroCanvas } from '@/components/media/SpaceHeroCanvas';
 import { ContentCarousel } from '@/components/media/ContentCarousel';
 import { VideoCarouselCard } from '@/components/media/VideoCarouselCard';
 import { BlogCarouselCard } from '@/components/media/BlogCarouselCard';
-import { Video, AudioTrack, Blog, AdvertiserCampaign } from '@/types/database';
+import { Video, AudioTrack, Blog, AdvertiserCampaign, ContentSeries } from '@/types/database';
 import {
   Film,
   Music,
@@ -28,6 +28,7 @@ import {
   BarChart2,
   Headphones,
   ChevronRight,
+  Layers,
 } from 'lucide-react';
 
 type FeedVideo = Video & { type: 'video' };
@@ -45,7 +46,7 @@ function formatDuration(seconds?: number | null) {
 function HeroCard({ video }: { video: FeedVideo }) {
   return (
     <Link href={`/videos/${video.id}`} className="block relative w-full rounded-2xl overflow-hidden group shadow-2xl">
-      <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+      <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-[var(--bg-secondary)] theme-glow-frame">
         {video.thumbnail_url ? (
           <Image src={video.thumbnail_url} alt={video.title} fill priority className="object-cover group-hover:scale-105 transition-transform duration-700" />
         ) : (
@@ -125,11 +126,7 @@ function AudioStrip({ track, onPlay }: { track: FeedAudio; onPlay: () => void })
   return (
     <button
       onClick={onPlay}
-      className="w-full flex items-center gap-3 border rounded-2xl px-4 py-3 transition-all group text-left cursor-pointer backdrop-blur-md"
-      style={{
-        background: 'var(--glass-surface)',
-        borderColor: 'var(--glass-border)',
-      }}
+      className="w-full flex items-center gap-3 rounded-2xl px-4 py-3 transition-all group text-left cursor-pointer theme-glass-card theme-glow-frame"
     >
       <div
         className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border"
@@ -157,13 +154,7 @@ function AudioStrip({ track, onPlay }: { track: FeedAudio; onPlay: () => void })
 function CompactVideoTile({ video }: { video: FeedVideo }) {
   return (
     <Link href={`/videos/${video.id}`} className="group flex flex-col gap-2">
-      <div
-        className="relative aspect-video w-full rounded-xl overflow-hidden border"
-        style={{
-          background: 'var(--glass-surface)',
-          borderColor: 'var(--glass-border)',
-        }}
-      >
+      <div className="relative aspect-video w-full rounded-xl overflow-hidden theme-glow-frame">
         {video.thumbnail_url
           ? <Image src={video.thumbnail_url} alt={video.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
           : <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)]"><Film className="w-6 h-6" /></div>}
@@ -217,6 +208,7 @@ export default function LandingPage() {
 
   const [sponsoredCampaigns, setSponsoredCampaigns] = useState<AdvertiserCampaign[]>([]);
   const [videos, setVideos] = useState<FeedVideo[]>([]);
+  const [seriesList, setSeriesList] = useState<ContentSeries[]>([]);
   const [audios, setAudios] = useState<FeedAudio[]>([]);
   const [blogs, setBlogs] = useState<FeedBlog[]>([]);
   const [contentLoading, setContentLoading] = useState(true);
@@ -226,14 +218,22 @@ export default function LandingPage() {
       try {
         const nowMs = Date.now();
 
-        const [{ data: vids }, { data: auds }, { data: blgs }, { data: camps }] = await Promise.all([
-          supabase.from('videos').select('*, creator:profiles(*)').eq('visibility', 'public').eq('status', 'published').order('created_at', { ascending: false }).limit(19),
+        const [
+          { data: vids },
+          { data: sList },
+          { data: auds },
+          { data: blgs },
+          { data: camps },
+        ] = await Promise.all([
+          supabase.from('videos').select('*, creator:profiles(*)').eq('visibility', 'public').eq('status', 'published').order('created_at', { ascending: false }).limit(30),
+          supabase.from('content_series').select('*, creator:profiles(*)').order('created_at', { ascending: false }).limit(10),
           supabase.from('audios').select('*, creator:profiles(*)').eq('visibility', 'public').eq('status', 'published').order('created_at', { ascending: false }).limit(6),
           supabase.from('blogs').select('*, author:profiles(*)').eq('status', 'published').order('published_at', { ascending: false }).limit(6),
           supabase.from('advertiser_campaigns').select('*, advertiser:profiles(*)').eq('status', 'active').order('created_at', { ascending: false }),
         ]);
 
         setVideos(((vids || []) as any[]).map((v) => ({ ...v, type: 'video' as const })));
+        setSeriesList((sList as ContentSeries[]) || []);
         setAudios(((auds || []) as any[]).map((a) => ({ ...a, type: 'audio' as const })));
         setBlogs(((blgs || []) as any[]).map((b) => ({ ...b, type: 'blog' as const })));
         setSponsoredCampaigns(((camps || []) as any[]).filter((c) => !c.end_date || new Date(c.end_date).getTime() >= nowMs) as AdvertiserCampaign[]);
@@ -246,10 +246,48 @@ export default function LandingPage() {
     loadAll();
   }, []);
 
-  const heroVideo = videos[0] ?? null;
+  // Group videos by series
+  const seriesMap = new Map<string, ContentSeries & { episodes: FeedVideo[] }>();
+  for (const s of seriesList) {
+    seriesMap.set(s.id, { ...s, episodes: [] });
+  }
+
+  const standaloneVideos: FeedVideo[] = [];
+  for (const v of videos) {
+    if (v.series_id) {
+      if (!seriesMap.has(v.series_id)) {
+        seriesMap.set(v.series_id, {
+          id: v.series_id,
+          creator_id: v.creator_id,
+          title: v.series?.title || 'Series Collection',
+          description: v.series?.description || '',
+          category: v.category || null,
+          tags: v.tags || [],
+          cover_url: v.series?.cover_url || v.thumbnail_url || null,
+          cover_public_id: null,
+          total_episodes: 0,
+          created_at: v.created_at,
+          updated_at: v.updated_at,
+          creator: v.creator,
+          episodes: [],
+        });
+      }
+      seriesMap.get(v.series_id)!.episodes.push(v);
+    } else {
+      standaloneVideos.push(v);
+    }
+  }
+
+  const seriesGroups = Array.from(seriesMap.values())
+    .filter((s) => s.episodes.length > 0)
+    .map((s) => ({
+      ...s,
+      episodes: s.episodes.sort((a, b) => (a.episode_number || 0) - (b.episode_number || 0)),
+    }));
+
+  const heroVideo = standaloneVideos[0] || videos[0] || null;
   const featuredAudio = audios[0] ?? null;
-  const shortVideos = videos.slice(1, 7);
-  const moreVideos = videos.slice(7, 19);
+  const shortVideos = standaloneVideos.slice(1, 8);
 
   return (
     <div className="w-full">
@@ -390,10 +428,25 @@ export default function LandingPage() {
               <AudioStrip track={featuredAudio} onPlay={() => playTrack(featuredAudio, audios)} />
             )}
 
-            {/* Latest Videos Carousel */}
+            {/* DEDICATED SERIES CAROUSELS: Episodes appear inside their series carousel */}
+            {seriesGroups.map((series) => (
+              <ContentCarousel
+                key={series.id}
+                title={series.title}
+                badge={`SERIES · ${series.episodes.length} EPS`}
+                href={`/videos/${series.episodes[0]?.id || ''}`}
+                icon={Layers}
+              >
+                {series.episodes.map((ep) => (
+                  <VideoCarouselCard key={ep.id} video={ep} />
+                ))}
+              </ContentCarousel>
+            ))}
+
+            {/* Latest Standalone Videos Carousel */}
             {shortVideos.length > 0 && (
               <ContentCarousel
-                title="Latest Drops"
+                title="Featured Movies & Drops"
                 badge="FRESH"
                 href="/explore?type=video"
                 icon={Zap}
@@ -414,20 +467,6 @@ export default function LandingPage() {
               >
                 {blogs.map((b) => (
                   <BlogCarouselCard key={b.id} blog={b} />
-                ))}
-              </ContentCarousel>
-            )}
-
-            {/* More Videos Carousel */}
-            {moreVideos.length > 0 && (
-              <ContentCarousel
-                title="More to Watch"
-                badge="TRENDING"
-                href="/explore?type=video"
-                icon={Film}
-              >
-                {moreVideos.map((v) => (
-                  <VideoCarouselCard key={v.id} video={v} />
                 ))}
               </ContentCarousel>
             )}

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { createClient } from '@/lib/supabase/client';
 import { uploadMedia } from '@/lib/upload';
+import { BottomToast } from '@/components/ui/BottomToast';
 import {
   Film,
   Music,
@@ -683,7 +684,7 @@ export default function CreatorStudioPage() {
           {videoMode === 'series' && (
             <form onSubmit={handleSubmitSeries} className="space-y-6">
               {/* Create Series Card */}
-              <div className="bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl p-6">
+              <div className="theme-form-card p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="p-2 rounded-lg bg-[var(--color-pink)]/15 text-[var(--color-pink)]">
                     <Layers className="w-5 h-5" />
@@ -802,8 +803,8 @@ export default function CreatorStudioPage() {
                 </div>
               </div>
 
-              {/* Episodes Section matching mockup */}
-              <div className="bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl p-6 space-y-4">
+              {/* Episodes List Card */}
+              <div className="theme-form-card p-6 space-y-4">
                 <div className="flex items-center justify-between pb-2 border-b border-[var(--glass-border)]">
                   <div>
                     <h2 className="text-base font-bold text-white flex items-center gap-2">
@@ -1007,7 +1008,7 @@ export default function CreatorStudioPage() {
 
           {/* ----------------- SINGLE VIDEO FORM ----------------- */}
           {videoMode === 'single' && (
-            <form onSubmit={handleSubmitSingleVideo} className="bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl p-6 space-y-5">
+            <form onSubmit={handleSubmitSingleVideo} className="theme-form-card p-6 space-y-5">
               <div>
                 <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                   Video Title *
@@ -1219,7 +1220,7 @@ export default function CreatorStudioPage() {
           {/* ----------------- ALBUM FORM ----------------- */}
           {audioMode === 'album' && (
             <form onSubmit={handleSubmitAlbum} className="space-y-6">
-              <div className="bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl p-6 space-y-4">
+              <div className="theme-form-card p-6 space-y-4">
                 <h2 className="text-base font-bold text-white">Upload Album</h2>
 
                 <div>
@@ -1337,7 +1338,7 @@ export default function CreatorStudioPage() {
               </div>
 
               {/* Tracks Section */}
-              <div className="bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl p-6 space-y-4">
+              <div className="theme-form-card p-6 space-y-4">
                 <div className="flex items-center justify-between pb-2 border-b border-[var(--glass-border)]">
                   <h2 className="text-base font-bold text-white flex items-center gap-2">
                     <Music className="w-4 h-4 text-[var(--color-pink)]" />
@@ -1426,7 +1427,7 @@ export default function CreatorStudioPage() {
 
           {/* ----------------- SINGLE AUDIO FORM ----------------- */}
           {audioMode === 'single' && (
-            <form onSubmit={handleSubmitSingleAudio} className="bg-[var(--glass-surface)] border border-[var(--glass-border)] rounded-2xl p-6 space-y-4">
+            <form onSubmit={handleSubmitSingleAudio} className="theme-form-card p-6 space-y-4">
               <div>
                 <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
                   Track Title *
@@ -1845,6 +1846,8 @@ export default function CreatorStudioPage() {
           </div>
         </div>
       )}
+      {/* Bottom Floating Error & Status Banner */}
+      <BottomToast message={statusMsg} onClose={() => setStatusMsg(null)} />
     </div>
   );
 }

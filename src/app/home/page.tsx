@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
@@ -10,7 +9,7 @@ import { useAudioPlayer } from '@/context/AudioPlayerContext';
 import { ContentCarousel } from '@/components/media/ContentCarousel';
 import { VideoCarouselCard } from '@/components/media/VideoCarouselCard';
 import { BlogCarouselCard } from '@/components/media/BlogCarouselCard';
-import { Video, AudioTrack, Blog } from '@/types/database';
+import { Video, AudioTrack, Blog, ContentSeries, AudioAlbum } from '@/types/database';
 import {
   Play,
   Music,
@@ -22,6 +21,8 @@ import {
   Headphones,
   BarChart2,
   Flame,
+  Layers,
+  Disc,
 } from 'lucide-react';
 
 type FeedVideo = Video & { type: 'video' };
@@ -29,6 +30,14 @@ type FeedAudio = AudioTrack & { type: 'audio' };
 type FeedBlog = Blog & { type: 'blog' };
 
 type FilterType = 'all' | 'videos' | 'audio' | 'blogs';
+
+interface SeriesWithEpisodes extends ContentSeries {
+  episodes: FeedVideo[];
+}
+
+interface AlbumWithTracks extends AudioAlbum {
+  tracks: FeedAudio[];
+}
 
 function formatDuration(seconds?: number | null) {
   if (!seconds) return null;
@@ -42,7 +51,7 @@ function HeroCard({ video }: { video: FeedVideo }) {
   return (
     <Link
       href={`/videos/${video.id}`}
-      className="block relative w-full rounded-3xl overflow-hidden group shadow-2xl border border-[var(--glass-border)] hover:border-[var(--color-magenta)] transition-all"
+      className="block relative w-full rounded-3xl overflow-hidden group shadow-2xl theme-glow-frame transition-all"
     >
       {/* Thumbnail */}
       <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-[var(--bg-secondary)]">
@@ -67,7 +76,7 @@ function HeroCard({ video }: { video: FeedVideo }) {
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
           <span className="flex items-center gap-1.5 theme-neon-button text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">
             <Zap className="w-3 h-3" />
-            {video.series ? 'Series' : 'Featured'}
+            {video.series_id ? 'Series Episode' : 'Featured'}
           </span>
           {video.genre && (
             <span className="flex items-center gap-1.5 bg-[var(--bg-primary)]/80 backdrop-blur-md border border-[var(--glass-border)] text-white text-[10px] font-semibold px-3 py-1 rounded-full">
@@ -137,7 +146,7 @@ function AudioStrip({ track, onPlay }: { track: FeedAudio; onPlay: () => void })
   return (
     <button
       onClick={onPlay}
-      className="w-full flex items-center gap-3.5 theme-glass-card rounded-2xl px-4 py-3 transition-all group text-left border border-[var(--glass-border)] hover:border-[var(--color-magenta)]"
+      className="w-full flex items-center gap-3.5 theme-glass-card theme-glow-frame rounded-2xl px-4 py-3 transition-all group text-left cursor-pointer"
     >
       <div className="relative w-11 h-11 rounded-xl overflow-hidden bg-[var(--bg-secondary)] shrink-0 border border-[var(--glass-border-subtle)]">
         {track.cover_url ? (
@@ -177,37 +186,143 @@ const FILTERS: { key: FilterType; label: string; icon?: React.ElementType }[] = 
   { key: 'blogs', label: 'Blogs', icon: BookOpen },
 ];
 
-// ─── Main Home Page (Dynamic Content Feed for Authenticated Users) ─────────────
+// Helper: Group videos by series
+function groupContentBySeries(
+  videos: FeedVideo[],
+  seriesList: ContentSeries[]
+): {
+  seriesGroups: SeriesWithEpisodes[];
+  standaloneVideos: FeedVideo[];
+} {
+  const seriesMap = new Map<string, SeriesWithEpisodes>();
+
+  for (const s of seriesList) {
+    seriesMap.set(s.id, { ...s, episodes: [] });
+  }
+
+  const standaloneVideos: FeedVideo[] = [];
+
+  for (const v of videos) {
+    if (v.series_id) {
+      if (!seriesMap.has(v.series_id)) {
+        seriesMap.set(v.series_id, {
+          id: v.series_id,
+          creator_id: v.creator_id,
+          title: v.series?.title || 'Series Collection',
+          description: v.series?.description || '',
+          category: v.category || null,
+          tags: v.tags || [],
+          cover_url: v.series?.cover_url || v.thumbnail_url || null,
+          cover_public_id: null,
+          total_episodes: 0,
+          created_at: v.created_at,
+          updated_at: v.updated_at,
+          creator: v.creator,
+          episodes: [],
+        });
+      }
+      seriesMap.get(v.series_id)!.episodes.push(v);
+    } else {
+      standaloneVideos.push(v);
+    }
+  }
+
+  const seriesGroups: SeriesWithEpisodes[] = [];
+  for (const s of seriesMap.values()) {
+    if (s.episodes.length > 0) {
+      s.episodes.sort((a, b) => (a.episode_number || 0) - (b.episode_number || 0));
+      seriesGroups.push(s);
+    }
+  }
+
+  return { seriesGroups, standaloneVideos };
+}
+
+// Helper: Group audio by album
+function groupAudioByAlbum(
+  audios: FeedAudio[],
+  albumList: AudioAlbum[]
+): {
+  albumGroups: AlbumWithTracks[];
+  standaloneAudio: FeedAudio[];
+} {
+  const albumMap = new Map<string, AlbumWithTracks>();
+  for (const a of albumList) {
+    albumMap.set(a.id, { ...a, tracks: [] });
+  }
+
+  const standaloneAudio: FeedAudio[] = [];
+  for (const track of audios) {
+    if (track.album_id) {
+      if (!albumMap.has(track.album_id)) {
+        albumMap.set(track.album_id, {
+          id: track.album_id,
+          creator_id: track.creator_id,
+          title: 'Album Collection',
+          artist_name: track.artist_name || track.creator?.display_name || 'Artist',
+          genre: track.genre || null,
+          description: null,
+          cover_url: track.cover_url || null,
+          cover_public_id: null,
+          created_at: track.created_at,
+          updated_at: track.created_at,
+          creator: track.creator,
+          tracks: [],
+        });
+      }
+      albumMap.get(track.album_id)!.tracks.push(track);
+    } else {
+      standaloneAudio.push(track);
+    }
+  }
+
+  const albumGroups: AlbumWithTracks[] = [];
+  for (const alb of albumMap.values()) {
+    if (alb.tracks.length > 0) {
+      alb.tracks.sort((a, b) => (a.track_number || 0) - (b.track_number || 0));
+      albumGroups.push(alb);
+    }
+  }
+
+  return { albumGroups, standaloneAudio };
+}
+
+// ─── Main Home Page (Public & Authenticated Video Feed) ─────────────────────────
 export default function HomePage() {
-  const router = useRouter();
-  const { user, isLoading: authLoading } = useAuth();
   const supabase = createClient();
   const { playTrack } = useAudioPlayer();
 
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [videos, setVideos] = useState<FeedVideo[]>([]);
+  const [seriesList, setSeriesList] = useState<ContentSeries[]>([]);
   const [audios, setAudios] = useState<FeedAudio[]>([]);
+  const [albumList, setAlbumList] = useState<AudioAlbum[]>([]);
   const [blogs, setBlogs] = useState<FeedBlog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // If someone isn't logged in, redirect to landing page instead of login
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.replace('/');
-    }
-  }, [user, authLoading, router]);
 
   const fetchFeed = async () => {
     setIsLoading(true);
     try {
-      const [{ data: vids }, { data: auds }, { data: blgs }] = await Promise.all([
+      const [
+        { data: vids },
+        { data: sList },
+        { data: auds },
+        { data: aList },
+        { data: blgs },
+      ] = await Promise.all([
         supabase
           .from('videos')
           .select('*, creator:profiles(*)')
           .eq('visibility', 'public')
           .eq('status', 'published')
           .order('created_at', { ascending: false })
-          .limit(30),
+          .limit(50),
+
+        supabase
+          .from('content_series')
+          .select('*, creator:profiles(*)')
+          .order('created_at', { ascending: false })
+          .limit(15),
 
         supabase
           .from('audios')
@@ -215,7 +330,13 @@ export default function HomePage() {
           .eq('visibility', 'public')
           .eq('status', 'published')
           .order('created_at', { ascending: false })
-          .limit(12),
+          .limit(30),
+
+        supabase
+          .from('audio_albums')
+          .select('*, creator:profiles(*)')
+          .order('created_at', { ascending: false })
+          .limit(10),
 
         supabase
           .from('blogs')
@@ -226,7 +347,9 @@ export default function HomePage() {
       ]);
 
       setVideos(((vids || []) as any[]).map((v) => ({ ...v, type: 'video' as const })));
+      setSeriesList((sList as ContentSeries[]) || []);
       setAudios(((auds || []) as any[]).map((a) => ({ ...a, type: 'audio' as const })));
+      setAlbumList((aList as AudioAlbum[]) || []);
       setBlogs(((blgs || []) as any[]).map((b) => ({ ...b, type: 'blog' as const })));
     } catch {
       // ignore
@@ -239,11 +362,12 @@ export default function HomePage() {
     fetchFeed();
   }, []);
 
-  // Derived content
-  const heroVideo = videos[0] ?? null;
-  const featuredAudio = audios[0] ?? null;
-  const shortVideos = videos.slice(1, 10);
-  const moreVideos = videos.slice(10, 25);
+  // Group series and albums
+  const { seriesGroups, standaloneVideos } = groupContentBySeries(videos, seriesList);
+  const { albumGroups, standaloneAudio } = groupAudioByAlbum(audios, albumList);
+
+  const heroVideo = standaloneVideos[0] || videos[0] || null;
+  const shortVideos = standaloneVideos.slice(1, 10);
   const trendingBlogs = blogs;
 
   // Filter overrides
@@ -256,10 +380,6 @@ export default function HomePage() {
     (activeFilter === 'audio' && audios.length === 0) ||
     (activeFilter === 'blogs' && blogs.length === 0);
 
-  if (!authLoading && !user) {
-    return null;
-  }
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
       {/* ── Filter Navigation Bar ── */}
@@ -268,7 +388,7 @@ export default function HomePage() {
           <button
             key={key}
             onClick={() => setActiveFilter(key)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all shrink-0 ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer ${
               activeFilter === key
                 ? 'theme-active-pill'
                 : 'theme-inactive-pill'
@@ -282,7 +402,7 @@ export default function HomePage() {
         <button
           onClick={fetchFeed}
           aria-label="Refresh Feed"
-          className="ml-auto p-2.5 rounded-full bg-[var(--glass-surface-subtle)] border border-[var(--glass-border)] text-[var(--text-muted)] hover:text-white hover:border-[var(--color-magenta)] transition-all shrink-0"
+          className="ml-auto p-2.5 rounded-full bg-[var(--glass-surface-subtle)] border border-[var(--glass-border)] text-[var(--text-muted)] hover:text-white hover:border-[var(--color-magenta)] transition-all shrink-0 cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[var(--color-pink)]' : ''}`} />
         </button>
@@ -318,17 +438,32 @@ export default function HomePage() {
           )}
 
           {/* 2. Featured Audio Strip */}
-          {showAudio && featuredAudio && (
+          {showAudio && audios.length > 0 && (
             <AudioStrip
-              track={featuredAudio}
-              onPlay={() => playTrack(featuredAudio, audios)}
+              track={audios[0]}
+              onPlay={() => playTrack(audios[0], audios)}
             />
           )}
 
-          {/* 3. Latest Drops Video Carousel */}
+          {/* 3. DEDICATED SERIES CAROUSELS: Episodes appear inside their series carousel */}
+          {showVideos && seriesGroups.map((series) => (
+            <ContentCarousel
+              key={series.id}
+              title={series.title}
+              badge={`SERIES · ${series.episodes.length} EPS`}
+              href={`/videos/${series.episodes[0]?.id || ''}`}
+              icon={Layers}
+            >
+              {series.episodes.map((ep) => (
+                <VideoCarouselCard key={ep.id} video={ep} />
+              ))}
+            </ContentCarousel>
+          ))}
+
+          {/* 4. Standalone Videos Carousel */}
           {showVideos && shortVideos.length > 0 && (
             <ContentCarousel
-              title="Latest Drops"
+              title="Featured Movies & Drops"
               badge="FRESH"
               href="/explore?type=video"
               icon={Zap}
@@ -339,21 +474,35 @@ export default function HomePage() {
             </ContentCarousel>
           )}
 
-          {/* 4. Trending & Series Video Carousel */}
-          {showVideos && moreVideos.length > 0 && (
-            <ContentCarousel
-              title="Trending & Episodic Series"
-              badge="HOT"
-              href="/explore?type=video"
-              icon={Flame}
-            >
-              {moreVideos.map((v) => (
-                <VideoCarouselCard key={v.id} video={v} />
-              ))}
-            </ContentCarousel>
-          )}
+          {/* 5. DEDICATED ALBUM COLLECTIONS */}
+          {showAudio && albumGroups.map((album) => (
+            <div key={album.id} className="theme-glass-card theme-glow-frame rounded-2xl p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Disc className="w-5 h-5 text-[var(--color-pink)]" />
+                  <h2 className="text-white font-bold text-base sm:text-lg">{album.title}</h2>
+                  <span className="text-[var(--color-pink)] text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-[var(--color-pink)]/15 border border-[var(--color-pink)]/30">
+                    ALBUM · {album.tracks.length} TRACKS
+                  </span>
+                </div>
+                <p className="text-xs text-[var(--text-muted)] font-medium">
+                  {album.artist_name || album.creator?.display_name}
+                </p>
+              </div>
 
-          {/* 5. Creator Blogs Carousel */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {album.tracks.map((t) => (
+                  <AudioStrip
+                    key={t.id}
+                    track={t}
+                    onPlay={() => playTrack(t, album.tracks)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* 6. Creator Blogs Carousel */}
           {showBlogs && trendingBlogs.length > 0 && (
             <ContentCarousel
               title="Community Blogs & Stories"
@@ -367,13 +516,13 @@ export default function HomePage() {
             </ContentCarousel>
           )}
 
-          {/* 6. Music & Audio Tracks */}
-          {showAudio && audios.length > 1 && (
+          {/* 7. Singles & Audio Tracks */}
+          {showAudio && standaloneAudio.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-3.5 px-1">
                 <div className="flex items-center gap-2">
                   <Music className="w-4 h-4 text-[var(--color-pink)]" />
-                  <h2 className="text-white font-bold text-base sm:text-lg">Music & Audio</h2>
+                  <h2 className="text-white font-bold text-base sm:text-lg">Singles & Audio Tracks</h2>
                   <span className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-[var(--glass-surface-subtle)] border border-[var(--glass-border-subtle)]">
                     LISTEN
                   </span>
@@ -387,7 +536,7 @@ export default function HomePage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {audios.slice(1, 9).map((track) => (
+                {standaloneAudio.slice(0, 8).map((track) => (
                   <AudioStrip
                     key={track.id}
                     track={track}
@@ -403,3 +552,4 @@ export default function HomePage() {
     </div>
   );
 }
+

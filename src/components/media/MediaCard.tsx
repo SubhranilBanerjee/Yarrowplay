@@ -64,7 +64,7 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
       'Sponsored Partner';
 
     return (
-      <div className="group relative theme-glass-card rounded-2xl overflow-hidden flex flex-col h-full border border-[var(--glass-border)] hover:border-[var(--color-magenta)]">
+      <div className="group relative theme-glass-card theme-glow-frame rounded-2xl overflow-hidden flex flex-col h-full">
         {/* Thumbnail area: square on mobile */}
         <a
           href={item.target_url}
@@ -141,7 +141,7 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
     return (
       <div
         onClick={() => playTrack(item, allAudioTracks)}
-        className="group relative theme-glass-card rounded-2xl overflow-hidden flex flex-col h-full cursor-pointer border border-[var(--glass-border)] hover:border-[var(--color-magenta)]"
+        className="group relative theme-glass-card theme-glow-frame rounded-2xl overflow-hidden flex flex-col h-full cursor-pointer"
       >
         <div className="relative aspect-square w-full bg-[var(--bg-secondary)] overflow-hidden">
           {item.cover_url ? (
@@ -222,7 +222,7 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
     return (
       <Link
         href={`/blogs/${item.id}`}
-        className="group relative theme-glass-card rounded-2xl overflow-hidden flex flex-col h-full border border-[var(--glass-border)] hover:border-[var(--color-magenta)]"
+        className="group relative theme-glass-card theme-glow-frame rounded-2xl overflow-hidden flex flex-col h-full"
       >
         <div className="relative aspect-square sm:aspect-video w-full bg-[var(--bg-secondary)] overflow-hidden">
           {item.cover_url ? (
@@ -287,7 +287,7 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
   return (
     <Link
       href={`/videos/${item.id}`}
-      className="group relative theme-glass-card rounded-2xl overflow-hidden flex flex-col h-full border border-[var(--glass-border)] hover:border-[var(--color-magenta)]"
+      className="group relative theme-glass-card theme-glow-frame rounded-2xl overflow-hidden flex flex-col h-full"
     >
       <div className="relative aspect-square sm:aspect-video w-full bg-[var(--bg-secondary)] overflow-hidden">
         {item.thumbnail_url ? (

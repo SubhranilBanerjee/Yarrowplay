@@ -1,9 +1,17 @@
 'use client';
 
 import React from 'react';
+import { usePathname } from 'next/navigation';
 import Galaxy from '@/components/Galaxy';
 
 export function GalaxyBackground() {
+  const pathname = usePathname();
+
+  // Display the galaxy background only on the landing page ('/')
+  if (pathname !== '/') {
+    return null;
+  }
+
   return (
     <div
       className="fixed inset-0 pointer-events-none -z-10 w-full h-full overflow-hidden select-none"
