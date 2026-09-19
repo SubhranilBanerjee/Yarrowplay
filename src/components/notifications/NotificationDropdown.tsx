@@ -278,13 +278,13 @@ export function NotificationDropdown() {
         onClick={handleToggle}
         className={`relative w-9 h-9 rounded-full bg-[var(--glass-surface-subtle)] border transition-all flex items-center justify-center ${
           isOpen
-            ? 'border-[var(--color-magenta)] text-white shadow-[0_0_15px_rgba(152,71,180,0.5)]'
-            : 'border-[var(--glass-border)] text-[var(--text-secondary)] hover:text-white hover:border-[var(--color-magenta)] hover:shadow-[0_0_15px_rgba(151,145,241,0.35)]'
+            ? 'border-[#8B5CF6] text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]'
+            : 'border-[#2E2A45] text-[#9CA3AF] hover:text-[#F9FAFB] hover:border-[#8B5CF6] hover:shadow-[0_0_15px_rgba(139,92,246,0.3)]'
         }`}
       >
         <Bell className="w-4 h-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-gradient-to-r from-[var(--color-magenta)] to-[var(--color-purple-bright)] text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(152,71,180,0.8)] animate-pulse">
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-gradient-to-r from-[#EC4899] to-[#8B5CF6] text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(236,72,153,0.8)] animate-pulse">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -292,14 +292,14 @@ export function NotificationDropdown() {
 
       {/* Glassmorphic Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-2xl bg-[var(--bg-primary)]/95 backdrop-blur-2xl border border-[var(--glass-border)] shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-2xl bg-[#161522] border border-[#2E2A45] shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
           {/* Header */}
-          <div className="px-4 py-3 border-b border-[var(--glass-border)] flex items-center justify-between bg-[var(--glass-surface-subtle)]">
+          <div className="px-4 py-3 border-b border-[#2E2A45] flex items-center justify-between bg-[#161522]">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <h3 className="text-sm font-bold text-[#F9FAFB] flex items-center gap-2">
                 Notifications
                 {unreadCount > 0 && (
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--color-purple-bright)]/20 text-[var(--color-pink)] border border-[var(--color-purple-bright)]/40">
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#8B5CF6]/20 text-[#A855F7] border border-[#8B5CF6]/40">
                     {unreadCount} new
                   </span>
                 )}
@@ -309,7 +309,7 @@ export function NotificationDropdown() {
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-xs text-[var(--color-pink)] hover:text-white flex items-center gap-1.5 transition-colors font-medium cursor-pointer"
+                className="text-xs text-[#EC4899] hover:text-white flex items-center gap-1.5 transition-colors font-medium cursor-pointer"
                 title="Mark all as read"
               >
                 <CheckCheck className="w-3.5 h-3.5" />
@@ -319,13 +319,13 @@ export function NotificationDropdown() {
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex items-center px-4 py-2 border-b border-[var(--glass-border-subtle)] gap-2 bg-[var(--bg-primary)]/40">
+          <div className="flex items-center px-4 py-2 border-b border-[#2E2A45]/60 gap-2 bg-[#0F0E17]/60">
             <button
               onClick={() => setFilter('all')}
               className={`text-xs px-3 py-1 rounded-full font-medium transition-all ${
                 filter === 'all'
-                  ? 'bg-[var(--color-purple-bright)] text-white shadow-[0_0_10px_rgba(157,0,255,0.4)]'
-                  : 'text-[var(--text-secondary)] hover:text-white hover:bg-[var(--glass-surface-subtle)]'
+                  ? 'bg-[#7C3AED] text-white shadow-[0_0_10px_rgba(124,58,237,0.4)]'
+                  : 'text-[#9CA3AF] hover:text-[#F9FAFB] hover:bg-[#1E1B2E]'
               }`}
             >
               All
@@ -334,13 +334,13 @@ export function NotificationDropdown() {
               onClick={() => setFilter('unread')}
               className={`text-xs px-3 py-1 rounded-full font-medium transition-all flex items-center gap-1.5 ${
                 filter === 'unread'
-                  ? 'bg-[var(--color-purple-bright)] text-white shadow-[0_0_10px_rgba(157,0,255,0.4)]'
-                  : 'text-[var(--text-secondary)] hover:text-white hover:bg-[var(--glass-surface-subtle)]'
+                  ? 'bg-[#7C3AED] text-white shadow-[0_0_10px_rgba(124,58,237,0.4)]'
+                  : 'text-[#9CA3AF] hover:text-[#F9FAFB] hover:bg-[#1E1B2E]'
               }`}
             >
               <span>Unread</span>
               {unreadCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-pink-500/40 text-[10px] flex items-center justify-center">
+                <span className="w-4 h-4 rounded-full bg-[#EC4899]/40 text-[10px] flex items-center justify-center">
                   {unreadCount}
                 </span>
               )}
@@ -435,7 +435,7 @@ export function NotificationDropdown() {
                   </div>
 
                   {!notification.is_read && (
-                    <div className="w-2 h-2 rounded-full bg-[var(--color-magenta)] shadow-[0_0_6px_rgba(152,71,180,0.8)] shrink-0 self-center group-hover:hidden" />
+                    <div className="w-2 h-2 rounded-full bg-[#EC4899] shadow-[0_0_6px_rgba(236,72,153,0.8)] shrink-0 self-center group-hover:hidden" />
                   )}
                 </div>
               ))
@@ -443,11 +443,11 @@ export function NotificationDropdown() {
           </div>
 
           {/* Footer */}
-          <div className="p-2.5 border-t border-[var(--glass-border)] bg-[var(--glass-surface-subtle)] text-center">
+          <div className="p-2.5 border-t border-[#2E2A45] bg-[#161522] text-center">
             <Link
               href="/notifications"
               onClick={() => setIsOpen(false)}
-              className="text-xs font-semibold text-[var(--color-pink)] hover:text-white transition-colors flex items-center justify-center gap-1.5 py-1"
+              className="text-xs font-semibold text-[#8B5CF6] hover:text-[#EC4899] transition-colors flex items-center justify-center gap-1.5 py-1"
             >
               <span>View all notifications</span>
               <ExternalLink className="w-3.5 h-3.5" />

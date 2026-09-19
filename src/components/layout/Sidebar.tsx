@@ -67,15 +67,15 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3.5 px-4 py-3 rounded-none font-medium text-sm transition-all duration-200 ${
+                className={`flex items-center gap-3.5 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
                   isActive
-                    ? 'theme-active-pill font-semibold border-l-4 border-l-[var(--color-pink)] shadow-md'
-                    : 'text-[var(--text-secondary)] border-l-4 border-l-transparent hover:bg-[var(--glass-surface)] hover:text-white hover:border-y hover:border-r hover:border-[var(--glass-border)]'
+                    ? 'theme-active-pill text-[#F9FAFB] shadow-[0_0_15px_rgba(139,92,246,0.35)]'
+                    : 'text-[#9CA3AF] hover:bg-[#161522] hover:text-[#F9FAFB]'
                 }`}
               >
                 <Icon
                   className={`w-5 h-5 transition-colors ${
-                    isActive ? 'text-white' : item.highlight ? 'text-[var(--color-pink)]' : 'text-[var(--text-muted)]'
+                    isActive ? 'text-[#F9FAFB]' : item.highlight ? 'text-[#EC4899]' : 'text-[#9CA3AF]'
                   }`}
                 />
                 <span>{item.label}</span>
@@ -88,23 +88,23 @@ export function Sidebar() {
         {user ? (
           <Link
             href={`/profile/${profile?.username || user.id}`}
-            className={`flex items-center gap-3.5 px-4 py-3 rounded-none font-medium text-sm transition-all ${
+            className={`flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all ${
               pathname.startsWith('/profile')
-                ? 'theme-active-pill border-l-4 border-l-[var(--color-pink)] font-semibold'
-                : 'text-[var(--text-secondary)] bg-[var(--glass-surface-subtle)] border border-[var(--glass-border-subtle)] hover:bg-[var(--glass-surface)] hover:border-[var(--glass-border)] hover:text-white'
+                ? 'theme-active-pill text-[#F9FAFB] font-semibold shadow-[0_0_15px_rgba(139,92,246,0.35)]'
+                : 'text-[#9CA3AF] hover:bg-[#161522] hover:text-[#F9FAFB]'
             }`}
           >
-            <div className="w-7 h-7 rounded-none bg-[var(--color-purple-bright)]/20 border border-[var(--color-purple-bright)]/40 flex items-center justify-center text-[var(--color-pink)] text-xs font-bold shrink-0">
+            <div className="w-7 h-7 rounded-full bg-[#8B5CF6]/20 border border-[#8B5CF6]/40 flex items-center justify-center text-[#A855F7] text-xs font-bold shrink-0">
               {profile?.display_name ? profile.display_name[0].toUpperCase() : 'U'}
             </div>
             <span className="truncate flex-1">{profile?.display_name || 'My Profile'}</span>
           </Link>
         ) : (
-          <div className="p-4 rounded-none theme-glass-card-static text-center border border-[var(--glass-border)]">
-            <p className="text-xs text-[var(--text-secondary)] mb-3 leading-relaxed">Join Yarrowplay to like, upload and comment.</p>
+          <div className="p-4 rounded-xl theme-glass-card-static text-center border border-[var(--glass-border)]">
+            <p className="text-xs text-[#9CA3AF] mb-3 leading-relaxed">Join Yarrowplay to like, upload and comment.</p>
             <Link
               href="/register"
-              className="block w-full text-xs font-semibold py-2.5 theme-neon-button rounded-none transition-all"
+              className="block w-full text-xs font-semibold py-2.5 theme-neon-button rounded-xl transition-all"
             >
               Get Started
             </Link>

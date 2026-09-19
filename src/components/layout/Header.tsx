@@ -50,7 +50,7 @@ export function Header() {
               placeholder="Search videos, music, creators, blogs..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[var(--glass-surface-subtle)] text-white placeholder-[var(--text-muted)] text-sm rounded-full pl-11 pr-4 py-2.5 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-magenta)] focus:ring-2 focus:ring-[var(--color-purple-bright)]/30 focus:bg-[var(--glass-surface)] transition-all"
+              className="w-full bg-[#161522] text-[#F9FAFB] placeholder-[#9CA3AF] text-sm rounded-full pl-11 pr-4 py-2.5 border border-[#2E2A45] focus:outline-none focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6]/25 focus:bg-[#1E1B2E] transition-all"
             />
           </div>
         </form>
@@ -62,7 +62,7 @@ export function Header() {
               {profile?.role === 'creator' && (
                 <Link
                   href="/creator/studio"
-                  className="hidden md:flex items-center gap-2 theme-neon-button text-xs md:text-sm font-semibold px-4 py-2 rounded-full transition-all"
+                  className="hidden md:flex items-center gap-2 bg-[#EC4899]/15 border border-[#EC4899]/35 text-[#EC4899] hover:bg-[#EC4899] hover:text-white text-xs md:text-sm font-semibold px-4 py-2 rounded-full transition-all shadow-sm hover:shadow-[0_0_15px_rgba(236,72,153,0.4)]"
                 >
                   <Film className="w-4 h-4" />
                   Creator Studio
@@ -72,7 +72,7 @@ export function Header() {
               {profile?.role === 'advertiser' && (
                 <Link
                   href="/advertiser"
-                  className="hidden md:flex items-center gap-2 theme-neon-button text-xs md:text-sm font-semibold px-4 py-2 rounded-full transition-all"
+                  className="hidden md:flex items-center gap-2 bg-[#8B5CF6]/15 border border-[#8B5CF6]/35 text-[#8B5CF6] hover:bg-[#8B5CF6] hover:text-white text-xs md:text-sm font-semibold px-4 py-2 rounded-full transition-all shadow-sm hover:shadow-[0_0_15px_rgba(139,92,246,0.4)]"
                 >
                   <Megaphone className="w-4 h-4" />
                   Advertiser Studio
@@ -86,7 +86,7 @@ export function Header() {
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 p-1 rounded-full bg-[var(--glass-surface-subtle)] border border-[var(--glass-border)] hover:border-[var(--color-magenta)] hover:shadow-[0_0_15px_rgba(151,145,241,0.35)] transition-all"
+                  className="flex items-center gap-2 p-1 rounded-full bg-[#161522] border border-[#2E2A45] hover:border-[#8B5CF6] hover:shadow-[0_0_15px_rgba(139,92,246,0.3)] transition-all"
                 >
                   {profile?.avatar_url ? (
                     <div className="relative w-7 h-7 rounded-full overflow-hidden">

@@ -43,7 +43,7 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  // Handle ADVERTISER CAMPAIGN
+  // ─── 1. ADVERTISER CAMPAIGN ────────────────────────────────────────────────
   if (item.type === 'ad') {
     const handleAdClick = () => {
       fetch('/api/analytics/track', {
@@ -64,14 +64,14 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
       'Sponsored Partner';
 
     return (
-      <div className="group relative theme-glass-card theme-glow-frame rounded-2xl overflow-hidden flex flex-col h-full">
-        {/* Thumbnail area: square on mobile */}
+      <div className="group relative bg-transparent flex flex-col h-full">
+        {/* Thumbnail area with ring-1 ring-white/10 */}
         <a
           href={item.target_url}
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleAdClick}
-          className="relative aspect-square sm:aspect-video w-full bg-[var(--bg-secondary)] overflow-hidden block cursor-pointer"
+          className="relative aspect-video w-full rounded-xl overflow-hidden bg-[#161522] ring-1 ring-white/10 block cursor-pointer"
         >
           {item.media_type === 'video' ? (
             <video
@@ -80,7 +80,7 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
               muted
               loop
               playsInline
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-cover group-hover:scale-105 group-hover:brightness-90 transition-all duration-300"
             />
           ) : item.media_url ? (
             <Image
@@ -88,44 +88,51 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
               alt={item.title}
               fill
               unoptimized
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              className="object-cover group-hover:scale-105 group-hover:brightness-90 transition-all duration-300"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)]">
+            <div className="w-full h-full flex items-center justify-center text-[#9CA3AF]">
               <Film className="w-8 h-8" />
             </div>
           )}
+
+          {/* Sponsored badge */}
+          <div className="absolute top-2.5 left-2.5">
+            <span className="bg-black/70 backdrop-blur-md border border-white/10 text-white text-[10px] font-medium px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
+              Sponsored
+            </span>
+          </div>
         </a>
 
-        {/* Ad Details */}
-        <div className="p-3.5 flex flex-col flex-1 justify-between gap-3">
+        {/* Metadata directly below image */}
+        <div className="pt-2 flex flex-col flex-1 justify-between gap-1.5">
           <div>
             <a
               href={item.target_url}
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleAdClick}
-              className="block group/title"
+              className="block"
             >
-              <h3 className="text-white font-semibold text-sm line-clamp-1 group-hover/title:text-[var(--color-pink)] transition-colors">
+              <h3 className="text-[#F9FAFB] font-semibold text-sm line-clamp-1 group-hover:text-[#EC4899] transition-colors">
                 {item.title}
               </h3>
             </a>
-            <p className="text-[var(--text-secondary)] text-xs line-clamp-2 mt-1 leading-relaxed">
-              {item.headline || item.description}
+            <p className="text-[#9CA3AF] text-xs line-clamp-1 mt-0.5">
+              {advertiserName} · {item.headline || item.description}
             </p>
           </div>
 
-          <div className="pt-2 border-t border-[var(--glass-border-subtle)] flex items-center justify-between gap-2">
-            <span className="text-[11px] text-[var(--text-muted)] truncate font-medium">
-              {advertiserName}
+          <div className="mt-1 flex items-center justify-between gap-2">
+            <span className="text-[11px] text-[#9CA3AF] truncate font-medium">
+              Promoted
             </span>
             <a
               href={item.target_url}
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleAdClick}
-              className="text-xs font-semibold px-3 py-1.5 theme-neon-button rounded-xl transition-all shadow-sm shrink-0 inline-flex items-center gap-1.5 active:scale-95"
+              className="text-xs font-semibold px-3 py-1 bg-[#EC4899]/15 border border-[#EC4899]/30 text-[#EC4899] hover:bg-[#EC4899] hover:text-white rounded-full transition-all shadow-sm shrink-0 inline-flex items-center gap-1"
             >
               <span>{item.cta_label || 'Learn More'}</span>
               <ExternalLink className="w-3 h-3" />
@@ -136,45 +143,46 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
     );
   }
 
-  // Handle AUDIO
+  // ─── 2. AUDIO TRACK ────────────────────────────────────────────────────────
   if (item.type === 'audio') {
     return (
       <div
         onClick={() => playTrack(item, allAudioTracks)}
-        className="group relative theme-glass-card theme-glow-frame rounded-2xl overflow-hidden flex flex-col h-full cursor-pointer"
+        className="group relative bg-transparent flex flex-col h-full cursor-pointer"
       >
-        <div className="relative aspect-square w-full bg-[var(--bg-secondary)] overflow-hidden">
+        <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-[#161522] ring-1 ring-white/10">
           {item.cover_url ? (
             <Image
               src={item.cover_url}
               alt={item.title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              className="object-cover group-hover:scale-105 group-hover:brightness-90 transition-all duration-300"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-[var(--color-purple-bright)] bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--bg-tertiary)]">
-              <Music className="w-12 h-12" />
+            <div className="w-full h-full flex items-center justify-center text-[#8B5CF6] bg-gradient-to-br from-[#161522] to-[#1E1B2E]">
+              <Music className="w-10 h-10" />
             </div>
           )}
 
           {/* Type Badge */}
-          <div className="absolute top-2.5 left-2.5 bg-[var(--bg-primary)]/80 backdrop-blur-md border border-[var(--glass-border)] text-white text-[10px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-sm">
-            <Music className="w-3 h-3 text-[var(--color-pink)]" />
-            Audio
+          <div className="absolute top-2.5 left-2.5">
+            <span className="bg-black/70 backdrop-blur-md border border-white/10 text-white text-[10px] font-medium px-2 py-0.5 rounded-md flex items-center gap-1.5 shadow-sm">
+              <Music className="w-2.5 h-2.5 text-[#EC4899]" />
+              Audio
+            </span>
           </div>
 
           {/* Duration */}
           {item.duration_seconds > 0 && (
-            <div className="absolute bottom-2.5 right-2.5 bg-[var(--bg-primary)]/80 backdrop-blur-md border border-[var(--glass-border-subtle)] text-[var(--text-secondary)] text-[10px] font-medium px-2 py-0.5 rounded-md flex items-center gap-1">
-              <Clock className="w-3 h-3" />
+            <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-md text-[#9CA3AF] text-[10px] font-medium px-1.5 py-0.5 rounded">
               {formatDuration(item.duration_seconds)}
             </div>
           )}
 
           {/* Play hover button */}
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <div className="w-12 h-12 rounded-full theme-neon-button flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
-              <Play className="w-6 h-6 text-white fill-white ml-0.5" />
+          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center pointer-events-none">
+            <div className="w-12 h-12 rounded-full bg-[#8B5CF6]/90 text-white flex items-center justify-center shadow-[0_0_25px_rgba(139,92,246,0.6)] transform group-hover:scale-110 transition-transform duration-200">
+              <Play className="w-5 h-5 fill-white text-white ml-0.5" />
             </div>
           </div>
 
@@ -188,27 +196,28 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
                 onDelete();
               }}
               title="Delete audio"
-              className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-full bg-black/70 hover:bg-[var(--status-error)] text-[var(--text-muted)] hover:text-white backdrop-blur transition-colors cursor-pointer"
+              className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-full bg-black/70 hover:bg-red-500 text-[#9CA3AF] hover:text-white backdrop-blur transition-colors cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
 
-        <div className="p-3.5 flex flex-col flex-1 justify-between">
+        {/* Metadata directly below image */}
+        <div className="pt-2 flex flex-col flex-1 justify-between">
           <div>
-            <h3 className="text-white font-semibold text-sm line-clamp-1 group-hover:text-[var(--color-pink)] transition-colors">
+            <h3 className="text-[#F9FAFB] font-semibold text-sm line-clamp-1 group-hover:text-[#A855F7] transition-colors">
               {item.title}
             </h3>
-            <p className="text-[var(--text-secondary)] text-xs line-clamp-1 mt-1 font-normal">
-              {item.artist_name || item.creator?.display_name}
+            <p className="text-[#9CA3AF] text-xs line-clamp-1 mt-0.5 font-normal">
+              {item.artist_name || item.creator?.display_name || 'Artist'}
             </p>
           </div>
 
-          <div className="mt-3 pt-2 border-t border-[var(--glass-border-subtle)] flex items-center justify-between text-xs text-[var(--text-muted)]">
+          <div className="mt-1 flex items-center justify-between text-xs text-[#9CA3AF]">
             <span className="truncate">{item.genre || 'Music'}</span>
             <div className="flex items-center gap-1">
-              <Heart className="w-3.5 h-3.5 text-[var(--color-pink)]" />
+              <Heart className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#EC4899] transition-colors" />
               <span>{item.likes_count || 0}</span>
             </div>
           </div>
@@ -217,31 +226,40 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
     );
   }
 
-  // Handle BLOG
+  // ─── 3. BLOG POST ──────────────────────────────────────────────────────────
   if (item.type === 'blog') {
     return (
       <Link
         href={`/blogs/${item.id}`}
-        className="group relative theme-glass-card theme-glow-frame rounded-2xl overflow-hidden flex flex-col h-full"
+        className="group relative bg-transparent flex flex-col h-full cursor-pointer"
       >
-        <div className="relative aspect-square sm:aspect-video w-full bg-[var(--bg-secondary)] overflow-hidden">
+        <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-[#161522] ring-1 ring-white/10">
           {item.cover_url ? (
             <Image
               src={item.cover_url}
               alt={item.title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              className="object-cover group-hover:scale-105 group-hover:brightness-90 transition-all duration-300"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-[var(--color-purple-bright)] bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--bg-tertiary)]">
+            <div className="w-full h-full flex items-center justify-center text-[#8B5CF6] bg-gradient-to-br from-[#161522] to-[#1E1B2E]">
               <FileText className="w-10 h-10" />
             </div>
           )}
 
           {/* Type Badge */}
-          <div className="absolute top-2.5 left-2.5 bg-[var(--bg-primary)]/80 backdrop-blur-md border border-[var(--glass-border)] text-white text-[10px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-sm">
-            <FileText className="w-3 h-3 text-[var(--color-pink)]" />
-            Blog
+          <div className="absolute top-2.5 left-2.5">
+            <span className="bg-black/70 backdrop-blur-md border border-white/10 text-white text-[10px] font-medium px-2 py-0.5 rounded-md flex items-center gap-1.5 shadow-sm">
+              <FileText className="w-2.5 h-2.5 text-[#EC4899]" />
+              Blog
+            </span>
+          </div>
+
+          {/* Read hover button */}
+          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center pointer-events-none">
+            <div className="w-12 h-12 rounded-full bg-[#8B5CF6]/90 text-white flex items-center justify-center shadow-[0_0_25px_rgba(139,92,246,0.6)] transform group-hover:scale-110 transition-transform duration-200">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
           </div>
 
           {/* Delete action */}
@@ -254,27 +272,28 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
                 onDelete();
               }}
               title="Delete article"
-              className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-full bg-black/70 hover:bg-[var(--status-error)] text-[var(--text-muted)] hover:text-white backdrop-blur transition-colors cursor-pointer"
+              className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-full bg-black/70 hover:bg-red-500 text-[#9CA3AF] hover:text-white backdrop-blur transition-colors cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
 
-        <div className="p-3.5 flex flex-col flex-1 justify-between">
+        {/* Metadata directly below image */}
+        <div className="pt-2 flex flex-col flex-1 justify-between">
           <div>
-            <h3 className="text-white font-semibold text-sm line-clamp-2 group-hover:text-[var(--color-pink)] transition-colors">
+            <h3 className="text-[#F9FAFB] font-semibold text-sm line-clamp-1 group-hover:text-[#A855F7] transition-colors">
               {item.title}
             </h3>
-            <p className="text-[var(--text-secondary)] text-xs line-clamp-2 mt-1 leading-relaxed">
-              {item.body.replace(/[#*`_]/g, '')}
+            <p className="text-[#9CA3AF] text-xs line-clamp-1 mt-0.5 font-normal">
+              {item.author?.display_name || 'Creator'}
             </p>
           </div>
 
-          <div className="mt-3 pt-2 border-t border-[var(--glass-border-subtle)] flex items-center justify-between text-xs text-[var(--text-muted)]">
-            <span className="truncate">{item.author?.display_name || 'Creator'}</span>
+          <div className="mt-1 flex items-center justify-between text-xs text-[#9CA3AF]">
+            <span className="truncate">{item.category || 'Article'}</span>
             <div className="flex items-center gap-1">
-              <Heart className="w-3.5 h-3.5 text-[var(--color-pink)]" />
+              <Heart className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#EC4899] transition-colors" />
               <span>{item.likes_count || 0}</span>
             </div>
           </div>
@@ -283,33 +302,42 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
     );
   }
 
-  // Handle VIDEO
+  // ─── 4. VIDEO (Default Minimalist Borderless Focus) ─────────────────────────
   return (
     <Link
       href={`/videos/${item.id}`}
-      className="group relative theme-glass-card theme-glow-frame rounded-2xl overflow-hidden flex flex-col h-full"
+      className="group relative bg-transparent flex flex-col h-full cursor-pointer"
     >
-      <div className="relative aspect-square sm:aspect-video w-full bg-[var(--bg-secondary)] overflow-hidden">
+      {/* Thumbnail: rounded corners (rounded-xl) with ring-1 ring-white/10 */}
+      <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-[#161522] ring-1 ring-white/10">
         {item.thumbnail_url ? (
           <Image
             src={item.thumbnail_url}
             alt={item.title}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="object-cover group-hover:scale-105 group-hover:brightness-90 transition-all duration-300"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-[var(--color-purple-bright)] bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--bg-tertiary)]">
+          <div className="w-full h-full flex items-center justify-center text-[#8B5CF6] bg-gradient-to-br from-[#161522] to-[#1E1B2E]">
             <Play className="w-10 h-10" />
           </div>
         )}
 
-        {/* Video Type Badge */}
+        {/* Video Type Badge (Top-Left) */}
         <div className="absolute top-2.5 left-2.5">
-          <span className="bg-[var(--bg-primary)]/80 backdrop-blur-md border border-[var(--glass-border)] text-white text-[10px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-sm">
-            <Play className="w-2.5 h-2.5 text-[var(--color-pink)] fill-current" />
+          <span className="bg-black/70 backdrop-blur-md border border-white/10 text-white text-[10px] font-medium px-2 py-0.5 rounded-md flex items-center gap-1.5 shadow-sm">
+            <Play className="w-2.5 h-2.5 text-[#EC4899] fill-current" />
             Video
           </span>
         </div>
+
+        {/* Duration (Bottom-Right) */}
+        {item.duration_seconds > 0 && (
+          <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-md text-[#9CA3AF] text-[10px] font-medium px-1.5 py-0.5 rounded">
+            {formatDuration(item.duration_seconds)}
+          </div>
+        )}
 
         {/* Delete action */}
         {onDelete && (
@@ -321,42 +349,35 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
               onDelete();
             }}
             title="Delete video"
-            className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-full bg-black/70 hover:bg-[var(--status-error)] text-[var(--text-muted)] hover:text-white backdrop-blur transition-colors cursor-pointer"
+            className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-full bg-black/70 hover:bg-red-500 text-[#9CA3AF] hover:text-white backdrop-blur transition-colors cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
         )}
 
-        {/* Duration */}
-        {item.duration_seconds > 0 && (
-          <div className="absolute bottom-2.5 right-2.5 bg-[var(--bg-primary)]/80 backdrop-blur-md border border-[var(--glass-border-subtle)] text-[var(--text-secondary)] text-[10px] font-medium px-2 py-0.5 rounded-md flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            {formatDuration(item.duration_seconds)}
-          </div>
-        )}
-
-        {/* Play Overlay */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-          <div className="w-12 h-12 rounded-full theme-neon-button flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
-            <Play className="w-6 h-6 text-white fill-white ml-0.5" />
+        {/* Hover State: prominent centered Play icon */}
+        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center pointer-events-none">
+          <div className="w-12 h-12 rounded-full bg-[#8B5CF6]/90 text-white flex items-center justify-center shadow-[0_0_25px_rgba(139,92,246,0.6)] transform group-hover:scale-110 transition-transform duration-200">
+            <Play className="w-5 h-5 fill-white text-white ml-0.5" />
           </div>
         </div>
       </div>
 
-      <div className="p-3.5 flex flex-col flex-1 justify-between">
+      {/* Metadata directly below the image */}
+      <div className="pt-2 flex flex-col flex-1 justify-between">
         <div>
-          <h3 className="text-white font-semibold text-sm line-clamp-1 group-hover:text-[var(--color-pink)] transition-colors">
+          <h3 className="text-[#F9FAFB] font-semibold text-sm line-clamp-1 group-hover:text-[#A855F7] transition-colors">
             {item.title}
           </h3>
-          <p className="text-[var(--text-secondary)] text-xs line-clamp-1 mt-1 font-normal">
+          <p className="text-[#9CA3AF] text-xs line-clamp-1 mt-0.5 font-normal">
             {item.creator?.display_name || 'Creator'}
           </p>
         </div>
 
-        <div className="mt-3 pt-2 border-t border-[var(--glass-border-subtle)] flex items-center justify-between text-xs text-[var(--text-muted)]">
+        <div className="mt-1 flex items-center justify-between text-xs text-[#9CA3AF]">
           <span>{item.views_count || 0} views</span>
           <div className="flex items-center gap-1">
-            <Heart className="w-3.5 h-3.5 text-[var(--color-pink)]" />
+            <Heart className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#EC4899] transition-colors" />
             <span>{item.likes_count || 0}</span>
           </div>
         </div>

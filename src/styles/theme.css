@@ -1,42 +1,45 @@
 /* ==========================================================================
    YARROWPLAY THEME SPECIFICATION
-   Configured with User Custom Palette:
-   #484AAA (Royal Iris / Indigo)
-   #9791F1 (Periwinkle / Soft Iris)
-   #F7EBF9 (Mist Lavender White)
-   #DDC2F2 (Pastel Orchid / Lilac)
-   #9847B4 (Rich Amethyst Violet)
+   Theme: Modern Electric Indigo
+   - Main Background: #0F0E17 (Deep Void Charcoal/Purple)
+   - Surface / Card Background: #161522 or #1E1B2E (Elevated Deep Violet Slate)
+   - Primary Accent (Active State / Pills): #8B5CF6 / #7C3AED (Tailwind Violet-500/600)
+   - Secondary Accent (CTAs / Badges): #EC4899 (Pink-500) / #A855F7 (Purple-500)
+   - Text Main: #F9FAFB (Gray-50)
+   - Text Muted / Icons: #9CA3AF (Gray-400)
+   - Borders / Separators: #2E2A45 (Subtle Soft Purple-Gray)
    ========================================================================== */
 
 :root {
   /* --- Primary Backgrounds --- */
-  --bg-primary: #090818;
-  --bg-secondary: #100D26;
-  --bg-tertiary: #191438;
+  --bg-primary: #0F0E17;
+  --bg-secondary: #161522;
+  --bg-tertiary: #1E1B2E;
   
-  /* --- Glass Surfaces --- */
-  --glass-surface-subtle: rgba(25, 20, 56, 0.45);
-  --glass-surface: rgba(28, 22, 65, 0.65);
-  --glass-surface-elevated: rgba(43, 34, 98, 0.75);
-  --glass-surface-hover: rgba(58, 46, 128, 0.85);
-  --glass-border: rgba(151, 145, 241, 0.22);
-  --glass-border-subtle: rgba(151, 145, 241, 0.12);
-  --glass-border-hover: rgba(221, 194, 242, 0.6);
-  --glass-border-active: rgba(152, 71, 180, 0.85);
+  /* --- Surfaces & Glass --- */
+  --glass-surface-subtle: rgba(22, 21, 34, 0.6);
+  --glass-surface: #161522;
+  --glass-surface-elevated: #1E1B2E;
+  --glass-surface-hover: #26223B;
+  --glass-border: #2E2A45;
+  --glass-border-subtle: rgba(46, 42, 69, 0.6);
+  --glass-border-hover: #8B5CF6;
+  --glass-border-active: #7C3AED;
   
-  /* --- Palette Accent Colors --- */
-  --color-purple-dark: #484AAA;
-  --color-purple-bright: #9791F1;
-  --color-magenta: #9847B4;
-  --color-pink: #DDC2F2;
-  --color-pink-light: #F7EBF9;
-  --color-neon-blue: #484AAA;
+  /* --- Primary & Secondary Accent Colors --- */
+  --color-purple-dark: #6D28D9;      /* Violet-700 */
+  --color-purple-bright: #8B5CF6;    /* Violet-500 (Primary Accent) */
+  --color-primary-accent: #7C3AED;   /* Violet-600 */
+  --color-magenta: #EC4899;          /* Pink-500 (CTA & Highlight) */
+  --color-pink: #A855F7;             /* Purple-500 */
+  --color-pink-light: #F472B6;       /* Pink-400 */
+  --color-neon-blue: #6366F1;        /* Indigo-500 */
   
   /* --- Text & Content Colors --- */
-  --text-primary: #F7EBF9;
-  --text-secondary: #DDC2F2;
-  --text-muted: #9E98D4;
-  --text-dim: #67619B;
+  --text-primary: #F9FAFB;           /* Gray-50 */
+  --text-secondary: #E5E7EB;         /* Gray-200 */
+  --text-muted: #9CA3AF;             /* Gray-400 */
+  --text-dim: #6B7280;               /* Gray-500 */
   
   /* --- Status Colors --- */
   --status-success: #10B981;
@@ -44,34 +47,34 @@
   --status-error: #EF4444;
   
   /* --- Gradients --- */
-  --gradient-brand-primary: linear-gradient(135deg, #484AAA 0%, #9847B4 35%, #9791F1 70%, #DDC2F2 100%);
-  --gradient-button: linear-gradient(135deg, #484AAA 0%, #9847B4 50%, #9791F1 100%);
-  --gradient-button-hover: linear-gradient(135deg, #595BBD 0%, #B055D0 50%, #ACA7F6 100%);
-  --gradient-active-pill: linear-gradient(135deg, #9847B4 0%, #484AAA 100%);
-  --gradient-card-border: linear-gradient(135deg, rgba(152, 71, 180, 0.45) 0%, rgba(72, 74, 170, 0.2) 50%, rgba(221, 194, 242, 0.4) 100%);
-  --gradient-text: linear-gradient(135deg, #F7EBF9 30%, #DDC2F2 70%, #9791F1 100%);
-  --gradient-text-pure: linear-gradient(90deg, #9791F1 0%, #DDC2F2 50%, #9847B4 100%);
-  --gradient-overlay-card: linear-gradient(180deg, rgba(9, 8, 24, 0.1) 0%, rgba(9, 8, 24, 0.85) 75%, rgba(9, 8, 24, 0.98) 100%);
-  --gradient-hero-ambient: radial-gradient(circle at 85% 20%, rgba(152, 71, 180, 0.25) 0%, rgba(72, 74, 170, 0.14) 35%, transparent 65%);
-  --gradient-bottom-ambient: radial-gradient(circle at 15% 90%, rgba(151, 145, 241, 0.15) 0%, transparent 60%);
+  --gradient-brand-primary: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #EC4899 100%);
+  --gradient-button: linear-gradient(135deg, #EC4899 0%, #A855F7 100%);
+  --gradient-button-hover: linear-gradient(135deg, #F43F5E 0%, #C084FC 100%);
+  --gradient-active-pill: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%);
+  --gradient-card-border: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(46, 42, 69, 0.4) 50%, rgba(236, 72, 153, 0.3) 100%);
+  --gradient-text: linear-gradient(135deg, #F9FAFB 30%, #E5E7EB 70%, #8B5CF6 100%);
+  --gradient-text-pure: linear-gradient(90deg, #8B5CF6 0%, #A855F7 50%, #EC4899 100%);
+  --gradient-overlay-card: linear-gradient(180deg, rgba(15, 14, 23, 0.1) 0%, rgba(15, 14, 23, 0.85) 75%, rgba(15, 14, 23, 0.98) 100%);
+  --gradient-hero-ambient: radial-gradient(circle at 85% 20%, rgba(124, 58, 237, 0.15) 0%, rgba(236, 72, 153, 0.08) 35%, transparent 65%);
+  --gradient-bottom-ambient: radial-gradient(circle at 15% 90%, rgba(139, 92, 246, 0.1) 0%, transparent 60%);
 
   /* --- Shadows & Glows --- */
-  --glow-button: 0 0 20px rgba(152, 71, 180, 0.45);
-  --glow-button-hover: 0 0 30px rgba(151, 145, 241, 0.65);
-  --glow-pill-active: 0 0 22px rgba(152, 71, 180, 0.55), 0 0 45px rgba(72, 74, 170, 0.25);
-  --glow-card: 0 4px 20px 0 rgba(9, 8, 24, 0.7), 0 0 16px 0 rgba(151, 145, 241, 0.2), inset 0 0 12px 0 rgba(152, 71, 180, 0.06);
-  --glow-card-hover: 0 8px 32px 0 rgba(9, 8, 24, 0.8), 0 0 28px 0 rgba(151, 145, 241, 0.5), inset 0 0 16px 0 rgba(221, 194, 242, 0.14);
-  --glow-card-featured: 0 0 30px rgba(152, 71, 180, 0.4), inset 0 0 20px rgba(151, 145, 241, 0.15);
-  --glow-icon: 0 0 12px rgba(151, 145, 241, 0.6);
-  --glow-search-focus: 0 0 0 2px rgba(151, 145, 241, 0.35), 0 0 25px rgba(72, 74, 170, 0.3);
-  --glow-form: 0 10px 40px rgba(9, 8, 24, 0.75), 0 0 24px rgba(152, 71, 180, 0.3), inset 0 0 18px rgba(151, 145, 241, 0.08);
+  --glow-button: 0 0 20px rgba(236, 72, 153, 0.35);
+  --glow-button-hover: 0 0 25px rgba(236, 72, 153, 0.55);
+  --glow-pill-active: 0 0 18px rgba(124, 58, 237, 0.45);
+  --glow-card: 0 4px 20px 0 rgba(0, 0, 0, 0.4);
+  --glow-card-hover: 0 8px 30px 0 rgba(0, 0, 0, 0.6), 0 0 20px 0 rgba(139, 92, 246, 0.25);
+  --glow-card-featured: 0 0 25px rgba(139, 92, 246, 0.35);
+  --glow-icon: 0 0 12px rgba(139, 92, 246, 0.5);
+  --glow-search-focus: 0 0 0 2px rgba(139, 92, 246, 0.4), 0 0 20px rgba(124, 58, 237, 0.25);
+  --glow-form: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 24px rgba(139, 92, 246, 0.25);
 
   /* --- Border Radius --- */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --radius-xl: 22px;
-  --radius-2xl: 28px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
   --radius-full: 9999px;
 }
 
@@ -87,52 +90,44 @@
 
 .theme-glass-card {
   background-color: var(--glass-surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(151, 145, 241, 0.28);
+  border: 1px solid var(--glass-border);
   box-shadow: var(--glow-card);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
 }
 
 .theme-glass-card:hover {
-  border-color: rgba(221, 194, 242, 0.7);
+  border-color: var(--glass-border-hover);
   box-shadow: var(--glow-card-hover);
   background-color: var(--glass-surface-hover);
-  transform: translateY(-2px);
 }
 
 .theme-glass-card-static {
   background-color: var(--glass-surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(151, 145, 241, 0.3);
+  border: 1px solid var(--glass-border);
   box-shadow: var(--glow-card);
 }
 
 .theme-glow-frame {
-  border: 1px solid rgba(151, 145, 241, 0.32);
-  box-shadow: 0 0 16px rgba(152, 71, 180, 0.22), inset 0 0 12px rgba(151, 145, 241, 0.05);
-  transition: all 0.25s ease;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glow-card);
+  transition: all 0.2s ease;
 }
 
 .theme-glow-frame:hover {
-  border-color: rgba(221, 194, 242, 0.7);
-  box-shadow: 0 0 28px rgba(151, 145, 241, 0.45), inset 0 0 18px rgba(221, 194, 242, 0.12);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--glow-card-hover);
 }
 
 .theme-form-card {
   background-color: var(--glass-surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(151, 145, 241, 0.35);
+  border: 1px solid var(--glass-border);
   box-shadow: var(--glow-form);
   border-radius: var(--radius-2xl);
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .theme-form-card:hover {
-  border-color: rgba(221, 194, 242, 0.6);
-  box-shadow: 0 12px 48px rgba(9, 8, 24, 0.8), 0 0 32px rgba(152, 71, 180, 0.4), inset 0 0 20px rgba(151, 145, 241, 0.1);
+  border-color: var(--color-purple-bright);
 }
 
 .theme-neon-button {
@@ -154,14 +149,14 @@
 
 .theme-active-pill {
   background: var(--gradient-active-pill);
-  color: var(--text-primary);
+  color: #F9FAFB;
   box-shadow: var(--glow-pill-active);
 }
 
 .theme-inactive-pill {
   background-color: var(--glass-surface-subtle);
-  color: var(--text-secondary);
-  border: 1px solid var(--glass-border-subtle);
+  color: var(--text-muted);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   transition: all 0.2s ease;
@@ -170,7 +165,7 @@
 .theme-inactive-pill:hover {
   background-color: var(--glass-surface-elevated);
   color: var(--text-primary);
-  border-color: var(--glass-border);
+  border-color: rgba(139, 92, 246, 0.4);
 }
 
 .theme-gradient-heading {

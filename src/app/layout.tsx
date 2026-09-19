@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark h-full">
-      <body className="min-h-full theme-bg-ambient text-white flex flex-col antialiased selection:bg-[#9847B4]/30 selection:text-white">
+      <body className="min-h-full bg-gradient-to-b from-[#0B0C10] via-[#0F0E17] to-[#12111A] text-[#F9FAFB] flex flex-col antialiased selection:bg-[#8B5CF6]/35 selection:text-[#F9FAFB]">
         <AuthProvider>
           <AudioPlayerProvider>
             <GalaxyBackground />

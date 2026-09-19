@@ -196,9 +196,9 @@ function ExploreContent() {
 
       {/* Results */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="bg-[#333336] rounded-2xl h-64 animate-pulse" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          {[...Array(12)].map((_, i) => (
+            <div key={i} className="aspect-video bg-[#161522] rounded-xl animate-pulse ring-1 ring-white/5" />
           ))}
         </div>
       ) : results.length === 0 ? (
