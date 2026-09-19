@@ -462,3 +462,39 @@ create policy "Creators read own analytics" on public.analytics_events for selec
 drop policy if exists "Creators read own earnings" on public.creator_earnings;
 create policy "Creators read own earnings" on public.creator_earnings for select
   using (auth.uid() = creator_id);
+
+-- 20. NOTIFICATIONS TABLE
+create table if not exists public.notifications (
+  id uuid primary key default gen_random_uuid(),
+  recipient_id uuid references public.profiles(id) on delete cascade not null,
+  actor_id uuid references public.profiles(id) on delete cascade not null,
+  action_type text not null check (action_type in ('like', 'dislike', 'comment', 'favorite', 'system')),
+  content_type text check (content_type in ('video', 'audio', 'blog')),
+  content_id uuid,
+  content_title text,
+  message text,
+  is_read boolean default false,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_notifications_recipient on public.notifications(recipient_id, is_read, created_at desc);
+create index if not exists idx_notifications_actor on public.notifications(actor_id);
+
+alter table public.notifications enable row level security;
+
+drop policy if exists "Recipients can view own notifications" on public.notifications;
+create policy "Recipients can view own notifications" on public.notifications for select
+  using (auth.uid() = recipient_id);
+
+drop policy if exists "Recipients can update own notifications" on public.notifications;
+create policy "Recipients can update own notifications" on public.notifications for update
+  using (auth.uid() = recipient_id);
+
+drop policy if exists "Recipients can delete own notifications" on public.notifications;
+create policy "Recipients can delete own notifications" on public.notifications for delete
+  using (auth.uid() = recipient_id);
+
+drop policy if exists "Authenticated users can insert notifications" on public.notifications;
+create policy "Authenticated users can insert notifications" on public.notifications for insert
+  with check (auth.uid() = actor_id);
+

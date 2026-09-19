@@ -218,3 +218,20 @@ export interface CreatorEarning {
   status: string;
   created_at: string;
 }
+
+export type NotificationAction = 'like' | 'dislike' | 'comment' | 'favorite' | 'system';
+
+export interface Notification {
+  id: string;
+  recipient_id: string;
+  actor_id: string;
+  action_type: NotificationAction;
+  content_type?: 'video' | 'audio' | 'blog' | null;
+  content_id?: string | null;
+  content_title?: string | null;
+  message?: string | null;
+  is_read: boolean;
+  created_at: string;
+  actor?: Profile;
+}
+

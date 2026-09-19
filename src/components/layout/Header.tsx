@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Search, Bell, User as UserIcon, LogOut, Film, Music, BookOpen, BarChart3, Megaphone } from 'lucide-react';
+import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 
 export function Header() {
   const { user, profile, signOut } = useAuth();
@@ -25,7 +26,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Logo and Brand */}
         <Link href={user ? '/home' : '/'} className="flex items-center gap-3 shrink-0 group">
-          <div className="relative w-8 h-8 md:w-9 md:h-9 filter drop-shadow-[0_0_8px_rgba(224,0,255,0.4)]">
+          <div className="relative w-8 h-8 md:w-9 md:h-9 filter drop-shadow-[0_0_8px_rgba(151,145,241,0.45)]">
             <Image
               src="/logo.png"
               alt="Yarrowplay"
@@ -78,19 +79,14 @@ export function Header() {
                 </Link>
               )}
 
-              {/* Notification button */}
-              <button
-                aria-label="Notifications"
-                className="w-9 h-9 rounded-full bg-[var(--glass-surface-subtle)] border border-[var(--glass-border)] flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:border-[var(--color-magenta)] hover:shadow-[0_0_15px_rgba(224,0,255,0.3)] transition-all"
-              >
-                <Bell className="w-4 h-4" />
-              </button>
+              {/* Notifications */}
+              <NotificationDropdown />
 
               {/* User Dropdown */}
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 p-1 rounded-full bg-[var(--glass-surface-subtle)] border border-[var(--glass-border)] hover:border-[var(--color-magenta)] hover:shadow-[0_0_15px_rgba(224,0,255,0.3)] transition-all"
+                  className="flex items-center gap-2 p-1 rounded-full bg-[var(--glass-surface-subtle)] border border-[var(--glass-border)] hover:border-[var(--color-magenta)] hover:shadow-[0_0_15px_rgba(151,145,241,0.35)] transition-all"
                 >
                   {profile?.avatar_url ? (
                     <div className="relative w-7 h-7 rounded-full overflow-hidden">

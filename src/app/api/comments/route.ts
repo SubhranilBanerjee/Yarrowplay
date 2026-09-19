@@ -67,6 +67,25 @@ export async function POST(req: NextRequest) {
       await supabase.from(targetTable).update({ comments_count: (current.comments_count || 0) + 1 }).eq('id', content_id);
     }
 
+    // Send activity notification to content creator
+    try {
+      const { resolveContentOwnerAndTitle, createNotification } = await import('@/lib/notifications');
+      const { owner_id, title } = await resolveContentOwnerAndTitle(supabase, content_type, content_id);
+      if (owner_id && owner_id !== user.id) {
+        await createNotification(supabase, {
+          recipient_id: owner_id,
+          actor_id: user.id,
+          action_type: 'comment',
+          content_type,
+          content_id,
+          content_title: title,
+          message: comment?.content || content.trim(),
+        });
+      }
+    } catch (notifyErr) {
+      console.error('Failed to dispatch comment notification:', notifyErr);
+    }
+
     return NextResponse.json({ comment });
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || 'Failed to post comment' }, { status: 500 });

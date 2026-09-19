@@ -1,38 +1,42 @@
 /* ==========================================================================
    YARROWPLAY THEME SPECIFICATION
-   All theme colors, gradients, glowing shadows, borders, and glassy surfaces 
-   are controlled from this single file.
+   Configured with User Custom Palette:
+   #484AAA (Royal Iris / Indigo)
+   #9791F1 (Periwinkle / Soft Iris)
+   #F7EBF9 (Mist Lavender White)
+   #DDC2F2 (Pastel Orchid / Lilac)
+   #9847B4 (Rich Amethyst Violet)
    ========================================================================== */
 
 :root {
   /* --- Primary Backgrounds --- */
-  --bg-primary: #080014;
-  --bg-secondary: #100020;
-  --bg-tertiary: #16042d;
+  --bg-primary: #090818;
+  --bg-secondary: #100D26;
+  --bg-tertiary: #191438;
   
   /* --- Glass Surfaces --- */
-  --glass-surface-subtle: rgba(22, 4, 45, 0.45);
-  --glass-surface: rgba(25, 7, 51, 0.65);
-  --glass-surface-elevated: rgba(38, 12, 75, 0.75);
-  --glass-surface-hover: rgba(52, 18, 98, 0.85);
-  --glass-border: rgba(161, 0, 255, 0.22);
-  --glass-border-subtle: rgba(161, 0, 255, 0.12);
-  --glass-border-hover: rgba(224, 0, 255, 0.6);
-  --glass-border-active: rgba(255, 32, 217, 0.8);
+  --glass-surface-subtle: rgba(25, 20, 56, 0.45);
+  --glass-surface: rgba(28, 22, 65, 0.65);
+  --glass-surface-elevated: rgba(43, 34, 98, 0.75);
+  --glass-surface-hover: rgba(58, 46, 128, 0.85);
+  --glass-border: rgba(151, 145, 241, 0.22);
+  --glass-border-subtle: rgba(151, 145, 241, 0.12);
+  --glass-border-hover: rgba(221, 194, 242, 0.6);
+  --glass-border-active: rgba(152, 71, 180, 0.85);
   
-  /* --- Neon & Brand Accent Colors --- */
-  --color-purple-dark: #7C00FF;
-  --color-purple-bright: #A100FF;
-  --color-magenta: #E000FF;
-  --color-pink: #FF20D9;
-  --color-pink-light: #FF5CE1;
-  --color-neon-blue: #4D7BFF;
+  /* --- Palette Accent Colors --- */
+  --color-purple-dark: #484AAA;
+  --color-purple-bright: #9791F1;
+  --color-magenta: #9847B4;
+  --color-pink: #DDC2F2;
+  --color-pink-light: #F7EBF9;
+  --color-neon-blue: #484AAA;
   
   /* --- Text & Content Colors --- */
-  --text-primary: #FFFFFF;
-  --text-secondary: #B9A9D6;
-  --text-muted: #7E6F9E;
-  --text-dim: #544570;
+  --text-primary: #F7EBF9;
+  --text-secondary: #DDC2F2;
+  --text-muted: #9E98D4;
+  --text-dim: #67619B;
   
   /* --- Status Colors --- */
   --status-success: #10B981;
@@ -40,27 +44,27 @@
   --status-error: #EF4444;
   
   /* --- Gradients --- */
-  --gradient-brand-primary: linear-gradient(135deg, #7C00FF 0%, #A100FF 35%, #E000FF 70%, #FF20D9 100%);
-  --gradient-button: linear-gradient(135deg, #9300EE 0%, #C800EE 50%, #FF20D9 100%);
-  --gradient-button-hover: linear-gradient(135deg, #A414FF 0%, #DB15FF 50%, #FF45DE 100%);
-  --gradient-active-pill: linear-gradient(135deg, #A100FF 0%, #E000FF 100%);
-  --gradient-card-border: linear-gradient(135deg, rgba(224, 0, 255, 0.4) 0%, rgba(124, 0, 255, 0.15) 50%, rgba(255, 32, 217, 0.3) 100%);
-  --gradient-text: linear-gradient(135deg, #FFFFFF 30%, #E000FF 80%, #FF20D9 100%);
-  --gradient-text-pure: linear-gradient(90deg, #A100FF 0%, #E000FF 50%, #FF20D9 100%);
-  --gradient-overlay-card: linear-gradient(180deg, rgba(8, 0, 20, 0.1) 0%, rgba(8, 0, 20, 0.85) 75%, rgba(8, 0, 20, 0.98) 100%);
-  --gradient-hero-ambient: radial-gradient(circle at 85% 20%, rgba(161, 0, 255, 0.28) 0%, rgba(224, 0, 255, 0.12) 35%, transparent 65%);
-  --gradient-bottom-ambient: radial-gradient(circle at 15% 90%, rgba(124, 0, 255, 0.18) 0%, transparent 60%);
+  --gradient-brand-primary: linear-gradient(135deg, #484AAA 0%, #9847B4 35%, #9791F1 70%, #DDC2F2 100%);
+  --gradient-button: linear-gradient(135deg, #484AAA 0%, #9847B4 50%, #9791F1 100%);
+  --gradient-button-hover: linear-gradient(135deg, #595BBD 0%, #B055D0 50%, #ACA7F6 100%);
+  --gradient-active-pill: linear-gradient(135deg, #9847B4 0%, #484AAA 100%);
+  --gradient-card-border: linear-gradient(135deg, rgba(152, 71, 180, 0.45) 0%, rgba(72, 74, 170, 0.2) 50%, rgba(221, 194, 242, 0.4) 100%);
+  --gradient-text: linear-gradient(135deg, #F7EBF9 30%, #DDC2F2 70%, #9791F1 100%);
+  --gradient-text-pure: linear-gradient(90deg, #9791F1 0%, #DDC2F2 50%, #9847B4 100%);
+  --gradient-overlay-card: linear-gradient(180deg, rgba(9, 8, 24, 0.1) 0%, rgba(9, 8, 24, 0.85) 75%, rgba(9, 8, 24, 0.98) 100%);
+  --gradient-hero-ambient: radial-gradient(circle at 85% 20%, rgba(152, 71, 180, 0.25) 0%, rgba(72, 74, 170, 0.14) 35%, transparent 65%);
+  --gradient-bottom-ambient: radial-gradient(circle at 15% 90%, rgba(151, 145, 241, 0.15) 0%, transparent 60%);
 
   /* --- Shadows & Glows --- */
-  --glow-button: 0 0 20px rgba(224, 0, 255, 0.45);
-  --glow-button-hover: 0 0 30px rgba(255, 32, 217, 0.65);
-  --glow-pill-active: 0 0 22px rgba(161, 0, 255, 0.55), 0 0 45px rgba(224, 0, 255, 0.25);
-  --glow-card: 0 4px 20px 0 rgba(8, 0, 20, 0.7), 0 0 16px 0 rgba(161, 0, 255, 0.22), inset 0 0 12px 0 rgba(224, 0, 255, 0.06);
-  --glow-card-hover: 0 8px 32px 0 rgba(8, 0, 20, 0.8), 0 0 28px 0 rgba(224, 0, 255, 0.5), inset 0 0 16px 0 rgba(255, 32, 217, 0.12);
-  --glow-card-featured: 0 0 30px rgba(161, 0, 255, 0.4), inset 0 0 20px rgba(224, 0, 255, 0.15);
-  --glow-icon: 0 0 12px rgba(224, 0, 255, 0.6);
-  --glow-search-focus: 0 0 0 2px rgba(224, 0, 255, 0.35), 0 0 25px rgba(161, 0, 255, 0.3);
-  --glow-form: 0 10px 40px rgba(8, 0, 20, 0.75), 0 0 24px rgba(161, 0, 255, 0.3), inset 0 0 18px rgba(224, 0, 255, 0.08);
+  --glow-button: 0 0 20px rgba(152, 71, 180, 0.45);
+  --glow-button-hover: 0 0 30px rgba(151, 145, 241, 0.65);
+  --glow-pill-active: 0 0 22px rgba(152, 71, 180, 0.55), 0 0 45px rgba(72, 74, 170, 0.25);
+  --glow-card: 0 4px 20px 0 rgba(9, 8, 24, 0.7), 0 0 16px 0 rgba(151, 145, 241, 0.2), inset 0 0 12px 0 rgba(152, 71, 180, 0.06);
+  --glow-card-hover: 0 8px 32px 0 rgba(9, 8, 24, 0.8), 0 0 28px 0 rgba(151, 145, 241, 0.5), inset 0 0 16px 0 rgba(221, 194, 242, 0.14);
+  --glow-card-featured: 0 0 30px rgba(152, 71, 180, 0.4), inset 0 0 20px rgba(151, 145, 241, 0.15);
+  --glow-icon: 0 0 12px rgba(151, 145, 241, 0.6);
+  --glow-search-focus: 0 0 0 2px rgba(151, 145, 241, 0.35), 0 0 25px rgba(72, 74, 170, 0.3);
+  --glow-form: 0 10px 40px rgba(9, 8, 24, 0.75), 0 0 24px rgba(152, 71, 180, 0.3), inset 0 0 18px rgba(151, 145, 241, 0.08);
 
   /* --- Border Radius --- */
   --radius-sm: 8px;
@@ -85,13 +89,13 @@
   background-color: var(--glass-surface);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(224, 0, 255, 0.3);
+  border: 1px solid rgba(151, 145, 241, 0.28);
   box-shadow: var(--glow-card);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .theme-glass-card:hover {
-  border-color: rgba(255, 32, 217, 0.7);
+  border-color: rgba(221, 194, 242, 0.7);
   box-shadow: var(--glow-card-hover);
   background-color: var(--glass-surface-hover);
   transform: translateY(-2px);
@@ -101,34 +105,34 @@
   background-color: var(--glass-surface);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(224, 0, 255, 0.35);
+  border: 1px solid rgba(151, 145, 241, 0.3);
   box-shadow: var(--glow-card);
 }
 
 .theme-glow-frame {
-  border: 1px solid rgba(224, 0, 255, 0.35);
-  box-shadow: 0 0 16px rgba(161, 0, 255, 0.22), inset 0 0 12px rgba(224, 0, 255, 0.05);
+  border: 1px solid rgba(151, 145, 241, 0.32);
+  box-shadow: 0 0 16px rgba(152, 71, 180, 0.22), inset 0 0 12px rgba(151, 145, 241, 0.05);
   transition: all 0.25s ease;
 }
 
 .theme-glow-frame:hover {
-  border-color: rgba(255, 32, 217, 0.7);
-  box-shadow: 0 0 28px rgba(224, 0, 255, 0.45), inset 0 0 18px rgba(255, 32, 217, 0.12);
+  border-color: rgba(221, 194, 242, 0.7);
+  box-shadow: 0 0 28px rgba(151, 145, 241, 0.45), inset 0 0 18px rgba(221, 194, 242, 0.12);
 }
 
 .theme-form-card {
   background-color: var(--glass-surface);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(224, 0, 255, 0.4);
+  border: 1px solid rgba(151, 145, 241, 0.35);
   box-shadow: var(--glow-form);
   border-radius: var(--radius-2xl);
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .theme-form-card:hover {
-  border-color: rgba(255, 32, 217, 0.6);
-  box-shadow: 0 12px 48px rgba(8, 0, 20, 0.8), 0 0 32px rgba(224, 0, 255, 0.4), inset 0 0 20px rgba(255, 32, 217, 0.1);
+  border-color: rgba(221, 194, 242, 0.6);
+  box-shadow: 0 12px 48px rgba(9, 8, 24, 0.8), 0 0 32px rgba(152, 71, 180, 0.4), inset 0 0 20px rgba(151, 145, 241, 0.1);
 }
 
 .theme-neon-button {

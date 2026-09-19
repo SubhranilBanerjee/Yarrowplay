@@ -4,7 +4,7 @@
 @theme {
   --color-brand: var(--color-pink);
   --color-brand-hover: var(--color-magenta);
-  --color-brand-muted: rgba(224, 0, 255, 0.18);
+  --color-brand-muted: rgba(152, 71, 180, 0.2);
   
   --color-bg-main: var(--bg-primary);
   --color-surface: var(--glass-surface);

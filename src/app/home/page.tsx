@@ -23,7 +23,9 @@ import {
   Flame,
   Layers,
   Disc,
+  Sparkles,
 } from 'lucide-react';
+import { RecommendationCard, RecommendationItem } from '@/components/media/RecommendationCard';
 
 type FeedVideo = Video & { type: 'video' };
 type FeedAudio = AudioTrack & { type: 'audio' };
@@ -298,6 +300,7 @@ export default function HomePage() {
   const [audios, setAudios] = useState<FeedAudio[]>([]);
   const [albumList, setAlbumList] = useState<AudioAlbum[]>([]);
   const [blogs, setBlogs] = useState<FeedBlog[]>([]);
+  const [recommendations, setRecommendations] = useState<RecommendationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchFeed = async () => {
@@ -309,6 +312,7 @@ export default function HomePage() {
         { data: auds },
         { data: aList },
         { data: blgs },
+        recData,
       ] = await Promise.all([
         supabase
           .from('videos')
@@ -344,6 +348,10 @@ export default function HomePage() {
           .eq('status', 'published')
           .order('published_at', { ascending: false })
           .limit(12),
+
+        fetch('/api/recommendations?limit=12')
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null),
       ]);
 
       setVideos(((vids || []) as any[]).map((v) => ({ ...v, type: 'video' as const })));
@@ -351,6 +359,9 @@ export default function HomePage() {
       setAudios(((auds || []) as any[]).map((a) => ({ ...a, type: 'audio' as const })));
       setAlbumList((aList as AudioAlbum[]) || []);
       setBlogs(((blgs || []) as any[]).map((b) => ({ ...b, type: 'blog' as const })));
+      if (recData?.recommendations) {
+        setRecommendations(recData.recommendations);
+      }
     } catch {
       // ignore
     } finally {
@@ -443,6 +454,19 @@ export default function HomePage() {
               track={audios[0]}
               onPlay={() => playTrack(audios[0], audios)}
             />
+          )}
+
+          {/* 2.5 Recommended for You Carousel */}
+          {recommendations.length > 0 && (
+            <ContentCarousel
+              title="Recommended for You"
+              badge="Personalized Picks"
+              icon={Sparkles}
+            >
+              {recommendations.map((rec) => (
+                <RecommendationCard key={`${rec.contentType}-${rec.id}`} item={rec} />
+              ))}
+            </ContentCarousel>
           )}
 
           {/* 3. DEDICATED SERIES CAROUSELS: Episodes appear inside their series carousel */}

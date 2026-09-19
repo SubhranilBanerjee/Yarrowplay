@@ -67,6 +67,24 @@ export async function POST(req: NextRequest) {
         content_id,
       });
       isFavorite = true;
+
+      // Dispatch notification to content creator
+      try {
+        const { resolveContentOwnerAndTitle, createNotification } = await import('@/lib/notifications');
+        const { owner_id, title } = await resolveContentOwnerAndTitle(supabase, content_type, content_id);
+        if (owner_id && owner_id !== user.id) {
+          await createNotification(supabase, {
+            recipient_id: owner_id,
+            actor_id: user.id,
+            action_type: 'favorite',
+            content_type,
+            content_id,
+            content_title: title,
+          });
+        }
+      } catch (notifyErr) {
+        console.error('Failed to dispatch favorite notification:', notifyErr);
+      }
     }
 
     return NextResponse.json({ isFavorite });

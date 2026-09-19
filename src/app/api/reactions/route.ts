@@ -104,6 +104,26 @@ export async function POST(req: NextRequest) {
       dislikes_count: dislikesCount || 0,
     }).eq('id', content_id);
 
+    // Send activity notification to content creator if a reaction was set (like or dislike)
+    if (userReaction) {
+      try {
+        const { resolveContentOwnerAndTitle, createNotification } = await import('@/lib/notifications');
+        const { owner_id, title } = await resolveContentOwnerAndTitle(supabase, content_type, content_id);
+        if (owner_id && owner_id !== user.id) {
+          await createNotification(supabase, {
+            recipient_id: owner_id,
+            actor_id: user.id,
+            action_type: userReaction,
+            content_type,
+            content_id,
+            content_title: title,
+          });
+        }
+      } catch (notifyErr) {
+        console.error('Failed to dispatch reaction notification:', notifyErr);
+      }
+    }
+
     return NextResponse.json({
       userReaction,
       likesCount: likesCount || 0,
