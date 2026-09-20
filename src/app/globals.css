@@ -84,3 +84,12 @@ header, aside, nav, [role="toolbar"] {
   -webkit-user-select: none;
 }
 
+/* Hide scrollbar while preserving scroll behavior */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+

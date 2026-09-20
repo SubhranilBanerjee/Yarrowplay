@@ -14,6 +14,8 @@ import { VideoCarouselCard } from '@/components/media/VideoCarouselCard';
 import { BlogCarouselCard } from '@/components/media/BlogCarouselCard';
 import { Video, AudioTrack, Blog, AdvertiserCampaign, ContentSeries } from '@/types/database';
 import { SeriesCard } from '@/components/media/SeriesCard';
+import { CreatorSpotlight } from '@/components/landing/CreatorSpotlight';
+import { CreatorItem, mapSupabaseProfileToCreator } from '@/data/content';
 import {
   Film,
   Music,
@@ -213,6 +215,7 @@ export default function LandingPage() {
   const [seriesList, setSeriesList] = useState<ContentSeries[]>([]);
   const [audios, setAudios] = useState<FeedAudio[]>([]);
   const [blogs, setBlogs] = useState<FeedBlog[]>([]);
+  const [creators, setCreators] = useState<CreatorItem[]>([]);
   const [contentLoading, setContentLoading] = useState(true);
 
   useEffect(() => {
@@ -226,12 +229,14 @@ export default function LandingPage() {
           { data: auds },
           { data: blgs },
           { data: camps },
+          { data: creatorsData },
         ] = await Promise.all([
           supabase.from('videos').select('*, creator:profiles(*)').eq('visibility', 'public').eq('status', 'published').order('created_at', { ascending: false }).limit(30),
           supabase.from('content_series').select('*, creator:profiles(*), episodes:videos(id, episode_number, thumbnail_url, duration_seconds, views_count, is_locked)').order('created_at', { ascending: false }).limit(15),
-          supabase.from('audios').select('*, creator:profiles(*)').eq('visibility', 'public').eq('status', 'published').order('created_at', { ascending: false }).limit(6),
-          supabase.from('blogs').select('*, author:profiles(*)').eq('status', 'published').order('published_at', { ascending: false }).limit(6),
+          supabase.from('audios').select('*, creator:profiles(*)').eq('visibility', 'public').eq('status', 'published').order('created_at', { ascending: false }).limit(12),
+          supabase.from('blogs').select('*, author:profiles(*)').eq('status', 'published').order('published_at', { ascending: false }).limit(10),
           supabase.from('advertiser_campaigns').select('*, advertiser:profiles(*)').eq('status', 'active').order('created_at', { ascending: false }),
+          supabase.from('profiles').select('*').eq('role', 'creator').order('created_at', { ascending: false }).limit(10),
         ]);
 
         setVideos(((vids || []) as any[]).map((v) => ({ ...v, type: 'video' as const })));
@@ -250,6 +255,7 @@ export default function LandingPage() {
         setAudios(((auds || []) as any[]).map((a) => ({ ...a, type: 'audio' as const })));
         setBlogs(((blgs || []) as any[]).map((b) => ({ ...b, type: 'blog' as const })));
         setSponsoredCampaigns(((camps || []) as any[]).filter((c) => !c.end_date || new Date(c.end_date).getTime() >= nowMs) as AdvertiserCampaign[]);
+        setCreators(((creatorsData || []) as any[]).map(mapSupabaseProfileToCreator));
       } catch {
         // ignore
       } finally {
@@ -471,6 +477,11 @@ export default function LandingPage() {
               </ContentCarousel>
             )}
 
+            {/* Creator Spotlight */}
+            {creators.length > 0 && (
+              <CreatorSpotlight creators={creators} />
+            )}
+
             {/* Blogs Carousel */}
             {blogs.length > 0 && (
               <ContentCarousel
@@ -485,29 +496,33 @@ export default function LandingPage() {
               </ContentCarousel>
             )}
 
-            {/* More Audio */}
+            {/* More Audio (Horizontally Scrollable) */}
             {audios.length > 1 && (
-              <div>
-                <SectionHeader title="Music & Audio" badge="LISTEN" href="/explore?type=audio" />
-                <div className="space-y-2">
-                  {audios.slice(1, 5).map((track) => (
-                    <AudioStrip key={track.id} track={track} onPlay={() => playTrack(track, audios)} />
-                  ))}
-                </div>
-              </div>
+              <ContentCarousel
+                title="Music & Audio"
+                badge="LISTEN"
+                href="/explore?type=audio"
+                icon={Music}
+              >
+                {audios.slice(1).map((track) => (
+                  <div key={track.id} className="w-72 sm:w-80 shrink-0 snap-start">
+                    <AudioStrip track={track} onPlay={() => playTrack(track, audios)} />
+                  </div>
+                ))}
+              </ContentCarousel>
             )}
 
           </div>
         )}
       </section>
 
-      {/* ── CONTENT FORMATS SHOWCASE (original) ── */}
+      {/* ── CONTENT FORMATS SHOWCASE (horizontally scrollable on compact viewports) ── */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t" style={{ borderColor: 'var(--glass-border)' }}>
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-white">Built For Seamless Multi-Format Discovery</h2>
           <p className="text-sm text-[var(--text-secondary)] mt-2">No need to jump between five different apps. Enjoy video, music, and written content side-by-side.</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-none scroll-smooth snap-x snap-mandatory md:grid md:grid-cols-3">
           {[
             { icon: Film, title: 'Episodic Series & Videos', desc: 'Enjoy mini-series and movies with gesture controls, playback speed controls, and auto-rotation on mobile devices.', tag: 'Cloudinary Powered Streaming' },
             { icon: Music, title: 'Music & Audio Experience', desc: 'Spotify-inspired persistent player with background playback, synchronized lyrics, queue management, and album collections.', tag: 'Persistent Audio Engine' },
@@ -515,7 +530,7 @@ export default function LandingPage() {
           ].map((card) => (
             <div
               key={card.title}
-              className="rounded-2xl p-6 flex flex-col justify-between border backdrop-blur-xl transition-all hover:border-[var(--color-purple)]"
+              className="w-[280px] sm:w-[320px] md:w-auto shrink-0 snap-start rounded-2xl p-6 flex flex-col justify-between border backdrop-blur-xl transition-all hover:border-[var(--color-purple)]"
               style={{
                 background: 'var(--glass-surface)',
                 borderColor: 'var(--glass-border)',
@@ -543,33 +558,21 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── SPONSORED CONTENT (original, hidden if empty) ── */}
+      {/* ── SPONSORED CONTENT (Horizontally scrollable carousel) ── */}
       {sponsoredCampaigns.length > 0 && (
-        <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t" style={{ borderColor: 'var(--glass-border)' }}>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-            <div>
-              <div
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 border"
-                style={{
-                  background: 'var(--neon-purple-glow)',
-                  borderColor: 'var(--neon-purple-border)',
-                  color: 'var(--color-pink-light)',
-                }}
-              >
-                <Megaphone className="w-3.5 h-3.5" />Sponsored Content
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-white">Partner Spotlight</h2>
-              <p className="text-sm text-[var(--text-secondary)] mt-1">Featured stories, products, and announcements from verified Yarrowplay partners.</p>
-            </div>
-            <Link href="/advertiser" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-pink-light)] hover:text-white transition-colors self-start sm:self-center">
-              <span>Promote with Us</span><ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t" style={{ borderColor: 'var(--glass-border)' }}>
+          <ContentCarousel
+            title="Partner Spotlight"
+            badge="SPONSORED"
+            href="/advertiser"
+            icon={Megaphone}
+          >
             {sponsoredCampaigns.map((c) => (
-              <MediaCard key={c.id} item={{ ...c, type: 'ad' }} />
+              <div key={c.id} className="w-64 sm:w-72 shrink-0 snap-start">
+                <MediaCard item={{ ...c, type: 'ad' }} />
+              </div>
             ))}
-          </div>
+          </ContentCarousel>
         </section>
       )}
 

@@ -521,7 +521,29 @@ export default function HomePage() {
               />
             )}
 
-            {/* 6. Series Divided by Category (Netflix style rows) */}
+            {/* 6. Featured Movies & Drops (Standalone Videos) */}
+            {showVideos && standaloneVideos.length > 1 && (
+              <ContentCarousel
+                title="Featured Movies & Drops"
+                badge="FRESH"
+                href="/explore?type=video"
+                icon={Zap}
+              >
+                {standaloneVideos.slice(1).map((v) => (
+                  <VideoCarouselCard key={v.id} video={v} />
+                ))}
+              </ContentCarousel>
+            )}
+
+            {/* 7. Recommended Portrait Short Videos */}
+            {showVideos && videos.length > 0 && (
+              <RecommendedSection
+                items={videos.map(mapSupabaseVideoToItem)}
+                onSelectVideo={(v) => setSelectedVideoItem(v)}
+              />
+            )}
+
+            {/* 8. Series Divided by Category (Netflix style rows) */}
             {showVideos &&
               seriesByCategory.map(([catName, seriesItems]) => (
                 <ContentCarousel
@@ -538,7 +560,7 @@ export default function HomePage() {
                 </ContentCarousel>
               ))}
 
-            {/* 8. Dedicated Album Collections */}
+            {/* 9. Dedicated Album Collections */}
             {showAudio &&
               albumGroups.map((album) => (
                 <div key={album.id} className="bg-[#1E1B2E] border border-[#2E2A45] rounded-2xl p-5 shadow-lg">
@@ -555,19 +577,23 @@ export default function HomePage() {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  <div
+                    className="flex gap-3 overflow-x-auto pb-2 pt-1 scrollbar-none scroll-smooth snap-x snap-mandatory"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                  >
                     {album.tracks.map((t) => (
-                      <AudioStrip
-                        key={t.id}
-                        track={t}
-                        onPlay={() => playTrack(t, album.tracks)}
-                      />
+                      <div key={t.id} className="w-72 sm:w-80 shrink-0 snap-start">
+                        <AudioStrip
+                          track={t}
+                          onPlay={() => playTrack(t, album.tracks)}
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>
               ))}
 
-            {/* 9. Creator Blogs Carousel */}
+            {/* 10. Creator Blogs Carousel */}
             {showBlogs && trendingBlogs.length > 0 && (
               <ContentCarousel
                 title="Community Blogs & Stories"
@@ -581,35 +607,23 @@ export default function HomePage() {
               </ContentCarousel>
             )}
 
-            {/* 10. Singles & Audio Tracks */}
+            {/* 11. Singles & Audio Tracks (Horizontally Scrollable) */}
             {showAudio && standaloneAudio.length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-3.5 px-1">
-                  <div className="flex items-center gap-2">
-                    <Music className="w-4 h-4 text-[#EC4899]" />
-                    <h2 className="text-white font-bold text-base sm:text-lg">Singles & Audio Tracks</h2>
-                    <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
-                      LISTEN
-                    </span>
-                  </div>
-                  <Link
-                    href="/explore?type=audio"
-                    className="text-xs font-semibold text-[#EC4899] hover:text-white transition-colors"
-                  >
-                    View all
-                  </Link>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {standaloneAudio.slice(0, 8).map((track) => (
+              <ContentCarousel
+                title="Singles & Audio Tracks"
+                badge="LISTEN"
+                href="/explore?type=audio"
+                icon={Music}
+              >
+                {standaloneAudio.map((track) => (
+                  <div key={track.id} className="w-72 sm:w-80 shrink-0 snap-start">
                     <AudioStrip
-                      key={track.id}
                       track={track}
                       onPlay={() => playTrack(track, audios)}
                     />
-                  ))}
-                </div>
-              </div>
+                  </div>
+                ))}
+              </ContentCarousel>
             )}
           </div>
         )}
