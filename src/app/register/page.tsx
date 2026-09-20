@@ -28,6 +28,7 @@ function RegisterForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -46,6 +47,12 @@ function RegisterForm() {
     setIsLoading(true);
 
     try {
+      if (!agreeTerms) {
+        setErrorMsg('You must agree to the Terms of Use and Privacy Policy to register.');
+        setIsLoading(false);
+        return;
+      }
+
       const metadataName = role === 'advertiser' ? companyName : displayName;
 
       if (!metadataName.trim()) {
@@ -319,11 +326,45 @@ function RegisterForm() {
             </div>
           </div>
 
+          {/* Terms and Privacy Checkbox */}
+          <div className="pt-1 pb-1">
+            <label className="flex items-start gap-2.5 cursor-pointer select-none group">
+              <input
+                type="checkbox"
+                required
+                checked={agreeTerms}
+                onChange={(e) => setAgreeTerms(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded border-[var(--glass-border)] text-[var(--color-pink)] bg-[var(--bg-secondary)] accent-[var(--color-pink)] focus:ring-0 transition-colors cursor-pointer shrink-0"
+              />
+              <span className="text-xs text-[var(--text-secondary)] leading-tight group-hover:text-white transition-colors">
+                I agree to the{' '}
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  className="text-[var(--color-pink)] hover:underline font-semibold"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Terms of Use
+                </Link>{' '}
+                and{' '}
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  className="text-[var(--color-pink)] hover:underline font-semibold"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Privacy Policy
+                </Link>
+                <span className="text-[var(--color-pink)] ml-0.5">*</span>
+              </span>
+            </label>
+          </div>
+
           {/* Primary Action Button */}
           <button
             type="submit"
-            disabled={isLoading}
-            className="w-full mt-2 py-3 px-4 rounded-xl theme-neon-button text-white text-sm font-bold tracking-wide transition-all shadow-lg active:scale-[0.99] disabled:opacity-50"
+            disabled={isLoading || !agreeTerms}
+            className="w-full mt-2 py-3 px-4 rounded-xl theme-neon-button text-white text-sm font-bold tracking-wide transition-all shadow-lg active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
             {isLoading
               ? 'Creating Account...'

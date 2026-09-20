@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { BottomToast } from '@/components/ui/BottomToast';
-import { Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle, Shield } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -65,10 +65,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleFillAdmin = () => {
-    setEmail(process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@dramabox.stream');
-    setPassword(process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'Admin@DramaBox2026!');
-  };
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center p-4">
@@ -163,17 +159,7 @@ export default function LoginPage() {
             {isLoading ? 'SIGNING IN...' : 'SIGN IN'}
           </button>
 
-          {/* Quick Admin fill button */}
-          <div className="pt-2 border-t border-[var(--glass-border)]">
-            <button
-              type="button"
-              onClick={handleFillAdmin}
-              className="w-full py-2 px-3 rounded-lg bg-[var(--glass-surface-subtle)] border border-[var(--glass-border)] hover:border-[var(--color-magenta)] text-[var(--text-secondary)] hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-            >
-              <Shield className="w-3.5 h-3.5 text-[var(--color-pink)]" />
-              <span>Fill Admin Credentials</span>
-            </button>
-          </div>
+
         </form>
 
         {/* Footer link */}
