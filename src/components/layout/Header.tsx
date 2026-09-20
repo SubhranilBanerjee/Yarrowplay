@@ -1,21 +1,50 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { useSidebar } from '@/context/SidebarContext';
-import { Search, Bell, User as UserIcon, LogOut, Film, Music, BookOpen, BarChart3, Megaphone, PanelLeftOpen, PanelLeftClose } from 'lucide-react';
+import {
+  Search,
+  Bell,
+  User as UserIcon,
+  LogOut,
+  Film,
+  Music,
+  BookOpen,
+  BarChart3,
+  Megaphone,
+  Home,
+  Compass,
+  Bookmark,
+  Heart,
+  PenTool,
+} from 'lucide-react';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 
 export function Header() {
   const { user, profile, signOut } = useAuth();
-  const { isCollapsed, toggleSidebar } = useSidebar();
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    }
+    if (showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserMenu]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,41 +53,25 @@ export function Header() {
     }
   };
 
-  const showSidebarToggle = pathname !== '/';
-
   return (
     <header className="sticky top-0 z-40 w-full bg-[var(--bg-primary)]/85 backdrop-blur-xl border-b border-[var(--glass-border)] px-4 md:px-8 py-3 transition-colors">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-        {/* Logo, Brand & Sidebar Toggle */}
-        <div className="flex items-center gap-2">
-          {showSidebarToggle && (
-            <button
-              type="button"
-              onClick={toggleSidebar}
-              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              className="hidden md:flex items-center justify-center w-8 h-8 rounded-lg text-[#9CA3AF] hover:text-white hover:bg-[#161522] border border-transparent hover:border-[#2E2A45] transition-all cursor-pointer mr-1"
-            >
-              {isCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
-            </button>
-          )}
-
-          <Link href={user ? '/home' : '/'} className="flex items-center gap-3 shrink-0 group">
-            <div className="relative w-8 h-8 md:w-9 md:h-9 filter drop-shadow-[0_0_8px_rgba(151,145,241,0.45)]">
-              <Image
-                src="/logo.png"
-                alt="Yarrowplay"
-                fill
-                sizes="(max-width: 768px) 32px, 36px"
-                className="object-contain transition-transform group-hover:scale-105"
-                priority
-              />
-            </div>
-            <span className="text-xl md:text-2xl font-black tracking-tight text-white flex items-center">
-              YARROW<span className="theme-gradient-heading font-black">PLAY</span>
-            </span>
-          </Link>
-        </div>
+        {/* Logo and Brand */}
+        <Link href={user ? '/home' : '/'} className="flex items-center gap-3 shrink-0 group">
+          <div className="relative w-8 h-8 md:w-9 md:h-9 filter drop-shadow-[0_0_8px_rgba(151,145,241,0.45)]">
+            <Image
+              src="/logo.png"
+              alt="Yarrowplay"
+              fill
+              sizes="(max-width: 768px) 32px, 36px"
+              className="object-contain transition-transform group-hover:scale-105"
+              priority
+            />
+          </div>
+          <span className="text-xl md:text-2xl font-black tracking-tight text-white flex items-center">
+            YARROW<span className="theme-gradient-heading font-black">PLAY</span>
+          </span>
+        </Link>
 
         {/* Global Search Bar */}
         <form onSubmit={handleSearch} className="hidden sm:flex flex-1 max-w-xl mx-4">
@@ -102,10 +115,11 @@ export function Header() {
               <NotificationDropdown />
 
               {/* User Dropdown */}
-              <div className="relative">
+              <div ref={userMenuRef} className="relative">
                 <button
+                  type="button"
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 p-1 rounded-full bg-[#161522] border border-[#2E2A45] hover:border-[#8B5CF6] hover:shadow-[0_0_15px_rgba(139,92,246,0.3)] transition-all"
+                  className="flex items-center gap-2 p-1 rounded-full bg-[#161522] border border-[#2E2A45] hover:border-[#8B5CF6] hover:shadow-[0_0_15px_rgba(139,92,246,0.3)] transition-all cursor-pointer"
                 >
                   {profile?.avatar_url ? (
                     <div className="relative w-7 h-7 rounded-full overflow-hidden">
@@ -125,96 +139,181 @@ export function Header() {
                 </button>
 
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-2xl theme-glass-card-static border border-[var(--glass-border)] shadow-2xl py-2 z-50">
-                    <div className="px-4 py-2 border-b border-[var(--glass-border-subtle)]">
+                  <div className="absolute right-0 mt-2 w-60 rounded-2xl theme-glass-card-static border border-[var(--glass-border)] shadow-2xl py-2 z-50 max-h-[calc(100vh-80px)] overflow-y-auto">
+                    {/* User Profile Summary */}
+                    <div className="px-4 py-2.5 border-b border-[var(--glass-border-subtle)]">
                       <p className="text-sm font-semibold text-white truncate">
                         {profile?.display_name || user.email}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-[var(--color-purple-bright)]/20 text-[var(--color-pink)] border border-[var(--color-purple-bright)]/30">
+                        <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-[var(--color-purple-bright)]/20 text-[var(--color-pink)] border border-[var(--color-purple-bright)]/30">
                           {profile?.role || 'viewer'}
                         </span>
                       </div>
                     </div>
 
+                    {/* Navigation Items (All Sidebar Pages) */}
                     <div className="py-1 text-sm text-[var(--text-secondary)]">
                       <Link
                         href={`/profile/${profile?.username || user.id}`}
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--glass-surface-elevated)] hover:text-white"
+                        className={`flex items-center gap-3 px-4 py-2 transition-colors ${
+                          pathname.startsWith('/profile')
+                            ? 'bg-[#8B5CF6]/15 text-white font-semibold'
+                            : 'hover:bg-[var(--glass-surface-elevated)] hover:text-white'
+                        }`}
                       >
-                        <UserIcon className="w-4 h-4" />
-                        My Profile
+                        <UserIcon className="w-4 h-4 text-[#8B5CF6]" />
+                        <span>My Profile</span>
                       </Link>
 
+                      <div className="my-1 border-t border-[var(--glass-border-subtle)]" />
+
+                      {/* Main Sidebar Pages */}
+                      <Link
+                        href="/home"
+                        onClick={() => setShowUserMenu(false)}
+                        className={`flex items-center gap-3 px-4 py-2 transition-colors ${
+                          pathname === '/home'
+                            ? 'bg-[#8B5CF6]/15 text-white font-semibold'
+                            : 'hover:bg-[var(--glass-surface-elevated)] hover:text-white'
+                        }`}
+                      >
+                        <Home className="w-4 h-4 text-[#9CA3AF]" />
+                        <span>Home</span>
+                      </Link>
+
+                      <Link
+                        href="/explore"
+                        onClick={() => setShowUserMenu(false)}
+                        className={`flex items-center gap-3 px-4 py-2 transition-colors ${
+                          pathname === '/explore'
+                            ? 'bg-[#8B5CF6]/15 text-white font-semibold'
+                            : 'hover:bg-[var(--glass-surface-elevated)] hover:text-white'
+                        }`}
+                      >
+                        <Compass className="w-4 h-4 text-[#9CA3AF]" />
+                        <span>Explore</span>
+                      </Link>
+
+                      <Link
+                        href="/blogs"
+                        onClick={() => setShowUserMenu(false)}
+                        className={`flex items-center gap-3 px-4 py-2 transition-colors ${
+                          pathname === '/blogs'
+                            ? 'bg-[#8B5CF6]/15 text-white font-semibold'
+                            : 'hover:bg-[var(--glass-surface-elevated)] hover:text-white'
+                        }`}
+                      >
+                        <BookOpen className="w-4 h-4 text-[#9CA3AF]" />
+                        <span>Blogs</span>
+                      </Link>
+
+                      {/* Creator / Studio Pages */}
                       {profile?.role === 'creator' && (
                         <>
+                          <div className="my-1 border-t border-[var(--glass-border-subtle)]" />
                           <Link
                             href="/creator/studio"
                             onClick={() => setShowUserMenu(false)}
-                            className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--glass-surface-elevated)] hover:text-white text-[var(--color-pink)]"
+                            className={`flex items-center gap-3 px-4 py-2 transition-colors ${
+                              pathname.startsWith('/creator/studio')
+                                ? 'bg-[#EC4899]/15 text-[#EC4899] font-semibold'
+                                : 'hover:bg-[var(--glass-surface-elevated)] hover:text-white text-[#EC4899]'
+                            }`}
                           >
-                            <Film className="w-4 h-4" />
-                            Creator Studio
+                            <Film className="w-4 h-4 text-[#EC4899]" />
+                            <span>Creator Studio</span>
                           </Link>
+
                           <Link
                             href="/creator/analytics"
                             onClick={() => setShowUserMenu(false)}
-                            className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--glass-surface-elevated)] hover:text-white"
+                            className={`flex items-center gap-3 px-4 py-2 transition-colors ${
+                              pathname.startsWith('/creator/analytics')
+                                ? 'bg-[#8B5CF6]/15 text-white font-semibold'
+                                : 'hover:bg-[var(--glass-surface-elevated)] hover:text-white'
+                            }`}
                           >
-                            <BarChart3 className="w-4 h-4" />
-                            Creator Analytics
+                            <BarChart3 className="w-4 h-4 text-[#9CA3AF]" />
+                            <span>Creator Analytics</span>
                           </Link>
                         </>
                       )}
 
                       {profile?.role === 'advertiser' && (
-                        <Link
-                          href="/advertiser"
-                          onClick={() => setShowUserMenu(false)}
-                          className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--glass-surface-elevated)] hover:text-white text-[var(--color-pink)]"
-                        >
-                          <Megaphone className="w-4 h-4" />
-                          Advertiser Studio
-                        </Link>
+                        <>
+                          <div className="my-1 border-t border-[var(--glass-border-subtle)]" />
+                          <Link
+                            href="/advertiser"
+                            onClick={() => setShowUserMenu(false)}
+                            className={`flex items-center gap-3 px-4 py-2 transition-colors ${
+                              pathname.startsWith('/advertiser')
+                                ? 'bg-[#8B5CF6]/15 text-[#8B5CF6] font-semibold'
+                                : 'hover:bg-[var(--glass-surface-elevated)] hover:text-white text-[#8B5CF6]'
+                            }`}
+                          >
+                            <Megaphone className="w-4 h-4 text-[#8B5CF6]" />
+                            <span>Advertiser Studio</span>
+                          </Link>
+                        </>
                       )}
 
                       <Link
                         href="/blog/studio"
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--glass-surface-elevated)] hover:text-white"
+                        className={`flex items-center gap-3 px-4 py-2 transition-colors ${
+                          pathname.startsWith('/blog/studio')
+                            ? 'bg-[#8B5CF6]/15 text-white font-semibold'
+                            : 'hover:bg-[var(--glass-surface-elevated)] hover:text-white'
+                        }`}
                       >
-                        <BookOpen className="w-4 h-4" />
-                        Write Blog
+                        <PenTool className="w-4 h-4 text-[#9CA3AF]" />
+                        <span>Write Blog</span>
+                      </Link>
+
+                      <div className="my-1 border-t border-[var(--glass-border-subtle)]" />
+
+                      {/* Personal Library Pages */}
+                      <Link
+                        href="/watchlist"
+                        onClick={() => setShowUserMenu(false)}
+                        className={`flex items-center gap-3 px-4 py-2 transition-colors ${
+                          pathname.startsWith('/watchlist')
+                            ? 'bg-[#8B5CF6]/15 text-white font-semibold'
+                            : 'hover:bg-[var(--glass-surface-elevated)] hover:text-white'
+                        }`}
+                      >
+                        <Bookmark className="w-4 h-4 text-[#9CA3AF]" />
+                        <span>Watchlist</span>
                       </Link>
 
                       <Link
                         href="/favorites"
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--glass-surface-elevated)] hover:text-white"
+                        className={`flex items-center gap-3 px-4 py-2 transition-colors ${
+                          pathname.startsWith('/favorites')
+                            ? 'bg-[#8B5CF6]/15 text-white font-semibold'
+                            : 'hover:bg-[var(--glass-surface-elevated)] hover:text-white'
+                        }`}
                       >
-                        Favorites
-                      </Link>
-
-                      <Link
-                        href="/watchlist"
-                        onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2 px-4 py-2 hover:bg-[var(--glass-surface-elevated)] hover:text-white"
-                      >
-                        Watchlist
+                        <Heart className="w-4 h-4 text-[#9CA3AF]" />
+                        <span>Favorites</span>
                       </Link>
                     </div>
 
-                    <div className="pt-1 border-t border-[var(--glass-border-subtle)]">
+                    {/* Sign Out */}
+                    <div className="pt-1 mt-1 border-t border-[var(--glass-border-subtle)]">
                       <button
+                        type="button"
                         onClick={() => {
                           setShowUserMenu(false);
                           signOut();
                         }}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[var(--status-error)] hover:bg-[var(--glass-surface-elevated)] transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-[var(--status-error)] hover:bg-[var(--glass-surface-elevated)] transition-colors cursor-pointer"
                       >
                         <LogOut className="w-4 h-4" />
-                        Sign Out
+                        <span>Sign Out</span>
                       </button>
                     </div>
                   </div>

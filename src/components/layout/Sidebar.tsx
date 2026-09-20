@@ -14,11 +14,9 @@ import {
   Heart,
   Compass,
   Megaphone,
-  User,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
   Sparkles,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 
 export function Sidebar() {
@@ -65,6 +63,35 @@ export function Sidebar() {
         isCollapsed ? 'w-20 px-2.5 py-4 items-center' : 'w-64 p-4'
       }`}
     >
+      {/* Top Sidebar Header & Collapse Toggle */}
+      <div
+        className={`flex items-center w-full mb-3 pb-2.5 border-b border-[var(--glass-border-subtle)] ${
+          isCollapsed ? 'justify-center' : 'justify-between px-1'
+        }`}
+      >
+        {!isCollapsed && (
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] pl-2">
+            Navigation
+          </span>
+        )}
+        <div className="relative group">
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="flex items-center justify-center w-8 h-8 rounded-lg text-[#9CA3AF] hover:text-white hover:bg-[#161522] border border-transparent hover:border-[#2E2A45] transition-all cursor-pointer"
+          >
+            {isCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
+          </button>
+          {isCollapsed && (
+            <div className="absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-[#1E1B2E] border border-[#2E2A45] text-white text-xs font-semibold whitespace-nowrap shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-150 z-50 flex items-center gap-1.5">
+              <span>Expand sidebar</span>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Navigation Items */}
       <div className={`space-y-1.5 w-full ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
         {navItems
@@ -106,7 +133,7 @@ export function Sidebar() {
           })}
       </div>
 
-      {/* Bottom Profile / Auth & Collapse toggle */}
+      {/* Bottom Profile / Auth */}
       <div className={`mt-auto pt-4 border-t border-[var(--glass-border-subtle)] w-full ${isCollapsed ? 'flex flex-col items-center' : 'space-y-2'}`}>
         {user ? (
           <Link
@@ -153,21 +180,6 @@ export function Sidebar() {
             </Link>
           </div>
         )}
-
-        {/* Sidebar Collapse Toggle Button */}
-        <button
-          type="button"
-          onClick={toggleSidebar}
-          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className={`flex items-center rounded-xl text-xs font-semibold text-[#9CA3AF] hover:text-white hover:bg-[#161522] border border-transparent hover:border-[#2E2A45] transition-all cursor-pointer mt-2 ${
-            isCollapsed
-              ? 'w-10 h-10 justify-center'
-              : 'w-full justify-between px-3 py-2'
-          }`}
-        >
-          {!isCollapsed && <span className="text-[11px] uppercase tracking-wider text-[var(--text-muted)]">Collapse</span>}
-          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-        </button>
       </div>
     </aside>
   );
