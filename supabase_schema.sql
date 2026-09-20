@@ -498,3 +498,51 @@ drop policy if exists "Authenticated users can insert notifications" on public.n
 create policy "Authenticated users can insert notifications" on public.notifications for insert
   with check (auth.uid() = actor_id);
 
+-- -----------------------------------------------------------------------------
+-- 13. DRAMABOX / REELSHORT MONETIZATION SYSTEM: COIN WALLET, REWARDS & UNLOCKS
+-- -----------------------------------------------------------------------------
+
+-- Add wallet and VIP columns to profiles
+alter table public.profiles add column if not exists coins_balance int default 50;
+alter table public.profiles add column if not exists vip_tier text check (vip_tier in ('none', 'weekly', 'monthly', 'annual')) default 'none';
+alter table public.profiles add column if not exists vip_expires_at timestamptz;
+alter table public.profiles add column if not exists last_check_in_date date;
+alter table public.profiles add column if not exists check_in_streak int default 0;
+
+-- Coin Transactions table
+create table if not exists public.coin_transactions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  amount int not null,
+  type text check (type in ('purchase', 'reward_ad', 'daily_check_in', 'episode_unlock', 'bonus')) not null,
+  description text,
+  metadata jsonb default '{}'::jsonb,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_coin_transactions_user on public.coin_transactions(user_id, created_at desc);
+alter table public.coin_transactions enable row level security;
+
+drop policy if exists "Users view own coin transactions" on public.coin_transactions;
+create policy "Users view own coin transactions" on public.coin_transactions for select
+  using (auth.uid() = user_id);
+
+-- Episode Unlocks table
+create table if not exists public.episode_unlocks (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  video_id uuid references public.videos(id) on delete cascade not null,
+  series_id uuid references public.content_series(id) on delete cascade,
+  coins_spent int default 0,
+  created_at timestamptz default now(),
+  constraint uq_user_video_unlock unique (user_id, video_id)
+);
+
+create index if not exists idx_episode_unlocks_user on public.episode_unlocks(user_id, video_id);
+alter table public.episode_unlocks enable row level security;
+
+drop policy if exists "Users view own episode unlocks" on public.episode_unlocks;
+create policy "Users view own episode unlocks" on public.episode_unlocks for select
+  using (auth.uid() = user_id);
+
+

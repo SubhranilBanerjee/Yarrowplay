@@ -13,6 +13,7 @@ import { ContentCarousel } from '@/components/media/ContentCarousel';
 import { VideoCarouselCard } from '@/components/media/VideoCarouselCard';
 import { BlogCarouselCard } from '@/components/media/BlogCarouselCard';
 import { Video, AudioTrack, Blog, AdvertiserCampaign, ContentSeries } from '@/types/database';
+import { SeriesCard } from '@/components/media/SeriesCard';
 import {
   Film,
   Music,
@@ -28,6 +29,7 @@ import {
   BarChart2,
   Headphones,
   ChevronRight,
+  Flame,
   Layers,
 } from 'lucide-react';
 
@@ -226,14 +228,25 @@ export default function LandingPage() {
           { data: camps },
         ] = await Promise.all([
           supabase.from('videos').select('*, creator:profiles(*)').eq('visibility', 'public').eq('status', 'published').order('created_at', { ascending: false }).limit(30),
-          supabase.from('content_series').select('*, creator:profiles(*)').order('created_at', { ascending: false }).limit(10),
+          supabase.from('content_series').select('*, creator:profiles(*), episodes:videos(id, episode_number, thumbnail_url, duration_seconds, views_count, is_locked)').order('created_at', { ascending: false }).limit(15),
           supabase.from('audios').select('*, creator:profiles(*)').eq('visibility', 'public').eq('status', 'published').order('created_at', { ascending: false }).limit(6),
           supabase.from('blogs').select('*, author:profiles(*)').eq('status', 'published').order('published_at', { ascending: false }).limit(6),
           supabase.from('advertiser_campaigns').select('*, advertiser:profiles(*)').eq('status', 'active').order('created_at', { ascending: false }),
         ]);
 
         setVideos(((vids || []) as any[]).map((v) => ({ ...v, type: 'video' as const })));
-        setSeriesList((sList as ContentSeries[]) || []);
+
+        const mappedSeries = ((sList || []) as any[]).map((s) => {
+          const episodes = s.episodes || [];
+          const sorted = [...episodes].sort((a: any, b: any) => (a.episode_number || 0) - (b.episode_number || 0));
+          return {
+            ...s,
+            type: 'series' as const,
+            first_episode_id: sorted[0]?.id || s.id,
+            episode_count: episodes.length || s.total_episodes || 1,
+          };
+        });
+        setSeriesList(mappedSeries as any);
         setAudios(((auds || []) as any[]).map((a) => ({ ...a, type: 'audio' as const })));
         setBlogs(((blgs || []) as any[]).map((b) => ({ ...b, type: 'blog' as const })));
         setSponsoredCampaigns(((camps || []) as any[]).filter((c) => !c.end_date || new Date(c.end_date).getTime() >= nowMs) as AdvertiserCampaign[]);
@@ -428,20 +441,21 @@ export default function LandingPage() {
               <AudioStrip track={featuredAudio} onPlay={() => playTrack(featuredAudio, audios)} />
             )}
 
-            {/* DEDICATED SERIES CAROUSELS: Episodes appear inside their series carousel */}
-            {seriesGroups.map((series) => (
+            {/* DEDICATED SERIES CAROUSEL: Displays only Series */}
+            {seriesList.length > 0 && (
               <ContentCarousel
-                key={series.id}
-                title={series.title}
-                badge={`SERIES · ${series.episodes.length} EPS`}
-                href={`/videos/${series.episodes[0]?.id || ''}`}
+                title="Featured & Trending Series"
+                badge="STREAMING"
+                href="/explore?type=series"
                 icon={Layers}
               >
-                {series.episodes.map((ep) => (
-                  <VideoCarouselCard key={ep.id} video={ep} />
+                {seriesList.map((series: any) => (
+                  <div key={series.id} className="w-64 sm:w-72 shrink-0 snap-start">
+                    <SeriesCard series={series} />
+                  </div>
                 ))}
               </ContentCarousel>
-            ))}
+            )}
 
             {/* Latest Standalone Videos Carousel */}
             {shortVideos.length > 0 && (

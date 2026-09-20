@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
     // Full watchlist query
     const { data: videoItems } = await supabase
       .from('watchlists')
-      .select('*, video:videos(*, creator:profiles(*))')
+      .select('*, video:videos(*, creator:profiles(*), series:content_series(*, creator:profiles(*)))')
       .eq('user_id', user.id)
       .not('video_id', 'is', null)
       .order('created_at', { ascending: false });

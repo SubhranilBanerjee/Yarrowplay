@@ -1,109 +1,169 @@
 'use client';
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { MediaCard, UnifiedMediaItem } from '@/components/media/MediaCard';
+import { SeriesCard } from '@/components/media/SeriesCard';
+import { ContentCarousel } from '@/components/media/ContentCarousel';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Compass, Film, Music, BookOpen, X } from 'lucide-react';
+import { ContentSeries, AudioTrack, Blog, AdvertiserCampaign } from '@/types/database';
+import {
+  Compass,
+  Layers,
+  Music,
+  BookOpen,
+  X,
+  Sparkles,
+  Flame,
+  Radio,
+  Tag,
+  Megaphone,
+} from 'lucide-react';
+
+type SeriesItem = ContentSeries & {
+  type: 'series';
+  first_episode_id?: string;
+  episode_count?: number;
+};
+
+type AudioItem = AudioTrack & { type: 'audio' };
+type BlogItem = Blog & { type: 'blog' };
+type AdItem = AdvertiserCampaign & { type: 'ad' };
 
 function ExploreContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
 
   const supabase = createClient();
-  const [activeType, setActiveType] = useState<'all' | 'video' | 'audio' | 'blog'>('all');
-  const [results, setResults] = useState<UnifiedMediaItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [activeType, setActiveType] = useState<'all' | 'series' | 'audio' | 'blog'>('all');
 
-  const handleSearch = async () => {
+  const [seriesList, setSeriesList] = useState<SeriesItem[]>([]);
+  const [audioList, setAudioList] = useState<AudioItem[]>([]);
+  const [blogList, setBlogList] = useState<BlogItem[]>([]);
+  const [campaignList, setCampaignList] = useState<AdItem[]>([]);
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchData = async () => {
     setIsLoading(true);
     try {
-      const items: UnifiedMediaItem[] = [];
       const trimmed = query.trim();
-
       const promises: Promise<any>[] = [];
 
-      // Search videos
-      if (activeType === 'all' || activeType === 'video') {
-        let vQuery = supabase
-          .from('videos')
-          .select('*, creator:profiles(*)')
-          .eq('status', 'published')
-          .eq('visibility', 'public');
+      // 1. Fetch Series (Only series, never individual episodes)
+      if (activeType === 'all' || activeType === 'series') {
+        let sQuery = supabase
+          .from('content_series')
+          .select('*, creator:profiles(*), episodes:videos(id, episode_number, thumbnail_url, duration_seconds, views_count, is_locked)')
+          .order('created_at', { ascending: false });
 
         if (trimmed) {
-          vQuery = vQuery.or(`title.ilike.%${trimmed}%,description.ilike.%${trimmed}%`);
+          sQuery = sQuery.or(`title.ilike.%${trimmed}%,description.ilike.%${trimmed}%,category.ilike.%${trimmed}%`);
         }
 
         promises.push(
-          vQuery.limit(20).then(({ data }: any) => {
-            (data || []).forEach((v: any) => items.push({ ...v, type: 'video' }));
+          sQuery.limit(50).then(({ data, error }: any) => {
+            if (error) throw error;
+            const mapped: SeriesItem[] = (data || []).map((s: any) => {
+              const episodes = s.episodes || [];
+              const sorted = [...episodes].sort(
+                (a: any, b: any) => (a.episode_number || 0) - (b.episode_number || 0)
+              );
+              return {
+                ...s,
+                type: 'series' as const,
+                first_episode_id: sorted[0]?.id || s.id,
+                episode_count: episodes.length || s.total_episodes || 1,
+              };
+            });
+            setSeriesList(mapped);
           })
         );
+      } else {
+        setSeriesList([]);
       }
 
-      // Search audio
+      // 2. Fetch Audio Tracks
       if (activeType === 'all' || activeType === 'audio') {
         let aQuery = supabase
           .from('audios')
           .select('*, creator:profiles(*)')
           .eq('status', 'published')
-          .eq('visibility', 'public');
+          .eq('visibility', 'public')
+          .order('created_at', { ascending: false });
 
         if (trimmed) {
-          aQuery = aQuery.or(`title.ilike.%${trimmed}%,artist_name.ilike.%${trimmed}%`);
+          aQuery = aQuery.or(`title.ilike.%${trimmed}%,artist_name.ilike.%${trimmed}%,genre.ilike.%${trimmed}%`);
         }
 
         promises.push(
-          aQuery.limit(20).then(({ data }: any) => {
-            (data || []).forEach((a: any) => items.push({ ...a, type: 'audio' }));
+          aQuery.limit(50).then(({ data, error }: any) => {
+            if (error) throw error;
+            const mapped: AudioItem[] = (data || []).map((a: any) => ({
+              ...a,
+              type: 'audio' as const,
+            }));
+            setAudioList(mapped);
           })
         );
+      } else {
+        setAudioList([]);
       }
 
-      // Search blogs
+      // 3. Fetch Blogs
       if (activeType === 'all' || activeType === 'blog') {
         let bQuery = supabase
           .from('blogs')
           .select('*, author:profiles(*)')
-          .eq('status', 'published');
+          .eq('status', 'published')
+          .order('published_at', { ascending: false });
 
         if (trimmed) {
-          bQuery = bQuery.or(`title.ilike.%${trimmed}%,body.ilike.%${trimmed}%`);
+          bQuery = bQuery.or(`title.ilike.%${trimmed}%,body.ilike.%${trimmed}%,category.ilike.%${trimmed}%`);
         }
 
         promises.push(
-          bQuery.limit(20).then(({ data }: any) => {
-            (data || []).forEach((b: any) => items.push({ ...b, type: 'blog' }));
+          bQuery.limit(30).then(({ data, error }: any) => {
+            if (error) throw error;
+            const mapped: BlogItem[] = (data || []).map((b: any) => ({
+              ...b,
+              type: 'blog' as const,
+            }));
+            setBlogList(mapped);
           })
         );
+      } else {
+        setBlogList([]);
       }
 
-      // Search campaigns (included in 'all' results)
+      // 4. Fetch Campaigns (ads in 'all' view)
       if (activeType === 'all') {
         let cQuery = supabase
           .from('advertiser_campaigns')
           .select('*, advertiser:profiles(*)')
-          .eq('status', 'active');
+          .eq('status', 'active')
+          .order('created_at', { ascending: false });
 
         if (trimmed) {
           cQuery = cQuery.or(`title.ilike.%${trimmed}%,headline.ilike.%${trimmed}%,description.ilike.%${trimmed}%`);
         }
 
         promises.push(
-          cQuery.limit(20).then(({ data }: any) => {
+          cQuery.limit(10).then(({ data }: any) => {
             const nowMs = Date.now();
-            (data || [])
+            const mapped: AdItem[] = (data || [])
               .filter((c: any) => !c.end_date || new Date(c.end_date).getTime() >= nowMs)
-              .forEach((c: any) => items.push({ ...c, type: 'ad' }));
+              .map((c: any) => ({ ...c, type: 'ad' as const }));
+            setCampaignList(mapped);
           })
         );
+      } else {
+        setCampaignList([]);
       }
 
       await Promise.all(promises);
-      setResults(items);
     } catch {
       // ignore
     } finally {
@@ -112,16 +172,49 @@ function ExploreContent() {
   };
 
   useEffect(() => {
-    handleSearch();
+    fetchData();
   }, [activeType, query]);
+
+  // Group Series by Category
+  const seriesByCategory = useMemo(() => {
+    const map = new Map<string, SeriesItem[]>();
+    for (const s of seriesList) {
+      const cat = s.category?.trim() || 'Featured Series';
+      if (!map.has(cat)) map.set(cat, []);
+      map.get(cat)!.push(s);
+    }
+    return Array.from(map.entries());
+  }, [seriesList]);
+
+  // Group Audio by Genre
+  const audioByGenre = useMemo(() => {
+    const map = new Map<string, AudioItem[]>();
+    for (const a of audioList) {
+      const genre = a.genre?.trim() || 'Featured Audio';
+      if (!map.has(genre)) map.set(genre, []);
+      map.get(genre)!.push(a);
+    }
+    return Array.from(map.entries());
+  }, [audioList]);
+
+  // Group Blogs by Category
+  const blogsByCategory = useMemo(() => {
+    const map = new Map<string, BlogItem[]>();
+    for (const b of blogList) {
+      const cat = b.category?.trim() || 'Stories & Articles';
+      if (!map.has(cat)) map.set(cat, []);
+      map.get(cat)!.push(b);
+    }
+    return Array.from(map.entries());
+  }, [blogList]);
+
+  const totalResultsCount =
+    seriesList.length + audioList.length + blogList.length + campaignList.length;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Page Header */}
+      {/* Page Header (Without 'Discover · Create · Share') */}
       <div className="max-w-3xl mb-8">
-        <p className="text-[11px] font-extrabold tracking-[0.25em] text-[var(--color-magenta)] uppercase mb-2">
-          Discover · Create · Share
-        </p>
         <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white flex items-center gap-3 flex-wrap">
           <span>Discover On</span>
           <span className="theme-gradient-heading">Yarrowplay</span>
@@ -139,7 +232,7 @@ function ExploreContent() {
           </div>
         ) : (
           <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2 font-normal max-w-xl">
-            Browse videos, audio tracks, creator blogs, and sponsored partner content.
+            Stream full video series, music collections, creator stories, and partner releases.
           </p>
         )}
       </div>
@@ -148,7 +241,7 @@ function ExploreContent() {
       <div className="flex items-center gap-2.5 pb-8 overflow-x-auto scrollbar-none">
         <button
           onClick={() => setActiveType('all')}
-          className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 ${
+          className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer ${
             activeType === 'all'
               ? 'theme-active-pill'
               : 'theme-inactive-pill'
@@ -158,20 +251,20 @@ function ExploreContent() {
         </button>
 
         <button
-          onClick={() => setActiveType('video')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 ${
-            activeType === 'video'
+          onClick={() => setActiveType('series')}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer ${
+            activeType === 'series'
               ? 'theme-active-pill'
               : 'theme-inactive-pill'
           }`}
         >
-          <Film className="w-4 h-4" />
-          Videos
+          <Layers className="w-4 h-4" />
+          Series
         </button>
 
         <button
           onClick={() => setActiveType('audio')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 ${
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer ${
             activeType === 'audio'
               ? 'theme-active-pill'
               : 'theme-inactive-pill'
@@ -183,7 +276,7 @@ function ExploreContent() {
 
         <button
           onClick={() => setActiveType('blog')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 ${
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer ${
             activeType === 'blog'
               ? 'theme-active-pill'
               : 'theme-inactive-pill'
@@ -194,26 +287,171 @@ function ExploreContent() {
         </button>
       </div>
 
-      {/* Results */}
+      {/* ── Content Presentation ── */}
       {isLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-          {[...Array(12)].map((_, i) => (
-            <div key={i} className="aspect-video bg-[#161522] rounded-xl animate-pulse ring-1 ring-white/5" />
-          ))}
+        <div className="space-y-8 animate-pulse">
+          <div className="h-6 w-48 bg-[#161522] rounded-lg mb-4" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="aspect-video bg-[#161522] rounded-2xl ring-1 ring-white/5" />
+            ))}
+          </div>
+          <div className="h-6 w-48 bg-[#161522] rounded-lg mt-8 mb-4" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="aspect-video bg-[#161522] rounded-2xl ring-1 ring-white/5" />
+            ))}
+          </div>
         </div>
-      ) : results.length === 0 ? (
+      ) : totalResultsCount === 0 ? (
         <EmptyState
           icon={Compass}
           title="No results found"
-          description={`We couldn't find any content matching "${query || 'your filter'}". Try another category or search keyword.`}
+          description={`We couldn't find any content matching "${query || 'your filter'}". Try searching another category or title.`}
           actionLabel="Clear Filter"
           actionHref="/explore"
         />
+      ) : query.trim() ? (
+        /* ── Search Mode: Categorized Results ── */
+        <div className="space-y-10">
+          {seriesList.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Layers className="w-5 h-5 text-[#EC4899]" />
+                <h2 className="text-xl font-bold text-white">Series ({seriesList.length})</h2>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {seriesList.map((series) => (
+                  <SeriesCard key={series.id} series={series} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {audioList.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Music className="w-5 h-5 text-[#8B5CF6]" />
+                <h2 className="text-xl font-bold text-white">Audio Tracks ({audioList.length})</h2>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {audioList.map((track) => (
+                  <MediaCard key={track.id} item={track} allAudioTracks={audioList} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {blogList.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="w-5 h-5 text-[#EC4899]" />
+                <h2 className="text-xl font-bold text-white">Blogs & Articles ({blogList.length})</h2>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {blogList.map((blog) => (
+                  <MediaCard key={blog.id} item={blog} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {campaignList.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Megaphone className="w-5 h-5 text-[#8B5CF6]" />
+                <h2 className="text-xl font-bold text-white">Sponsored Releases ({campaignList.length})</h2>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {campaignList.map((ad) => (
+                  <MediaCard key={ad.id} item={ad} />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-          {results.map((item) => (
-            <MediaCard key={`${item.type}-${item.id}`} item={item} />
+        /* ── Netflix-Style Horizontal Rows Divided by Types & Categories ── */
+        <div className="space-y-12">
+          {/* 1. TOP SPOTLIGHT SERIES */}
+          {seriesList.length > 0 && (
+            <ContentCarousel
+              title="Trending Series"
+              badge="MUST WATCH"
+              icon={Flame}
+            >
+              {seriesList.map((series) => (
+                <div key={series.id} className="w-64 sm:w-72 shrink-0 snap-start">
+                  <SeriesCard series={series} />
+                </div>
+              ))}
+            </ContentCarousel>
+          )}
+
+          {/* 2. SERIES DIVIDED BY CATEGORIES (Netflix Rows) */}
+          {seriesByCategory.map(([categoryName, seriesInCat]) => (
+            <ContentCarousel
+              key={categoryName}
+              title={`${categoryName} Series`}
+              badge={`${seriesInCat.length} ${seriesInCat.length === 1 ? 'SHOW' : 'SHOWS'}`}
+              icon={Layers}
+            >
+              {seriesInCat.map((series) => (
+                <div key={series.id} className="w-64 sm:w-72 shrink-0 snap-start">
+                  <SeriesCard series={series} />
+                </div>
+              ))}
+            </ContentCarousel>
           ))}
+
+          {/* 3. AUDIO TRACKS DIVIDED BY GENRE */}
+          {(activeType === 'all' || activeType === 'audio') &&
+            audioByGenre.map(([genreName, tracksInGenre]) => (
+              <ContentCarousel
+                key={genreName}
+                title={`${genreName} Tracks`}
+                badge={`${tracksInGenre.length} TRACKS`}
+                icon={Radio}
+              >
+                {tracksInGenre.map((track) => (
+                  <div key={track.id} className="w-56 sm:w-64 shrink-0 snap-start">
+                    <MediaCard item={track} allAudioTracks={audioList} />
+                  </div>
+                ))}
+              </ContentCarousel>
+            ))}
+
+          {/* 4. BLOG ARTICLES DIVIDED BY CATEGORY */}
+          {(activeType === 'all' || activeType === 'blog') &&
+            blogsByCategory.map(([catName, blogsInCat]) => (
+              <ContentCarousel
+                key={catName}
+                title={`${catName} Blogs`}
+                badge="READS"
+                icon={BookOpen}
+              >
+                {blogsInCat.map((blog) => (
+                  <div key={blog.id} className="w-64 sm:w-72 shrink-0 snap-start">
+                    <MediaCard item={blog} />
+                  </div>
+                ))}
+              </ContentCarousel>
+            ))}
+
+          {/* 5. SPONSORED PARTNER CONTENT */}
+          {activeType === 'all' && campaignList.length > 0 && (
+            <ContentCarousel
+              title="Featured Partner Drops"
+              badge="SPONSORED"
+              icon={Sparkles}
+            >
+              {campaignList.map((ad) => (
+                <div key={ad.id} className="w-64 sm:w-72 shrink-0 snap-start">
+                  <MediaCard item={ad} />
+                </div>
+              ))}
+            </ContentCarousel>
+          )}
         </div>
       )}
     </div>
@@ -225,10 +463,10 @@ export default function ExplorePage() {
     <Suspense
       fallback={
         <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="h-12 bg-[#333336] rounded-2xl w-full max-w-xl mx-auto animate-pulse mb-8" />
+          <div className="h-12 bg-[#161522] rounded-2xl w-full max-w-xl mx-auto animate-pulse mb-8" />
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-60 bg-[#333336] rounded-2xl animate-pulse" />
+              <div key={i} className="h-60 bg-[#161522] rounded-2xl animate-pulse" />
             ))}
           </div>
         </div>

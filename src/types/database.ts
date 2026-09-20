@@ -11,8 +11,45 @@ export interface Profile {
   company_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  coins_balance?: number;
+  vip_tier?: 'none' | 'weekly' | 'monthly' | 'annual';
+  vip_expires_at?: string | null;
+  last_check_in_date?: string | null;
+  check_in_streak?: number;
   created_at: string;
   updated_at: string;
+}
+
+export type CoinTransactionType = 'purchase' | 'reward_ad' | 'daily_check_in' | 'episode_unlock' | 'bonus';
+
+export interface CoinTransaction {
+  id: string;
+  user_id: string;
+  amount: number;
+  type: CoinTransactionType;
+  description: string | null;
+  metadata?: Record<string, any>;
+  created_at: string;
+}
+
+export interface EpisodeUnlock {
+  id: string;
+  user_id: string;
+  video_id: string;
+  series_id: string | null;
+  coins_spent: number;
+  created_at: string;
+}
+
+export interface CoinPack {
+  id: string;
+  coins: number;
+  bonus_coins: number;
+  price_usd: number;
+  price_inr: number;
+  popular?: boolean;
+  best_value?: boolean;
+  tag?: string;
 }
 
 export interface ContentSeries {

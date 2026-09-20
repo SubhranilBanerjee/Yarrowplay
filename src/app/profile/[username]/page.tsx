@@ -37,11 +37,11 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<'uploads' | 'favorites' | 'watchlist'>('uploads');
   const [favSubTab, setFavSubTab] = useState<'video' | 'audio' | 'blog'>('video');
 
-  const [myVideos, setMyVideos] = useState<Video[]>([]);
+  const [myVideos, setMyVideos] = useState<any[]>([]);
   const [myAudios, setMyAudios] = useState<AudioTrack[]>([]);
   const [myBlogs, setMyBlogs] = useState<Blog[]>([]);
   const [favoriteItems, setFavoriteItems] = useState<UnifiedMediaItem[]>([]);
-  const [watchlistItems, setWatchlistItems] = useState<Video[]>([]);
+  const [watchlistItems, setWatchlistItems] = useState<any[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -92,6 +92,7 @@ export default function ProfilePage() {
 
           // Parallelize primary queries: uploads, favorites, and watchlist
           const [
+            { data: sList },
             { data: vids },
             { data: auds },
             { data: blgs },
@@ -99,8 +100,14 @@ export default function ProfilePage() {
             { data: wList },
           ] = await Promise.all([
             supabase
+              .from('content_series')
+              .select('*, creator:profiles(*), episodes:videos(id, episode_number, thumbnail_url, duration_seconds, views_count, is_locked)')
+              .eq('creator_id', prof.id)
+              .order('created_at', { ascending: false }),
+
+            supabase
               .from('videos')
-              .select('*')
+              .select('*, creator:profiles(*), series:content_series(*, creator:profiles(*))')
               .eq('creator_id', prof.id)
               .order('created_at', { ascending: false }),
 
@@ -123,16 +130,47 @@ export default function ProfilePage() {
 
             supabase
               .from('watchlists')
-              .select('video:videos(*, creator:profiles(*))')
+              .select('video:videos(*, creator:profiles(*), series:content_series(*, creator:profiles(*)))')
               .eq('user_id', prof.id),
           ]);
 
-          setMyVideos((vids as Video[]) || []);
+          const mappedSeries: any[] = ((sList || []) as any[]).map((s) => {
+            const episodes = s.episodes || [];
+            const sorted = [...episodes].sort((a: any, b: any) => (a.episode_number || 0) - (b.episode_number || 0));
+            return {
+              ...s,
+              type: 'series' as const,
+              first_episode_id: sorted[0]?.id || s.id,
+              episode_count: episodes.length || s.total_episodes || 1,
+            };
+          });
+
+          // Show series and any standalone videos (videos without series_id)
+          const standaloneVids = ((vids as Video[]) || []).filter((v) => !v.series_id).map((v) => ({ ...v, type: 'video' as const }));
+          setMyVideos([...mappedSeries, ...standaloneVids]);
+
           setMyAudios((auds as AudioTrack[]) || []);
           setMyBlogs((blgs as Blog[]) || []);
 
-          const wVideos = (wList || []).map((w: any) => w.video).filter(Boolean);
-          setWatchlistItems(wVideos);
+          // Group watchlist items by series
+          const rawWVideos = (wList || []).map((w: any) => w.video).filter(Boolean);
+          const wSeriesSeen = new Set<string>();
+          const groupedWList: any[] = [];
+          for (const v of rawWVideos) {
+            if (v.series_id && v.series) {
+              if (!wSeriesSeen.has(v.series_id)) {
+                wSeriesSeen.add(v.series_id);
+                groupedWList.push({
+                  ...v.series,
+                  type: 'series' as const,
+                  first_episode_id: v.id,
+                });
+              }
+            } else {
+              groupedWList.push({ ...v, type: 'video' as const });
+            }
+          }
+          setWatchlistItems(groupedWList);
 
           // Resolve favorites in parallel if any exist
           if (favs && favs.length > 0) {
@@ -142,7 +180,7 @@ export default function ProfilePage() {
 
             const [fVidsRes, fAudsRes, fBlgsRes] = await Promise.all([
               vidIds.length > 0
-                ? supabase.from('videos').select('*, creator:profiles(*)').in('id', vidIds)
+                ? supabase.from('videos').select('*, creator:profiles(*), series:content_series(*, creator:profiles(*))').in('id', vidIds)
                 : Promise.resolve({ data: [] }),
               audIds.length > 0
                 ? supabase.from('audios').select('*, creator:profiles(*)').in('id', audIds)
@@ -153,7 +191,23 @@ export default function ProfilePage() {
             ]);
 
             const favList: UnifiedMediaItem[] = [];
-            (fVidsRes.data || []).forEach((v: any) => favList.push({ ...v, type: 'video' }));
+            const favSeriesSeen = new Set<string>();
+
+            (fVidsRes.data || []).forEach((v: any) => {
+              if (v.series_id && v.series) {
+                if (!favSeriesSeen.has(v.series_id)) {
+                  favSeriesSeen.add(v.series_id);
+                  favList.push({
+                    ...v.series,
+                    type: 'series' as const,
+                    first_episode_id: v.id,
+                  });
+                }
+              } else {
+                favList.push({ ...v, type: 'video' });
+              }
+            });
+
             (fAudsRes.data || []).forEach((a: any) => favList.push({ ...a, type: 'audio' }));
             (fBlgsRes.data || []).forEach((b: any) => favList.push({ ...b, type: 'blog' }));
             setFavoriteItems(favList);
@@ -276,7 +330,9 @@ export default function ProfilePage() {
     );
   }
 
-  const filteredFavorites = favoriteItems.filter((f) => f.type === favSubTab);
+  const filteredFavorites = favoriteItems.filter((f) =>
+    favSubTab === 'video' ? (f.type === 'video' || f.type === 'series') : f.type === favSubTab
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -528,8 +584,8 @@ export default function ProfilePage() {
               {myVideos.map((v) => (
                 <MediaCard
                   key={v.id}
-                  item={{ ...v, type: 'video' }}
-                  onDelete={canManageContent ? () => setDeleteTarget({ id: v.id, type: 'video', title: v.title }) : undefined}
+                  item={v.type ? v : { ...v, type: 'video' }}
+                  onDelete={canManageContent && v.type !== 'series' ? () => setDeleteTarget({ id: v.id, type: 'video', title: v.title }) : undefined}
                 />
               ))}
               {myAudios.map((a) => (
@@ -650,7 +706,7 @@ export default function ProfilePage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               {watchlistItems.map((v) => (
-                <MediaCard key={v.id} item={{ ...v, type: 'video' }} />
+                <MediaCard key={v.id} item={v.type ? v : { ...v, type: 'video' }} />
               ))}
             </div>
           )}

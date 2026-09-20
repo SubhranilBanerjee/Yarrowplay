@@ -10,6 +10,7 @@ import { ContentCarousel } from '@/components/media/ContentCarousel';
 import { VideoCarouselCard } from '@/components/media/VideoCarouselCard';
 import { BlogCarouselCard } from '@/components/media/BlogCarouselCard';
 import { Video, AudioTrack, Blog, ContentSeries, AudioAlbum } from '@/types/database';
+import { SeriesCard } from '@/components/media/SeriesCard';
 import {
   Play,
   Music,
@@ -23,6 +24,7 @@ import {
   Layers,
   Disc,
   Sparkles,
+  Flame,
 } from 'lucide-react';
 import { RecommendationCard, RecommendationItem } from '@/components/media/RecommendationCard';
 import {
@@ -40,6 +42,11 @@ import { VideoPreviewModal } from '@/components/landing/VideoPreviewModal';
 type FeedVideo = Video & { type: 'video' };
 type FeedAudio = AudioTrack & { type: 'audio' };
 type FeedBlog = Blog & { type: 'blog' };
+type FeedSeries = ContentSeries & {
+  type: 'series';
+  first_episode_id?: string;
+  episode_count?: number;
+};
 
 type FilterType = 'all' | 'videos' | 'audio' | 'blogs';
 
@@ -304,13 +311,12 @@ export default function HomePage() {
 
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [videos, setVideos] = useState<FeedVideo[]>([]);
-  const [seriesList, setSeriesList] = useState<ContentSeries[]>([]);
+  const [seriesList, setSeriesList] = useState<FeedSeries[]>([]);
   const [audios, setAudios] = useState<FeedAudio[]>([]);
   const [albumList, setAlbumList] = useState<AudioAlbum[]>([]);
   const [blogs, setBlogs] = useState<FeedBlog[]>([]);
   const [recommendations, setRecommendations] = useState<RecommendationItem[]>([]);
   const [creators, setCreators] = useState<CreatorItem[]>([]);
-  const [dynamicCategorySections, setDynamicCategorySections] = useState<CategorySection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Dynamic preview modal state
@@ -338,9 +344,9 @@ export default function HomePage() {
 
         supabase
           .from('content_series')
-          .select('*, creator:profiles(*)')
+          .select('*, creator:profiles(*), episodes:videos(id, episode_number, thumbnail_url, duration_seconds, views_count, is_locked)')
           .order('created_at', { ascending: false })
-          .limit(15),
+          .limit(30),
 
         supabase
           .from('audios')
@@ -377,33 +383,25 @@ export default function HomePage() {
 
       const mappedVideos = ((vids || []) as any[]).map((v) => ({ ...v, type: 'video' as const }));
       setVideos(mappedVideos);
-      setSeriesList((sList as ContentSeries[]) || []);
+
+      const mappedSeries: FeedSeries[] = ((sList || []) as any[]).map((s) => {
+        const episodes = s.episodes || [];
+        const sorted = [...episodes].sort((a: any, b: any) => (a.episode_number || 0) - (b.episode_number || 0));
+        return {
+          ...s,
+          type: 'series' as const,
+          first_episode_id: sorted[0]?.id || s.id,
+          episode_count: episodes.length || s.total_episodes || 1,
+        };
+      });
+      setSeriesList(mappedSeries);
+
       setAudios(((auds || []) as any[]).map((a) => ({ ...a, type: 'audio' as const })));
       setAlbumList((aList as AudioAlbum[]) || []);
       setBlogs(((blgs || []) as any[]).map((b) => ({ ...b, type: 'blog' as const })));
       
       const mappedCreators = (creatorsData || []).map(mapSupabaseProfileToCreator);
       setCreators(mappedCreators);
-
-      // Group dynamic category sections
-      const typedVideos = mappedVideos.map(mapSupabaseVideoToItem);
-      const catMap = new Map<string, VideoItem[]>();
-      for (const item of typedVideos) {
-        const cat = item.category || 'General';
-        if (!catMap.has(cat)) catMap.set(cat, []);
-        catMap.get(cat)!.push(item);
-      }
-      const catSections: CategorySection[] = [];
-      for (const [cName, items] of catMap.entries()) {
-        catSections.push({
-          id: cName.toLowerCase().replace(/\s+/g, '-'),
-          name: cName,
-          subtitle: `Curated ${cName.toLowerCase()} videos and shorts`,
-          viewAllHref: `/explore?q=${encodeURIComponent(cName)}`,
-          items,
-        });
-      }
-      setDynamicCategorySections(catSections);
 
       if (recData?.recommendations) {
         setRecommendations(recData.recommendations);
@@ -422,8 +420,18 @@ export default function HomePage() {
   const { seriesGroups, standaloneVideos } = groupContentBySeries(videos, seriesList);
   const { albumGroups, standaloneAudio } = groupAudioByAlbum(audios, albumList);
 
+  // Group Series by Category
+  const seriesByCategory = React.useMemo(() => {
+    const map = new Map<string, FeedSeries[]>();
+    for (const s of seriesList) {
+      const cat = s.category?.trim() || 'Featured Series';
+      if (!map.has(cat)) map.set(cat, []);
+      map.get(cat)!.push(s);
+    }
+    return Array.from(map.entries());
+  }, [seriesList]);
+
   const heroVideo = standaloneVideos[0] || videos[0] || null;
-  const shortVideos = standaloneVideos.slice(1, 10);
   const trendingBlogs = blogs;
 
   const showVideos = activeFilter === 'all' || activeFilter === 'videos';
@@ -431,7 +439,7 @@ export default function HomePage() {
   const showBlogs = activeFilter === 'all' || activeFilter === 'blogs';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0B0C10] via-[#0F0E17] to-[#12111A] text-[#F9FAFB] pb-24">
+    <div className="min-h-screen bg-transparent text-[#F9FAFB] pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
         {/* ── Filter Navigation Bar ── */}
         <div className="flex items-center gap-2.5 pb-6 overflow-x-auto scrollbar-none">
@@ -474,12 +482,19 @@ export default function HomePage() {
             {/* 1. Hero Featured Video (if available) */}
             {showVideos && heroVideo && <HeroCard video={heroVideo} />}
 
-            {/* 2. SECTION A: "Recommended for you" 9:16 Portrait Cards */}
-            {showVideos && videos.length > 0 && (
-              <RecommendedSection
-                items={videos.map(mapSupabaseVideoToItem)}
-                onSelectVideo={(v) => setSelectedVideoItem(v)}
-              />
+            {/* 2. SECTION A: "Featured Series" Carousel */}
+            {showVideos && seriesList.length > 0 && (
+              <ContentCarousel
+                title="Featured & Trending Series"
+                badge="TOP SHOWS"
+                icon={Flame}
+              >
+                {seriesList.map((series) => (
+                  <div key={series.id} className="w-64 sm:w-72 shrink-0 snap-start">
+                    <SeriesCard series={series} />
+                  </div>
+                ))}
+              </ContentCarousel>
             )}
 
             {/* 3. SECTION B: "Creator Spotlight" */}
@@ -506,34 +521,19 @@ export default function HomePage() {
               />
             )}
 
-            {/* 6. SECTION C: Dynamic Category Rows from Supabase */}
-            {showVideos && dynamicCategorySections.length > 0 && (
-              <div className="space-y-8">
-                {dynamicCategorySections.map((section) => (
-                  <CategoryRow
-                    key={section.id}
-                    categoryName={section.name}
-                    subtitle={section.subtitle}
-                    viewAllHref={section.viewAllHref}
-                    items={section.items}
-                    onSelectVideo={(v) => setSelectedVideoItem(v)}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* 7. Dedicated Series Carousels */}
+            {/* 6. Series Divided by Category (Netflix style rows) */}
             {showVideos &&
-              seriesGroups.map((series) => (
+              seriesByCategory.map(([catName, seriesItems]) => (
                 <ContentCarousel
-                  key={series.id}
-                  title={series.title}
-                  badge={`SERIES · ${series.episodes.length} EPS`}
-                  href={`/videos/${series.episodes[0]?.id || ''}`}
+                  key={catName}
+                  title={`${catName} Series`}
+                  badge={`${seriesItems.length} ${seriesItems.length === 1 ? 'SHOW' : 'SHOWS'}`}
                   icon={Layers}
                 >
-                  {series.episodes.map((ep) => (
-                    <VideoCarouselCard key={ep.id} video={ep} />
+                  {seriesItems.map((series) => (
+                    <div key={series.id} className="w-64 sm:w-72 shrink-0 snap-start">
+                      <SeriesCard series={series} />
+                    </div>
                   ))}
                 </ContentCarousel>
               ))}

@@ -33,7 +33,7 @@ export default function FavoritesPage() {
 
           const [vidsRes, audsRes, blgsRes] = await Promise.all([
             vidIds.length > 0
-              ? supabase.from('videos').select('*, creator:profiles(*)').in('id', vidIds)
+              ? supabase.from('videos').select('*, creator:profiles(*), series:content_series(*, creator:profiles(*))').in('id', vidIds)
               : Promise.resolve({ data: [] }),
             audIds.length > 0
               ? supabase.from('audios').select('*, creator:profiles(*)').in('id', audIds)
@@ -44,7 +44,23 @@ export default function FavoritesPage() {
           ]);
 
           const list: UnifiedMediaItem[] = [];
-          (vidsRes.data || []).forEach((v: any) => list.push({ ...v, type: 'video' }));
+          const seriesSeen = new Set<string>();
+
+          (vidsRes.data || []).forEach((v: any) => {
+            if (v.series_id && v.series) {
+              if (!seriesSeen.has(v.series_id)) {
+                seriesSeen.add(v.series_id);
+                list.push({
+                  ...v.series,
+                  type: 'series' as const,
+                  first_episode_id: v.id,
+                });
+              }
+            } else {
+              list.push({ ...v, type: 'video' });
+            }
+          });
+
           (audsRes.data || []).forEach((a: any) => list.push({ ...a, type: 'audio' }));
           (blgsRes.data || []).forEach((b: any) => list.push({ ...b, type: 'blog' }));
 
@@ -62,7 +78,9 @@ export default function FavoritesPage() {
     fetchFavorites();
   }, [user]);
 
-  const filteredItems = favoriteItems.filter((item) => item.type === activeTab);
+  const filteredItems = favoriteItems.filter((item) =>
+    activeTab === 'video' ? (item.type === 'video' || item.type === 'series') : item.type === activeTab
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

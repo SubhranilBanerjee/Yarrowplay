@@ -3,13 +3,16 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Search, Bell, User as UserIcon, LogOut, Film, Music, BookOpen, BarChart3, Megaphone } from 'lucide-react';
+import { useSidebar } from '@/context/SidebarContext';
+import { Search, Bell, User as UserIcon, LogOut, Film, Music, BookOpen, BarChart3, Megaphone, PanelLeftOpen, PanelLeftClose } from 'lucide-react';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 
 export function Header() {
   const { user, profile, signOut } = useAuth();
+  const { isCollapsed, toggleSidebar } = useSidebar();
+  const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const router = useRouter();
@@ -21,25 +24,41 @@ export function Header() {
     }
   };
 
+  const showSidebarToggle = pathname !== '/';
+
   return (
     <header className="sticky top-0 z-40 w-full bg-[var(--bg-primary)]/85 backdrop-blur-xl border-b border-[var(--glass-border)] px-4 md:px-8 py-3 transition-colors">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-        {/* Logo and Brand */}
-        <Link href={user ? '/home' : '/'} className="flex items-center gap-3 shrink-0 group">
-          <div className="relative w-8 h-8 md:w-9 md:h-9 filter drop-shadow-[0_0_8px_rgba(151,145,241,0.45)]">
-            <Image
-              src="/logo.png"
-              alt="Yarrowplay"
-              fill
-              sizes="(max-width: 768px) 32px, 36px"
-              className="object-contain transition-transform group-hover:scale-105"
-              priority
-            />
-          </div>
-          <span className="text-xl md:text-2xl font-black tracking-tight text-white flex items-center">
-            YARROW<span className="theme-gradient-heading font-black">PLAY</span>
-          </span>
-        </Link>
+        {/* Logo, Brand & Sidebar Toggle */}
+        <div className="flex items-center gap-2">
+          {showSidebarToggle && (
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              className="hidden md:flex items-center justify-center w-8 h-8 rounded-lg text-[#9CA3AF] hover:text-white hover:bg-[#161522] border border-transparent hover:border-[#2E2A45] transition-all cursor-pointer mr-1"
+            >
+              {isCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
+            </button>
+          )}
+
+          <Link href={user ? '/home' : '/'} className="flex items-center gap-3 shrink-0 group">
+            <div className="relative w-8 h-8 md:w-9 md:h-9 filter drop-shadow-[0_0_8px_rgba(151,145,241,0.45)]">
+              <Image
+                src="/logo.png"
+                alt="Yarrowplay"
+                fill
+                sizes="(max-width: 768px) 32px, 36px"
+                className="object-contain transition-transform group-hover:scale-105"
+                priority
+              />
+            </div>
+            <span className="text-xl md:text-2xl font-black tracking-tight text-white flex items-center">
+              YARROW<span className="theme-gradient-heading font-black">PLAY</span>
+            </span>
+          </Link>
+        </div>
 
         {/* Global Search Bar */}
         <form onSubmit={handleSearch} className="hidden sm:flex flex-1 max-w-xl mx-4">

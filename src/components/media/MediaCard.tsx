@@ -5,9 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Play, Heart, Clock, FileText, Music, Film, Trash2, ExternalLink } from 'lucide-react';
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
-import { Video, AudioTrack, Blog, AdvertiserCampaign } from '@/types/database';
+import { Video, AudioTrack, Blog, AdvertiserCampaign, ContentSeries } from '@/types/database';
+import { SeriesCard } from '@/components/media/SeriesCard';
 
 export type UnifiedMediaItem =
+  | ({ type: 'series'; first_episode_id?: string; episode_count?: number } & ContentSeries)
   | ({ type: 'video' } & Video)
   | ({ type: 'audio' } & AudioTrack)
   | ({ type: 'blog' } & Blog)
@@ -35,6 +37,10 @@ export function MediaCard({ item, allAudioTracks, onDelete }: MediaCardProps) {
       }).catch(() => {});
     }
   }, [item.id, item.type]);
+
+  if (item.type === 'series') {
+    return <SeriesCard series={item} />;
+  }
 
   const formatDuration = (seconds?: number) => {
     if (!seconds) return null;

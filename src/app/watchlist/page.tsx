@@ -11,7 +11,7 @@ export default function WatchlistPage() {
   const { user } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'video' | 'audio'>('video');
-  const [videoList, setVideoList] = useState<Video[]>([]);
+  const [videoList, setVideoList] = useState<any[]>([]);
   const [audioList, setAudioList] = useState<AudioTrack[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -24,7 +24,26 @@ export default function WatchlistPage() {
         const res = await fetch('/api/watchlist');
         if (res.ok) {
           const data = await res.json();
-          setVideoList(data.videos || []);
+          const rawVideos = data.videos || [];
+          const seriesSeen = new Set<string>();
+          const grouped: any[] = [];
+
+          for (const v of rawVideos) {
+            if (v.series_id && v.series) {
+              if (!seriesSeen.has(v.series_id)) {
+                seriesSeen.add(v.series_id);
+                grouped.push({
+                  ...v.series,
+                  type: 'series' as const,
+                  first_episode_id: v.id,
+                });
+              }
+            } else {
+              grouped.push({ ...v, type: 'video' as const });
+            }
+          }
+
+          setVideoList(grouped);
           setAudioList(data.audios || []);
         }
       } catch {
@@ -47,7 +66,7 @@ export default function WatchlistPage() {
           My Watchlist
         </h1>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
-          Continue watching and listening to your saved videos and audio tracks.
+          Continue watching and listening to your saved series and audio tracks.
         </p>
       </div>
 
@@ -72,7 +91,7 @@ export default function WatchlistPage() {
           }
         >
           <Film className="w-4 h-4" />
-          <span>Videos ({videoList.length})</span>
+          <span>Series ({videoList.length})</span>
         </button>
 
         <button
@@ -111,19 +130,19 @@ export default function WatchlistPage() {
       ) : currentItemsCount === 0 ? (
         <EmptyState
           icon={activeTab === 'video' ? Film : Music}
-          title={activeTab === 'video' ? 'No videos in watchlist' : 'No audio tracks in watchlist'}
+          title={activeTab === 'video' ? 'No series in watchlist' : 'No audio tracks in watchlist'}
           description={
             activeTab === 'video'
-              ? 'Save videos to your watchlist while watching or browsing.'
+              ? 'Save series to your watchlist while watching or browsing.'
               : 'Save songs or podcasts to your watchlist while listening.'
           }
-          actionLabel={activeTab === 'video' ? 'Browse Videos' : 'Discover Music'}
-          actionHref="/home"
+          actionLabel={activeTab === 'video' ? 'Browse Series' : 'Discover Music'}
+          actionHref="/explore"
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {activeTab === 'video'
-            ? videoList.map((v) => <MediaCard key={v.id} item={{ ...v, type: 'video' }} />)
+            ? videoList.map((v) => <MediaCard key={v.id} item={v} />)
             : audioList.map((a) => (
                 <MediaCard key={a.id} item={{ ...a, type: 'audio' }} allAudioTracks={audioList} />
               ))}
