@@ -61,13 +61,14 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`hidden md:flex flex-col shrink-0 bg-[var(--bg-primary)]/80 backdrop-blur-xl border-r border-[var(--glass-border)] min-h-[calc(100vh-61px)] select-none transition-all duration-300 ease-in-out ${
-        isCollapsed ? 'w-20 px-2.5 py-4 items-center' : 'w-64 p-4'
+      onWheel={(e) => e.stopPropagation()}
+      className={`hidden md:flex flex-col shrink-0 bg-[var(--bg-primary)]/80 backdrop-blur-xl border-r border-[var(--glass-border)] sticky top-[61px] h-[calc(100vh-61px)] max-h-[calc(100vh-61px)] overflow-hidden select-none overscroll-none transition-all duration-300 ease-in-out z-20 ${
+        isCollapsed ? 'w-20 px-2.5 py-3.5 items-center' : 'w-64 p-3.5'
       }`}
     >
       {/* Top Sidebar Header & Collapse Toggle */}
       <div
-        className={`flex items-center w-full mb-3 pb-2.5 border-b border-[var(--glass-border-subtle)] ${
+        className={`flex items-center w-full mb-2.5 pb-2 border-b border-[var(--glass-border-subtle)] shrink-0 ${
           isCollapsed ? 'justify-center' : 'justify-between px-1'
         }`}
       >
@@ -95,7 +96,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation Items */}
-      <div className={`space-y-1.5 w-full ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
+      <div className={`space-y-1 w-full shrink-0 overflow-hidden ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
         {navItems
           .filter((item) => item.show)
           .map((item) => {
@@ -109,8 +110,8 @@ export function Sidebar() {
                 title={isCollapsed ? item.label : undefined}
                 className={`relative group flex items-center rounded-xl font-semibold text-sm transition-all duration-200 ${
                   isCollapsed
-                    ? 'w-12 h-12 justify-center'
-                    : 'gap-3.5 px-4 py-3 w-full'
+                    ? 'w-10 h-10 justify-center'
+                    : 'gap-3 px-3.5 py-2.5 w-full'
                 } ${
                   isActive
                     ? 'theme-active-pill text-[#F9FAFB] shadow-[0_0_15px_rgba(139,92,246,0.35)]'
@@ -136,25 +137,25 @@ export function Sidebar() {
       </div>
 
       {/* Bottom Profile / Auth */}
-      <div className={`mt-auto pt-4 border-t border-[var(--glass-border-subtle)] w-full ${isCollapsed ? 'flex flex-col items-center' : 'space-y-2'}`}>
+      <div className={`mt-auto pt-3 border-t border-[var(--glass-border-subtle)] w-full shrink-0 overflow-hidden ${isCollapsed ? 'flex flex-col items-center' : 'space-y-2'}`}>
         {user ? (
           <Link
             href={`/profile/${profile?.username || user.id}`}
             title={isCollapsed ? (profile?.display_name || 'My Profile') : undefined}
             className={`relative group flex items-center rounded-xl font-medium text-sm transition-all ${
               isCollapsed
-                ? 'w-12 h-12 justify-center'
-                : 'gap-3.5 px-3.5 py-2.5 w-full'
+                ? 'w-10 h-10 justify-center'
+                : 'gap-3 px-3.5 py-2 w-full'
             } ${
               pathname.startsWith('/profile')
                 ? 'theme-active-pill text-[#F9FAFB] font-semibold shadow-[0_0_15px_rgba(139,92,246,0.35)]'
                 : 'text-[#9CA3AF] hover:bg-[#161522] hover:text-[#F9FAFB]'
             }`}
           >
-            <div className="w-7 h-7 rounded-full bg-[#8B5CF6]/20 border border-[#8B5CF6]/40 flex items-center justify-center text-[#A855F7] text-xs font-bold shrink-0">
+            <div className="w-6 h-6 rounded-full bg-[#8B5CF6]/20 border border-[#8B5CF6]/40 flex items-center justify-center text-[#A855F7] text-xs font-bold shrink-0">
               {profile?.display_name ? profile.display_name[0].toUpperCase() : 'U'}
             </div>
-            {!isCollapsed && <span className="truncate flex-1">{profile?.display_name || 'My Profile'}</span>}
+            {!isCollapsed && <span className="truncate flex-1 text-xs">{profile?.display_name || 'My Profile'}</span>}
 
             {/* Hover Tooltip when collapsed */}
             {isCollapsed && (
@@ -172,11 +173,11 @@ export function Sidebar() {
             <Sparkles className="w-4 h-4" />
           </Link>
         ) : (
-          <div className="p-3.5 rounded-xl theme-glass-card-static text-center border border-[var(--glass-border)]">
-            <p className="text-[11px] text-[#9CA3AF] mb-2.5 leading-relaxed">Join Yarrowplay to stream, publish & comment.</p>
+          <div className="p-3 rounded-xl theme-glass-card-static text-center border border-[var(--glass-border)]">
+            <p className="text-[11px] text-[#9CA3AF] mb-2 leading-relaxed">Join Yarrowplay to stream, publish & comment.</p>
             <Link
               href="/register"
-              className="block w-full text-xs font-semibold py-2 theme-neon-button rounded-xl transition-all"
+              className="block w-full text-xs font-semibold py-1.5 theme-neon-button rounded-xl transition-all"
             >
               Get Started
             </Link>

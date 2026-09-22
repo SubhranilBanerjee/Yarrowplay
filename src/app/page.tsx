@@ -10,6 +10,7 @@ import { SeriesCard } from '@/components/media/SeriesCard';
 import { ContentCarousel } from '@/components/media/ContentCarousel';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SpecularButton } from '@/components/ui/SpecularButton';
+import { DriftWall, DriftWallItem } from '@/components/ui/DriftWall';
 import { ContentSeries, AudioTrack, Blog, AdvertiserCampaign } from '@/types/database';
 import {
   Film,
@@ -166,108 +167,196 @@ export default function LandingPage() {
   const totalContentCount =
     seriesList.length + audioList.length + blogList.length + campaignList.length;
 
+  // Dynamic thumbnails from content for the hero DriftWall background
+  const heroWallItems: DriftWallItem[] | undefined = useMemo(() => {
+    const list: DriftWallItem[] = [];
+
+    for (const s of seriesList) {
+      if (s.cover_url) {
+        list.push({
+          image: s.cover_url,
+          title: s.title,
+          href: `/videos/${s.first_episode_id || s.id}`,
+        });
+      }
+      if (s.episodes && Array.isArray(s.episodes)) {
+        for (const ep of s.episodes) {
+          if (ep.thumbnail_url && ep.thumbnail_url !== s.cover_url) {
+            list.push({
+              image: ep.thumbnail_url,
+              title: ep.title || s.title,
+              href: `/videos/${ep.id}`,
+            });
+          }
+        }
+      }
+    }
+
+    for (const a of audioList) {
+      if (a.cover_url) {
+        list.push({
+          image: a.cover_url,
+          title: a.title,
+          href: '/explore?type=audio',
+        });
+      }
+    }
+
+    for (const b of blogList) {
+      if (b.cover_url) {
+        list.push({
+          image: b.cover_url,
+          title: b.title,
+          href: `/blogs/${b.id}`,
+        });
+      }
+    }
+
+    for (const c of campaignList) {
+      if (c.media_url) {
+        list.push({
+          image: c.media_url,
+          title: c.title,
+          href: c.target_url || '/advertiser',
+        });
+      }
+    }
+
+    return list.length > 0 ? list : undefined;
+  }, [seriesList, audioList, blogList, campaignList]);
+
   return (
     <div className="w-full">
-      {/* ── 1. MINIMAL TRANSPARENT HERO SECTION (ONLY TITLE & TWO SPECULAR BUTTONS) ── */}
-      <section className="relative w-full pt-14 pb-10 px-4 flex flex-col items-center justify-center text-center bg-transparent">
-        {/* Massive Bold Headline: EXACT SIZE PRESERVED, NO EXTRA TEXT, NO BOXES */}
-        <h1 className="font-black tracking-tight uppercase leading-none py-1 select-none text-5xl sm:text-7xl md:text-8xl lg:text-[7.5rem] xl:text-[8.5rem] filter drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)]">
-          <span className="bg-gradient-to-r from-[#FFE600] via-[#FF6E00] to-[#FF20D9] bg-clip-text text-transparent">
-            YARROWPLAY
-          </span>
-        </h1>
+      {/* ── 1. MINIMAL HERO SECTION WITH DRIFT WALL BACKGROUND ── */}
+      <section className="relative w-full pt-20 pb-16 px-4 flex flex-col items-center justify-center text-center overflow-hidden min-h-[440px] sm:min-h-[500px]">
+        {/* DriftWall Background */}
+        <div className="absolute inset-0 w-full h-full pointer-events-auto overflow-hidden opacity-60">
+          <DriftWall
+            items={heroWallItems}
+            columns={6}
+            tileWidth={200}
+            tileHeight={130}
+            gap={16}
+            tilt={15}
+            turn={-14}
+            perspective={1100}
+            depth={120}
+            speed={36}
+            direction="up"
+            variance={0.45}
+            parallax={0.6}
+            lift={64}
+            fade={0.6}
+            dim={0.55}
+            overlayColor="#060010"
+          />
+        </div>
 
-        {/* Two Specular Buttons Below */}
-        <div className="flex flex-wrap items-center justify-center gap-5 pt-8">
-          {user ? (
-            <>
-              <SpecularButton
-                size="md"
-                radius={16}
-                tint="#ffffff"
-                tintOpacity={0.06}
-                blur={12}
-                textColor="#ffffff"
-                lineColor="#EC4899"
-                baseColor="#2E2A45"
-                intensity={1.4}
-                shineSize={14}
-                shineFade={35}
-                thickness={1.5}
-                speed={0.4}
-                followMouse
-                proximity={250}
-                onClick={() => router.push('/home')}
-              >
-                <span>Explore Content Feed</span>
-              </SpecularButton>
+        {/* Cinematic gradient overlays to blend the wall into the page and enhance headline legibility */}
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#0B0C10] via-transparent to-[#0B0C10]/80 z-[1]" />
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_65%_55%_at_50%_50%,rgba(11,12,16,0.35)_0%,rgba(11,12,16,0.88)_100%)] z-[1]" />
 
-              <SpecularButton
-                size="md"
-                radius={16}
-                tint="#ffffff"
-                tintOpacity={0.03}
-                blur={12}
-                textColor="#E5E7EB"
-                lineColor="#8B5CF6"
-                baseColor="#2E2A45"
-                intensity={1.2}
-                shineSize={14}
-                shineFade={35}
-                thickness={1.5}
-                speed={0.35}
-                followMouse
-                proximity={250}
-                onClick={() => router.push('/explore')}
-              >
-                <span>Explore Catalog</span>
-              </SpecularButton>
-            </>
-          ) : (
-            <>
-              <SpecularButton
-                size="md"
-                radius={16}
-                tint="#ffffff"
-                tintOpacity={0.06}
-                blur={12}
-                textColor="#ffffff"
-                lineColor="#EC4899"
-                baseColor="#2E2A45"
-                intensity={1.5}
-                shineSize={14}
-                shineFade={35}
-                thickness={1.5}
-                speed={0.4}
-                followMouse
-                proximity={250}
-                onClick={() => router.push('/register')}
-              >
-                <span>Get Started Free</span>
-              </SpecularButton>
+        {/* Hero Content (Z-10, relative) */}
+        <div className="relative z-10 flex flex-col items-center justify-center pointer-events-auto">
+          {/* Massive Bold Headline: EXACT SIZE PRESERVED, NO EXTRA TEXT, NO BOXES */}
+          <h1 className="font-black tracking-tight uppercase leading-none py-1 select-none text-5xl sm:text-7xl md:text-8xl lg:text-[7.5rem] xl:text-[8.5rem] filter drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)]">
+            <span className="bg-gradient-to-r from-[#FFE600] via-[#FF6E00] to-[#FF20D9] bg-clip-text text-transparent">
+              YARROWPLAY
+            </span>
+          </h1>
 
-              <SpecularButton
-                size="md"
-                radius={16}
-                tint="#ffffff"
-                tintOpacity={0.03}
-                blur={12}
-                textColor="#E5E7EB"
-                lineColor="#8B5CF6"
-                baseColor="#2E2A45"
-                intensity={1.2}
-                shineSize={14}
-                shineFade={35}
-                thickness={1.5}
-                speed={0.35}
-                followMouse
-                proximity={250}
-                onClick={() => router.push('/login')}
-              >
-                <span>Sign In</span>
-              </SpecularButton>
-            </>
-          )}
+          {/* Two Specular Buttons Below */}
+          <div className="flex flex-wrap items-center justify-center gap-5 pt-8">
+            {user ? (
+              <>
+                <SpecularButton
+                  size="md"
+                  radius={16}
+                  tint="#ffffff"
+                  tintOpacity={0.06}
+                  blur={12}
+                  textColor="#ffffff"
+                  lineColor="#EC4899"
+                  baseColor="#2E2A45"
+                  intensity={1.4}
+                  shineSize={14}
+                  shineFade={35}
+                  thickness={1.5}
+                  speed={0.4}
+                  followMouse
+                  proximity={250}
+                  onClick={() => router.push('/home')}
+                >
+                  <span>Explore Content Feed</span>
+                </SpecularButton>
+
+                <SpecularButton
+                  size="md"
+                  radius={16}
+                  tint="#ffffff"
+                  tintOpacity={0.03}
+                  blur={12}
+                  textColor="#E5E7EB"
+                  lineColor="#8B5CF6"
+                  baseColor="#2E2A45"
+                  intensity={1.2}
+                  shineSize={14}
+                  shineFade={35}
+                  thickness={1.5}
+                  speed={0.35}
+                  followMouse
+                  proximity={250}
+                  onClick={() => router.push('/explore')}
+                >
+                  <span>Explore Catalog</span>
+                </SpecularButton>
+              </>
+            ) : (
+              <>
+                <SpecularButton
+                  size="md"
+                  radius={16}
+                  tint="#ffffff"
+                  tintOpacity={0.06}
+                  blur={12}
+                  textColor="#ffffff"
+                  lineColor="#EC4899"
+                  baseColor="#2E2A45"
+                  intensity={1.5}
+                  shineSize={14}
+                  shineFade={35}
+                  thickness={1.5}
+                  speed={0.4}
+                  followMouse
+                  proximity={250}
+                  onClick={() => router.push('/register')}
+                >
+                  <span>Get Started Free</span>
+                </SpecularButton>
+
+                <SpecularButton
+                  size="md"
+                  radius={16}
+                  tint="#ffffff"
+                  tintOpacity={0.03}
+                  blur={12}
+                  textColor="#E5E7EB"
+                  lineColor="#8B5CF6"
+                  baseColor="#2E2A45"
+                  intensity={1.2}
+                  shineSize={14}
+                  shineFade={35}
+                  thickness={1.5}
+                  speed={0.35}
+                  followMouse
+                  proximity={250}
+                  onClick={() => router.push('/login')}
+                >
+                  <span>Sign In</span>
+                </SpecularButton>
+              </>
+            )}
+          </div>
         </div>
       </section>
 
