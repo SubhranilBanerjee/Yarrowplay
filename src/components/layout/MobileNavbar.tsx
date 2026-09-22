@@ -33,19 +33,7 @@ export function MobileNavbar() {
           <span className="text-[10px] font-semibold">Explore</span>
         </Link>
 
-        {profile?.role === 'creator' ? (
-          <Link
-            href="/creator/studio"
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
-              pathname.startsWith('/creator/studio') ? 'text-[var(--color-pink)]' : 'text-[var(--text-muted)] hover:text-white'
-            }`}
-          >
-            <div className="p-2 rounded-full theme-neon-button -mt-3 shadow-lg">
-              <Film className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] font-bold text-[var(--color-pink)]">Studio</span>
-          </Link>
-        ) : profile?.role === 'advertiser' ? (
+        {profile?.role === 'advertiser' ? (
           <Link
             href="/advertiser"
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
@@ -57,7 +45,19 @@ export function MobileNavbar() {
             </div>
             <span className="text-[10px] font-bold text-[var(--color-pink)]">Studio</span>
           </Link>
-        ) : null}
+        ) : (
+          <Link
+            href="/creator/studio"
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              pathname.startsWith('/creator/studio') ? 'text-[var(--color-pink)]' : 'text-[var(--text-muted)] hover:text-white'
+            }`}
+          >
+            <div className="p-2 rounded-full theme-neon-button -mt-3 shadow-lg">
+              <Film className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-bold text-[var(--color-pink)]">Studio</span>
+          </Link>
+        )}
 
         <Link
           href="/blogs"

@@ -54,8 +54,8 @@ export async function updateSession(request: NextRequest) {
   const isAdvertiserPath = pathname.startsWith('/advertiser');
   const isAuthPage = pathname === '/login' || pathname === '/register';
 
-  // 1. Unauthenticated user trying to access a protected path
-  if (!user && (isAuthRequired || isCreatorPath || isAdvertiserPath)) {
+  // 1. Unauthenticated user trying to access a protected path (require login for private user data)
+  if (!user && (isAuthRequired || isAdvertiserPath)) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('redirect', pathname);
@@ -70,22 +70,15 @@ export async function updateSession(request: NextRequest) {
     return redirectWithCookies(url);
   }
 
-  // 3. Authenticated user accessing role-restricted paths
-  if (user && (isCreatorPath || isAdvertiserPath)) {
+  // 3. Authenticated user accessing advertiser-restricted paths
+  if (user && isAdvertiserPath) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
 
-    if (isCreatorPath && profile?.role !== 'creator') {
-      const url = request.nextUrl.clone();
-      url.pathname = '/home';
-      url.searchParams.set('error', 'unauthorized_creator_access');
-      return redirectWithCookies(url);
-    }
-
-    if (isAdvertiserPath && profile?.role !== 'advertiser') {
+    if (profile?.role !== 'advertiser') {
       const url = request.nextUrl.clone();
       url.pathname = '/home';
       url.searchParams.set('error', 'unauthorized_advertiser_access');

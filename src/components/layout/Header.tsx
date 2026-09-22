@@ -239,7 +239,7 @@ export function Header() {
                           </Link>
 
                           {/* Creator / Studio Pages */}
-                          {profile?.role === 'creator' && (
+                          {user && (
                             <>
                               <div className="my-1 border-t border-[var(--glass-border-subtle)]" />
                               <Link

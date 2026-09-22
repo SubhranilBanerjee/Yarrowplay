@@ -38,14 +38,14 @@ export function Sidebar() {
       label: 'Creator Studio',
       href: '/creator/studio',
       icon: Film,
-      show: profile?.role === 'creator',
+      show: true,
       highlight: true,
     },
     {
       label: 'Analytics',
       href: '/creator/analytics',
       icon: BarChart3,
-      show: profile?.role === 'creator',
+      show: true,
     },
     {
       label: 'Advertiser Studio',

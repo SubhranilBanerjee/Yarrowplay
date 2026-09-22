@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { createClient } from '@/lib/supabase/client';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -59,7 +60,10 @@ export default function CreatorAnalyticsPage() {
   });
 
   const fetchAnalytics = async () => {
-    if (!user) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
 
     try {
@@ -281,6 +285,27 @@ export default function CreatorAnalyticsPage() {
           </button>
         </div>
       </div>
+
+      {/* Guest Mode Notice */}
+      {!user && (
+        <div className="mb-8 p-4 rounded-2xl bg-gradient-to-r from-[var(--color-purple)]/20 via-[var(--color-pink)]/20 to-transparent border border-[var(--color-pink)]/30 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-[var(--color-pink)]/20 text-[var(--color-pink-light)] shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white">Previewing Creator Telemetry</h3>
+              <p className="text-xs text-[var(--text-secondary)]">Sign in with your creator account to track real viewer watch time, follower growth, and audience retention metrics.</p>
+            </div>
+          </div>
+          <Link
+            href="/login?redirect=/creator/analytics"
+            className="px-4 py-2 rounded-xl bg-[var(--gradient-neon)] text-white text-xs font-bold shrink-0 shadow-md hover:shadow-[0_0_15px_rgba(255,32,217,0.5)] transition-all cursor-pointer"
+          >
+            Sign In to Account
+          </Link>
+        </div>
+      )}
 
       {/* 8 Primary Telemetry Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">

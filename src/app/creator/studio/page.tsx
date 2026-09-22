@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { createClient } from '@/lib/supabase/client';
@@ -52,7 +53,7 @@ interface AudioTrackDraft {
 }
 
 export default function CreatorStudioPage() {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const router = useRouter();
   const supabase = createClient();
 
@@ -598,6 +599,27 @@ export default function CreatorStudioPage() {
           Create and upload your content. Bring your stories to life!
         </p>
       </div>
+
+      {/* Guest Mode Notice */}
+      {!user && (
+        <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-[var(--color-purple)]/20 via-[var(--color-pink)]/20 to-transparent border border-[var(--color-pink)]/30 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-[var(--color-pink)]/20 text-[var(--color-pink-light)] shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white">Guest Creator Mode</h3>
+              <p className="text-xs text-[var(--text-secondary)]">Sign in or create an account to publish your videos, series, and audio tracks.</p>
+            </div>
+          </div>
+          <Link
+            href="/login?redirect=/creator/studio"
+            className="px-4 py-2 rounded-xl bg-[var(--gradient-neon)] text-white text-xs font-bold shrink-0 shadow-md hover:shadow-[0_0_15px_rgba(255,32,217,0.5)] transition-all cursor-pointer"
+          >
+            Sign In to Publish
+          </Link>
+        </div>
+      )}
 
       {/* Primary Top Tabs: [ Video ] [ Audio ] [ Manage Content ] */}
       <div className="grid grid-cols-3 gap-3 mb-6 bg-[var(--glass-surface)] p-1.5 rounded-2xl border border-[var(--glass-border)]">
