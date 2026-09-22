@@ -17,6 +17,7 @@ import {
   Sparkles,
   PanelLeftClose,
   PanelLeftOpen,
+  Clock,
 } from 'lucide-react';
 
 export function Sidebar() {
@@ -55,6 +56,7 @@ export function Sidebar() {
     },
     { label: 'Watchlist', href: '/watchlist', icon: Bookmark, show: !!user },
     { label: 'Favorites', href: '/favorites', icon: Heart, show: !!user },
+    { label: 'History', href: '/history', icon: Clock, show: !!user },
   ];
 
   return (

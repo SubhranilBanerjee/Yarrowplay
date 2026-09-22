@@ -3,9 +3,10 @@
 import React, { useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { CheckCircle2, UserPlus } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { CreatorItem } from '@/data/content';
 import { SectionHeader } from './SectionHeader';
+import { FollowButton } from '@/components/ui/FollowButton';
 
 interface CreatorSpotlightProps {
   creators: CreatorItem[];
@@ -82,18 +83,12 @@ export const CreatorSpotlight: React.FC<CreatorSpotlightProps> = ({
                 </p>
               </div>
 
-              {/* Follow button icon */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                aria-label={`Follow ${creator.name}`}
-                className="w-8 h-8 rounded-full bg-white/5 hover:bg-[#8B5CF6] text-gray-400 hover:text-white flex items-center justify-center transition-colors shrink-0 opacity-0 group-hover:opacity-100"
-              >
-                <UserPlus className="w-3.5 h-3.5" />
-              </button>
+              {/* Functional Follow Button */}
+              <FollowButton
+                creatorId={creator.id}
+                size="sm"
+                showCount={false}
+              />
             </div>
           );
 

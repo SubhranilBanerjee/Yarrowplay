@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { VideoPlayer } from '@/components/media/VideoPlayer';
+import { FollowButton } from '@/components/ui/FollowButton';
+import { CommentSection } from '@/components/media/CommentSection';
 import { Video, Comment } from '@/types/database';
 import {
   Heart,
@@ -237,7 +239,9 @@ function PaymentModal({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function VideoDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const videoId = params?.id as string;
+  const initialTime = searchParams?.get('t') ? parseFloat(searchParams.get('t')!) : 0;
   const router = useRouter();
   const { user } = useAuth();
   const supabase = createClient();
@@ -603,6 +607,7 @@ export default function VideoDetailPage() {
                 videoUrl={video.video_url}
                 title={video.title}
                 posterUrl={video.thumbnail_url}
+                initialProgress={initialTime}
                 locked={isLocked}
                 priceInr={video.price_inr as number | undefined}
                 onUnlockRequest={() => {
@@ -631,29 +636,43 @@ export default function VideoDetailPage() {
               className="flex flex-wrap items-center justify-between gap-3 mt-3 pb-4 border-b"
               style={{ borderColor: 'var(--glass-border)' }}
             >
-              {/* Creator Info */}
-              <div className="flex items-center gap-2.5">
-                <div
-                  className="relative w-9 h-9 rounded-full overflow-hidden border shrink-0"
-                  style={{
-                    background: 'var(--glass-surface-heavy)',
-                    borderColor: 'var(--neon-purple-border)',
-                  }}
+              {/* Creator Info & Follow Button */}
+              <div className="flex items-center gap-3 flex-wrap">
+                <Link
+                  href={`/profile/${video.creator?.username || video.creator_id}`}
+                  className="flex items-center gap-2.5 group/creator"
                 >
-                  {video.creator?.avatar_url ? (
-                    <Image src={video.creator.avatar_url} alt={video.creator.display_name || 'Creator'} fill className="object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xs font-bold text-[var(--color-pink-light)]">
-                      {video.creator?.display_name?.[0] || 'C'}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-white">{video.creator?.display_name || 'Creator'}</p>
-                  <p className="text-[11px] text-[var(--text-muted)]">
-                    {video.views_count || 0} views · {new Date(video.created_at).toLocaleDateString()}
-                  </p>
-                </div>
+                  <div
+                    className="relative w-9 h-9 rounded-full overflow-hidden border shrink-0 group-hover/creator:scale-105 transition-transform"
+                    style={{
+                      background: 'var(--glass-surface-heavy)',
+                      borderColor: 'var(--neon-purple-border)',
+                    }}
+                  >
+                    {video.creator?.avatar_url ? (
+                      <Image src={video.creator.avatar_url} alt={video.creator.display_name || 'Creator'} fill className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-xs font-bold text-[var(--color-pink-light)]">
+                        {video.creator?.display_name?.[0] || 'C'}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white group-hover/creator:text-[var(--color-pink-light)] transition-colors">
+                      {video.creator?.display_name || 'Creator'}
+                    </p>
+                    <p className="text-[11px] text-[var(--text-muted)]">
+                      {video.views_count || 0} views · {new Date(video.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </Link>
+
+                {/* Follow Button */}
+                <FollowButton
+                  creatorId={video.creator_id}
+                  size="sm"
+                  onRequireAuth={() => setShowAuthModal(true)}
+                />
               </div>
 
               {/* Action Buttons */}
@@ -805,122 +824,20 @@ export default function VideoDetailPage() {
             </div>
           </div>
 
-          {/* ── Collapsible Comments Section ── */}
+          {/* ── Threaded Nested Comments Section ── */}
           <div
-            className="rounded-2xl overflow-hidden border backdrop-blur-md"
+            className="rounded-2xl p-5 border backdrop-blur-md"
             style={{
               background: 'var(--glass-surface)',
               borderColor: 'var(--glass-border)',
             }}
           >
-            <button
-              onClick={() => setCommentsOpen((o) => !o)}
-              className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
-            >
-              <span className="text-sm font-bold text-white flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-[var(--color-pink-light)]" />
-                Comments ({comments.length})
-              </span>
-              {commentsOpen ? (
-                <ChevronUp className="w-4 h-4 text-[var(--text-muted)]" />
-              ) : (
-                <ChevronDown className="w-4 h-4 text-[var(--text-muted)]" />
-              )}
-            </button>
-
-            {commentsOpen && (
-              <div
-                className="px-4 pb-4 space-y-4 border-t"
-                style={{ borderColor: 'var(--glass-border)' }}
-              >
-                {/* Comment Input */}
-                {user ? (
-                  <form onSubmit={handlePostComment} className="space-y-2 pt-4">
-                    <div className="relative">
-                      <textarea
-                        rows={2}
-                        placeholder="Add a public comment..."
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        className="w-full text-white text-xs rounded-xl p-3 border focus:outline-none transition-all resize-none"
-                        style={{
-                          background: 'var(--glass-surface-heavy)',
-                          borderColor: 'var(--glass-border)',
-                        }}
-                      />
-                    </div>
-                    <div className="flex justify-end">
-                      <button
-                        type="submit"
-                        disabled={!newComment.trim()}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-xs font-semibold disabled:opacity-40 transition-all cursor-pointer shadow-md"
-                        style={{
-                          background: 'var(--gradient-neon)',
-                          boxShadow: 'var(--glow-purple)',
-                        }}
-                      >
-                        <Send className="w-3.5 h-3.5" />
-                        <span>Post Comment</span>
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <div
-                    className="pt-4 flex items-center justify-between gap-3 p-3 rounded-xl border my-2"
-                    style={{
-                      background: 'var(--glass-surface-heavy)',
-                      borderColor: 'var(--glass-border)',
-                    }}
-                  >
-                    <p className="text-xs text-[var(--text-muted)]">Sign in to join the conversation</p>
-                    <button
-                      onClick={() => setShowAuthModal(true)}
-                      className="text-xs font-semibold text-[var(--color-pink-light)] hover:underline shrink-0"
-                    >
-                      Sign In
-                    </button>
-                  </div>
-                )}
-
-                {/* Comment Thread */}
-                <div className="space-y-3">
-                  {comments.length === 0 ? (
-                    <p className="text-xs text-[var(--text-muted)] text-center py-4">No comments yet. Start the conversation!</p>
-                  ) : (
-                    comments.map((comm) => (
-                      <div
-                        key={comm.id}
-                        className="p-3 rounded-xl border text-xs"
-                        style={{
-                          background: 'var(--glass-surface-heavy)',
-                          borderColor: 'var(--glass-border)',
-                        }}
-                      >
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="font-semibold text-white">{comm.user?.display_name || 'Viewer'}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-[var(--text-muted)]">
-                              {new Date(comm.created_at).toLocaleDateString()}
-                            </span>
-                            {user && (user.id === comm.user_id || user.id === video?.creator_id || isAdmin) && (
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteComment(comm.id)}
-                                title="Delete comment"
-                                className="text-[var(--text-muted)] hover:text-red-400 transition-colors p-0.5 rounded cursor-pointer"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                        <p className="text-[var(--text-secondary)] leading-relaxed">{comm.content}</p>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
+            <CommentSection
+              contentType="video"
+              contentId={video.id}
+              creatorId={video.creator_id}
+              onRequireAuth={() => setShowAuthModal(true)}
+            />
           </div>
 
           {/* ── Recommended Videos ── */}

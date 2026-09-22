@@ -36,8 +36,8 @@ import {
 } from '@/data/content';
 import { RecommendedSection } from '@/components/landing/RecommendedSection';
 import { CreatorSpotlight } from '@/components/landing/CreatorSpotlight';
-import { CategoryRow } from '@/components/landing/CategoryRow';
 import { VideoPreviewModal } from '@/components/landing/VideoPreviewModal';
+import { ContinueWatchingSection } from '@/components/media/ContinueWatchingSection';
 
 type FeedVideo = Video & { type: 'video' };
 type FeedAudio = AudioTrack & { type: 'audio' };
@@ -479,6 +479,9 @@ export default function HomePage() {
         {/* ── Dynamic Content Feed ── */}
         {!isLoading && (
           <div className="space-y-12">
+            {/* Continue Watching for active user */}
+            <ContinueWatchingSection />
+
             {/* 1. Hero Featured Video (if available) */}
             {showVideos && heroVideo && <HeroCard video={heroVideo} />}
 

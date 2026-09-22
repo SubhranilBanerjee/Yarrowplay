@@ -24,7 +24,9 @@ import {
   FolderOpen,
   ExternalLink,
   Loader2,
+  Subtitles,
 } from 'lucide-react';
+import { SubtitleManagerModal } from '@/components/media/SubtitleManagerModal';
 
 interface EpisodeDraft {
   id: string;
@@ -80,6 +82,9 @@ export default function CreatorStudioPage() {
     user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
     user.email === 'admin@dramabox.stream'
   );
+
+  // Subtitle Manager Modal state
+  const [selectedSubtitleVideo, setSelectedSubtitleVideo] = useState<{ id: string; title: string } | null>(null);
 
   // --- SERIES STATE ---
   const [seriesTitle, setSeriesTitle] = useState('');
@@ -987,10 +992,36 @@ export default function CreatorStudioPage() {
                               />
                             </label>
                           )}
+
+                          {/* Add Episode button placed below the upload thumbnail button */}
+                          <div className="mt-3">
+                            <button
+                              type="button"
+                              onClick={addEpisode}
+                              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--color-pink)]/40 hover:border-[var(--color-pink)] text-white hover:bg-[var(--color-pink)]/15 text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-98"
+                              style={{ background: 'var(--glass-surface-elevated)' }}
+                            >
+                              <Plus className="w-3.5 h-3.5 text-[var(--color-pink)]" />
+                              <span>Add Episode</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   ))}
+                </div>
+
+                {/* Bottom Add Episode Button */}
+                <div className="pt-2 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={addEpisode}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl border border-[var(--color-pink)] text-white hover:bg-[var(--color-pink)]/15 text-xs font-semibold transition-all shadow-md active:scale-95 cursor-pointer"
+                    style={{ background: 'var(--glass-surface-elevated)' }}
+                  >
+                    <Plus className="w-4 h-4 text-[var(--color-pink)]" />
+                    <span>Add Another Episode</span>
+                  </button>
                 </div>
               </div>
 
@@ -1692,6 +1723,13 @@ export default function CreatorStudioPage() {
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => setSelectedSubtitleVideo({ id: v.id, title: v.title })}
+                        title="Manage Subtitles"
+                        className="p-2 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--glass-surface-elevated)] text-[var(--color-pink-light)] hover:text-white transition-colors cursor-pointer border border-white/5"
+                      >
+                        <Subtitles className="w-4 h-4" />
+                      </button>
                       <a
                         href={`/videos/${v.id}`}
                         target="_blank"
@@ -1846,6 +1884,16 @@ export default function CreatorStudioPage() {
           </div>
         </div>
       )}
+
+      {/* Subtitle Manager Modal */}
+      {selectedSubtitleVideo && (
+        <SubtitleManagerModal
+          videoId={selectedSubtitleVideo.id}
+          videoTitle={selectedSubtitleVideo.title}
+          onClose={() => setSelectedSubtitleVideo(null)}
+        />
+      )}
+
       {/* Bottom Floating Error & Status Banner */}
       <BottomToast message={statusMsg} onClose={() => setStatusMsg(null)} />
     </div>

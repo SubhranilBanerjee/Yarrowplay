@@ -190,15 +190,75 @@ export interface Watchlist {
   audio?: AudioTrack;
 }
 
+export interface SubtitleTrack {
+  id: string;
+  video_id: string;
+  language: string;
+  label: string;
+  source_url: string;
+  format: 'vtt' | 'srt';
+  default_track: boolean;
+  enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Comment {
   id: string;
   user_id: string;
   content_type: 'video' | 'audio' | 'blog';
   content_id: string;
+  parent_id?: string | null;
   timestamp_seconds: number | null;
   content: string;
+  likes_count?: number;
+  dislikes_count?: number;
+  is_edited?: boolean;
+  is_deleted?: boolean;
   created_at: string;
+  updated_at?: string;
   user?: Profile;
+  replies?: Comment[];
+  reply_count?: number;
+  user_reaction?: 'like' | 'dislike' | null;
+}
+
+export interface CommentReaction {
+  id: string;
+  user_id: string;
+  comment_id: string;
+  reaction_type: 'like' | 'dislike';
+  created_at: string;
+}
+
+export interface CommentReport {
+  id: string;
+  reporter_id: string;
+  comment_id: string;
+  reason: string;
+  details?: string | null;
+  status: 'pending' | 'reviewed' | 'dismissed';
+  created_at: string;
+}
+
+export interface CreatorFollow {
+  id: string;
+  follower_id: string;
+  creator_id: string;
+  created_at: string;
+  creator?: Profile;
+  follower?: Profile;
+}
+
+export interface WatchHistoryItem {
+  id: string;
+  user_id: string;
+  video_id: string;
+  progress_seconds: number;
+  total_duration: number;
+  completed: boolean;
+  last_watched_at: string;
+  video?: Video;
 }
 
 export interface VideoBoost {

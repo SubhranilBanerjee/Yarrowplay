@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { uploadMedia } from '@/lib/upload';
 import { MediaCard, UnifiedMediaItem } from '@/components/media/MediaCard';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { FollowButton } from '@/components/ui/FollowButton';
 import { Profile, Video, AudioTrack, Blog } from '@/types/database';
 import {
   User,
@@ -407,7 +408,7 @@ export default function ProfilePage() {
 
           {/* Quick Creator / Edit Actions */}
           <div className="flex flex-wrap items-center gap-2 self-stretch sm:self-auto">
-            {isOwnProfile && (
+            {isOwnProfile ? (
               <>
                 <button
                   onClick={() => setIsEditing(!isEditing)}
@@ -448,6 +449,8 @@ export default function ProfilePage() {
                   </>
                 )}
               </>
+            ) : (
+              <FollowButton creatorId={profile.id} size="md" />
             )}
           </div>
         </div>
