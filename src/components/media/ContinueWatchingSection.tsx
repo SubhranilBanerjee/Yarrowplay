@@ -68,20 +68,14 @@ export function ContinueWatchingSection() {
     <section className="w-full py-5">
       <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-2">
-          <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center border"
-            style={{
-              background: 'var(--neon-purple-glow)',
-              borderColor: 'var(--neon-purple-border)',
-            }}
-          >
-            <Clock className="w-4 h-4 text-[var(--color-pink-light)]" />
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#F4C95D]/15 border border-[#F4C95D]/30">
+            <Clock className="w-4 h-4 text-[#F4C95D]" />
           </div>
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
+            <h2 className="text-base sm:text-lg font-bold text-[#F5F1E8] tracking-tight">
               Continue Watching
             </h2>
-            <p className="text-[11px] text-[var(--text-muted)]">Pick up right where you left off</p>
+            <p className="text-[11px] text-[#7F8993]">Pick up right where you left off</p>
           </div>
         </div>
 
@@ -90,14 +84,14 @@ export function ContinueWatchingSection() {
             <button
               onClick={() => handleScroll('left')}
               title="Previous"
-              className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white flex items-center justify-center transition-colors border border-white/5"
+              className="w-7 h-7 rounded-full bg-[#151F28] hover:bg-[#111A22] text-[#B7BEC6] hover:text-[#F5F1E8] flex items-center justify-center transition-colors border border-[#27313A] cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => handleScroll('right')}
               title="Next"
-              className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white flex items-center justify-center transition-colors border border-white/5"
+              className="w-7 h-7 rounded-full bg-[#151F28] hover:bg-[#111A22] text-[#B7BEC6] hover:text-[#F5F1E8] flex items-center justify-center transition-colors border border-[#27313A] cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -122,15 +116,10 @@ export function ContinueWatchingSection() {
           return (
             <div
               key={item.id}
-              className="group relative w-60 sm:w-68 shrink-0 snap-start rounded-2xl overflow-hidden border transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
-              style={{
-                background: 'var(--glass-surface-heavy)',
-                borderColor: 'var(--glass-border)',
-                boxShadow: 'var(--shadow-card)',
-              }}
+              className="group relative w-60 sm:w-68 shrink-0 snap-start rounded-xl overflow-hidden bg-[#111A22] border border-white/[0.07] hover:border-[#F4C95D]/40 transition-all duration-300 hover:scale-[1.02] shadow-md"
             >
               {/* Thumbnail Container */}
-              <Link href={`/videos/${video.id}?t=${Math.round(item.progress_seconds)}`} className="block relative aspect-video bg-[#1E1B2E]">
+              <Link href={`/videos/${video.id}?t=${Math.round(item.progress_seconds)}`} className="block relative aspect-video bg-[#0B1117]">
                 {video.thumbnail_url ? (
                   <Image
                     src={video.thumbnail_url}
@@ -139,8 +128,8 @@ export function ContinueWatchingSection() {
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#161522] to-[#1E1B2E]">
-                    <Film className="w-10 h-10 text-[var(--color-pink-light)] opacity-40" />
+                  <div className="w-full h-full flex items-center justify-center bg-[#151F28]">
+                    <Film className="w-10 h-10 text-[#F4C95D] opacity-40" />
                   </div>
                 )}
 
@@ -148,30 +137,23 @@ export function ContinueWatchingSection() {
                 <button
                   onClick={(e) => handleRemove(e, video.id)}
                   title="Remove from Continue Watching"
-                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/75 hover:bg-red-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20 cursor-pointer shadow-lg"
+                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/75 hover:bg-[#D96868] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20 cursor-pointer shadow-lg"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
 
                 {/* Center Hover Play Button */}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-white shadow-lg"
-                    style={{ background: 'var(--gradient-neon)' }}
-                  >
-                    <Play className="w-5 h-5 fill-white ml-0.5" />
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F4C95D] text-[#0B0F13] shadow-md">
+                    <Play className="w-5 h-5 fill-current ml-0.5" />
                   </div>
                 </div>
 
                 {/* Progress bar attached to bottom of thumbnail */}
-                <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/20">
+                <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-[#3B4650]">
                   <div
-                    className="h-full"
-                    style={{
-                      width: `${percent}%`,
-                      background: 'var(--gradient-neon)',
-                      boxShadow: 'var(--glow-pink)',
-                    }}
+                    className="h-full bg-[#F4C95D]"
+                    style={{ width: `${percent}%` }}
                   />
                 </div>
               </Link>
@@ -179,20 +161,20 @@ export function ContinueWatchingSection() {
               {/* Card Meta */}
               <div className="p-3">
                 {video.series && (
-                  <p className="text-[10px] font-bold text-[var(--color-pink-light)] uppercase tracking-wider truncate mb-0.5">
+                  <p className="text-[10px] font-bold text-[#F4C95D] uppercase tracking-wider truncate mb-0.5">
                     {video.series.title}
                     {video.episode_number && ` · Ep ${video.episode_number}`}
                   </p>
                 )}
-                <h3 className="text-xs sm:text-sm font-semibold text-white truncate group-hover:text-[var(--color-pink-light)] transition-colors">
+                <h3 className="text-xs sm:text-sm font-semibold text-[#F5F1E8] truncate group-hover:text-[#F4C95D] transition-colors">
                   {video.title}
                 </h3>
 
-                <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5 text-[11px] text-[var(--text-muted)]">
+                <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#1C252D] text-[11px] text-[#7F8993]">
                   <span>{percent}% watched</span>
                   <Link
                     href={`/videos/${video.id}?t=${Math.round(item.progress_seconds)}`}
-                    className="text-[var(--color-pink-light)] hover:underline font-semibold flex items-center gap-1"
+                    className="text-[#F4C95D] hover:underline font-semibold flex items-center gap-1"
                   >
                     Resume →
                   </Link>

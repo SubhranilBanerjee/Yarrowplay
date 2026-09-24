@@ -232,54 +232,35 @@ export default function CreatorAnalyticsPage() {
 
         {/* Date Filters */}
         <div
-          className="flex items-center gap-2 p-1.5 rounded-xl border self-start sm:self-auto backdrop-blur-md"
-          style={{
-            background: 'var(--glass-surface)',
-            borderColor: 'var(--glass-border)',
-          }}
+          className="flex items-center gap-2 p-1.5 rounded-xl border border-[#27313A] bg-[#141D26] self-start sm:self-auto"
         >
           <button
             onClick={() => setDateRange('7d')}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
-            style={
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               dateRange === '7d'
-                ? {
-                    background: 'var(--gradient-neon)',
-                    color: '#ffffff',
-                    boxShadow: 'var(--glow-purple)',
-                  }
-                : { color: 'var(--text-secondary)' }
-            }
+                ? 'bg-[#F4C95D] text-[#0B0F13] shadow-md font-bold'
+                : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
+            }`}
           >
             Last 7 Days
           </button>
           <button
             onClick={() => setDateRange('30d')}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
-            style={
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               dateRange === '30d'
-                ? {
-                    background: 'var(--gradient-neon)',
-                    color: '#ffffff',
-                    boxShadow: 'var(--glow-purple)',
-                  }
-                : { color: 'var(--text-secondary)' }
-            }
+                ? 'bg-[#F4C95D] text-[#0B0F13] shadow-md font-bold'
+                : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
+            }`}
           >
             Last 30 Days
           </button>
           <button
             onClick={() => setDateRange('all')}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
-            style={
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               dateRange === 'all'
-                ? {
-                    background: 'var(--gradient-neon)',
-                    color: '#ffffff',
-                    boxShadow: 'var(--glow-purple)',
-                  }
-                : { color: 'var(--text-secondary)' }
-            }
+                ? 'bg-[#F4C95D] text-[#0B0F13] shadow-md font-bold'
+                : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
+            }`}
           >
             All Time
           </button>
@@ -288,19 +269,19 @@ export default function CreatorAnalyticsPage() {
 
       {/* Guest Mode Notice */}
       {!user && (
-        <div className="mb-8 p-4 rounded-2xl bg-gradient-to-r from-[var(--color-purple)]/20 via-[var(--color-pink)]/20 to-transparent border border-[var(--color-pink)]/30 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+        <div className="mb-8 p-4 rounded-2xl bg-[#111A22] border border-[#27313A] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-[var(--color-pink)]/20 text-[var(--color-pink-light)] shrink-0">
+            <div className="p-2.5 rounded-xl bg-[#F4C95D]/15 text-[#F4C95D] shrink-0 border border-[#F4C95D]/30">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">Previewing Creator Telemetry</h3>
-              <p className="text-xs text-[var(--text-secondary)]">Sign in with your creator account to track real viewer watch time, follower growth, and audience retention metrics.</p>
+              <h3 className="text-sm font-bold text-[#F5F1E8]">Previewing Creator Telemetry</h3>
+              <p className="text-xs text-[#B7BEC6]">Sign in with your creator account to track real viewer watch time, follower growth, and audience retention metrics.</p>
             </div>
           </div>
           <Link
             href="/login?redirect=/creator/analytics"
-            className="px-4 py-2 rounded-xl bg-[var(--gradient-neon)] text-white text-xs font-bold shrink-0 shadow-md hover:shadow-[0_0_15px_rgba(255,32,217,0.5)] transition-all cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] text-[#0B0F13] text-xs font-bold shrink-0 shadow-md transition-all cursor-pointer"
           >
             Sign In to Account
           </Link>
@@ -309,161 +290,107 @@ export default function CreatorAnalyticsPage() {
 
       {/* 8 Primary Telemetry Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div
-          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
-          style={{
-            background: 'var(--glass-surface)',
-            borderColor: 'var(--glass-border)',
-          }}
-        >
-          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
+        <div className="rounded-2xl p-4 border border-[#27313A] bg-[#111A22] transition-all hover:border-[#F4C95D]/30">
+          <div className="flex items-center justify-between text-[#7F8993] mb-2">
             <span className="text-xs uppercase font-semibold">Total Views</span>
-            <Eye className="w-4 h-4 text-[var(--color-pink-light)]" />
+            <Eye className="w-4 h-4 text-[#F4C95D]" />
           </div>
-          <p className="text-2xl font-extrabold text-white">{totals.views.toLocaleString()}</p>
-          <span className="text-[11px] text-emerald-400 mt-1 flex items-center gap-1">
+          <p className="text-2xl font-extrabold text-[#F5F1E8]">{totals.views.toLocaleString()}</p>
+          <span className="text-[11px] text-[#68B88A] mt-1 flex items-center gap-1">
             <TrendingUp className="w-3 h-3" /> +12.4% vs last period
           </span>
         </div>
 
-        <div
-          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
-          style={{
-            background: 'var(--glass-surface)',
-            borderColor: 'var(--glass-border)',
-          }}
-        >
-          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
+        <div className="rounded-2xl p-4 border border-[#27313A] bg-[#111A22] transition-all hover:border-[#F4C95D]/30">
+          <div className="flex items-center justify-between text-[#7F8993] mb-2">
             <span className="text-xs uppercase font-semibold">Followers</span>
-            <Users className="w-4 h-4 text-[var(--color-pink-light)]" />
+            <Users className="w-4 h-4 text-[#F4C95D]" />
           </div>
-          <p className="text-2xl font-extrabold text-white">{totals.followers.toLocaleString()}</p>
-          <span className="text-[11px] text-emerald-400 mt-1 flex items-center gap-1">
+          <p className="text-2xl font-extrabold text-[#F5F1E8]">{totals.followers.toLocaleString()}</p>
+          <span className="text-[11px] text-[#68B88A] mt-1 flex items-center gap-1">
             <TrendingUp className="w-3 h-3" /> +8.2% growth
           </span>
         </div>
 
-        <div
-          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
-          style={{
-            background: 'var(--glass-surface)',
-            borderColor: 'var(--glass-border)',
-          }}
-        >
-          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
+        <div className="rounded-2xl p-4 border border-[#27313A] bg-[#111A22] transition-all hover:border-[#F4C95D]/30">
+          <div className="flex items-center justify-between text-[#7F8993] mb-2">
             <span className="text-xs uppercase font-semibold">Watch Time</span>
-            <Clock className="w-4 h-4 text-[var(--color-pink-light)]" />
+            <Clock className="w-4 h-4 text-[#F4C95D]" />
           </div>
-          <p className="text-2xl font-extrabold text-white">
+          <p className="text-2xl font-extrabold text-[#F5F1E8]">
             {totals.watchTimeMinutes.toLocaleString()}{' '}
-            <span className="text-xs font-normal text-[var(--text-muted)]">mins</span>
+            <span className="text-xs font-normal text-[#7F8993]">mins</span>
           </p>
-          <span className="text-[11px] text-emerald-400 mt-1 flex items-center gap-1">
+          <span className="text-[11px] text-[#68B88A] mt-1 flex items-center gap-1">
             <TrendingUp className="w-3 h-3" /> +16.7% vs last period
           </span>
         </div>
 
-        <div
-          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
-          style={{
-            background: 'var(--glass-surface)',
-            borderColor: 'var(--glass-border)',
-          }}
-        >
-          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
+        <div className="rounded-2xl p-4 border border-[#27313A] bg-[#111A22] transition-all hover:border-[#F4C95D]/30">
+          <div className="flex items-center justify-between text-[#7F8993] mb-2">
             <span className="text-xs uppercase font-semibold">Avg Completion</span>
-            <Sparkles className="w-4 h-4 text-[var(--color-pink-light)]" />
+            <Sparkles className="w-4 h-4 text-[#F4C95D]" />
           </div>
-          <p className="text-2xl font-extrabold text-white">
+          <p className="text-2xl font-extrabold text-[#F5F1E8]">
             {totals.views > 0
               ? Math.min(94, Math.max(45, Math.round((totals.watchTimeMinutes * 60 / (totals.views * 60)) * 75)))
               : 0}%
           </p>
-          <span className="text-[11px] text-emerald-400 mt-1 block">Healthy viewer retention</span>
+          <span className="text-[11px] text-[#68B88A] mt-1 block">Healthy viewer retention</span>
         </div>
 
-        <div
-          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
-          style={{
-            background: 'var(--glass-surface)',
-            borderColor: 'var(--glass-border)',
-          }}
-        >
-          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
+        <div className="rounded-2xl p-4 border border-[#27313A] bg-[#111A22] transition-all hover:border-[#F4C95D]/30">
+          <div className="flex items-center justify-between text-[#7F8993] mb-2">
             <span className="text-xs uppercase font-semibold">Total Likes</span>
-            <Heart className="w-4 h-4 text-[var(--color-pink-light)]" />
+            <Heart className="w-4 h-4 text-[#F4C95D]" />
           </div>
-          <p className="text-2xl font-extrabold text-white">{totals.likes.toLocaleString()}</p>
-          <span className="text-[11px] text-[var(--text-secondary)] mt-1 block">
+          <p className="text-2xl font-extrabold text-[#F5F1E8]">{totals.likes.toLocaleString()}</p>
+          <span className="text-[11px] text-[#B7BEC6] mt-1 block">
             {totals.dislikes} dislikes
           </span>
         </div>
 
-        <div
-          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
-          style={{
-            background: 'var(--glass-surface)',
-            borderColor: 'var(--glass-border)',
-          }}
-        >
-          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
+        <div className="rounded-2xl p-4 border border-[#27313A] bg-[#111A22] transition-all hover:border-[#F4C95D]/30">
+          <div className="flex items-center justify-between text-[#7F8993] mb-2">
             <span className="text-xs uppercase font-semibold">Comments</span>
-            <MessageSquare className="w-4 h-4 text-[var(--color-pink-light)]" />
+            <MessageSquare className="w-4 h-4 text-[#F4C95D]" />
           </div>
-          <p className="text-2xl font-extrabold text-white">{totals.comments.toLocaleString()}</p>
-          <span className="text-[11px] text-[var(--text-muted)] mt-1 block">Active community</span>
+          <p className="text-2xl font-extrabold text-[#F5F1E8]">{totals.comments.toLocaleString()}</p>
+          <span className="text-[11px] text-[#7F8993] mt-1 block">Active community</span>
         </div>
 
-        <div
-          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
-          style={{
-            background: 'var(--glass-surface)',
-            borderColor: 'var(--glass-border)',
-          }}
-        >
-          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
+        <div className="rounded-2xl p-4 border border-[#27313A] bg-[#111A22] transition-all hover:border-[#F4C95D]/30">
+          <div className="flex items-center justify-between text-[#7F8993] mb-2">
             <span className="text-xs uppercase font-semibold">Published Items</span>
-            <Film className="w-4 h-4 text-[var(--color-pink-light)]" />
+            <Film className="w-4 h-4 text-[#F4C95D]" />
           </div>
-          <p className="text-2xl font-extrabold text-white">{totals.totalContent}</p>
-          <span className="text-[11px] text-[var(--text-muted)] mt-1 block">Videos & Audio</span>
+          <p className="text-2xl font-extrabold text-[#F5F1E8]">{totals.totalContent}</p>
+          <span className="text-[11px] text-[#7F8993] mt-1 block">Videos & Audio</span>
         </div>
 
-        <div
-          className="rounded-2xl p-4 border backdrop-blur-md transition-all hover:border-[var(--color-purple)]"
-          style={{
-            background: 'var(--glass-surface)',
-            borderColor: 'var(--glass-border)',
-          }}
-        >
-          <div className="flex items-center justify-between text-[var(--text-muted)] mb-2">
+        <div className="rounded-2xl p-4 border border-[#27313A] bg-[#111A22] transition-all hover:border-[#F4C95D]/30">
+          <div className="flex items-center justify-between text-[#7F8993] mb-2">
             <span className="text-xs uppercase font-semibold">Creator Earnings</span>
-            <DollarSign className="w-4 h-4 text-emerald-400" />
+            <DollarSign className="w-4 h-4 text-[#68B88A]" />
           </div>
-          <p className="text-2xl font-extrabold text-white">${totals.earnings.toFixed(2)}</p>
-          <span className="text-[11px] text-emerald-400 mt-1 block">+5.4% ad & unlocks</span>
+          <p className="text-2xl font-extrabold text-[#F5F1E8]">${totals.earnings.toFixed(2)}</p>
+          <span className="text-[11px] text-[#68B88A] mt-1 block">+5.4% ad & unlocks</span>
         </div>
       </div>
 
       {/* ── Audience Retention Curve (0% - 100%) ── */}
-      <div
-        className="rounded-3xl p-6 mb-8 border backdrop-blur-xl"
-        style={{
-          background: 'var(--glass-surface)',
-          borderColor: 'var(--glass-border)',
-        }}
-      >
+      <div className="rounded-2xl p-6 mb-8 border border-[#27313A] bg-[#111A22]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[var(--color-pink-light)]" />
+            <h2 className="text-base sm:text-lg font-bold text-[#F5F1E8] flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#F4C95D]" />
               Audience Retention Curve
             </h2>
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="text-xs text-[#7F8993]">
               Playback retention profile showing where viewers commonly drop off or stay engaged
             </p>
           </div>
-          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 self-start sm:self-auto">
+          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#68B88A]/10 border border-[#68B88A]/30 text-[#68B88A] self-start sm:self-auto">
             78.4% Average Retention
           </span>
         </div>
@@ -479,55 +406,42 @@ export default function CreatorAnalyticsPage() {
           ].map((step) => (
             <div key={step.mark} className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-white">{step.mark}</span>
-                <span className="font-mono text-[var(--color-pink-light)] font-bold">{step.pct}%</span>
+                <span className="font-semibold text-[#F5F1E8]">{step.mark}</span>
+                <span className="font-mono text-[#F4C95D] font-bold">{step.pct}%</span>
               </div>
-              <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden p-0.5 border border-white/5">
+              <div className="w-full h-3 bg-[#1C252D] rounded-full overflow-hidden p-0.5 border border-[#27313A]">
                 <div
-                  className="h-full rounded-full transition-all duration-700"
-                  style={{
-                    width: `${step.pct}%`,
-                    background: 'var(--gradient-neon)',
-                    boxShadow: 'var(--glow-pink)',
-                  }}
+                  className="h-full bg-[#F4C95D] rounded-full transition-all duration-700"
+                  style={{ width: `${step.pct}%` }}
                 />
               </div>
-              <p className="text-[10px] text-[var(--text-muted)]">{step.desc}</p>
+              <p className="text-[10px] text-[#7F8993]">{step.desc}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Visual Chart: Performance Bars */}
-      <div
-        className="rounded-2xl p-6 mb-8 border backdrop-blur-xl"
-        style={{
-          background: 'var(--glass-surface)',
-          borderColor: 'var(--glass-border)',
-        }}
-      >
+      <div className="rounded-2xl p-6 mb-8 border border-[#27313A] bg-[#111A22]">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-base font-bold text-white">Audience Engagement by Upload</h2>
-            <p className="text-xs text-[var(--text-muted)]">Comparing views against watch duration</p>
+            <h2 className="text-base font-bold text-[#F5F1E8]">Audience Engagement by Upload</h2>
+            <p className="text-xs text-[#7F8993]">Comparing views against watch duration</p>
           </div>
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-1.5">
-              <span
-                className="w-3 h-3 rounded"
-                style={{ background: 'var(--gradient-neon)' }}
-              />
-              <span className="text-[var(--text-secondary)]">Views</span>
+              <span className="w-3 h-3 rounded bg-[#F4C95D]" />
+              <span className="text-[#B7BEC6]">Views</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded bg-purple-500" />
-              <span className="text-[var(--text-secondary)]">Watch Time (mins)</span>
+              <span className="w-3 h-3 rounded bg-[#7E9BB5]" />
+              <span className="text-[#B7BEC6]">Watch Time (mins)</span>
             </div>
           </div>
         </div>
 
         {contentList.length === 0 ? (
-          <div className="py-12 text-center text-xs text-[var(--text-muted)]">
+          <div className="py-12 text-center text-xs text-[#7F8993]">
             No uploaded content yet to chart.
           </div>
         ) : (
@@ -541,25 +455,18 @@ export default function CreatorAnalyticsPage() {
               return (
                 <div key={item.id} className="space-y-1.5">
                   <div className="flex justify-between text-xs">
-                    <span className="font-semibold text-white truncate max-w-xs">{item.title}</span>
-                    <span className="text-[var(--text-muted)]">
+                    <span className="font-semibold text-[#F5F1E8] truncate max-w-xs">{item.title}</span>
+                    <span className="text-[#7F8993]">
                       {item.views} views • {item.watchTimeMinutes} mins
                     </span>
                   </div>
-                  <div
-                    className="h-3 rounded-full overflow-hidden flex gap-1 p-0.5"
-                    style={{ background: 'var(--glass-surface-heavy)' }}
-                  >
+                  <div className="h-3 rounded-full overflow-hidden flex gap-1 p-0.5 bg-[#141D26] border border-[#27313A]">
                     <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${viewPct}%`,
-                        background: 'var(--gradient-neon)',
-                        boxShadow: 'var(--glow-pink)',
-                      }}
+                      className="h-full bg-[#F4C95D] rounded-full transition-all duration-500"
+                      style={{ width: `${viewPct}%` }}
                     />
                     <div
-                      className="h-full bg-purple-500 rounded-full transition-all duration-500"
+                      className="h-full bg-[#7E9BB5] rounded-full transition-all duration-500"
                       style={{ width: `${watchPct}%` }}
                     />
                   </div>
@@ -571,74 +478,38 @@ export default function CreatorAnalyticsPage() {
       </div>
 
       {/* Item-by-Item Telemetry Table */}
-      <div
-        className="rounded-2xl p-6 border backdrop-blur-xl"
-        style={{
-          background: 'var(--glass-surface)',
-          borderColor: 'var(--glass-border)',
-        }}
-      >
+      <div className="rounded-2xl p-6 border border-[#27313A] bg-[#111A22]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <h2 className="text-base font-bold text-white">Itemized Content Telemetry</h2>
+          <h2 className="text-base font-bold text-[#F5F1E8]">Itemized Content Telemetry</h2>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setContentTypeFilter('all')}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer"
-              style={
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                 contentTypeFilter === 'all'
-                  ? {
-                      background: 'var(--gradient-neon)',
-                      color: '#ffffff',
-                      borderColor: 'var(--color-pink)',
-                      boxShadow: 'var(--glow-purple)',
-                    }
-                  : {
-                      background: 'var(--glass-surface-heavy)',
-                      color: 'var(--text-secondary)',
-                      borderColor: 'var(--glass-border)',
-                    }
-              }
+                  ? 'bg-[#F4C95D] text-[#0B0F13] border-[#F4C95D] font-bold shadow-md'
+                  : 'bg-[#151F28] text-[#B7BEC6] border-[#27313A] hover:text-[#F5F1E8]'
+              }`}
             >
               All
             </button>
             <button
               onClick={() => setContentTypeFilter('video')}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer"
-              style={
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                 contentTypeFilter === 'video'
-                  ? {
-                      background: 'var(--gradient-neon)',
-                      color: '#ffffff',
-                      borderColor: 'var(--color-pink)',
-                      boxShadow: 'var(--glow-purple)',
-                    }
-                  : {
-                      background: 'var(--glass-surface-heavy)',
-                      color: 'var(--text-secondary)',
-                      borderColor: 'var(--glass-border)',
-                    }
-              }
+                  ? 'bg-[#F4C95D] text-[#0B0F13] border-[#F4C95D] font-bold shadow-md'
+                  : 'bg-[#151F28] text-[#B7BEC6] border-[#27313A] hover:text-[#F5F1E8]'
+              }`}
             >
               Videos Only
             </button>
             <button
               onClick={() => setContentTypeFilter('audio')}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer"
-              style={
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                 contentTypeFilter === 'audio'
-                  ? {
-                      background: 'var(--gradient-neon)',
-                      color: '#ffffff',
-                      borderColor: 'var(--color-pink)',
-                      boxShadow: 'var(--glow-purple)',
-                    }
-                  : {
-                      background: 'var(--glass-surface-heavy)',
-                      color: 'var(--text-secondary)',
-                      borderColor: 'var(--glass-border)',
-                    }
-              }
+                  ? 'bg-[#F4C95D] text-[#0B0F13] border-[#F4C95D] font-bold shadow-md'
+                  : 'bg-[#151F28] text-[#B7BEC6] border-[#27313A] hover:text-[#F5F1E8]'
+              }`}
             >
               Audio Only
             </button>
@@ -655,11 +526,8 @@ export default function CreatorAnalyticsPage() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-[var(--text-secondary)]">
-              <thead
-                className="border-b text-[var(--text-muted)] uppercase"
-                style={{ borderColor: 'var(--glass-border)' }}
-              >
+            <table className="w-full text-left text-xs text-[#B7BEC6]">
+              <thead className="border-b border-[#27313A] text-[#7F8993] uppercase">
                 <tr>
                   <th className="py-3 px-4">Title</th>
                   <th className="py-3 px-4">Type</th>
@@ -671,55 +539,35 @@ export default function CreatorAnalyticsPage() {
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody
-                className="divide-y"
-                style={{ borderColor: 'var(--glass-border)' }}
-              >
+              <tbody className="divide-y divide-[#27313A]/50">
                 {filteredContent.map((item) => (
-                  <tr key={item.id} className="hover:bg-white/5 transition-colors">
-                    <td className="py-3.5 px-4 font-semibold text-white truncate max-w-[200px]">
+                  <tr key={item.id} className="hover:bg-[#151F28] transition-colors">
+                    <td className="py-3.5 px-4 font-semibold text-[#F5F1E8] truncate max-w-[200px]">
                       {item.title}
                     </td>
                     <td className="py-3.5 px-4 capitalize">
-                      <span
-                        className="px-2 py-0.5 rounded-full border text-[11px]"
-                        style={{
-                          background: 'var(--glass-surface-heavy)',
-                          borderColor: 'var(--glass-border)',
-                        }}
-                      >
+                      <span className="px-2 py-0.5 rounded-full border border-[#27313A] bg-[#151F28] text-[11px] text-[#7E9BB5]">
                         {item.type}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-white font-medium">{item.views}</td>
+                    <td className="py-3.5 px-4 text-[#F5F1E8] font-medium">{item.views}</td>
                     <td className="py-3.5 px-4">{item.watchTimeMinutes} mins</td>
                     <td className="py-3.5 px-4">
-                      <span className="text-emerald-400">{item.likes}</span> /{' '}
-                      <span className="text-red-400">{item.dislikes}</span>
+                      <span className="text-[#68B88A]">{item.likes}</span> /{' '}
+                      <span className="text-[#D96868]">{item.dislikes}</span>
                     </td>
                     <td className="py-3.5 px-4">{item.shares}</td>
-                    <td className="py-3.5 px-4 text-emerald-400 font-medium">${item.earnings.toFixed(2)}</td>
+                    <td className="py-3.5 px-4 text-[#68B88A] font-medium">${item.earnings.toFixed(2)}</td>
                     <td className="py-3.5 px-4 text-right">
                       {item.type === 'video' && (
                         item.boosted ? (
-                          <span
-                            className="px-2.5 py-1 rounded-lg font-semibold text-[11px] border"
-                            style={{
-                              background: 'var(--neon-purple-glow)',
-                              borderColor: 'var(--neon-purple-border)',
-                              color: 'var(--color-pink-light)',
-                            }}
-                          >
+                          <span className="px-2.5 py-1 rounded-lg font-semibold text-[11px] border border-[#F4C95D]/40 bg-[#F4C95D]/15 text-[#F4C95D]">
                             Boosted
                           </span>
                         ) : (
                           <button
                             onClick={() => handleBoostVideo(item.id)}
-                            className="px-2.5 py-1 rounded-lg text-white font-semibold text-[11px] transition-all cursor-pointer shadow-md"
-                            style={{
-                              background: 'var(--gradient-neon)',
-                              boxShadow: 'var(--glow-purple)',
-                            }}
+                            className="px-2.5 py-1 rounded-lg bg-[#F4C95D] hover:bg-[#FFD978] text-[#0B0F13] font-semibold text-[11px] transition-all cursor-pointer shadow-md"
                           >
                             Boost Video
                           </button>

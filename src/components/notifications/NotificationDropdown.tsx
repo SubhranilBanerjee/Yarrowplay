@@ -195,32 +195,32 @@ export function NotificationDropdown() {
     switch (action) {
       case 'like':
         return (
-          <div className="w-5 h-5 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center border border-pink-500/30">
-            <Heart className="w-3 h-3 fill-pink-500 text-pink-400" />
+          <div className="w-5 h-5 rounded-full bg-[#D96868]/20 text-[#D96868] flex items-center justify-center border border-[#D96868]/30">
+            <Heart className="w-3 h-3 fill-[#D96868] text-[#D96868]" />
           </div>
         );
       case 'dislike':
         return (
-          <div className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-500/30">
-            <ThumbsDown className="w-3 h-3 text-cyan-400" />
+          <div className="w-5 h-5 rounded-full bg-[#7E9BB5]/20 text-[#7E9BB5] flex items-center justify-center border border-[#7E9BB5]/30">
+            <ThumbsDown className="w-3 h-3 text-[#7E9BB5]" />
           </div>
         );
       case 'comment':
         return (
-          <div className="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center border border-purple-500/30">
-            <MessageSquare className="w-3 h-3 fill-purple-400/30 text-purple-400" />
+          <div className="w-5 h-5 rounded-full bg-[#7E9BB5]/20 text-[#7E9BB5] flex items-center justify-center border border-[#7E9BB5]/30">
+            <MessageSquare className="w-3 h-3 fill-[#7E9BB5]/30 text-[#7E9BB5]" />
           </div>
         );
       case 'favorite':
         return (
-          <div className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
-            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+          <div className="w-5 h-5 rounded-full bg-[#F4C95D]/20 text-[#F4C95D] flex items-center justify-center border border-[#F4C95D]/30">
+            <Star className="w-3 h-3 fill-[#F4C95D] text-[#F4C95D]" />
           </div>
         );
       default:
         return (
-          <div className="w-5 h-5 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center border border-violet-500/30">
-            <Bell className="w-3 h-3 text-violet-400" />
+          <div className="w-5 h-5 rounded-full bg-[#7E9BB5]/20 text-[#7E9BB5] flex items-center justify-center border border-[#7E9BB5]/30">
+            <Bell className="w-3 h-3 text-[#7E9BB5]" />
           </div>
         );
     }
@@ -234,35 +234,35 @@ export function NotificationDropdown() {
       case 'like':
         return (
           <span>
-            <strong className="text-white font-medium">{actorName}</strong> liked your {typeLabel}{' '}
-            {n.content_title && <span className="text-[var(--color-pink)]">"{n.content_title}"</span>}
+            <strong className="text-[#F5F1E8] font-medium">{actorName}</strong> liked your {typeLabel}{' '}
+            {n.content_title && <span className="text-[#F4C95D]">"{n.content_title}"</span>}
           </span>
         );
       case 'dislike':
         return (
           <span>
-            <strong className="text-white font-medium">{actorName}</strong> gave feedback on your {typeLabel}{' '}
-            {n.content_title && <span className="text-cyan-400">"{n.content_title}"</span>}
+            <strong className="text-[#F5F1E8] font-medium">{actorName}</strong> gave feedback on your {typeLabel}{' '}
+            {n.content_title && <span className="text-[#7E9BB5]">"{n.content_title}"</span>}
           </span>
         );
       case 'comment':
         return (
           <span>
-            <strong className="text-white font-medium">{actorName}</strong> commented on your {typeLabel}{' '}
-            {n.content_title && <span className="text-[var(--color-pink)]">"{n.content_title}"</span>}
+            <strong className="text-[#F5F1E8] font-medium">{actorName}</strong> commented on your {typeLabel}{' '}
+            {n.content_title && <span className="text-[#F4C95D]">"{n.content_title}"</span>}
           </span>
         );
       case 'favorite':
         return (
           <span>
-            <strong className="text-white font-medium">{actorName}</strong> favorited your {typeLabel}{' '}
-            {n.content_title && <span className="text-amber-400">"{n.content_title}"</span>}
+            <strong className="text-[#F5F1E8] font-medium">{actorName}</strong> favorited your {typeLabel}{' '}
+            {n.content_title && <span className="text-[#F4C95D]">"{n.content_title}"</span>}
           </span>
         );
       default:
         return (
           <span>
-            <strong className="text-white font-medium">{actorName}</strong> interacted with your {typeLabel}
+            <strong className="text-[#F5F1E8] font-medium">{actorName}</strong> interacted with your {typeLabel}
           </span>
         );
     }
@@ -276,15 +276,15 @@ export function NotificationDropdown() {
       <button
         aria-label="Notifications"
         onClick={handleToggle}
-        className={`relative w-9 h-9 rounded-full bg-[var(--glass-surface-subtle)] border transition-all flex items-center justify-center ${
+        className={`relative w-9 h-9 rounded-xl border transition-all flex items-center justify-center cursor-pointer ${
           isOpen
-            ? 'border-[#8B5CF6] text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]'
-            : 'border-[#2E2A45] text-[#9CA3AF] hover:text-[#F9FAFB] hover:border-[#8B5CF6] hover:shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+            ? 'border-[#F4C95D] text-[#F4C95D] bg-[#141D26]'
+            : 'border-[#27313A] text-[#B7BEC6] hover:text-[#F5F1E8] hover:border-[#F4C95D]/40 bg-[#111A22]'
         }`}
       >
         <Bell className="w-4 h-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-gradient-to-r from-[#EC4899] to-[#8B5CF6] text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(236,72,153,0.8)] animate-pulse">
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-[#F4C95D] text-[#0B0F13] text-[10px] font-black rounded-full flex items-center justify-center shadow">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -292,14 +292,14 @@ export function NotificationDropdown() {
 
       {/* Glassmorphic Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-2xl bg-[#161522] border border-[#2E2A45] shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-2xl bg-[#101820] border border-[#27313A] shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
           {/* Header */}
-          <div className="px-4 py-3 border-b border-[#2E2A45] flex items-center justify-between bg-[#161522]">
+          <div className="px-4 py-3 border-b border-[#27313A] flex items-center justify-between bg-[#151F28]">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-[#F9FAFB] flex items-center gap-2">
+              <h3 className="text-sm font-bold text-[#F5F1E8] flex items-center gap-2">
                 Notifications
                 {unreadCount > 0 && (
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#8B5CF6]/20 text-[#A855F7] border border-[#8B5CF6]/40">
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#F4C95D]/20 text-[#F4C95D] border border-[#F4C95D]/40">
                     {unreadCount} new
                   </span>
                 )}
@@ -309,7 +309,7 @@ export function NotificationDropdown() {
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-xs text-[#EC4899] hover:text-white flex items-center gap-1.5 transition-colors font-medium cursor-pointer"
+                className="text-xs text-[#F4C95D] hover:underline flex items-center gap-1.5 transition-colors font-medium cursor-pointer"
                 title="Mark all as read"
               >
                 <CheckCheck className="w-3.5 h-3.5" />
@@ -319,28 +319,28 @@ export function NotificationDropdown() {
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex items-center px-4 py-2 border-b border-[#2E2A45]/60 gap-2 bg-[#0F0E17]/60">
+          <div className="flex items-center px-4 py-2 border-b border-[#1C252D] gap-2 bg-[#0B1117]">
             <button
               onClick={() => setFilter('all')}
-              className={`text-xs px-3 py-1 rounded-full font-medium transition-all ${
+              className={`text-xs px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
                 filter === 'all'
-                  ? 'bg-[#7C3AED] text-white shadow-[0_0_10px_rgba(124,58,237,0.4)]'
-                  : 'text-[#9CA3AF] hover:text-[#F9FAFB] hover:bg-[#1E1B2E]'
+                  ? 'bg-[#F4C95D] text-[#0B0F13] font-bold shadow'
+                  : 'text-[#B7BEC6] hover:text-[#F5F1E8] hover:bg-[#151F28]'
               }`}
             >
               All
             </button>
             <button
               onClick={() => setFilter('unread')}
-              className={`text-xs px-3 py-1 rounded-full font-medium transition-all flex items-center gap-1.5 ${
+              className={`text-xs px-3 py-1 rounded-full font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                 filter === 'unread'
-                  ? 'bg-[#7C3AED] text-white shadow-[0_0_10px_rgba(124,58,237,0.4)]'
-                  : 'text-[#9CA3AF] hover:text-[#F9FAFB] hover:bg-[#1E1B2E]'
+                  ? 'bg-[#F4C95D] text-[#0B0F13] font-bold shadow'
+                  : 'text-[#B7BEC6] hover:text-[#F5F1E8] hover:bg-[#151F28]'
               }`}
             >
               <span>Unread</span>
               {unreadCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-[#EC4899]/40 text-[10px] flex items-center justify-center">
+                <span className="w-4 h-4 rounded-full bg-[#0B0F13] text-[#F4C95D] text-[10px] font-bold flex items-center justify-center">
                   {unreadCount}
                 </span>
               )}
@@ -348,14 +348,14 @@ export function NotificationDropdown() {
           </div>
 
           {/* Notifications List */}
-          <div className="max-h-[380px] overflow-y-auto divide-y divide-[var(--glass-border-subtle)]">
+          <div className="max-h-[380px] overflow-y-auto divide-y divide-[#1C252D]">
             {filteredNotifications.length === 0 ? (
               <div className="py-12 px-4 text-center">
-                <div className="w-12 h-12 mx-auto rounded-full bg-[var(--glass-surface-subtle)] border border-[var(--glass-border)] flex items-center justify-center text-[var(--text-muted)] mb-3">
+                <div className="w-12 h-12 mx-auto rounded-full bg-[#151F28] border border-[#27313A] flex items-center justify-center text-[#7F8993] mb-3">
                   <Bell className="w-6 h-6" />
                 </div>
-                <p className="text-sm font-semibold text-white">No notifications</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
+                <p className="text-sm font-semibold text-[#F5F1E8]">No notifications</p>
+                <p className="text-xs text-[#7F8993] mt-1">
                   {filter === 'unread'
                     ? "You have read all your notifications!"
                     : "You'll be notified when someone likes, comments, or interacts with your content."}
@@ -368,13 +368,13 @@ export function NotificationDropdown() {
                   onClick={() => handleNotificationClick(notification)}
                   className={`p-3.5 flex items-start gap-3 transition-colors cursor-pointer group ${
                     notification.is_read
-                      ? 'hover:bg-[var(--glass-surface-subtle)]'
-                      : 'bg-[var(--color-purple-bright)]/10 hover:bg-[var(--color-purple-bright)]/15 border-l-2 border-l-[var(--color-magenta)]'
+                      ? 'hover:bg-[#151F28]'
+                      : 'bg-[#141D26] hover:bg-[#151F28] border-l-2 border-l-[#F4C95D]'
                   }`}
                 >
                   {/* Actor Avatar with Action Badge */}
                   <div className="relative shrink-0 mt-0.5">
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-[var(--color-purple-bright)]/20 border border-[var(--glass-border)] flex items-center justify-center text-xs font-bold text-[var(--color-pink)]">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-[#151F28] border border-[#27313A] flex items-center justify-center text-xs font-bold text-[#F4C95D]">
                       {notification.actor?.avatar_url ? (
                         <Image
                           src={notification.actor.avatar_url}
@@ -396,19 +396,19 @@ export function NotificationDropdown() {
 
                   {/* Body Text */}
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                    <div className="text-xs text-[#B7BEC6] leading-relaxed">
                       {getActionText(notification)}
                     </div>
 
                     {/* Comment preview if applicable */}
                     {notification.message && (
-                      <p className="mt-1 text-xs text-[var(--text-muted)] bg-[var(--bg-primary)]/60 px-2.5 py-1.5 rounded-lg border border-[var(--glass-border-subtle)] italic line-clamp-2">
+                      <p className="mt-1 text-xs text-[#7F8993] bg-[#0B1117] px-2.5 py-1.5 rounded-lg border border-[#1C252D] italic line-clamp-2">
                         "{notification.message}"
                       </p>
                     )}
 
                     <div className="flex items-center gap-2 mt-1.5">
-                      <span className="text-[11px] text-[var(--text-muted)]">
+                      <span className="text-[11px] text-[#7F8993]">
                         {formatRelativeTime(notification.created_at)}
                       </span>
                     </div>
@@ -420,7 +420,7 @@ export function NotificationDropdown() {
                       <button
                         onClick={(e) => markAsRead(notification.id, e)}
                         title="Mark as read"
-                        className="p-1 rounded-md text-[var(--text-muted)] hover:text-white hover:bg-[var(--glass-surface-elevated)]"
+                        className="p-1 rounded-md text-[#7F8993] hover:text-[#F5F1E8] hover:bg-[#151F28]"
                       >
                         <Check className="w-3.5 h-3.5" />
                       </button>
@@ -428,14 +428,14 @@ export function NotificationDropdown() {
                     <button
                       onClick={(e) => deleteNotification(notification.id, e)}
                       title="Delete notification"
-                      className="p-1 rounded-md text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/10"
+                      className="p-1 rounded-md text-[#7F8993] hover:text-[#D96868] hover:bg-[#D96868]/10"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
 
                   {!notification.is_read && (
-                    <div className="w-2 h-2 rounded-full bg-[#EC4899] shadow-[0_0_6px_rgba(236,72,153,0.8)] shrink-0 self-center group-hover:hidden" />
+                    <div className="w-2 h-2 rounded-full bg-[#F4C95D] shrink-0 self-center group-hover:hidden" />
                   )}
                 </div>
               ))
@@ -443,11 +443,11 @@ export function NotificationDropdown() {
           </div>
 
           {/* Footer */}
-          <div className="p-2.5 border-t border-[#2E2A45] bg-[#161522] text-center">
+          <div className="p-2.5 border-t border-[#27313A] bg-[#151F28] text-center">
             <Link
               href="/notifications"
               onClick={() => setIsOpen(false)}
-              className="text-xs font-semibold text-[#8B5CF6] hover:text-[#EC4899] transition-colors flex items-center justify-center gap-1.5 py-1"
+              className="text-xs font-semibold text-[#F4C95D] hover:underline transition-colors flex items-center justify-center gap-1.5 py-1"
             >
               <span>View all notifications</span>
               <ExternalLink className="w-3.5 h-3.5" />

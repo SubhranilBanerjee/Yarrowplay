@@ -70,9 +70,9 @@ function HeroCard({ video }: { video: FeedVideo }) {
   return (
     <Link
       href={`/videos/${video.id}`}
-      className="block relative w-full rounded-3xl overflow-hidden group shadow-2xl transition-all border border-[#2E2A45] hover:border-[#8B5CF6]/80"
+      className="block relative w-full rounded-2xl overflow-hidden group shadow-2xl transition-all border border-[#27313A] hover:border-[#F4C95D]/40"
     >
-      <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-[#1E1B2E]">
+      <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-[#111A22]">
         {video.thumbnail_url ? (
           <Image
             src={video.thumbnail_url}
@@ -82,23 +82,23 @@ function HeroCard({ video }: { video: FeedVideo }) {
             className="object-cover group-hover:scale-105 transition-transform duration-700"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#161522] to-[#1E1B2E]">
-            <Film className="w-16 h-16 text-[#8B5CF6]" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#111A22] to-[#151F28]">
+            <Film className="w-16 h-16 text-[#F4C95D]" />
           </div>
         )}
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0F0E17] via-[#0F0E17]/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#070B0F] via-[#070B0F]/40 to-transparent" />
 
         {/* Top Badges */}
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
-          <span className="flex items-center gap-1.5 bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] text-white text-[10px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-full shadow-lg shadow-purple-950/50">
-            <Zap className="w-3 h-3" />
+          <span className="flex items-center gap-1.5 bg-[#F4C95D] text-[#0B0F13] text-[10px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-md shadow-md">
+            <Zap className="w-3 h-3 fill-current" />
             {video.series_id ? 'Series Episode' : 'Featured Premiere'}
           </span>
           {video.genre && (
-            <span className="flex items-center gap-1.5 bg-[#0F0E17]/80 backdrop-blur-md border border-white/10 text-white text-[10px] font-semibold px-3 py-1 rounded-full">
-              <BarChart2 className="w-3 h-3 text-[#EC4899]" />
+            <span className="flex items-center gap-1.5 bg-[#070B0F]/85 backdrop-blur-md border border-[#27313A] text-[#F5F1E8] text-[10px] font-semibold px-3 py-1 rounded-md">
+              <BarChart2 className="w-3 h-3 text-[#7E9BB5]" />
               {video.genre}
             </span>
           )}
@@ -106,8 +106,8 @@ function HeroCard({ video }: { video: FeedVideo }) {
 
         {/* Center Play Button */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#8B5CF6] hover:bg-[#7C3AED] flex items-center justify-center shadow-2xl shadow-purple-950/80 group-hover:scale-110 transition-transform duration-300">
-            <Play className="w-7 h-7 text-white fill-white ml-1" />
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#F4C95D] hover:bg-[#FFD978] flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
+            <Play className="w-7 h-7 text-[#0B0F13] fill-[#0B0F13] ml-1" />
           </div>
         </div>
 
@@ -115,39 +115,39 @@ function HeroCard({ video }: { video: FeedVideo }) {
         <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
           <div className="flex items-center gap-2 mb-2">
             {video.category && (
-              <span className="bg-[#8B5CF6]/20 border border-[#8B5CF6]/40 text-[#EC4899] text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full">
+              <span className="bg-[#151F28] border border-[#27313A] text-[#F4C95D] text-[10px] font-bold uppercase px-2.5 py-0.5 rounded">
                 {video.category}
               </span>
             )}
             {video.tags?.slice(0, 1).map((tag) => (
-              <span key={tag} className="text-gray-400 text-[10px] font-semibold uppercase tracking-wider">
+              <span key={tag} className="text-[#7F8993] text-[10px] font-semibold uppercase tracking-wider">
                 {tag}
               </span>
             ))}
           </div>
 
-          <h2 className="text-white font-black text-xl sm:text-3xl leading-tight line-clamp-2 drop-shadow-lg">
+          <h2 className="text-[#F5F1E8] font-black text-xl sm:text-3xl leading-tight line-clamp-2 drop-shadow-lg">
             {video.title}
           </h2>
-          <p className="text-gray-300 text-xs sm:text-sm mt-1.5 line-clamp-1 max-w-2xl font-normal">
+          <p className="text-[#B7BEC6] text-xs sm:text-sm mt-1.5 line-clamp-1 max-w-2xl font-normal">
             {video.description}
           </p>
 
           <div className="flex items-center gap-3 mt-3 pt-3 border-t border-white/10">
-            <div className="relative w-7 h-7 rounded-full overflow-hidden bg-[#8B5CF6]/20 border border-white/10 shrink-0 flex items-center justify-center">
+            <div className="relative w-7 h-7 rounded-full overflow-hidden bg-[#151F28] border border-[#27313A] shrink-0 flex items-center justify-center">
               {video.creator?.avatar_url ? (
                 <Image src={video.creator.avatar_url} alt="" fill className="object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-[#EC4899]">
+                <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-[#F4C95D]">
                   {video.creator?.display_name?.[0] || 'C'}
                 </div>
               )}
             </div>
-            <span className="text-gray-300 text-xs font-medium">
+            <span className="text-[#B7BEC6] text-xs font-medium">
               @{video.creator?.username || video.creator?.display_name || 'creator'}
             </span>
             {video.duration_seconds > 0 && (
-              <span className="ml-auto flex items-center gap-1 text-[11px] text-gray-400">
+              <span className="ml-auto flex items-center gap-1 text-[11px] text-[#7F8993]">
                 <Clock className="w-3.5 h-3.5" />
                 {formatDuration(video.duration_seconds)}
               </span>
@@ -164,33 +164,33 @@ function AudioStrip({ track, onPlay }: { track: FeedAudio; onPlay: () => void })
   return (
     <button
       onClick={onPlay}
-      className="w-full flex items-center gap-3.5 bg-[#161522]/80 hover:bg-[#1E1B2E] border border-[#2E2A45] hover:border-[#8B5CF6]/60 rounded-2xl px-4 py-3 transition-all group text-left cursor-pointer shadow-sm hover:shadow-lg hover:shadow-purple-950/20"
+      className="w-full flex items-center gap-3.5 bg-[#111A22] hover:bg-[#151F28] border border-[#1C252D] hover:border-[#F4C95D]/30 rounded-xl px-4 py-3 transition-all group text-left cursor-pointer shadow-sm"
     >
-      <div className="relative w-11 h-11 rounded-xl overflow-hidden bg-[#1E1B2E] shrink-0 border border-white/10">
+      <div className="relative w-11 h-11 rounded-lg overflow-hidden bg-[#151F28] shrink-0 border border-[#27313A]">
         {track.cover_url ? (
           <Image src={track.cover_url} alt={track.title} fill className="object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-[#8B5CF6]/20">
-            <Music className="w-5 h-5 text-[#EC4899]" />
+          <div className="w-full h-full flex items-center justify-center bg-[#151F28]">
+            <Music className="w-5 h-5 text-[#F4C95D]" />
           </div>
         )}
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-white text-xs sm:text-sm font-semibold truncate group-hover:text-[#A78BFA] transition-colors">
+        <p className="text-[#F5F1E8] text-xs sm:text-sm font-semibold truncate group-hover:text-[#F4C95D] transition-colors">
           {track.title}
         </p>
-        <p className="text-gray-400 text-[11px] truncate mt-0.5">
+        <p className="text-[#7F8993] text-[11px] truncate mt-0.5">
           {track.artist_name || track.creator?.display_name} · {track.genre || 'Audio'}
         </p>
       </div>
 
       <div className="flex items-center gap-2.5 shrink-0">
-        <BarChart2 className="w-4 h-4 text-[#EC4899]" />
+        <BarChart2 className="w-4 h-4 text-[#7E9BB5]" />
         {track.duration_seconds > 0 && (
-          <span className="text-gray-400 text-[11px] font-medium">{formatDuration(track.duration_seconds)}</span>
+          <span className="text-[#7F8993] text-[11px] font-medium">{formatDuration(track.duration_seconds)}</span>
         )}
-        <Headphones className="w-4 h-4 text-gray-400" />
+        <Headphones className="w-4 h-4 text-[#7F8993]" />
       </div>
     </button>
   );
@@ -439,7 +439,7 @@ export default function HomePage() {
   const showBlogs = activeFilter === 'all' || activeFilter === 'blogs';
 
   return (
-    <div className="min-h-screen bg-transparent text-[#F9FAFB] pb-24">
+    <div className="min-h-screen bg-transparent text-[#F5F1E8] pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
         {/* ── Filter Navigation Bar ── */}
         <div className="flex items-center gap-2.5 pb-6 overflow-x-auto scrollbar-none">
@@ -449,8 +449,8 @@ export default function HomePage() {
               onClick={() => setActiveFilter(key)}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all shrink-0 cursor-pointer ${
                 activeFilter === key
-                  ? 'bg-[#8B5CF6] text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]'
-                  : 'bg-[#161522] text-[#9CA3AF] hover:text-[#F9FAFB] hover:bg-[#1E1B2E] border border-[#2E2A45]'
+                  ? 'bg-[#F4C95D] text-[#0B0F13] shadow-sm'
+                  : 'bg-[#111A22] text-[#B7BEC6] hover:text-[#F5F1E8] hover:bg-[#151F28] border border-[#27313A]'
               }`}
             >
               {Icon && <Icon className="w-3.5 h-3.5" />}
@@ -461,18 +461,18 @@ export default function HomePage() {
           <button
             onClick={fetchFeed}
             aria-label="Refresh Feed"
-            className="ml-auto p-2.5 rounded-full bg-[#161522] border border-[#2E2A45] text-[#9CA3AF] hover:text-white hover:border-[#8B5CF6] transition-all shrink-0 cursor-pointer"
+            className="ml-auto p-2.5 rounded-full bg-[#111A22] border border-[#27313A] text-[#B7BEC6] hover:text-[#F5F1E8] hover:border-[#F4C95D] transition-all shrink-0 cursor-pointer"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#EC4899]' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#F4C95D]' : ''}`} />
           </button>
         </div>
 
         {/* ── Loading Skeleton ── */}
         {isLoading && (
           <div className="space-y-6 animate-pulse">
-            <div className="w-full aspect-[16/9] sm:aspect-[21/9] bg-[#1E1B2E] rounded-3xl" />
-            <div className="h-14 bg-[#1E1B2E] rounded-2xl" />
-            <div className="h-44 bg-[#1E1B2E] rounded-2xl" />
+            <div className="w-full aspect-[16/9] sm:aspect-[21/9] bg-[#111A22] border border-[#1C252D] rounded-2xl" />
+            <div className="h-14 bg-[#111A22] border border-[#1C252D] rounded-xl" />
+            <div className="h-44 bg-[#111A22] border border-[#1C252D] rounded-xl" />
           </div>
         )}
 
@@ -566,16 +566,16 @@ export default function HomePage() {
             {/* 9. Dedicated Album Collections */}
             {showAudio &&
               albumGroups.map((album) => (
-                <div key={album.id} className="bg-[#1E1B2E] border border-[#2E2A45] rounded-2xl p-5 shadow-lg">
+                <div key={album.id} className="bg-[#111A22] border border-[#27313A] rounded-xl p-5 shadow-lg">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <Disc className="w-5 h-5 text-[#EC4899]" />
-                      <h2 className="text-white font-bold text-base sm:text-lg">{album.title}</h2>
-                      <span className="text-[#EC4899] text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-[#EC4899]/15 border border-[#EC4899]/30">
+                      <Disc className="w-5 h-5 text-[#F4C95D]" />
+                      <h2 className="text-[#F5F1E8] font-bold text-base sm:text-lg">{album.title}</h2>
+                      <span className="text-[#F4C95D] text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-md bg-[#F4C95D]/12 border border-[#F4C95D]/25">
                         ALBUM · {album.tracks.length} TRACKS
                       </span>
                     </div>
-                    <p className="text-xs text-gray-400 font-medium">
+                    <p className="text-xs text-[#7F8993] font-medium">
                       {album.artist_name || album.creator?.display_name}
                     </p>
                   </div>

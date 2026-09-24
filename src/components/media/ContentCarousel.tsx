@@ -62,12 +62,12 @@ export function ContentCarousel({
       {/* Header with Title and Nav Controls */}
       <div className="flex items-center justify-between mb-3.5 px-1">
         <div className="flex items-center gap-2">
-          <Icon className="w-4 h-4 text-[var(--color-pink)] shrink-0" />
-          <h2 className="text-white font-bold text-base sm:text-lg tracking-tight">
+          <Icon className="w-4 h-4 text-[#F4C95D] shrink-0" />
+          <h2 className="text-[#F5F1E8] font-bold text-base sm:text-lg tracking-tight">
             {title}
           </h2>
           {badge && (
-            <span className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-[var(--glass-surface-subtle)] border border-[var(--glass-border-subtle)]">
+            <span className="text-[#7F8993] text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-[#151F28] border border-[#27313A]">
               {badge}
             </span>
           )}
@@ -77,7 +77,7 @@ export function ContentCarousel({
           {href && (
             <Link
               href={href}
-              className="text-xs font-semibold text-[var(--color-pink)] hover:text-white transition-colors mr-2 flex items-center gap-1"
+              className="text-xs font-semibold text-[#F4C95D] hover:underline transition-colors mr-2 flex items-center gap-1"
             >
               <span>View all</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -90,10 +90,10 @@ export function ContentCarousel({
               onClick={() => scroll('left')}
               disabled={!canScrollLeft}
               aria-label="Scroll left"
-              className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all ${
+              className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all cursor-pointer ${
                 canScrollLeft
-                  ? 'bg-[var(--glass-surface)] border-[var(--glass-border)] text-white hover:border-[var(--color-magenta)] hover:bg-[var(--glass-surface-hover)] shadow-md'
-                  : 'bg-[var(--glass-surface-subtle)] border-[var(--glass-border-subtle)] text-[var(--text-dim)] opacity-40 cursor-not-allowed'
+                  ? 'bg-[#151F28] border-[#27313A] text-[#F5F1E8] hover:border-[#F4C95D] hover:bg-[#111A22] shadow'
+                  : 'bg-[#111A22] border-[#1C252D] text-[#59636D] opacity-40 cursor-not-allowed'
               }`}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -102,10 +102,10 @@ export function ContentCarousel({
               onClick={() => scroll('right')}
               disabled={!canScrollRight}
               aria-label="Scroll right"
-              className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all ${
+              className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all cursor-pointer ${
                 canScrollRight
-                  ? 'bg-[var(--glass-surface)] border-[var(--glass-border)] text-white hover:border-[var(--color-magenta)] hover:bg-[var(--glass-surface-hover)] shadow-md'
-                  : 'bg-[var(--glass-surface-subtle)] border-[var(--glass-border-subtle)] text-[var(--text-dim)] opacity-40 cursor-not-allowed'
+                  ? 'bg-[#151F28] border-[#27313A] text-[#F5F1E8] hover:border-[#F4C95D] hover:bg-[#111A22] shadow'
+                  : 'bg-[#111A22] border-[#1C252D] text-[#59636D] opacity-40 cursor-not-allowed'
               }`}
             >
               <ChevronRight className="w-4 h-4" />

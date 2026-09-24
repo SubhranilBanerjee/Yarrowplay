@@ -140,27 +140,25 @@ function RegisterForm() {
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center p-4">
-      <div className="w-full max-w-md theme-form-card p-6 sm:p-8 relative">
+      <div className="w-full max-w-md bg-[#101820] border border-[#27313A] rounded-2xl p-6 sm:p-8 relative shadow-2xl">
         {/* Header Branding */}
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="relative w-12 h-12 mb-2 filter drop-shadow-[0_0_12px_rgba(224,0,255,0.4)]">
-            <Image
-              src="/logo.png"
-              alt="Yarrowplay"
-              fill
-              sizes="48px"
-              className="object-contain"
-              priority
-            />
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#151F28] to-[#0B1117] border border-[#27313A] flex items-center justify-center shadow-md">
+              <svg className="w-5 h-5 text-[#F4C95D]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2v20M8 6l8 4M8 18l8-4M5 10l14 4" />
+                <circle cx="12" cy="12" r="3" fill="#F4C95D" fillOpacity="0.2" />
+              </svg>
+            </div>
+            <div className="flex items-center gap-1.5 text-lg font-black tracking-wider">
+              <span className="text-[#F5F1E8]">LIGHTHOUSE</span>
+              <span className="text-[#F4C95D]">REELS</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1 text-lg font-black tracking-tight text-white mb-3">
-            <span>YARROW</span>
-            <span className="theme-gradient-heading font-black">PLAY</span>
-          </div>
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-[#F5F1E8]">
             {role === 'advertiser' ? 'ADVERTISER REGISTRATION' : 'CREATE ACCOUNT'}
           </h1>
-          <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1 font-normal">
+          <p className="text-xs sm:text-sm text-[#B7BEC6] mt-1 font-normal">
             {role === 'advertiser'
               ? 'Register your company and launch sponsored campaigns'
               : 'Select your account type to get started'}
@@ -169,24 +167,24 @@ function RegisterForm() {
 
         {/* Role Selection: Advertiser tab is hidden entirely from standard signup! */}
         {role === 'advertiser' ? (
-          <div className="mb-6 p-3 rounded-2xl bg-[var(--color-purple-bright)]/15 border border-[var(--glass-border)] flex items-center justify-between text-xs text-[var(--text-secondary)]">
-            <div className="flex items-center gap-2 text-[var(--color-pink)] font-semibold">
+          <div className="mb-6 p-3 rounded-2xl bg-[#141D26] border border-[#27313A] flex items-center justify-between text-xs text-[#B7BEC6]">
+            <div className="flex items-center gap-2 text-[#F4C95D] font-semibold">
               <Megaphone className="w-4 h-4" />
               <span>Partner / Advertiser Account</span>
             </div>
-            <Link href="/register" className="text-xs text-[var(--text-muted)] hover:text-white underline">
+            <Link href="/register" className="text-xs text-[#7F8993] hover:text-[#F5F1E8] underline">
               Switch to Viewer
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2 bg-[var(--bg-secondary)] p-1.5 rounded-2xl mb-6 border border-[var(--glass-border)]">
+          <div className="grid grid-cols-2 gap-2 bg-[#141D26] p-1.5 rounded-xl mb-6 border border-[#27313A]">
             <button
               type="button"
               onClick={() => setRole('viewer')}
-              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-xs sm:text-sm font-bold transition-all ${
                 role === 'viewer'
-                  ? 'theme-active-pill'
-                  : 'text-[var(--text-secondary)] hover:text-white'
+                  ? 'bg-[#F4C95D] text-[#0B0F13] shadow'
+                  : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
               }`}
             >
               <User className="w-4 h-4" />
@@ -196,10 +194,10 @@ function RegisterForm() {
             <button
               type="button"
               onClick={() => setRole('creator')}
-              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-xs sm:text-sm font-bold transition-all ${
                 role === 'creator'
-                  ? 'theme-active-pill'
-                  : 'text-[var(--text-secondary)] hover:text-white'
+                  ? 'bg-[#F4C95D] text-[#0B0F13] shadow'
+                  : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
               }`}
             >
               <Video className="w-4 h-4" />
@@ -210,14 +208,14 @@ function RegisterForm() {
 
         {/* Error / Success Feedback */}
         {errorMsg && (
-          <div className="mb-4 p-3.5 rounded-2xl bg-[var(--status-error)]/15 border border-[var(--status-error)]/30 text-[var(--status-error)] text-xs flex items-center gap-2">
+          <div className="mb-4 p-3.5 rounded-xl bg-[#D96868]/15 border border-[#D96868]/30 text-[#D96868] text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {successMsg && (
-          <div className="mb-4 p-3.5 rounded-2xl bg-[var(--status-success)]/15 border border-[var(--status-success)]/30 text-[var(--status-success)] text-xs flex items-center gap-2">
+          <div className="mb-4 p-3.5 rounded-xl bg-[#68B88A]/15 border border-[#68B88A]/30 text-[#68B88A] text-xs flex items-center gap-2">
             <CheckCircle className="w-4 h-4 shrink-0" />
             <span>{successMsg}</span>
           </div>
@@ -227,35 +225,35 @@ function RegisterForm() {
         <form onSubmit={handleRegister} className="space-y-4">
           {role === 'advertiser' ? (
             <div>
-              <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
+              <label className="block text-xs uppercase tracking-wider font-semibold text-[#B7BEC6] mb-1.5">
                 COMPANY NAME
               </label>
               <div className="relative">
-                <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7F8993]" />
                 <input
                   type="text"
                   required
                   placeholder="e.g. Acme Corp"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl pl-10 pr-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-magenta)] focus:ring-2 focus:ring-[var(--color-purple-bright)]/30 transition-all"
+                  className="w-full bg-[#141D26] text-[#F5F1E8] placeholder-[#7F8993] text-sm rounded-xl pl-10 pr-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D] transition-all"
                 />
               </div>
             </div>
           ) : (
             <div>
-              <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
+              <label className="block text-xs uppercase tracking-wider font-semibold text-[#B7BEC6] mb-1.5">
                 DISPLAY NAME
               </label>
               <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7F8993]" />
                 <input
                   type="text"
                   required
                   placeholder="e.g. Alex Vance"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl pl-10 pr-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-magenta)] focus:ring-2 focus:ring-[var(--color-purple-bright)]/30 transition-all"
+                  className="w-full bg-[#141D26] text-[#F5F1E8] placeholder-[#7F8993] text-sm rounded-xl pl-10 pr-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D] transition-all"
                 />
               </div>
             </div>
@@ -264,62 +262,62 @@ function RegisterForm() {
           {/* Creator Sub-Role Dropdown */}
           {role === 'creator' && (
             <div>
-              <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
+              <label className="block text-xs uppercase tracking-wider font-semibold text-[#B7BEC6] mb-1.5">
                 CREATOR TYPE
               </label>
               <div className="relative">
                 <select
                   value={subRole}
                   onChange={(e) => setSubRole(e.target.value as CreatorSubRole)}
-                  className="w-full bg-[var(--bg-secondary)] text-white text-sm rounded-xl pl-4 pr-10 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-magenta)] focus:ring-2 focus:ring-[var(--color-purple-bright)]/30 transition-all appearance-none cursor-pointer"
+                  className="w-full bg-[#141D26] text-[#F5F1E8] text-sm rounded-xl pl-4 pr-10 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D] transition-all appearance-none cursor-pointer"
                 >
-                  <option value="Professional" className="bg-[#100020] text-white">Professional</option>
-                  <option value="Student" className="bg-[#100020] text-white">Student</option>
-                  <option value="Hobbyist" className="bg-[#100020] text-white">Hobbyist</option>
+                  <option value="Professional" className="bg-[#101820] text-[#F5F1E8]">Professional</option>
+                  <option value="Student" className="bg-[#101820] text-[#F5F1E8]">Student</option>
+                  <option value="Hobbyist" className="bg-[#101820] text-[#F5F1E8]">Hobbyist</option>
                 </select>
-                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7F8993] pointer-events-none" />
               </div>
-              <p className="mt-1.5 text-[11px] text-[var(--text-muted)] leading-relaxed">
+              <p className="mt-1.5 text-[11px] text-[#7F8993] leading-relaxed">
                 {subRoleDescriptions[subRole]}
               </p>
             </div>
           )}
 
           <div>
-            <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
+            <label className="block text-xs uppercase tracking-wider font-semibold text-[#B7BEC6] mb-1.5">
               EMAIL ADDRESS
             </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7F8993]" />
               <input
                 type="email"
                 required
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl pl-10 pr-4 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-magenta)] focus:ring-2 focus:ring-[var(--color-purple-bright)]/30 transition-all"
+                className="w-full bg-[#141D26] text-[#F5F1E8] placeholder-[#7F8993] text-sm rounded-xl pl-10 pr-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D] transition-all"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--text-secondary)] mb-1.5">
+            <label className="block text-xs uppercase tracking-wider font-semibold text-[#B7BEC6] mb-1.5">
               PASSWORD
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7F8993]" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[var(--bg-secondary)] text-white placeholder-[var(--text-muted)] text-sm rounded-xl pl-10 pr-10 py-3 border border-[var(--glass-border)] focus:outline-none focus:border-[var(--color-magenta)] focus:ring-2 focus:ring-[var(--color-purple-bright)]/30 transition-all"
+                className="w-full bg-[#141D26] text-[#F5F1E8] placeholder-[#7F8993] text-sm rounded-xl pl-10 pr-10 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D] transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#7F8993] hover:text-[#F5F1E8]"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -334,14 +332,14 @@ function RegisterForm() {
                 required
                 checked={agreeTerms}
                 onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="mt-0.5 w-4 h-4 rounded border-[var(--glass-border)] text-[var(--color-pink)] bg-[var(--bg-secondary)] accent-[var(--color-pink)] focus:ring-0 transition-colors cursor-pointer shrink-0"
+                className="mt-0.5 w-4 h-4 rounded border-[#27313A] text-[#F4C95D] bg-[#141D26] accent-[#F4C95D] focus:ring-0 transition-colors cursor-pointer shrink-0"
               />
-              <span className="text-xs text-[var(--text-secondary)] leading-tight group-hover:text-white transition-colors">
+              <span className="text-xs text-[#B7BEC6] leading-tight group-hover:text-[#F5F1E8] transition-colors">
                 I agree to the{' '}
                 <Link
                   href="/terms"
                   target="_blank"
-                  className="text-[var(--color-pink)] hover:underline font-semibold"
+                  className="text-[#F4C95D] hover:underline font-semibold"
                   onClick={(e) => e.stopPropagation()}
                 >
                   Terms of Use
@@ -350,12 +348,12 @@ function RegisterForm() {
                 <Link
                   href="/privacy"
                   target="_blank"
-                  className="text-[var(--color-pink)] hover:underline font-semibold"
+                  className="text-[#F4C95D] hover:underline font-semibold"
                   onClick={(e) => e.stopPropagation()}
                 >
                   Privacy Policy
                 </Link>
-                <span className="text-[var(--color-pink)] ml-0.5">*</span>
+                <span className="text-[#F4C95D] ml-0.5">*</span>
               </span>
             </label>
           </div>
@@ -364,7 +362,7 @@ function RegisterForm() {
           <button
             type="submit"
             disabled={isLoading || !agreeTerms}
-            className="w-full mt-2 py-3 px-4 rounded-xl theme-neon-button text-white text-sm font-bold tracking-wide transition-all shadow-lg active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            className="w-full mt-2 py-3 px-4 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] active:bg-[#DDB347] text-[#0B0F13] text-sm font-bold tracking-wide transition-all shadow-md active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
             {isLoading
               ? 'Creating Account...'
@@ -377,9 +375,9 @@ function RegisterForm() {
         </form>
 
         {/* Footer link */}
-        <div className="mt-6 pt-4 border-t border-[var(--glass-border-subtle)] text-center text-xs text-[var(--text-muted)]">
+        <div className="mt-6 pt-4 border-t border-[#1C252D] text-center text-xs text-[#7F8993]">
           <span>Already have an account? </span>
-          <Link href="/login" className="text-[var(--color-pink)] hover:underline font-semibold ml-1">
+          <Link href="/login" className="text-[#F4C95D] hover:underline font-semibold ml-1">
             Sign In
           </Link>
         </div>
@@ -396,7 +394,7 @@ function RegisterForm() {
 
 export default function RegisterPage() {
   return (
-    <Suspense fallback={<div className="min-h-[85vh] flex items-center justify-center"><div className="w-10 h-10 rounded-full border-2 border-[var(--color-pink)] border-t-transparent animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-[85vh] flex items-center justify-center"><div className="w-10 h-10 rounded-full border-2 border-[#F4C95D] border-t-transparent animate-spin" /></div>}>
       <RegisterForm />
     </Suspense>
   );

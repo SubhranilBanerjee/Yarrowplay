@@ -248,20 +248,20 @@ export default function LandingPage() {
             lift={64}
             fade={0.6}
             dim={0.55}
-            overlayColor="#060010"
+            overlayColor="#070B0F"
           />
         </div>
 
         {/* Cinematic gradient overlays to blend the wall into the page and enhance headline legibility */}
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#0B0C10] via-transparent to-[#0B0C10]/80 z-[1]" />
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_65%_55%_at_50%_50%,rgba(11,12,16,0.35)_0%,rgba(11,12,16,0.88)_100%)] z-[1]" />
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#070B0F] via-transparent to-[#070B0F]/80 z-[1]" />
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_65%_55%_at_50%_50%,rgba(7,11,15,0.4)_0%,rgba(7,11,15,0.92)_100%)] z-[1]" />
 
         {/* Hero Content (Z-10, relative) */}
         <div className="relative z-10 flex flex-col items-center justify-center pointer-events-auto">
-          {/* Massive Bold Headline: EXACT SIZE PRESERVED, NO EXTRA TEXT, NO BOXES */}
+          {/* Massive Bold Headline */}
           <h1 className="font-black tracking-tight uppercase leading-none py-1 select-none text-5xl sm:text-7xl md:text-8xl lg:text-[7.5rem] xl:text-[8.5rem] filter drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)]">
-            <span className="bg-gradient-to-r from-[#FFE600] via-[#FF6E00] to-[#FF20D9] bg-clip-text text-transparent">
-              YARROWPLAY
+            <span className="text-[#F5F1E8]">
+              LIGHTHOUSE <span className="text-[#F4C95D]">REELS</span>
             </span>
           </h1>
 
@@ -271,14 +271,14 @@ export default function LandingPage() {
               <>
                 <SpecularButton
                   size="md"
-                  radius={16}
-                  tint="#ffffff"
-                  tintOpacity={0.06}
+                  radius={10}
+                  tint="#F4C95D"
+                  tintOpacity={0.12}
                   blur={12}
-                  textColor="#ffffff"
-                  lineColor="#EC4899"
-                  baseColor="#2E2A45"
-                  intensity={1.4}
+                  textColor="#0B0F13"
+                  lineColor="#F4C95D"
+                  baseColor="#F4C95D"
+                  intensity={1.2}
                   shineSize={14}
                   shineFade={35}
                   thickness={1.5}
@@ -287,19 +287,19 @@ export default function LandingPage() {
                   proximity={250}
                   onClick={() => router.push('/home')}
                 >
-                  <span>Explore Content Feed</span>
+                  <span className="font-bold">Explore Content Feed</span>
                 </SpecularButton>
 
                 <SpecularButton
                   size="md"
-                  radius={16}
+                  radius={10}
                   tint="#ffffff"
-                  tintOpacity={0.03}
+                  tintOpacity={0.04}
                   blur={12}
-                  textColor="#E5E7EB"
-                  lineColor="#8B5CF6"
-                  baseColor="#2E2A45"
-                  intensity={1.2}
+                  textColor="#F5F1E8"
+                  lineColor="#52606C"
+                  baseColor="#111A22"
+                  intensity={1.0}
                   shineSize={14}
                   shineFade={35}
                   thickness={1.5}
@@ -315,14 +315,14 @@ export default function LandingPage() {
               <>
                 <SpecularButton
                   size="md"
-                  radius={16}
-                  tint="#ffffff"
-                  tintOpacity={0.06}
+                  radius={10}
+                  tint="#F4C95D"
+                  tintOpacity={0.12}
                   blur={12}
-                  textColor="#ffffff"
-                  lineColor="#EC4899"
-                  baseColor="#2E2A45"
-                  intensity={1.5}
+                  textColor="#0B0F13"
+                  lineColor="#F4C95D"
+                  baseColor="#F4C95D"
+                  intensity={1.2}
                   shineSize={14}
                   shineFade={35}
                   thickness={1.5}
@@ -331,19 +331,19 @@ export default function LandingPage() {
                   proximity={250}
                   onClick={() => router.push('/register')}
                 >
-                  <span>Get Started Free</span>
+                  <span className="font-bold">Get Started Free</span>
                 </SpecularButton>
 
                 <SpecularButton
                   size="md"
-                  radius={16}
+                  radius={10}
                   tint="#ffffff"
-                  tintOpacity={0.03}
+                  tintOpacity={0.04}
                   blur={12}
-                  textColor="#E5E7EB"
-                  lineColor="#8B5CF6"
-                  baseColor="#2E2A45"
-                  intensity={1.2}
+                  textColor="#F5F1E8"
+                  lineColor="#52606C"
+                  baseColor="#111A22"
+                  intensity={1.0}
                   shineSize={14}
                   shineFade={35}
                   thickness={1.5}
@@ -407,16 +407,16 @@ export default function LandingPage() {
         {/* Content Rows */}
         {isLoading ? (
           <div className="space-y-8 animate-pulse">
-            <div className="h-6 w-48 bg-[#161522] rounded-lg mb-4" />
+            <div className="h-6 w-48 bg-[#111A22] rounded-lg mb-4 border border-[#1C252D]" />
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="aspect-video bg-[#161522] rounded-2xl ring-1 ring-white/5" />
+                <div key={i} className="aspect-video bg-[#111A22] rounded-xl border border-[#1C252D]" />
               ))}
             </div>
-            <div className="h-6 w-48 bg-[#161522] rounded-lg mt-8 mb-4" />
+            <div className="h-6 w-48 bg-[#111A22] rounded-lg mt-8 mb-4 border border-[#1C252D]" />
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="aspect-video bg-[#161522] rounded-2xl ring-1 ring-white/5" />
+                <div key={i} className="aspect-video bg-[#111A22] rounded-xl border border-[#1C252D]" />
               ))}
             </div>
           </div>
@@ -662,8 +662,8 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
-              <span className="text-[11px] font-semibold tracking-wide uppercase text-[var(--color-pink-light)] flex items-center gap-1.5">
-                Open Publishing for Creators <Zap className="w-3.5 h-3.5 text-[var(--color-magenta)]" />
+              <span className="text-[11px] font-semibold tracking-wide uppercase text-[#F4C95D] flex items-center gap-1.5">
+                Open Publishing for Creators <Zap className="w-3.5 h-3.5 text-[#F4C95D]" />
               </span>
             </div>
           </div>
@@ -671,20 +671,20 @@ export default function LandingPage() {
       </section>
 
       {/* ── 5. PLATFORM FOOTER & LEGAL LINKS ── */}
-      <footer className="py-10 px-4 max-w-[1750px] mx-auto border-t border-[var(--glass-border)]">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--text-muted)]">
+      <footer className="py-10 px-4 max-w-[1750px] mx-auto border-t border-[#27313A]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#7F8993]">
           <div className="flex items-center gap-2">
-            <span className="font-black tracking-wider text-white">YARROWPLAY</span>
-            <span>· Multi-Format Media &amp; Streaming Platform</span>
+            <span className="font-black tracking-wider text-[#F5F1E8]">LIGHTHOUSE REELS</span>
+            <span>· Premium Short-Form Video &amp; Entertainment Platform</span>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/terms" className="hover:text-white transition-colors">
+            <Link href="/terms" className="hover:text-[#F5F1E8] transition-colors">
               Terms of Use
             </Link>
-            <Link href="/privacy" className="hover:text-white transition-colors">
+            <Link href="/privacy" className="hover:text-[#F5F1E8] transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/explore" className="hover:text-white transition-colors">
+            <Link href="/explore" className="hover:text-[#F5F1E8] transition-colors">
               Explore Catalog
             </Link>
           </div>

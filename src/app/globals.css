@@ -3,35 +3,66 @@
 @import "../components/ui/SpecularButton.css";
 
 @theme {
-  --color-brand: var(--color-pink);
-  --color-brand-hover: var(--color-magenta);
-  --color-brand-muted: rgba(139, 92, 246, 0.2);
+  --color-brand: var(--lr-gold);
+  --color-brand-hover: var(--lr-gold-hover);
+  --color-brand-muted: rgba(244, 201, 93, 0.15);
   
-  --color-bg-main: var(--bg-primary);
-  --color-surface: var(--glass-surface);
-  --color-surface-elevated: var(--glass-surface-elevated);
-  --color-border-subtle: var(--glass-border);
-  --color-surface-hover: var(--glass-surface-hover);
+  --color-bg-main: var(--lr-bg-primary);
+  --color-surface: var(--lr-bg-surface);
+  --color-surface-elevated: var(--lr-bg-elevated);
+  --color-border-subtle: var(--lr-border-subtle);
+  --color-surface-hover: var(--lr-bg-elevated);
   
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-text-muted: var(--text-muted);
+  --color-text-primary: var(--lr-text-primary);
+  --color-text-secondary: var(--lr-text-secondary);
+  --color-text-muted: var(--lr-text-muted);
   
-  --color-status-success: var(--status-success);
-  --color-status-warning: var(--status-warning);
-  --color-status-error: var(--status-error);
+  --color-status-success: var(--lr-success);
+  --color-status-warning: var(--lr-warning);
+  --color-status-error: var(--lr-error);
+
+  /* Canonical Lighthouse Reels design tokens */
+  --color-lr-bg-primary: #070B0F;
+  --color-lr-bg-secondary: #0B1117;
+  --color-lr-bg-tertiary: #101820;
+  --color-lr-bg-surface: #111A22;
+  --color-lr-bg-elevated: #151F28;
+  --color-lr-bg-input: #141D26;
+  --color-lr-bg-sidebar: #080D12;
+  --color-lr-bg-header: #0A1016;
+  --color-lr-bg-modal: #101820;
+
+  --color-lr-gold: #F4C95D;
+  --color-lr-gold-light: #FFD978;
+  --color-lr-gold-dark: #C99A32;
+  --color-lr-gold-muted: #A98235;
+
+  --color-lr-text-primary: #F5F1E8;
+  --color-lr-text-secondary: #B7BEC6;
+  --color-lr-text-muted: #7F8993;
+  --color-lr-text-disabled: #59636D;
+
+  --color-lr-border-primary: #27313A;
+  --color-lr-border-subtle: #1C252D;
+
+  --color-lr-blue: #7E9BB5;
+  --color-lr-blue-bright: #9DB9D0;
+
+  --color-lr-success: #68B88A;
+  --color-lr-warning: #E8B84A;
+  --color-lr-error: #D96868;
+  --color-lr-danger: #C95353;
 }
 
 :root {
-  --background: var(--bg-primary);
-  --foreground: var(--text-primary);
+  --background: var(--lr-bg-primary);
+  --foreground: var(--lr-text-primary);
 }
 
 body {
-  background-color: var(--bg-primary);
-  background-attachment: fixed;
+  background-color: var(--lr-bg-primary);
   min-height: 100vh;
-  color: var(--text-primary);
+  color: var(--lr-text-primary);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
 }
@@ -42,19 +73,19 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: var(--lr-bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--glass-border);
+  background: var(--lr-border-primary);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-magenta);
+  background: var(--lr-gold-dark);
 }
 
 /* Custom Range Input for Media Players */
 input[type="range"] {
-  accent-color: var(--color-magenta);
+  accent-color: var(--lr-gold);
 }
 
 /* Prevent random blinking text caret on non-editable elements */
@@ -63,7 +94,7 @@ input[type="range"] {
 }
 
 input, textarea, [contenteditable="true"] {
-  caret-color: var(--color-pink);
+  caret-color: var(--lr-gold);
 }
 
 /* Ensure interactive elements keep pointer cursor and avoid accidental text selection */
@@ -93,4 +124,3 @@ header, aside, nav, [role="toolbar"] {
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
-

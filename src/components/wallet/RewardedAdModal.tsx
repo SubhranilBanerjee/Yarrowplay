@@ -6,8 +6,8 @@ import { X, Play, Volume2, VolumeX, CheckCircle, Coins, Sparkles } from 'lucide-
 
 const SPONSOR_ADS = [
   {
-    title: 'DramaBox Premium - Binge Short Dramas Anywhere',
-    sponsor: 'DramaBox Entertainment',
+    title: 'Lighthouse Reels VIP - Binge Short Dramas Anywhere',
+    sponsor: 'Lighthouse Reels',
     videoUrl: 'https://commondatastream.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
     tagline: 'Unlock endless romance, revenge, and mystery series in bite-sized episodes!',
   },
@@ -71,15 +71,15 @@ export default function RewardedAdModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-neutral-950 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg bg-[#101820] border border-[#27313A] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
         {/* Top Control Bar */}
-        <div className="p-4 bg-neutral-900/80 border-b border-neutral-800 flex items-center justify-between">
+        <div className="p-4 bg-[#151F28] border-b border-[#27313A] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 uppercase tracking-wide">
+            <span className="text-xs px-2 py-0.5 rounded bg-[#F4C95D]/20 text-[#F4C95D] font-bold border border-[#F4C95D]/30 uppercase tracking-wide">
               Rewarded Sponsor
             </span>
-            <span className="text-xs text-neutral-400 font-medium">
+            <span className="text-xs text-[#B7BEC6] font-medium">
               {adFinished ? 'Reward Unlocked!' : `Reward in ${timeLeft}s`}
             </span>
           </div>
@@ -92,14 +92,14 @@ export default function RewardedAdModal() {
                   setIsMuted(videoRef.current.muted);
                 }
               }}
-              className="p-1.5 rounded-lg bg-neutral-800 text-neutral-300 hover:text-white"
+              className="p-1.5 rounded-lg bg-[#101820] text-[#B7BEC6] hover:text-[#F5F1E8] cursor-pointer"
             >
               {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
             {adFinished && (
               <button
                 onClick={closeRewardedAd}
-                className="p-1.5 rounded-lg bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-lg bg-[#101820] text-[#7F8993] hover:text-[#F5F1E8] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -108,7 +108,7 @@ export default function RewardedAdModal() {
         </div>
 
         {/* Video Player */}
-        <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden">
+        <div className="relative aspect-video bg-[#05080B] flex items-center justify-center overflow-hidden">
           <video
             ref={videoRef}
             src={ad.videoUrl}
@@ -121,36 +121,36 @@ export default function RewardedAdModal() {
 
           {/* Countdown badge over video */}
           {!adFinished && (
-            <div className="absolute top-3 left-3 px-3 py-1 bg-black/70 backdrop-blur-md rounded-full text-xs font-mono font-bold text-white border border-white/20">
+            <div className="absolute top-3 left-3 px-3 py-1 bg-[#070B0F]/85 backdrop-blur-md rounded-full text-xs font-mono font-bold text-[#F5F1E8] border border-white/10">
               ⏱ {timeLeft}s
             </div>
           )}
 
           {/* Claim celebration overlay */}
           {rewardClaimed && (
-            <div className="absolute inset-0 bg-neutral-950/85 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 animate-in zoom-in-95 duration-200">
-              <CheckCircle className="w-16 h-16 text-emerald-400 mb-2" />
-              <h3 className="text-xl font-black text-white">Reward Claimed!</h3>
-              <p className="text-sm text-amber-300 font-bold mt-1">
+            <div className="absolute inset-0 bg-[#070B0F]/90 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 animate-in zoom-in-95 duration-200">
+              <CheckCircle className="w-16 h-16 text-[#68B88A] mb-2" />
+              <h3 className="text-xl font-black text-[#F5F1E8]">Reward Claimed!</h3>
+              <p className="text-sm text-[#F4C95D] font-bold mt-1">
                 🪙 +2 Free Coins added to your wallet!
               </p>
-              <p className="text-xs text-neutral-400 mt-2">New Balance: {coins} coins</p>
+              <p className="text-xs text-[#B7BEC6] mt-2">New Balance: {coins} coins</p>
             </div>
           )}
         </div>
 
         {/* Ad details & Claim button footer */}
-        <div className="p-4 bg-neutral-900 border-t border-neutral-800 flex flex-col gap-3">
+        <div className="p-4 bg-[#111A22] border-t border-[#27313A] flex flex-col gap-3">
           <div>
-            <span className="text-[10px] uppercase font-bold text-amber-500 tracking-wider">
+            <span className="text-[10px] uppercase font-bold text-[#F4C95D] tracking-wider">
               {ad.sponsor}
             </span>
-            <h4 className="text-sm font-bold text-white leading-snug">{ad.title}</h4>
-            <p className="text-xs text-neutral-400 mt-0.5">{ad.tagline}</p>
+            <h4 className="text-sm font-bold text-[#F5F1E8] leading-snug">{ad.title}</h4>
+            <p className="text-xs text-[#B7BEC6] mt-0.5">{ad.tagline}</p>
           </div>
 
           <div className="pt-2 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5 text-xs text-amber-400 font-bold">
+            <div className="flex items-center gap-1.5 text-xs text-[#F4C95D] font-bold">
               <Coins className="w-4 h-4" />
               <span>Reward: 2 Coins</span>
             </div>
@@ -158,12 +158,12 @@ export default function RewardedAdModal() {
             <button
               onClick={handleClaimReward}
               disabled={!adFinished || claiming || rewardClaimed}
-              className={`px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 ${
+              className={`px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer ${
                 rewardClaimed
-                  ? 'bg-emerald-600 text-white'
+                  ? 'bg-[#68B88A] text-[#0B0F13]'
                   : adFinished
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-neutral-950 shadow-amber-500/20'
-                  : 'bg-neutral-800 text-neutral-500 cursor-not-allowed border border-neutral-700'
+                  ? 'bg-[#F4C95D] hover:bg-[#FFD978] active:bg-[#DDB347] text-[#0B0F13]'
+                  : 'bg-[#141D26] text-[#7F8993] cursor-not-allowed border border-[#27313A]'
               }`}
             >
               {rewardClaimed

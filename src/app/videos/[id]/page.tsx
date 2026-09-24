@@ -37,53 +37,32 @@ import { BottomToast } from '@/components/ui/BottomToast';
 function AuthGateModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-      <div
-        className="rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-5 relative backdrop-blur-xl border"
-        style={{
-          background: 'var(--glass-surface-heavy)',
-          borderColor: 'var(--glass-border-light)',
-          boxShadow: 'var(--shadow-card-hover)',
-        }}
-      >
+      <div className="rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-5 relative bg-[#101820] border border-[#27313A]">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-[var(--text-muted)] hover:text-white transition-colors"
+          className="absolute top-3 right-3 text-[#7F8993] hover:text-[#F5F1E8] transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
         <div className="text-center">
-          <div
-            className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 border"
-            style={{
-              background: 'var(--neon-purple-glow)',
-              borderColor: 'var(--neon-purple-border)',
-            }}
-          >
-            <LogIn className="w-7 h-7 text-[var(--color-pink-light)]" />
+          <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#F4C95D]/30 bg-[#F4C95D]/10">
+            <LogIn className="w-7 h-7 text-[#F4C95D]" />
           </div>
-          <h3 className="text-white font-bold text-lg">Sign in to Continue</h3>
-          <p className="text-[var(--text-secondary)] text-sm mt-2 leading-relaxed">
-            Create a free account to like, comment, save, and interact with content on Yarrowplay.
+          <h3 className="text-[#F5F1E8] font-bold text-lg">Sign in to Continue</h3>
+          <p className="text-[#B7BEC6] text-sm mt-2 leading-relaxed">
+            Create a free account to like, comment, save, and interact with content on Lighthouse Reels.
           </p>
         </div>
         <div className="flex flex-col gap-2.5">
           <Link
             href={`/login?redirect=${encodeURIComponent(window.location.pathname)}`}
-            className="w-full py-3 px-4 rounded-xl text-white text-sm font-semibold text-center transition-all active:scale-[0.99]"
-            style={{
-              background: 'var(--gradient-neon)',
-              boxShadow: 'var(--glow-purple)',
-            }}
+            className="w-full py-3 px-4 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] text-[#0B0F13] text-sm font-semibold text-center transition-all active:scale-[0.99] shadow-md"
           >
             Sign In
           </Link>
           <Link
             href="/register"
-            className="w-full py-3 px-4 rounded-xl text-white text-sm font-semibold text-center transition-all border"
-            style={{
-              background: 'var(--glass-surface)',
-              borderColor: 'var(--glass-border)',
-            }}
+            className="w-full py-3 px-4 rounded-xl text-[#F5F1E8] text-sm font-semibold text-center transition-all border border-[#52606C] hover:bg-[#151F28] hover:border-[#F4C95D]"
           >
             Create Free Account
           </Link>
@@ -125,7 +104,7 @@ function PaymentModal({
         key: data.key_id,
         amount: data.amount,
         currency: data.currency,
-        name: 'Yarrowplay',
+        name: 'Lighthouse Reels',
         description: data.video_title,
         order_id: data.order_id,
         handler: async (response: any) => {
@@ -147,7 +126,7 @@ function PaymentModal({
           }
         },
         prefill: {},
-        theme: { color: '#7C00FF' },
+        theme: { color: '#F4C95D' },
         modal: {
           ondismiss: () => {
             setIsLoading(false);
@@ -164,47 +143,27 @@ function PaymentModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-      <div
-        className="rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-5 relative backdrop-blur-xl border"
-        style={{
-          background: 'var(--glass-surface-heavy)',
-          borderColor: 'var(--glass-border-light)',
-          boxShadow: 'var(--shadow-card-hover)',
-        }}
-      >
+      <div className="rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-5 relative bg-[#101820] border border-[#27313A]">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-[var(--text-muted)] hover:text-white transition-colors"
+          className="absolute top-3 right-3 text-[#7F8993] hover:text-[#F5F1E8] transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
         <div className="text-center">
-          <div
-            className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 border"
-            style={{
-              background: 'var(--neon-purple-glow)',
-              borderColor: 'var(--neon-purple-border)',
-            }}
-          >
-            <Lock className="w-7 h-7 text-[var(--color-pink-light)]" />
+          <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#F4C95D]/30 bg-[#F4C95D]/10">
+            <Lock className="w-7 h-7 text-[#F4C95D]" />
           </div>
-          <h3 className="text-white font-bold text-lg">Unlock Episode</h3>
-          <p className="text-[var(--text-secondary)] text-sm mt-2 leading-relaxed line-clamp-2">
+          <h3 className="text-[#F5F1E8] font-bold text-lg">Unlock Episode</h3>
+          <p className="text-[#B7BEC6] text-sm mt-2 leading-relaxed line-clamp-2">
             {video.title}
           </p>
           {video.price_inr && video.price_inr > 0 && (
-            <p
-              className="font-extrabold text-3xl mt-3"
-              style={{
-                background: 'var(--gradient-text)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
+            <p className="font-extrabold text-3xl mt-3 text-[#F4C95D]">
               ₹{(video.price_inr as number).toFixed(2)}
             </p>
           )}
-          <p className="text-[11px] text-[var(--text-muted)] mt-1">One-time payment · Instant access</p>
+          <p className="text-[11px] text-[#7F8993] mt-1">One-time payment · Instant access</p>
         </div>
 
         {error && (
@@ -216,11 +175,7 @@ function PaymentModal({
         <button
           onClick={handlePay}
           disabled={isLoading}
-          className="w-full py-3 px-4 rounded-xl text-white text-sm font-semibold transition-all active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
-          style={{
-            background: 'var(--gradient-neon)',
-            boxShadow: 'var(--glow-purple)',
-          }}
+          className="w-full py-3 px-4 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] text-[#0B0F13] text-sm font-semibold transition-all active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2 shadow-md"
         >
           {isLoading ? (
             <>
@@ -553,23 +508,13 @@ export default function VideoDetailPage() {
 
   if (!video) {
     return (
-      <div
-        className="max-w-md mx-auto px-6 py-16 text-center my-12 rounded-2xl border"
-        style={{
-          background: 'var(--glass-surface)',
-          borderColor: 'var(--glass-border)',
-        }}
-      >
-        <Film className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-3" />
-        <h2 className="text-xl font-bold text-white mb-2">Video Not Found</h2>
-        <p className="text-xs text-[var(--text-secondary)] mb-6">This video may have been unpublished or removed.</p>
+      <div className="max-w-md mx-auto px-6 py-16 text-center my-12 rounded-2xl border bg-[#111A22] border-[#27313A]">
+        <Film className="w-12 h-12 text-[#7F8993] mx-auto mb-3" />
+        <h2 className="text-xl font-bold text-[#F5F1E8] mb-2">Video Not Found</h2>
+        <p className="text-xs text-[#B7BEC6] mb-6">This video may have been unpublished or removed.</p>
         <Link
           href="/home"
-          className="px-5 py-2.5 rounded-xl text-white text-xs font-semibold inline-block transition-all"
-          style={{
-            background: 'var(--gradient-neon)',
-            boxShadow: 'var(--glow-purple)',
-          }}
+          className="px-5 py-2.5 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] text-[#0B0F13] text-xs font-semibold inline-block transition-all shadow-md"
         >
           Return to Home Feed
         </Link>
@@ -586,16 +531,16 @@ export default function VideoDetailPage() {
         <div className="flex-1 min-w-0 space-y-5">
 
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] flex-wrap">
-            <Link href="/home" className="hover:text-white transition-colors">Home</Link>
+          <nav className="flex items-center gap-1.5 text-xs text-[#7F8993] flex-wrap">
+            <Link href="/home" className="hover:text-[#F5F1E8] transition-colors">Home</Link>
             {video.series && (
               <>
                 <span>/</span>
-                <span className="text-[var(--text-secondary)]">{video.series.title}</span>
+                <span className="text-[#B7BEC6]">{video.series.title}</span>
               </>
             )}
             <span>/</span>
-            <span className="text-white truncate max-w-[200px]">{video.title}</span>
+            <span className="text-[#F5F1E8] truncate max-w-[200px]">{video.title}</span>
           </nav>
 
           {/* Vertical Video Player — centered, max width for portrait */}
@@ -623,45 +568,36 @@ export default function VideoDetailPage() {
 
           {/* Title & Actions */}
           <div>
-            <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+            <h1 className="text-lg sm:text-xl font-bold text-[#F5F1E8] tracking-tight">
               {video.title}
               {video.episode_number && (
-                <span className="ml-2 text-sm font-normal text-[var(--text-muted)]">
+                <span className="ml-2 text-sm font-normal text-[#7F8993]">
                   · Episode {video.episode_number}
                 </span>
               )}
             </h1>
 
-            <div
-              className="flex flex-wrap items-center justify-between gap-3 mt-3 pb-4 border-b"
-              style={{ borderColor: 'var(--glass-border)' }}
-            >
+            <div className="flex flex-wrap items-center justify-between gap-3 mt-3 pb-4 border-b border-[#27313A]">
               {/* Creator Info & Follow Button */}
               <div className="flex items-center gap-3 flex-wrap">
                 <Link
                   href={`/profile/${video.creator?.username || video.creator_id}`}
                   className="flex items-center gap-2.5 group/creator"
                 >
-                  <div
-                    className="relative w-9 h-9 rounded-full overflow-hidden border shrink-0 group-hover/creator:scale-105 transition-transform"
-                    style={{
-                      background: 'var(--glass-surface-heavy)',
-                      borderColor: 'var(--neon-purple-border)',
-                    }}
-                  >
+                  <div className="relative w-9 h-9 rounded-full overflow-hidden border border-[#27313A] bg-[#151F28] shrink-0 group-hover/creator:scale-105 transition-transform">
                     {video.creator?.avatar_url ? (
                       <Image src={video.creator.avatar_url} alt={video.creator.display_name || 'Creator'} fill className="object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-xs font-bold text-[var(--color-pink-light)]">
+                      <div className="w-full h-full flex items-center justify-center text-xs font-bold text-[#F4C95D]">
                         {video.creator?.display_name?.[0] || 'C'}
                       </div>
                     )}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-white group-hover/creator:text-[var(--color-pink-light)] transition-colors">
+                    <p className="text-sm font-semibold text-[#F5F1E8] group-hover/creator:text-[#F4C95D] transition-colors">
                       {video.creator?.display_name || 'Creator'}
                     </p>
-                    <p className="text-[11px] text-[var(--text-muted)]">
+                    <p className="text-[11px] text-[#7F8993]">
                       {video.views_count || 0} views · {new Date(video.created_at).toLocaleDateString()}
                     </p>
                   </div>
@@ -678,38 +614,27 @@ export default function VideoDetailPage() {
               {/* Action Buttons */}
               <div className="flex items-center gap-2 flex-wrap">
                 {/* Like / Dislike */}
-                <div
-                  className="flex items-center rounded-xl border overflow-hidden backdrop-blur-md"
-                  style={{
-                    background: 'var(--glass-surface)',
-                    borderColor: 'var(--glass-border)',
-                  }}
-                >
+                <div className="flex items-center rounded-xl border border-[#27313A] bg-[#141D26] overflow-hidden">
                   <button
                     onClick={() => handleReaction('like')}
                     title="Like"
                     className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-all ${
                       userReaction === 'like'
-                        ? 'text-white shadow-inner'
-                        : 'text-[var(--text-secondary)] hover:text-white'
+                        ? 'text-[#F4C95D] bg-[#F4C95D]/15'
+                        : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
                     }`}
-                    style={
-                      userReaction === 'like'
-                        ? { background: 'var(--neon-purple-glow)', color: 'var(--color-pink-light)' }
-                        : undefined
-                    }
                   >
                     <ThumbsUp className={`w-4 h-4 ${userReaction === 'like' ? 'fill-current' : ''}`} />
                     <span>{likesCount}</span>
                   </button>
-                  <div className="w-px h-5 bg-white/10" />
+                  <div className="w-px h-5 bg-[#27313A]" />
                   <button
                     onClick={() => handleReaction('dislike')}
                     title="Dislike"
                     className={`px-3 py-2 text-xs font-semibold transition-all ${
                       userReaction === 'dislike'
-                        ? 'text-red-400 bg-red-500/20'
-                        : 'text-[var(--text-secondary)] hover:text-white'
+                        ? 'text-[#D96868] bg-[#D96868]/15'
+                        : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
                     }`}
                   >
                     <ThumbsDown className={`w-4 h-4 ${userReaction === 'dislike' ? 'fill-current' : ''}`} />
@@ -720,13 +645,11 @@ export default function VideoDetailPage() {
                 <button
                   onClick={handleToggleFavorite}
                   title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-                  className="p-2 rounded-xl border transition-all cursor-pointer"
-                  style={{
-                    background: isFavorite ? 'var(--gradient-neon)' : 'var(--glass-surface)',
-                    borderColor: isFavorite ? 'var(--color-pink)' : 'var(--glass-border)',
-                    boxShadow: isFavorite ? 'var(--glow-pink)' : 'none',
-                    color: isFavorite ? '#ffffff' : 'var(--text-secondary)',
-                  }}
+                  className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                    isFavorite
+                      ? 'bg-[#F4C95D]/15 border-[#F4C95D] text-[#F4C95D]'
+                      : 'bg-[#141D26] border-[#27313A] text-[#B7BEC6] hover:text-[#F5F1E8]'
+                  }`}
                 >
                   <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
                 </button>
@@ -735,13 +658,11 @@ export default function VideoDetailPage() {
                 <button
                   onClick={handleToggleWatchlist}
                   title={isWatchlisted ? 'Remove from Watchlist' : 'Add to Watchlist'}
-                  className="p-2 rounded-xl border transition-all cursor-pointer"
-                  style={{
-                    background: isWatchlisted ? 'var(--gradient-neon)' : 'var(--glass-surface)',
-                    borderColor: isWatchlisted ? 'var(--color-pink)' : 'var(--glass-border)',
-                    boxShadow: isWatchlisted ? 'var(--glow-pink)' : 'none',
-                    color: isWatchlisted ? '#ffffff' : 'var(--text-secondary)',
-                  }}
+                  className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                    isWatchlisted
+                      ? 'bg-[#F4C95D]/15 border-[#F4C95D] text-[#F4C95D]'
+                      : 'bg-[#141D26] border-[#27313A] text-[#B7BEC6] hover:text-[#F5F1E8]'
+                  }`}
                 >
                   <Bookmark className={`w-4 h-4 ${isWatchlisted ? 'fill-current' : ''}`} />
                 </button>
@@ -749,13 +670,9 @@ export default function VideoDetailPage() {
                 {/* Share — available to all users */}
                 <button
                   onClick={handleShare}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold text-[var(--text-secondary)] hover:text-white transition-all cursor-pointer"
-                  style={{
-                    background: 'var(--glass-surface)',
-                    borderColor: 'var(--glass-border)',
-                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#27313A] bg-[#141D26] text-xs font-semibold text-[#B7BEC6] hover:text-[#F5F1E8] transition-all cursor-pointer"
                 >
-                  {copiedLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
+                  {copiedLink ? <Check className="w-4 h-4 text-[#68B88A]" /> : <Share2 className="w-4 h-4" />}
                   <span>{copiedLink ? 'Copied!' : 'Share'}</span>
                 </button>
 
@@ -763,11 +680,7 @@ export default function VideoDetailPage() {
                 {video.is_locked && !isPurchased && user && user.id !== video.creator_id && !isAdmin && (
                   <button
                     onClick={() => setShowPaymentModal(true)}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-white text-xs font-semibold transition-all shadow-lg"
-                    style={{
-                      background: 'var(--gradient-neon)',
-                      boxShadow: 'var(--glow-purple)',
-                    }}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] text-[#0B0F13] text-xs font-semibold transition-all shadow-md"
                   >
                     <Lock className="w-3.5 h-3.5" />
                     <span>₹{(video.price_inr as number)?.toFixed(0)}</span>
@@ -779,11 +692,7 @@ export default function VideoDetailPage() {
                   <button
                     onClick={() => setShowDeleteModal(true)}
                     title="Delete Video"
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold text-red-400 hover:bg-red-600 hover:text-white transition-all cursor-pointer"
-                    style={{
-                      background: 'rgba(239, 68, 68, 0.12)',
-                      borderColor: 'rgba(239, 68, 68, 0.3)',
-                    }}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#D96868]/30 bg-[#D96868]/10 text-xs font-semibold text-[#D96868] hover:bg-[#D96868] hover:text-white transition-all cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                     <span className="hidden sm:inline">Delete</span>
@@ -793,28 +702,14 @@ export default function VideoDetailPage() {
             </div>
 
             {/* Video Description */}
-            <div
-              className="rounded-2xl p-4 mt-4 text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed border backdrop-blur-md"
-              style={{
-                background: 'var(--glass-surface)',
-                borderColor: 'var(--glass-border)',
-              }}
-            >
+            <div className="rounded-2xl p-4 mt-4 text-xs sm:text-sm text-[#B7BEC6] leading-relaxed border bg-[#111A22] border-[#27313A]">
               <p className="whitespace-pre-line">{video.description}</p>
               {video.tags && video.tags.length > 0 && (
-                <div
-                  className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t"
-                  style={{ borderColor: 'var(--glass-border)' }}
-                >
+                <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-[#27313A]">
                   {video.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-2.5 py-0.5 rounded-full text-[11px] font-medium border"
-                      style={{
-                        background: 'var(--neon-purple-glow)',
-                        borderColor: 'var(--neon-purple-border)',
-                        color: 'var(--text-secondary)',
-                      }}
+                      className="px-2.5 py-0.5 rounded-full text-[11px] font-medium border border-[#27313A] bg-[#151F28] text-[#7E9BB5]"
                     >
                       #{tag}
                     </span>
@@ -825,13 +720,7 @@ export default function VideoDetailPage() {
           </div>
 
           {/* ── Threaded Nested Comments Section ── */}
-          <div
-            className="rounded-2xl p-5 border backdrop-blur-md"
-            style={{
-              background: 'var(--glass-surface)',
-              borderColor: 'var(--glass-border)',
-            }}
-          >
+          <div className="rounded-2xl p-5 border bg-[#111A22] border-[#27313A]">
             <CommentSection
               contentType="video"
               contentId={video.id}
@@ -843,8 +732,8 @@ export default function VideoDetailPage() {
           {/* ── Recommended Videos ── */}
           {recommendedVideos.length > 0 && (
             <div>
-              <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-3">
-                <Sparkles className="w-4 h-4 text-[var(--color-pink-light)]" />
+              <h3 className="text-sm font-bold text-[#F5F1E8] flex items-center gap-2 mb-3">
+                <Sparkles className="w-4 h-4 text-[#F4C95D]" />
                 Recommended
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -852,31 +741,27 @@ export default function VideoDetailPage() {
                   <Link
                     key={rv.id}
                     href={`/videos/${rv.id}`}
-                    className="group relative rounded-xl overflow-hidden border transition-all shadow-sm"
-                    style={{
-                      background: 'var(--glass-surface)',
-                      borderColor: 'var(--glass-border)',
-                    }}
+                    className="group relative rounded-xl overflow-hidden border border-[#27313A] bg-[#111A22] hover:border-[#F4C95D]/30 transition-all shadow-sm"
                   >
-                    <div className="relative aspect-video bg-black/40 overflow-hidden">
+                    <div className="relative aspect-video bg-[#070B0F] overflow-hidden">
                       {rv.thumbnail_url ? (
                         <Image src={rv.thumbnail_url} alt={rv.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)]">
+                        <div className="w-full h-full flex items-center justify-center text-[#7F8993]">
                           <Play className="w-6 h-6" />
                         </div>
                       )}
                       {rv.is_locked && (
-                        <div className="absolute top-1.5 right-1.5 bg-black/80 backdrop-blur p-1 rounded-md">
-                          <Lock className="w-3 h-3 text-[var(--color-pink-light)]" />
+                        <div className="absolute top-1.5 right-1.5 bg-[#070B0F]/90 backdrop-blur p-1 rounded-md">
+                          <Lock className="w-3 h-3 text-[#F4C95D]" />
                         </div>
                       )}
                     </div>
                     <div className="p-2">
-                      <p className="text-white text-xs font-semibold line-clamp-2 group-hover:text-[var(--color-pink-light)] transition-colors leading-tight">
+                      <p className="text-[#F5F1E8] text-xs font-semibold line-clamp-2 group-hover:text-[#F4C95D] transition-colors leading-tight">
                         {rv.title}
                       </p>
-                      <p className="text-[10px] text-[var(--text-muted)] mt-1">{rv.creator?.display_name || 'Creator'}</p>
+                      <p className="text-[10px] text-[#7F8993] mt-1">{rv.creator?.display_name || 'Creator'}</p>
                     </div>
                   </Link>
                 ))}
@@ -888,20 +773,14 @@ export default function VideoDetailPage() {
         {/* ── Right Sidebar: Episode List (grid of numbers) ── */}
         {video.series && seriesEpisodes.length > 0 && (
           <div className="w-full lg:w-72 shrink-0">
-            <div
-              className="rounded-2xl p-4 sticky top-4 border backdrop-blur-md"
-              style={{
-                background: 'var(--glass-surface)',
-                borderColor: 'var(--glass-border)',
-              }}
-            >
+            <div className="rounded-2xl p-4 sticky top-4 border bg-[#111A22] border-[#27313A]">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold text-white">Episodes</h3>
-                <span className="text-xs text-[var(--text-muted)]">
+                <h3 className="text-sm font-bold text-[#F5F1E8]">Episodes</h3>
+                <span className="text-xs text-[#7F8993]">
                   {video.episode_number}/{seriesEpisodes.length}
                 </span>
               </div>
-              <p className="text-xs text-[var(--text-muted)] mb-3 truncate">{video.series.title}</p>
+              <p className="text-xs text-[#7F8993] mb-3 truncate">{video.series.title}</p>
 
               {/* Episode Number Grid */}
               <div className="grid grid-cols-5 gap-1.5 max-h-[70vh] overflow-y-auto pr-1 scrollbar-thin">
@@ -913,24 +792,14 @@ export default function VideoDetailPage() {
                       key={ep.id}
                       href={`/videos/${ep.id}`}
                       title={ep.title}
-                      className="relative aspect-square flex items-center justify-center rounded-lg text-xs font-bold transition-all border"
-                      style={
+                      className={`relative aspect-square flex items-center justify-center rounded-lg text-xs font-bold transition-all border ${
                         isCurrent
-                          ? {
-                              background: 'var(--gradient-neon)',
-                              color: '#ffffff',
-                              borderColor: 'var(--color-pink)',
-                              boxShadow: 'var(--glow-purple)',
-                            }
-                          : {
-                              background: 'var(--glass-surface-heavy)',
-                              color: 'var(--text-secondary)',
-                              borderColor: 'var(--glass-border)',
-                            }
-                      }
+                          ? 'bg-[#F4C95D] text-[#0B0F13] border-[#F4C95D] shadow-md'
+                          : 'bg-[#151F28] text-[#B7BEC6] border-[#27313A] hover:border-[#52606C] hover:text-[#F5F1E8]'
+                      }`}
                     >
                       {epLocked ? (
-                        <Lock className="w-3 h-3 text-[var(--color-pink-light)]" />
+                        <Lock className="w-3 h-3 text-[#F4C95D]" />
                       ) : (
                         ep.episode_number || '?'
                       )}
@@ -960,25 +829,18 @@ export default function VideoDetailPage() {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-          <div
-            className="rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border backdrop-blur-xl"
-            style={{
-              background: 'var(--glass-surface-heavy)',
-              borderColor: 'rgba(239, 68, 68, 0.3)',
-              boxShadow: '0 0 25px rgba(239, 68, 68, 0.2)',
-            }}
-          >
-            <div className="flex items-center gap-3 text-red-400">
-              <div className="p-3 bg-red-500/10 rounded-xl border border-red-500/20">
+          <div className="rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border bg-[#101820] border-[#27313A]">
+            <div className="flex items-center gap-3 text-[#D96868]">
+              <div className="p-3 bg-[#D96868]/10 rounded-xl border border-[#D96868]/20">
                 <Trash2 className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Delete Video</h3>
-                <p className="text-xs text-[var(--text-muted)]">This action cannot be undone</p>
+                <h3 className="text-lg font-bold text-[#F5F1E8]">Delete Video</h3>
+                <p className="text-xs text-[#7F8993]">This action cannot be undone</p>
               </div>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-              Are you sure you want to permanently delete <strong className="text-white">"{video.title}"</strong>? All associated comments, reactions, and history will be permanently deleted.
+            <p className="text-sm text-[#B7BEC6] leading-relaxed">
+              Are you sure you want to permanently delete <strong className="text-[#F5F1E8]">"{video.title}"</strong>? All associated comments, reactions, and history will be permanently deleted.
             </p>
             {deleteError && (
               <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400">
@@ -990,7 +852,7 @@ export default function VideoDetailPage() {
                 type="button"
                 disabled={isDeleting}
                 onClick={() => { setShowDeleteModal(false); setDeleteError(null); }}
-                className="px-4 py-2 text-xs font-semibold text-[var(--text-muted)] hover:text-white transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-[#7F8993] hover:text-[#F5F1E8] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -998,7 +860,7 @@ export default function VideoDetailPage() {
                 type="button"
                 disabled={isDeleting}
                 onClick={handleDeleteVideo}
-                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer shadow-lg"
+                className="px-4 py-2 rounded-xl bg-[#D96868] hover:bg-[#C95353] text-white text-xs font-semibold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer shadow-lg"
               >
                 {isDeleting ? (
                   <><Loader2 className="w-3.5 h-3.5 animate-spin" />Deleting...</>

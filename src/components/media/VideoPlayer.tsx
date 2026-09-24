@@ -510,7 +510,7 @@ export function VideoPlayer({
       onMouseMove={handleMouseMove}
       onTouchEnd={handleTouchEnd}
       onMouseLeave={() => isPlaying && activeMenu === 'none' && setShowControls(false)}
-      className="relative w-full aspect-[9/16] bg-black rounded-2xl overflow-hidden group select-none shadow-2xl transition-all duration-200"
+      className="relative w-full aspect-[9/16] bg-[#05080B] rounded-2xl overflow-hidden group select-none shadow-2xl transition-all duration-200"
     >
       <video
         ref={videoRef}
@@ -568,13 +568,13 @@ export function VideoPlayer({
           <div className="flex flex-col items-center justify-center gap-1 text-white">
             {doubleTapFeedback.side === 'left' ? (
               <>
-                <RotateCcw className="w-8 h-8 text-[var(--color-pink-light)] animate-spin" />
-                <span className="text-xs font-bold">-10s</span>
+                <RotateCcw className="w-8 h-8 text-[#F4C95D] animate-spin" />
+                <span className="text-xs font-bold text-[#F5F1E8]">-10s</span>
               </>
             ) : (
               <>
-                <RotateCw className="w-8 h-8 text-[var(--color-pink-light)] animate-spin" />
-                <span className="text-xs font-bold">+10s</span>
+                <RotateCw className="w-8 h-8 text-[#F4C95D] animate-spin" />
+                <span className="text-xs font-bold text-[#F5F1E8]">+10s</span>
               </>
             )}
           </div>
@@ -587,29 +587,23 @@ export function VideoPlayer({
           onClick={togglePlay}
           className="absolute inset-0 flex items-center justify-center bg-black/45 cursor-pointer transition-opacity backdrop-blur-[2px]"
         >
-          <div
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95 text-white shadow-2xl"
-            style={{
-              background: 'var(--gradient-neon)',
-              boxShadow: 'var(--glow-purple-strong)',
-            }}
-          >
-            <Play className="w-8 h-8 sm:w-10 sm:h-10 text-white fill-white ml-1" />
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95 bg-[#F4C95D] hover:bg-[#FFD978] shadow-2xl">
+            <Play className="w-8 h-8 sm:w-10 sm:h-10 text-[#0B0F13] fill-[#0B0F13] ml-1" />
           </div>
         </div>
       )}
 
       {/* Top Overlay Controls (Title & Subtitle Status) */}
       <div
-        className={`absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 via-black/40 to-transparent transition-opacity duration-300 flex items-center justify-between pointer-events-none ${
+        className={`absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-[#070B0F]/90 via-[#070B0F]/40 to-transparent transition-opacity duration-300 flex items-center justify-between pointer-events-none ${
           showControls ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <span className="text-xs sm:text-sm font-semibold text-white/90 truncate max-w-[70%]">
+        <span className="text-xs sm:text-sm font-semibold text-[#F5F1E8] truncate max-w-[70%]">
           {title}
         </span>
         {selectedSubtitleId !== 'off' && (
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#8B5CF6]/40 border border-[#8B5CF6] text-white font-bold uppercase tracking-wider">
+          <span className="text-[10px] px-2.5 py-0.5 rounded-md bg-[#151F28] border border-[#27313A] text-[#F4C95D] font-bold uppercase tracking-wider">
             CC · {subtitlesList.find((t) => t.id === selectedSubtitleId)?.label || 'On'}
           </span>
         )}
@@ -618,24 +612,24 @@ export function VideoPlayer({
       {/* Settings & Subtitle Menus Modal */}
       {activeMenu !== 'none' && (
         <div
-          className="absolute bottom-16 right-3 p-3 rounded-2xl shadow-2xl z-40 text-xs backdrop-blur-xl border border-white/10 w-56 text-white animate-in fade-in zoom-in-95 duration-150"
-          style={{ background: 'rgba(15, 14, 23, 0.95)' }}
+          className="absolute bottom-16 right-3 p-3 rounded-xl shadow-2xl z-40 text-xs backdrop-blur-xl border w-56 text-[#F5F1E8] animate-in fade-in zoom-in-95 duration-150"
+          style={{ background: '#101820', borderColor: '#27313A' }}
         >
           {/* Main Settings Menu */}
           {activeMenu === 'settings' && (
             <div className="space-y-1">
-              <div className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider px-2 pb-1.5 border-b border-white/10">
+              <div className="text-[11px] font-bold text-[#7F8993] uppercase tracking-wider px-2 pb-1.5 border-b border-[#27313A]">
                 Playback Settings
               </div>
               <button
                 onClick={() => setActiveMenu('subtitles')}
-                className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-white/10 transition-colors text-left"
+                className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg hover:bg-[#151F28] transition-colors text-left"
               >
                 <div className="flex items-center gap-2">
-                  <Subtitles className="w-4 h-4 text-[var(--color-pink-light)]" />
+                  <Subtitles className="w-4 h-4 text-[#AEB7BF]" />
                   <span>Subtitles / CC</span>
                 </div>
-                <div className="flex items-center gap-1 text-[var(--text-muted)]">
+                <div className="flex items-center gap-1 text-[#7F8993]">
                   <span className="truncate max-w-[70px]">
                     {selectedSubtitleId === 'off'
                       ? 'Off'
@@ -647,13 +641,13 @@ export function VideoPlayer({
 
               <button
                 onClick={() => setActiveMenu('speed')}
-                className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-white/10 transition-colors text-left"
+                className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg hover:bg-[#151F28] transition-colors text-left"
               >
                 <div className="flex items-center gap-2">
-                  <Gauge className="w-4 h-4 text-[var(--color-pink-light)]" />
+                  <Gauge className="w-4 h-4 text-[#AEB7BF]" />
                   <span>Speed</span>
                 </div>
-                <div className="flex items-center gap-1 text-[var(--text-muted)]">
+                <div className="flex items-center gap-1 text-[#7F8993]">
                   <span>{playbackSpeed}x</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </div>
@@ -661,13 +655,13 @@ export function VideoPlayer({
 
               <button
                 onClick={() => setActiveMenu('quality')}
-                className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-white/10 transition-colors text-left"
+                className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg hover:bg-[#151F28] transition-colors text-left"
               >
                 <div className="flex items-center gap-2">
-                  <Sliders className="w-4 h-4 text-[var(--color-pink-light)]" />
+                  <Sliders className="w-4 h-4 text-[#AEB7BF]" />
                   <span>Quality</span>
                 </div>
-                <div className="flex items-center gap-1 text-[var(--text-muted)]">
+                <div className="flex items-center gap-1 text-[#7F8993]">
                   <span>{selectedQuality}</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </div>
@@ -678,18 +672,18 @@ export function VideoPlayer({
           {/* Subtitles Track Selection */}
           {activeMenu === 'subtitles' && (
             <div className="space-y-1">
-              <div className="flex items-center justify-between px-2 pb-1.5 border-b border-white/10">
+              <div className="flex items-center justify-between px-2 pb-1.5 border-b border-[#27313A]">
                 <button
                   onClick={() => setActiveMenu('settings')}
-                  className="text-[11px] text-[var(--color-pink-light)] hover:underline font-bold"
+                  className="text-[11px] text-[#F4C95D] hover:underline font-bold"
                 >
                   ← Back
                 </button>
-                <span className="text-[11px] font-bold text-white uppercase tracking-wider">Subtitles</span>
+                <span className="text-[11px] font-bold text-[#F5F1E8] uppercase tracking-wider">Subtitles</span>
                 <button
                   onClick={() => setActiveMenu('subtitle-style')}
                   title="Subtitle Style"
-                  className="text-[11px] text-[var(--color-pink-light)] hover:underline"
+                  className="text-[11px] text-[#F4C95D] hover:underline"
                 >
                   Style
                 </button>
@@ -700,8 +694,8 @@ export function VideoPlayer({
                   setSelectedSubtitleId('off');
                   setActiveMenu('none');
                 }}
-                className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl transition-colors text-left ${
-                  selectedSubtitleId === 'off' ? 'bg-[#8B5CF6]/25 text-[var(--color-pink-light)] font-bold' : 'hover:bg-white/10'
+                className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg transition-colors text-left ${
+                  selectedSubtitleId === 'off' ? 'bg-[#F4C95D]/15 text-[#F4C95D] font-bold' : 'hover:bg-[#151F28]'
                 }`}
               >
                 <span>Off</span>
@@ -709,7 +703,7 @@ export function VideoPlayer({
               </button>
 
               {subtitlesList.length === 0 ? (
-                <div className="px-2.5 py-3 text-center text-[11px] text-[var(--text-muted)]">
+                <div className="px-2.5 py-3 text-center text-[11px] text-[#7F8993]">
                   No subtitle tracks available for this video.
                 </div>
               ) : (
@@ -720,8 +714,8 @@ export function VideoPlayer({
                       setSelectedSubtitleId(track.id);
                       setActiveMenu('none');
                     }}
-                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl transition-colors text-left ${
-                      selectedSubtitleId === track.id ? 'bg-[#8B5CF6]/25 text-[var(--color-pink-light)] font-bold' : 'hover:bg-white/10'
+                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg transition-colors text-left ${
+                      selectedSubtitleId === track.id ? 'bg-[#F4C95D]/15 text-[#F4C95D] font-bold' : 'hover:bg-[#151F28]'
                     }`}
                   >
                     <span>{track.label}</span>
@@ -735,18 +729,18 @@ export function VideoPlayer({
           {/* Subtitle Appearance / Style */}
           {activeMenu === 'subtitle-style' && (
             <div className="space-y-2">
-              <div className="flex items-center justify-between px-2 pb-1.5 border-b border-white/10">
+              <div className="flex items-center justify-between px-2 pb-1.5 border-b border-[#27313A]">
                 <button
                   onClick={() => setActiveMenu('subtitles')}
-                  className="text-[11px] text-[var(--color-pink-light)] hover:underline font-bold"
+                  className="text-[11px] text-[#F4C95D] hover:underline font-bold"
                 >
                   ← Back
                 </button>
-                <span className="text-[11px] font-bold text-white uppercase tracking-wider">Style</span>
+                <span className="text-[11px] font-bold text-[#F5F1E8] uppercase tracking-wider">Style</span>
               </div>
 
               <div>
-                <span className="block text-[10px] text-[var(--text-muted)] uppercase px-2 mb-1">Font Size</span>
+                <span className="block text-[10px] text-[#7F8993] uppercase px-2 mb-1">Font Size</span>
                 <div className="grid grid-cols-3 gap-1 px-1">
                   {(['small', 'medium', 'large'] as SubtitleSize[]).map((sz) => (
                     <button
@@ -754,8 +748,8 @@ export function VideoPlayer({
                       onClick={() => setSubtitleSize(sz)}
                       className={`py-1 rounded-lg text-center capitalize text-xs border ${
                         subtitleSize === sz
-                          ? 'border-[var(--color-pink)] bg-[var(--color-pink)]/20 text-white font-bold'
-                          : 'border-white/10 hover:bg-white/5 text-gray-300'
+                          ? 'border-[#F4C95D] bg-[#F4C95D]/20 text-[#F5F1E8] font-bold'
+                          : 'border-[#27313A] hover:bg-[#151F28] text-[#B7BEC6]'
                       }`}
                     >
                       {sz}
@@ -765,7 +759,7 @@ export function VideoPlayer({
               </div>
 
               <div>
-                <span className="block text-[10px] text-[var(--text-muted)] uppercase px-2 mb-1">Background Style</span>
+                <span className="block text-[10px] text-[#7F8993] uppercase px-2 mb-1">Background Style</span>
                 <div className="grid grid-cols-3 gap-1 px-1">
                   {(['translucent', 'solid', 'glow'] as SubtitleStyle[]).map((st) => (
                     <button
@@ -773,8 +767,8 @@ export function VideoPlayer({
                       onClick={() => setSubtitleStyle(st)}
                       className={`py-1 rounded-lg text-center capitalize text-xs border ${
                         subtitleStyle === st
-                          ? 'border-[var(--color-pink)] bg-[var(--color-pink)]/20 text-white font-bold'
-                          : 'border-white/10 hover:bg-white/5 text-gray-300'
+                          ? 'border-[#F4C95D] bg-[#F4C95D]/20 text-[#F5F1E8] font-bold'
+                          : 'border-[#27313A] hover:bg-[#151F28] text-[#B7BEC6]'
                       }`}
                     >
                       {st}
@@ -788,21 +782,21 @@ export function VideoPlayer({
           {/* Speed Selector Menu */}
           {activeMenu === 'speed' && (
             <div className="space-y-1">
-              <div className="flex items-center justify-between px-2 pb-1.5 border-b border-white/10">
+              <div className="flex items-center justify-between px-2 pb-1.5 border-b border-[#27313A]">
                 <button
                   onClick={() => setActiveMenu('settings')}
-                  className="text-[11px] text-[var(--color-pink-light)] hover:underline font-bold"
+                  className="text-[11px] text-[#F4C95D] hover:underline font-bold"
                 >
                   ← Back
                 </button>
-                <span className="text-[11px] font-bold text-white uppercase tracking-wider">Speed</span>
+                <span className="text-[11px] font-bold text-[#F5F1E8] uppercase tracking-wider">Speed</span>
               </div>
               {[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((spd) => (
                 <button
                   key={spd}
                   onClick={() => changeSpeed(spd)}
-                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-colors text-left ${
-                    playbackSpeed === spd ? 'bg-[#8B5CF6]/25 text-[var(--color-pink-light)] font-bold' : 'hover:bg-white/10'
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors text-left ${
+                    playbackSpeed === spd ? 'bg-[#F4C95D]/15 text-[#F4C95D] font-bold' : 'hover:bg-[#151F28]'
                   }`}
                 >
                   <span>{spd}x {spd === 1 && '(Normal)'}</span>
@@ -815,21 +809,21 @@ export function VideoPlayer({
           {/* Quality Selector Menu */}
           {activeMenu === 'quality' && (
             <div className="space-y-1">
-              <div className="flex items-center justify-between px-2 pb-1.5 border-b border-white/10">
+              <div className="flex items-center justify-between px-2 pb-1.5 border-b border-[#27313A]">
                 <button
                   onClick={() => setActiveMenu('settings')}
-                  className="text-[11px] text-[var(--color-pink-light)] hover:underline font-bold"
+                  className="text-[11px] text-[#F4C95D] hover:underline font-bold"
                 >
                   ← Back
                 </button>
-                <span className="text-[11px] font-bold text-white uppercase tracking-wider">Quality</span>
+                <span className="text-[11px] font-bold text-[#F5F1E8] uppercase tracking-wider">Quality</span>
               </div>
               {(['Auto', '1080p', '720p', '480p', '360p'] as VideoQuality[]).map((q) => (
                 <button
                   key={q}
                   onClick={() => changeQuality(q)}
-                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-colors text-left ${
-                    selectedQuality === q ? 'bg-[#8B5CF6]/25 text-[var(--color-pink-light)] font-bold' : 'hover:bg-white/10'
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors text-left ${
+                    selectedQuality === q ? 'bg-[#F4C95D]/15 text-[#F4C95D] font-bold' : 'hover:bg-[#151F28]'
                   }`}
                 >
                   <span>{q} {q === 'Auto' && '(Optimal)'}</span>
@@ -843,7 +837,7 @@ export function VideoPlayer({
 
       {/* Bottom Controls Bar */}
       <div
-        className={`absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-t from-black/95 via-black/70 to-transparent transition-opacity duration-300 ${
+        className={`absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-t from-[#05080B]/95 via-[#05080B]/70 to-transparent transition-opacity duration-300 ${
           showControls || activeMenu !== 'none' ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
@@ -853,12 +847,12 @@ export function VideoPlayer({
           onClick={handleSeekClick}
           onMouseMove={handleSeekMouseMove}
           onMouseLeave={() => setHoverTime(null)}
-          className="relative w-full h-1.5 hover:h-3 bg-white/20 rounded-full cursor-pointer mb-3 transition-all group/seek"
+          className="relative w-full h-1.5 hover:h-2.5 bg-[#36414B] rounded-full cursor-pointer mb-3 transition-all group/seek"
         >
           {/* Hover preview tooltip */}
           {hoverTime !== null && (
             <div
-              className="absolute bottom-full mb-2 -translate-x-1/2 px-2 py-0.5 rounded-md bg-black/90 text-[11px] text-white font-mono pointer-events-none border border-white/20 shadow-xl"
+              className="absolute bottom-full mb-2 -translate-x-1/2 px-2 py-0.5 rounded-md bg-[#101820] text-[11px] text-[#F5F1E8] font-mono pointer-events-none border border-[#27313A] shadow-xl"
               style={{ left: `${hoverPosition}%` }}
             >
               {formatTime(hoverTime)}
@@ -870,23 +864,22 @@ export function VideoPlayer({
             className="h-full rounded-full relative"
             style={{
               width: `${progressPercent}%`,
-              background: 'var(--gradient-neon)',
-              boxShadow: 'var(--glow-pink)',
+              background: '#F4C95D',
             }}
           >
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full opacity-0 group-hover/seek:opacity-100 transition-opacity shadow-[0_0_8px_rgba(255,255,255,0.9)]" />
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-[#F4C95D] rounded-full opacity-0 group-hover/seek:opacity-100 transition-opacity shadow-md" />
           </div>
         </div>
 
         {/* Controls Rows */}
-        <div className="flex items-center justify-between gap-2 text-white">
+        <div className="flex items-center justify-between gap-2 text-[#F5F1E8]">
           {/* Left Controls: Play, Seek -10s, Seek +10s, Volume, Timestamp */}
           <div className="flex items-center gap-1.5 sm:gap-2.5">
             <button
               onClick={togglePlay}
               aria-label={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
               title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
-              className="p-1.5 hover:text-[var(--color-pink-light)] hover:scale-110 transition-all active:scale-95"
+              className="p-1.5 text-[#F5F1E8] hover:text-[#F4C95D] hover:scale-110 transition-all active:scale-95 cursor-pointer"
             >
               {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
             </button>
@@ -896,7 +889,7 @@ export function VideoPlayer({
               onClick={() => seekDelta(-10)}
               aria-label="Seek back 10 seconds (Left Arrow)"
               title="Seek back 10s"
-              className="p-1 hover:text-[var(--color-pink-light)] transition-colors hidden xs:block"
+              className="p-1 text-[#AEB7BF] hover:text-[#F4C95D] transition-colors hidden xs:block cursor-pointer"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
@@ -906,7 +899,7 @@ export function VideoPlayer({
               onClick={() => seekDelta(10)}
               aria-label="Seek forward 10 seconds (Right Arrow)"
               title="Seek forward 10s"
-              className="p-1 hover:text-[var(--color-pink-light)] transition-colors hidden xs:block"
+              className="p-1 text-[#AEB7BF] hover:text-[#F4C95D] transition-colors hidden xs:block cursor-pointer"
             >
               <RotateCw className="w-4 h-4" />
             </button>
@@ -917,7 +910,7 @@ export function VideoPlayer({
                 onClick={toggleMute}
                 aria-label={isMuted ? 'Unmute (M)' : 'Mute (M)'}
                 title={isMuted ? 'Unmute (M)' : 'Mute (M)'}
-                className="p-1 hover:text-[var(--color-pink-light)] transition-colors"
+                className="p-1 text-[#AEB7BF] hover:text-[#F4C95D] transition-colors cursor-pointer"
               >
                 {isMuted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
               </button>
@@ -928,13 +921,13 @@ export function VideoPlayer({
                 step="0.05"
                 value={isMuted ? 0 : volume}
                 onChange={handleVolumeChange}
-                className="w-12 sm:w-16 h-1 bg-white/30 rounded cursor-pointer accent-[var(--color-pink-light)]"
+                className="w-12 sm:w-16 h-1 bg-[#36414B] rounded cursor-pointer accent-[#F4C95D]"
               />
             </div>
 
             {/* Time Stamp */}
-            <div className="text-[11px] text-[var(--text-secondary)] font-mono pl-1">
-              <span>{formatTime(currentTime)}</span> / <span>{formatTime(duration)}</span>
+            <div className="text-[11px] text-[#AEB7BF] font-mono pl-1">
+              <span className="text-[#F5F1E8]">{formatTime(currentTime)}</span> / <span>{formatTime(duration)}</span>
             </div>
           </div>
 
@@ -950,10 +943,10 @@ export function VideoPlayer({
                 }
               }}
               title="Subtitles / Closed Captions (C)"
-              className={`p-1.5 rounded-lg transition-colors ${
+              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                 selectedSubtitleId !== 'off'
-                  ? 'text-[var(--color-pink-light)] bg-white/10'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'text-[#F4C95D] bg-[#151F28]'
+                  : 'text-[#AEB7BF] hover:text-[#F4C95D]'
               }`}
             >
               <Subtitles className="w-4 h-4" />
@@ -963,8 +956,8 @@ export function VideoPlayer({
             <button
               onClick={() => setActiveMenu(activeMenu === 'settings' ? 'none' : 'settings')}
               title="Settings (Speed, Quality, Subtitles)"
-              className={`p-1.5 rounded-lg hover:text-[var(--color-pink-light)] transition-colors ${
-                activeMenu !== 'none' ? 'text-[var(--color-pink-light)] bg-white/10' : ''
+              className={`p-1.5 rounded-lg hover:text-[#F4C95D] transition-colors cursor-pointer ${
+                activeMenu !== 'none' ? 'text-[#F4C95D] bg-[#151F28]' : 'text-[#AEB7BF]'
               }`}
             >
               <Settings className="w-4 h-4" />
@@ -975,7 +968,7 @@ export function VideoPlayer({
               onClick={togglePiP}
               aria-label="Picture in Picture"
               title="Picture-in-Picture"
-              className="p-1.5 hover:text-[var(--color-pink-light)] transition-colors hidden sm:block"
+              className="p-1.5 text-[#AEB7BF] hover:text-[#F4C95D] transition-colors hidden sm:block cursor-pointer"
             >
               <Sparkles className="w-4 h-4" />
             </button>
@@ -985,7 +978,7 @@ export function VideoPlayer({
               onClick={toggleFullscreen}
               aria-label="Toggle Fullscreen (F)"
               title="Fullscreen (F)"
-              className="p-1.5 hover:text-[var(--color-pink-light)] transition-colors"
+              className="p-1.5 text-[#AEB7BF] hover:text-[#F4C95D] transition-colors cursor-pointer"
             >
               {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
             </button>
@@ -995,40 +988,23 @@ export function VideoPlayer({
 
       {/* Locked Paywall Overlay */}
       {locked && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md rounded-2xl">
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#070B0F]/95 backdrop-blur-md rounded-2xl">
           <div className="text-center px-6">
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border"
-              style={{
-                background: 'var(--neon-purple-glow)',
-                borderColor: 'var(--neon-purple-border)',
-              }}
-            >
-              <svg className="w-8 h-8 text-[var(--color-pink-light)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#27313A] bg-[#151F28]">
+              <svg className="w-8 h-8 text-[#F4C95D]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <h3 className="text-white font-bold text-lg mb-1">Premium Episode</h3>
-            <p className="text-[var(--text-secondary)] text-sm mb-2">This episode requires a one-time unlock.</p>
+            <h3 className="text-[#F5F1E8] font-bold text-lg mb-1">Premium Episode</h3>
+            <p className="text-[#B7BEC6] text-sm mb-2">This episode requires a one-time unlock.</p>
             {priceInr > 0 && (
-              <p
-                className="font-extrabold text-3xl mb-5"
-                style={{
-                  background: 'var(--gradient-text)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
+              <p className="font-extrabold text-3xl mb-5 text-[#F4C95D]">
                 ₹{priceInr.toFixed(2)}
               </p>
             )}
             <button
               onClick={onUnlockRequest}
-              className="px-8 py-3 rounded-xl font-semibold text-sm text-white transition-all shadow-xl active:scale-95 cursor-pointer"
-              style={{
-                background: 'var(--gradient-neon)',
-                boxShadow: 'var(--glow-purple)',
-              }}
+              className="px-8 py-3 rounded-lg font-bold text-sm bg-[#F4C95D] text-[#0B0F13] hover:bg-[#FFD978] transition-all shadow-xl active:scale-95 cursor-pointer"
             >
               Unlock Now
             </button>

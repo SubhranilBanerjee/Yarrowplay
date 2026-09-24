@@ -33,40 +33,40 @@ export default function DailyRewardsModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg bg-[#101820] border border-[#27313A] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-red-600/30 via-amber-600/30 to-orange-600/30 p-6 border-b border-neutral-800 text-center">
+        <div className="relative bg-[#151F28] p-6 border-b border-[#27313A] text-center">
           <button
             onClick={closeDailyRewards}
-            className="absolute top-4 right-4 p-2 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800/80 transition-colors"
+            className="absolute top-4 right-4 p-2 rounded-full text-[#7F8993] hover:text-[#F5F1E8] hover:bg-[#101820] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
 
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30 mb-3">
-            <Gift className="w-8 h-8 text-neutral-950" />
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-[#F4C95D] flex items-center justify-center shadow-md mb-3">
+            <Gift className="w-8 h-8 text-[#0B0F13]" />
           </div>
 
-          <h2 className="text-xl font-bold text-white flex items-center justify-center gap-2">
+          <h2 className="text-xl font-bold text-[#F5F1E8] flex items-center justify-center gap-2">
             7-Day Streak Rewards
-            <span className="text-xs px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center gap-1 font-semibold">
-              <Flame className="w-3 h-3 text-orange-500 fill-orange-500" /> {streak} Day Streak
+            <span className="text-xs px-2 py-0.5 rounded-full bg-[#F4C95D]/15 text-[#F4C95D] border border-[#F4C95D]/30 flex items-center gap-1 font-semibold">
+              <Flame className="w-3 h-3 text-[#F4C95D] fill-[#F4C95D]" /> {streak} Day Streak
             </span>
           </h2>
-          <p className="text-xs text-neutral-400 mt-1">
-            Check in every single day to claim free drama coins and unlock episodes!
+          <p className="text-xs text-[#B7BEC6] mt-1">
+            Check in every single day to claim free coins and unlock episodes!
           </p>
         </div>
 
         {/* Claimed Celebration Banner */}
         {claimedReward && (
-          <div className="mx-6 mt-4 p-4 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 text-center animate-bounce">
-            <p className="text-sm font-bold text-amber-300 flex items-center justify-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-400" />
-              Claimed +{claimedReward} Free Drama Coins!
+          <div className="mx-6 mt-4 p-4 rounded-xl bg-[#F4C95D]/15 border border-[#F4C95D]/30 text-center animate-bounce">
+            <p className="text-sm font-bold text-[#F4C95D] flex items-center justify-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#F4C95D]" />
+              Claimed +{claimedReward} Free Coins!
             </p>
-            <p className="text-xs text-neutral-300 mt-0.5">Your updated balance is 🪙 {coins} coins</p>
+            <p className="text-xs text-[#B7BEC6] mt-0.5">Your updated balance is 🪙 {coins} coins</p>
           </div>
         )}
 
@@ -82,32 +82,32 @@ export default function DailyRewardsModal() {
                 <div
                   key={item.day}
                   className={`relative p-3 rounded-xl border flex flex-col items-center justify-center transition-all ${
-                    isGrandPrize ? 'col-span-2 bg-gradient-to-br from-amber-950/60 to-neutral-900 border-amber-500/60' : ''
+                    isGrandPrize ? 'col-span-2 bg-[#151F28] border-[#F4C95D]/60' : ''
                   } ${
                     isToday
-                      ? 'bg-amber-500/20 border-amber-500 ring-2 ring-amber-400/40 shadow-lg shadow-amber-500/20'
+                      ? 'bg-[#F4C95D]/15 border-[#F4C95D] ring-2 ring-[#F4C95D]/40 shadow-md'
                       : isClaimed
-                      ? 'bg-neutral-900/40 border-neutral-800/60 opacity-60'
-                      : 'bg-neutral-900/80 border-neutral-800'
+                      ? 'bg-[#111A22]/50 border-[#27313A]/60 opacity-60'
+                      : 'bg-[#111A22] border-[#27313A]'
                   }`}
                 >
-                  <span className="text-[11px] font-semibold text-neutral-400">Day {item.day}</span>
+                  <span className="text-[11px] font-semibold text-[#7F8993]">Day {item.day}</span>
 
                   <div className="my-2 flex flex-col items-center">
                     <span className="text-xl">🪙</span>
-                    <span className="text-sm font-black text-amber-400">+{item.coins}</span>
+                    <span className="text-sm font-black text-[#F4C95D]">+{item.coins}</span>
                   </div>
 
                   {isClaimed ? (
-                    <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                    <span className="text-[10px] text-[#68B88A] font-bold flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Done
                     </span>
                   ) : isToday ? (
-                    <span className="text-[10px] text-amber-300 font-bold animate-pulse">
+                    <span className="text-[10px] text-[#F4C95D] font-bold animate-pulse">
                       Ready!
                     </span>
                   ) : (
-                    <span className="text-[10px] text-neutral-500">Upcoming</span>
+                    <span className="text-[10px] text-[#7F8993]">Upcoming</span>
                   )}
                 </div>
               );
@@ -119,10 +119,10 @@ export default function DailyRewardsModal() {
             <button
               onClick={handleClaim}
               disabled={!canCheckIn || loading}
-              className={`w-full py-3.5 rounded-xl font-black text-sm tracking-wide shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`w-full py-3.5 rounded-xl font-bold text-sm tracking-wide shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
                 canCheckIn
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-neutral-950 shadow-orange-500/30'
-                  : 'bg-neutral-800 text-neutral-400 border border-neutral-700'
+                  ? 'bg-[#F4C95D] hover:bg-[#FFD978] active:bg-[#DDB347] text-[#0B0F13]'
+                  : 'bg-[#141D26] text-[#7F8993] border border-[#27313A]'
               }`}
             >
               {loading

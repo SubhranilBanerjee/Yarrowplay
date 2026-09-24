@@ -11,12 +11,12 @@ export function MobileNavbar() {
   const { user, profile } = useAuth();
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--bg-primary)]/90 backdrop-blur-xl border-t border-[var(--glass-border)] px-2 py-2">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0A1016]/95 backdrop-blur-xl border-t border-[#1C252D] px-2 py-2">
       <div className="flex items-center justify-around">
         <Link
           href="/home"
-          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
-            pathname === '/home' ? 'text-[var(--color-pink)] drop-shadow-[0_0_8px_rgba(255,32,217,0.5)]' : 'text-[var(--text-muted)] hover:text-white'
+          className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
+            pathname === '/home' ? 'text-[#F4C95D]' : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
           }`}
         >
           <Home className="w-5 h-5" />
@@ -25,8 +25,8 @@ export function MobileNavbar() {
 
         <Link
           href="/explore"
-          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
-            pathname === '/explore' ? 'text-[var(--color-pink)] drop-shadow-[0_0_8px_rgba(255,32,217,0.5)]' : 'text-[var(--text-muted)] hover:text-white'
+          className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
+            pathname === '/explore' ? 'text-[#F4C95D]' : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
           }`}
         >
           <Compass className="w-5 h-5" />
@@ -36,33 +36,33 @@ export function MobileNavbar() {
         {profile?.role === 'advertiser' ? (
           <Link
             href="/advertiser"
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
-              pathname.startsWith('/advertiser') ? 'text-[var(--color-pink)]' : 'text-[var(--text-muted)] hover:text-white'
+            className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
+              pathname.startsWith('/advertiser') ? 'text-[#F4C95D]' : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
             }`}
           >
-            <div className="p-2 rounded-full theme-neon-button -mt-3 shadow-lg">
+            <div className="p-2 rounded-full bg-[#F4C95D] text-[#0B0F13] -mt-3 shadow-md">
               <Megaphone className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-bold text-[var(--color-pink)]">Studio</span>
+            <span className="text-[10px] font-bold text-[#F4C95D]">Studio</span>
           </Link>
         ) : (
           <Link
             href="/creator/studio"
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
-              pathname.startsWith('/creator/studio') ? 'text-[var(--color-pink)]' : 'text-[var(--text-muted)] hover:text-white'
+            className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
+              pathname.startsWith('/creator/studio') ? 'text-[#F4C95D]' : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
             }`}
           >
-            <div className="p-2 rounded-full theme-neon-button -mt-3 shadow-lg">
+            <div className="p-2 rounded-full bg-[#F4C95D] text-[#0B0F13] -mt-3 shadow-md">
               <Film className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-bold text-[var(--color-pink)]">Studio</span>
+            <span className="text-[10px] font-bold text-[#F4C95D]">Studio</span>
           </Link>
         )}
 
         <Link
           href="/blogs"
-          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
-            pathname.startsWith('/blogs') ? 'text-[var(--color-pink)] drop-shadow-[0_0_8px_rgba(255,32,217,0.5)]' : 'text-[var(--text-muted)] hover:text-white'
+          className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
+            pathname.startsWith('/blogs') ? 'text-[#F4C95D]' : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
           }`}
         >
           <BookOpen className="w-5 h-5" />
@@ -71,10 +71,10 @@ export function MobileNavbar() {
 
         <Link
           href={user ? `/profile/${profile?.username || user.id}` : '/login'}
-          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+          className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
             pathname.startsWith('/profile') || pathname === '/login'
-              ? 'text-[var(--color-pink)] drop-shadow-[0_0_8px_rgba(255,32,217,0.5)]'
-              : 'text-[var(--text-muted)] hover:text-white'
+              ? 'text-[#F4C95D]'
+              : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
           }`}
         >
           <User className="w-5 h-5" />

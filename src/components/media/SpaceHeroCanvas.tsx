@@ -153,52 +153,51 @@ export function SpaceHeroCanvas() {
         background: 'transparent',
       }}
     >
-      {/* ── 1. WATERCOLOR NEBULA CLOUD LAYERS (From Reference 1) ── */}
+      {/* ── 1. CINEMATIC AMBIENT LIGHTING LAYERS ── */}
       <div
         className="absolute inset-0 transition-transform duration-75 ease-out will-change-transform"
         style={{
           transform: `translate3d(${(mousePos.x - 0.5) * -15}px, ${nebulaOffsetY * 0.8}px, 0)`,
         }}
       >
-        {/* Deep Violet Base Cloud */}
+        {/* Deep Slate/Obsidian Base Ambiance */}
         <div
-          className="absolute -top-24 -left-20 w-[650px] h-[650px] rounded-full blur-[140px] opacity-70 mix-blend-screen"
+          className="absolute -top-24 -left-20 w-[650px] h-[650px] rounded-full blur-[140px] opacity-40 mix-blend-screen"
           style={{
-            background: 'radial-gradient(circle, #5b00c8 0%, #30006e 60%, transparent 80%)',
+            background: 'radial-gradient(circle, rgba(16,24,32,0.7) 0%, rgba(11,17,23,0.4) 60%, transparent 80%)',
             transform: `translateY(${scrollY * -0.1}px)`,
           }}
         />
 
-        {/* Rich Magenta Mid Cloud */}
+        {/* Subtle Blue-Gray Mid Ambiance */}
         <div
-          className="absolute top-1/4 right-0 w-[600px] h-[600px] rounded-full blur-[130px] opacity-60 mix-blend-screen"
+          className="absolute top-1/4 right-0 w-[600px] h-[600px] rounded-full blur-[130px] opacity-30 mix-blend-screen"
           style={{
-            background: 'radial-gradient(circle, #a800d8 0%, #680098 50%, transparent 80%)',
+            background: 'radial-gradient(circle, rgba(21,31,40,0.6) 0%, rgba(11,17,23,0.3) 50%, transparent 80%)',
             transform: `translateY(${scrollY * 0.25}px) rotate(${scrollY * 0.02}deg)`,
           }}
         />
 
-        {/* Soft Lavender / Pink Watercolor Glow */}
+        {/* Champagne Warm Light Glow */}
         <div
-          className="absolute -bottom-20 left-1/4 w-[700px] h-[550px] rounded-full blur-[150px] opacity-50 mix-blend-screen"
+          className="absolute -bottom-20 left-1/4 w-[700px] h-[550px] rounded-full blur-[150px] opacity-25 mix-blend-screen"
           style={{
-            background: 'radial-gradient(circle, #ff20d9 0%, #7c00ff 45%, transparent 75%)',
+            background: 'radial-gradient(circle, rgba(244,201,93,0.12) 0%, rgba(201,154,50,0.04) 45%, transparent 75%)',
             transform: `translateY(${scrollY * -0.2}px)`,
           }}
         />
 
-        {/* Golden Solar Core Dust */}
+        {/* Gold Accent Core */}
         <div
-          className="absolute top-1/3 left-1/3 w-[350px] h-[350px] rounded-full blur-[90px] opacity-35 mix-blend-screen"
+          className="absolute top-1/3 left-1/3 w-[350px] h-[350px] rounded-full blur-[90px] opacity-20 mix-blend-screen"
           style={{
-            background: 'radial-gradient(circle, #ffb300 0%, #ff20d9 50%, transparent 80%)',
+            background: 'radial-gradient(circle, rgba(244,201,93,0.2) 0%, transparent 70%)',
             transform: `scale(${1 + scrollRatio * 0.2}) translate(${mousePos.x * 20}px, ${mousePos.y * 20}px)`,
           }}
         />
       </div>
 
-      {/* ── 2. COSMIC PLASMA STREAM / AURORA FLAME (From Reference 2) ── */}
-      {/* Sweeps diagonally up from bottom-left towards top-right and dynamically expands/tilts on scroll */}
+      {/* ── 2. CINEMATIC LIGHT BEAM STREAM ── */}
       <div
         className="absolute inset-0 transition-transform duration-100 ease-out will-change-transform"
         style={{
@@ -209,14 +208,13 @@ export function SpaceHeroCanvas() {
         <svg
           viewBox="0 0 1000 800"
           preserveAspectRatio="none"
-          className="w-full h-full opacity-60 mix-blend-screen filter blur-[24px]"
+          className="w-full h-full opacity-30 mix-blend-screen filter blur-[24px]"
         >
           <defs>
             <linearGradient id="plasmaGrad" x1="0%" y1="100%" x2="80%" y2="20%">
-              <stop offset="0%" stopColor="#FF20D9" stopOpacity="0.9" />
-              <stop offset="35%" stopColor="#FF5C00" stopOpacity="0.8" />
-              <stop offset="65%" stopColor="#FFE600" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#E000FF" stopOpacity="0" />
+              <stop offset="0%" stopColor="#C99A32" stopOpacity="0.5" />
+              <stop offset="50%" stopColor="#F4C95D" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#101820" stopOpacity="0" />
             </linearGradient>
             <filter id="plasmaGlow" x="-20%" y="-20%" width="140%" height="140%">
               <feGaussianBlur stdDeviation="25" result="blur" />
@@ -233,16 +231,16 @@ export function SpaceHeroCanvas() {
           <path
             d="M -80,820 Q 180,580 320,380 T 640,160 Q 790,40 920,-20"
             fill="none"
-            stroke="#FFE600"
-            strokeWidth="20"
+            stroke="#F4C95D"
+            strokeWidth="15"
             strokeLinecap="round"
-            opacity="0.85"
+            opacity="0.4"
             filter="url(#plasmaGlow)"
           />
         </svg>
       </div>
 
-      {/* ── 3. CELESTIAL CONSTELLATION MESH (From Reference 1) ── */}
+      {/* ── 3. CELESTIAL CONSTELLATION MESH ── */}
       <svg
         className="absolute inset-0 w-full h-full transition-transform duration-100 ease-out will-change-transform"
         style={{
@@ -251,15 +249,15 @@ export function SpaceHeroCanvas() {
       >
         <defs>
           <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="1" />
-            <stop offset="40%" stopColor="#E000FF" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#7C00FF" stopOpacity="0" />
+            <stop offset="0%" stopColor="#F5F1E8" stopOpacity="1" />
+            <stop offset="40%" stopColor="#F4C95D" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#C99A32" stopOpacity="0" />
           </radialGradient>
         </defs>
 
         {/* Constellation Lines */}
         {constellations.map((constellation, cIdx) => (
-          <g key={cIdx} className="opacity-40">
+          <g key={cIdx} className="opacity-30">
             {constellation.connections.map(([fromIdx, toIdx], lIdx) => {
               const from = constellation.nodes[fromIdx];
               const to = constellation.nodes[toIdx];
@@ -270,7 +268,7 @@ export function SpaceHeroCanvas() {
                   y1={`${from.y}%`}
                   x2={`${to.x}%`}
                   y2={`${to.y}%`}
-                  stroke="rgba(216, 180, 254, 0.45)"
+                  stroke="rgba(244, 201, 93, 0.25)"
                   strokeWidth="0.85"
                   strokeDasharray="4 2"
                 />
@@ -283,14 +281,14 @@ export function SpaceHeroCanvas() {
                 <circle
                   cx={`${node.x}%`}
                   cy={`${node.y}%`}
-                  r="2.5"
-                  fill="#FFFFFF"
-                  className="filter drop-shadow-[0_0_6px_#FFFFFF]"
+                  r="2"
+                  fill="#F5F1E8"
+                  className="filter drop-shadow-[0_0_4px_#F4C95D]"
                 />
                 <circle
                   cx={`${node.x}%`}
                   cy={`${node.y}%`}
-                  r="6"
+                  r="5"
                   fill="url(#starGlow)"
                 />
               </g>
@@ -299,7 +297,7 @@ export function SpaceHeroCanvas() {
         ))}
       </svg>
 
-      {/* ── 4. STARRY DEEP SPACE PARTICLES (From Reference 1) ── */}
+      {/* ── 4. STARRY DEEP SPACE PARTICLES ── */}
       <div
         className="absolute inset-0 transition-transform duration-100 ease-out will-change-transform"
         style={{
@@ -309,14 +307,14 @@ export function SpaceHeroCanvas() {
         {stars.map((star, idx) => (
           <div
             key={idx}
-            className="absolute rounded-full bg-white transition-opacity"
+            className="absolute rounded-full bg-[#F5F1E8] transition-opacity"
             style={{
               left: `${star.x}%`,
               top: `${star.y}%`,
               width: `${star.size}px`,
               height: `${star.size}px`,
-              opacity: star.opacity,
-              boxShadow: star.size > 1.8 ? '0 0 6px 1px rgba(255, 255, 255, 0.8), 0 0 12px 2px rgba(224, 0, 255, 0.4)' : 'none',
+              opacity: star.opacity * 0.7,
+              boxShadow: star.size > 1.8 ? '0 0 4px 1px rgba(244, 201, 93, 0.4)' : 'none',
               animation: `spaceTwinkle ${star.twinkleSpeed}s infinite ease-in-out ${star.twinkleDelay}s`,
             }}
           />

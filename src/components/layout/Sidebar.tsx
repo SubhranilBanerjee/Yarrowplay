@@ -62,18 +62,18 @@ export function Sidebar() {
   return (
     <aside
       onWheel={(e) => e.stopPropagation()}
-      className={`hidden md:flex flex-col shrink-0 bg-[var(--bg-primary)]/80 backdrop-blur-xl border-r border-[var(--glass-border)] sticky top-[61px] h-[calc(100vh-61px)] max-h-[calc(100vh-61px)] overflow-hidden select-none overscroll-none transition-all duration-300 ease-in-out z-20 ${
+      className={`hidden md:flex flex-col shrink-0 bg-[#080D12] border-r border-[#1C252D] sticky top-[61px] h-[calc(100vh-61px)] max-h-[calc(100vh-61px)] overflow-hidden select-none overscroll-none transition-all duration-300 ease-in-out z-20 ${
         isCollapsed ? 'w-20 px-2.5 py-3.5 items-center' : 'w-64 p-3.5'
       }`}
     >
       {/* Top Sidebar Header & Collapse Toggle */}
       <div
-        className={`flex items-center w-full mb-2.5 pb-2 border-b border-[var(--glass-border-subtle)] shrink-0 ${
+        className={`flex items-center w-full mb-2.5 pb-2 border-b border-[#1C252D] shrink-0 ${
           isCollapsed ? 'justify-center' : 'justify-between px-1'
         }`}
       >
         {!isCollapsed && (
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] pl-2">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#7F8993] pl-2">
             Navigation
           </span>
         )}
@@ -83,12 +83,12 @@ export function Sidebar() {
             onClick={toggleSidebar}
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="flex items-center justify-center w-8 h-8 rounded-lg text-[#9CA3AF] hover:text-white hover:bg-[#161522] border border-transparent hover:border-[#2E2A45] transition-all cursor-pointer"
+            className="flex items-center justify-center w-8 h-8 rounded-lg text-[#9AA5AF] hover:text-[#F5F1E8] hover:bg-[#111A22] border border-transparent hover:border-[#27313A] transition-all cursor-pointer"
           >
             {isCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
           </button>
           {isCollapsed && (
-            <div className="absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-[#1E1B2E] border border-[#2E2A45] text-white text-xs font-semibold whitespace-nowrap shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-150 z-50 flex items-center gap-1.5">
+            <div className="absolute left-full ml-3 px-3 py-1.5 rounded-lg bg-[#101820] border border-[#27313A] text-[#F5F1E8] text-xs font-semibold whitespace-nowrap shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-150 z-50 flex items-center gap-1.5">
               <span>Expand sidebar</span>
             </div>
           )}
@@ -108,26 +108,31 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 title={isCollapsed ? item.label : undefined}
-                className={`relative group flex items-center rounded-xl font-semibold text-sm transition-all duration-200 ${
+                className={`relative group flex items-center rounded-lg font-medium text-sm transition-all duration-150 ${
                   isCollapsed
                     ? 'w-10 h-10 justify-center'
                     : 'gap-3 px-3.5 py-2.5 w-full'
                 } ${
                   isActive
-                    ? 'theme-active-pill text-[#F9FAFB] shadow-[0_0_15px_rgba(139,92,246,0.35)]'
-                    : 'text-[#9CA3AF] hover:bg-[#161522] hover:text-[#F9FAFB]'
+                    ? 'bg-[#F4C95D]/12 text-[#F5F1E8] font-semibold'
+                    : 'text-[#B7BEC6] hover:bg-[#111A22] hover:text-[#F5F1E8]'
                 }`}
               >
                 <Icon
                   className={`w-5 h-5 shrink-0 transition-colors ${
-                    isActive ? 'text-[#F9FAFB]' : item.highlight ? 'text-[#EC4899]' : 'text-[#9CA3AF]'
+                    isActive ? 'text-[#F4C95D]' : 'text-[#9AA5AF]'
                   }`}
                 />
                 {!isCollapsed && <span className="truncate">{item.label}</span>}
 
-                {/* Netflix-style hover tooltip when collapsed */}
+                {/* Subtle active left border bar */}
+                {isActive && !isCollapsed && (
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#F4C95D] rounded-r" />
+                )}
+
+                {/* Hover tooltip when collapsed */}
                 {isCollapsed && (
-                  <div className="absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-[#1E1B2E] border border-[#2E2A45] text-white text-xs font-semibold whitespace-nowrap shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-150 z-50 flex items-center gap-1.5">
+                  <div className="absolute left-full ml-3 px-3 py-1.5 rounded-lg bg-[#101820] border border-[#27313A] text-[#F5F1E8] text-xs font-semibold whitespace-nowrap shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-150 z-50 flex items-center gap-1.5">
                     <span>{item.label}</span>
                   </div>
                 )}
@@ -137,29 +142,29 @@ export function Sidebar() {
       </div>
 
       {/* Bottom Profile / Auth */}
-      <div className={`mt-auto pt-3 border-t border-[var(--glass-border-subtle)] w-full shrink-0 overflow-hidden ${isCollapsed ? 'flex flex-col items-center' : 'space-y-2'}`}>
+      <div className={`mt-auto pt-3 border-t border-[#1C252D] w-full shrink-0 overflow-hidden ${isCollapsed ? 'flex flex-col items-center' : 'space-y-2'}`}>
         {user ? (
           <Link
             href={`/profile/${profile?.username || user.id}`}
             title={isCollapsed ? (profile?.display_name || 'My Profile') : undefined}
-            className={`relative group flex items-center rounded-xl font-medium text-sm transition-all ${
+            className={`relative group flex items-center rounded-lg font-medium text-sm transition-all ${
               isCollapsed
                 ? 'w-10 h-10 justify-center'
                 : 'gap-3 px-3.5 py-2 w-full'
             } ${
               pathname.startsWith('/profile')
-                ? 'theme-active-pill text-[#F9FAFB] font-semibold shadow-[0_0_15px_rgba(139,92,246,0.35)]'
-                : 'text-[#9CA3AF] hover:bg-[#161522] hover:text-[#F9FAFB]'
+                ? 'bg-[#F4C95D]/12 text-[#F5F1E8] font-semibold'
+                : 'text-[#B7BEC6] hover:bg-[#111A22] hover:text-[#F5F1E8]'
             }`}
           >
-            <div className="w-6 h-6 rounded-full bg-[#8B5CF6]/20 border border-[#8B5CF6]/40 flex items-center justify-center text-[#A855F7] text-xs font-bold shrink-0">
+            <div className="w-6 h-6 rounded-full bg-[#151F28] border border-[#27313A] flex items-center justify-center text-[#F4C95D] text-xs font-bold shrink-0">
               {profile?.display_name ? profile.display_name[0].toUpperCase() : 'U'}
             </div>
-            {!isCollapsed && <span className="truncate flex-1 text-xs">{profile?.display_name || 'My Profile'}</span>}
+            {!isCollapsed && <span className="truncate flex-1 text-xs text-[#F5F1E8]">{profile?.display_name || 'My Profile'}</span>}
 
             {/* Hover Tooltip when collapsed */}
             {isCollapsed && (
-              <div className="absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-[#1E1B2E] border border-[#2E2A45] text-white text-xs font-semibold whitespace-nowrap shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-150 z-50">
+              <div className="absolute left-full ml-3 px-3 py-1.5 rounded-lg bg-[#101820] border border-[#27313A] text-[#F5F1E8] text-xs font-semibold whitespace-nowrap shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-150 z-50">
                 <span>{profile?.display_name || 'My Profile'}</span>
               </div>
             )}
@@ -168,16 +173,16 @@ export function Sidebar() {
           <Link
             href="/register"
             title="Sign Up"
-            className="w-10 h-10 rounded-xl theme-neon-button flex items-center justify-center text-white text-xs font-bold transition-all"
+            className="w-10 h-10 rounded-lg theme-neon-button flex items-center justify-center text-[#0B0F13] text-xs font-bold transition-all"
           >
             <Sparkles className="w-4 h-4" />
           </Link>
         ) : (
-          <div className="p-3 rounded-xl theme-glass-card-static text-center border border-[var(--glass-border)]">
-            <p className="text-[11px] text-[#9CA3AF] mb-2 leading-relaxed">Join Yarrowplay to stream, publish & comment.</p>
+          <div className="p-3 rounded-xl bg-[#111A22] text-center border border-[#1C252D]">
+            <p className="text-[11px] text-[#B7BEC6] mb-2 leading-relaxed">Join Lighthouse Reels to stream, publish &amp; comment.</p>
             <Link
               href="/register"
-              className="block w-full text-xs font-semibold py-1.5 theme-neon-button rounded-xl transition-all"
+              className="block w-full text-xs font-semibold py-1.5 theme-neon-button rounded-lg transition-all"
             >
               Get Started
             </Link>

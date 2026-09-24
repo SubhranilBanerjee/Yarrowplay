@@ -212,26 +212,26 @@ function ExploreContent() {
     seriesList.length + audioList.length + blogList.length + campaignList.length;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Page Header (Without 'Discover · Create · Share') */}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-[#F5F1E8]">
+      {/* Page Header */}
       <div className="max-w-3xl mb-8">
-        <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white flex items-center gap-3 flex-wrap">
+        <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-[#F5F1E8] flex items-center gap-3 flex-wrap">
           <span>Discover On</span>
-          <span className="theme-gradient-heading">Yarrowplay</span>
+          <span className="text-[#F5F1E8]">LIGHTHOUSE <span className="text-[#F4C95D]">REELS</span></span>
         </h1>
         {query ? (
-          <div className="mt-3 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--glass-surface)] border border-[var(--glass-border)] text-xs text-[var(--text-secondary)]">
-            <span>Filter: <strong className="text-white">&ldquo;{query}&rdquo;</strong></span>
+          <div className="mt-3 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-[#111A22] border border-[#27313A] text-xs text-[#B7BEC6]">
+            <span>Filter: <strong className="text-[#F5F1E8]">&ldquo;{query}&rdquo;</strong></span>
             <Link
               href="/explore"
-              className="text-[var(--text-muted)] hover:text-[var(--color-pink)] inline-flex items-center gap-0.5 ml-1 transition-colors"
+              className="text-[#7F8993] hover:text-[#F4C95D] inline-flex items-center gap-0.5 ml-1 transition-colors"
             >
               <X className="w-3.5 h-3.5" />
               <span>Clear</span>
             </Link>
           </div>
         ) : (
-          <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2 font-normal max-w-xl">
+          <p className="text-sm sm:text-base text-[#B7BEC6] mt-2 font-normal max-w-xl">
             Stream full video series, music collections, creator stories, and partner releases.
           </p>
         )}
@@ -290,16 +290,16 @@ function ExploreContent() {
       {/* ── Content Presentation ── */}
       {isLoading ? (
         <div className="space-y-8 animate-pulse">
-          <div className="h-6 w-48 bg-[#161522] rounded-lg mb-4" />
+          <div className="h-6 w-48 bg-[#111A22] rounded-lg mb-4 border border-[#1C252D]" />
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="aspect-video bg-[#161522] rounded-2xl ring-1 ring-white/5" />
+              <div key={i} className="aspect-video bg-[#111A22] rounded-xl border border-[#1C252D]" />
             ))}
           </div>
-          <div className="h-6 w-48 bg-[#161522] rounded-lg mt-8 mb-4" />
+          <div className="h-6 w-48 bg-[#111A22] rounded-lg mt-8 mb-4 border border-[#1C252D]" />
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="aspect-video bg-[#161522] rounded-2xl ring-1 ring-white/5" />
+              <div key={i} className="aspect-video bg-[#111A22] rounded-xl border border-[#1C252D]" />
             ))}
           </div>
         </div>
@@ -317,8 +317,8 @@ function ExploreContent() {
           {seriesList.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Layers className="w-5 h-5 text-[#EC4899]" />
-                <h2 className="text-xl font-bold text-white">Series ({seriesList.length})</h2>
+                <Layers className="w-5 h-5 text-[#F4C95D]" />
+                <h2 className="text-xl font-bold text-[#F5F1E8]">Series ({seriesList.length})</h2>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {seriesList.map((series) => (
@@ -331,8 +331,8 @@ function ExploreContent() {
           {audioList.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Music className="w-5 h-5 text-[#8B5CF6]" />
-                <h2 className="text-xl font-bold text-white">Audio Tracks ({audioList.length})</h2>
+                <Music className="w-5 h-5 text-[#7E9BB5]" />
+                <h2 className="text-xl font-bold text-[#F5F1E8]">Audio Tracks ({audioList.length})</h2>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {audioList.map((track) => (
@@ -345,8 +345,8 @@ function ExploreContent() {
           {blogList.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <BookOpen className="w-5 h-5 text-[#EC4899]" />
-                <h2 className="text-xl font-bold text-white">Blogs & Articles ({blogList.length})</h2>
+                <BookOpen className="w-5 h-5 text-[#F4C95D]" />
+                <h2 className="text-xl font-bold text-[#F5F1E8]">Blogs &amp; Articles ({blogList.length})</h2>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {blogList.map((blog) => (
@@ -359,8 +359,8 @@ function ExploreContent() {
           {campaignList.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Megaphone className="w-5 h-5 text-[#8B5CF6]" />
-                <h2 className="text-xl font-bold text-white">Sponsored Releases ({campaignList.length})</h2>
+                <Megaphone className="w-5 h-5 text-[#7E9BB5]" />
+                <h2 className="text-xl font-bold text-[#F5F1E8]">Sponsored Releases ({campaignList.length})</h2>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {campaignList.map((ad) => (
@@ -463,10 +463,10 @@ export default function ExplorePage() {
     <Suspense
       fallback={
         <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="h-12 bg-[#161522] rounded-2xl w-full max-w-xl mx-auto animate-pulse mb-8" />
+          <div className="h-12 bg-[#111A22] border border-[#1C252D] rounded-xl w-full max-w-xl mx-auto animate-pulse mb-8" />
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-60 bg-[#161522] rounded-2xl animate-pulse" />
+              <div key={i} className="h-60 bg-[#111A22] border border-[#1C252D] rounded-xl animate-pulse" />
             ))}
           </div>
         </div>

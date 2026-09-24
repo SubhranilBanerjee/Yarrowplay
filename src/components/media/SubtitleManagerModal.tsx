@@ -172,37 +172,25 @@ export function SubtitleManagerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div
-        className="rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 relative backdrop-blur-xl border"
-        style={{
-          background: 'var(--glass-surface-heavy)',
-          borderColor: 'var(--glass-border)',
-        }}
-      >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 relative bg-[#101820] border border-[#27313A]">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-white transition-colors"
+          className="absolute top-4 right-4 text-[#7F8993] hover:text-[#F5F1E8] transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center border"
-            style={{
-              background: 'var(--neon-purple-glow)',
-              borderColor: 'var(--neon-purple-border)',
-            }}
-          >
-            <Subtitles className="w-5 h-5 text-[var(--color-pink-light)]" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#F4C95D]/15 border border-[#F4C95D]/30">
+            <Subtitles className="w-5 h-5 text-[#F4C95D]" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
+            <h2 className="text-base sm:text-lg font-bold text-[#F5F1E8] tracking-tight">
               Manage Subtitles
             </h2>
-            <p className="text-xs text-[var(--text-muted)] truncate max-w-xs sm:max-w-sm">
+            <p className="text-xs text-[#7F8993] truncate max-w-xs sm:max-w-sm">
               {videoTitle}
             </p>
           </div>
@@ -211,33 +199,33 @@ export function SubtitleManagerModal({
         {/* Tracks List */}
         <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
           {isLoading ? (
-            <div className="py-8 flex items-center justify-center gap-2 text-xs text-[var(--text-muted)]">
-              <Loader2 className="w-4 h-4 animate-spin text-[var(--color-pink-light)]" />
+            <div className="py-8 flex items-center justify-center gap-2 text-xs text-[#7F8993]">
+              <Loader2 className="w-4 h-4 animate-spin text-[#F4C95D]" />
               <span>Loading subtitle tracks...</span>
             </div>
           ) : tracks.length === 0 ? (
-            <div className="py-6 text-center text-xs text-[var(--text-muted)] border border-dashed border-white/10 rounded-2xl">
+            <div className="py-6 text-center text-xs text-[#7F8993] border border-dashed border-[#27313A] rounded-xl">
               No subtitle tracks configured yet. Add your first subtitle track below.
             </div>
           ) : (
             tracks.map((track) => (
               <div
                 key={track.id}
-                className="flex items-center justify-between p-3 rounded-xl border bg-white/5 border-white/10 text-xs"
+                className="flex items-center justify-between p-3 rounded-xl border bg-[#141D26] border-[#27313A] text-xs"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <Globe className="w-4 h-4 text-[var(--color-pink-light)] shrink-0" />
+                  <Globe className="w-4 h-4 text-[#F4C95D] shrink-0" />
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-semibold text-white">{track.label}</span>
-                      <span className="text-[10px] text-[var(--text-muted)] uppercase">({track.language})</span>
+                      <span className="font-semibold text-[#F5F1E8]">{track.label}</span>
+                      <span className="text-[10px] text-[#7F8993] uppercase">({track.language})</span>
                       {track.default_track && (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-[#8B5CF6]/30 text-[var(--color-pink-light)] border border-[#8B5CF6]/50">
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#F4C95D]/15 text-[#F4C95D] border border-[#F4C95D]/30">
                           Default
                         </span>
                       )}
                     </div>
-                    <span className="text-[10px] text-[var(--text-muted)] block truncate max-w-[180px]">
+                    <span className="text-[10px] text-[#7F8993] block truncate max-w-[180px]">
                       {track.source_url}
                     </span>
                   </div>
@@ -249,7 +237,7 @@ export function SubtitleManagerModal({
                     <button
                       onClick={() => handleSetDefault(track.id)}
                       title="Set as Default Track"
-                      className="px-2 py-1 rounded text-[10px] text-[var(--text-muted)] hover:text-white border border-white/10 hover:bg-white/5"
+                      className="px-2 py-1 rounded text-[10px] text-[#7F8993] hover:text-[#F5F1E8] border border-[#27313A] hover:bg-[#151F28] cursor-pointer"
                     >
                       Set Default
                     </button>
@@ -259,12 +247,12 @@ export function SubtitleManagerModal({
                   <button
                     onClick={() => handleToggleEnabled(track)}
                     title={track.enabled ? 'Disable Track' : 'Enable Track'}
-                    className="p-1 hover:text-white transition-colors"
+                    className="p-1 hover:text-[#F5F1E8] transition-colors cursor-pointer"
                   >
                     {track.enabled ? (
-                      <ToggleRight className="w-6 h-6 text-emerald-400" />
+                      <ToggleRight className="w-6 h-6 text-[#68B88A]" />
                     ) : (
-                      <ToggleLeft className="w-6 h-6 text-gray-500" />
+                      <ToggleLeft className="w-6 h-6 text-[#59636D]" />
                     )}
                   </button>
 
@@ -272,7 +260,7 @@ export function SubtitleManagerModal({
                   <button
                     onClick={() => handleDelete(track.id)}
                     title="Delete Track"
-                    className="p-1 text-[var(--text-muted)] hover:text-red-400 transition-colors"
+                    className="p-1 text-[#7F8993] hover:text-[#D96868] transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -284,13 +272,13 @@ export function SubtitleManagerModal({
 
         {/* Add Track Section */}
         {showAddForm ? (
-          <form onSubmit={handleAddTrack} className="p-4 rounded-2xl border border-white/15 bg-black/40 space-y-3 text-xs">
-            <div className="flex items-center justify-between pb-1 border-b border-white/10">
-              <span className="font-bold text-white uppercase tracking-wider text-[11px]">Add Subtitle Track</span>
+          <form onSubmit={handleAddTrack} className="p-4 rounded-xl border border-[#27313A] bg-[#141D26] space-y-3 text-xs">
+            <div className="flex items-center justify-between pb-1 border-b border-[#27313A]">
+              <span className="font-bold text-[#F5F1E8] uppercase tracking-wider text-[11px]">Add Subtitle Track</span>
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="text-xs text-[var(--text-muted)] hover:text-white"
+                className="text-xs text-[#7F8993] hover:text-[#F5F1E8] cursor-pointer"
               >
                 Cancel
               </button>
@@ -298,7 +286,7 @@ export function SubtitleManagerModal({
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Language</label>
+                <label className="block text-[10px] text-[#7F8993] uppercase mb-1">Language</label>
                 <select
                   value={newLangCode}
                   onChange={(e) => {
@@ -307,10 +295,10 @@ export function SubtitleManagerModal({
                     const matched = COMMON_LANGUAGES.find((l) => l.code === code);
                     if (matched) setNewLabel(matched.label);
                   }}
-                  className="w-full bg-[var(--glass-surface)] text-white text-xs rounded-xl p-2 border border-white/10 focus:outline-none"
+                  className="w-full bg-[#111A22] text-[#F5F1E8] text-xs rounded-xl p-2 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
                 >
                   {COMMON_LANGUAGES.map((lang) => (
-                    <option key={lang.code} value={lang.code}>
+                    <option key={lang.code} value={lang.code} className="bg-[#101820] text-[#F5F1E8]">
                       {lang.label} ({lang.code})
                     </option>
                   ))}
@@ -318,19 +306,19 @@ export function SubtitleManagerModal({
               </div>
 
               <div>
-                <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Track Label</label>
+                <label className="block text-[10px] text-[#7F8993] uppercase mb-1">Track Label</label>
                 <input
                   type="text"
                   value={newLabel}
                   onChange={(e) => setNewLabel(e.target.value)}
                   placeholder="e.g. English, Español"
-                  className="w-full bg-[var(--glass-surface)] text-white text-xs rounded-xl p-2 border border-white/10 focus:outline-none"
+                  className="w-full bg-[#111A22] text-[#F5F1E8] text-xs rounded-xl p-2 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[10px] text-[var(--text-muted)] uppercase mb-1">
+              <label className="block text-[10px] text-[#7F8993] uppercase mb-1">
                 Upload WebVTT / SRT File or Paste URL
               </label>
               <div className="flex gap-2">
@@ -339,10 +327,10 @@ export function SubtitleManagerModal({
                   value={newSourceUrl}
                   onChange={(e) => setNewSourceUrl(e.target.value)}
                   placeholder="https://.../subtitles.vtt"
-                  className="flex-1 bg-[var(--glass-surface)] text-white text-xs rounded-xl p-2 border border-white/10 focus:outline-none"
+                  className="flex-1 bg-[#111A22] text-[#F5F1E8] text-xs rounded-xl p-2 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
                 />
-                <label className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold flex items-center gap-1.5 cursor-pointer shrink-0">
-                  {isUploadingFile ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                <label className="px-3 py-2 rounded-xl bg-[#151F28] hover:bg-[#111A22] border border-[#27313A] text-[#F5F1E8] font-semibold flex items-center gap-1.5 cursor-pointer shrink-0">
+                  {isUploadingFile ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#F4C95D]" /> : <Upload className="w-3.5 h-3.5 text-[#F4C95D]" />}
                   <span>{isUploadingFile ? 'Uploading...' : 'Upload'}</span>
                   <input
                     type="file"
@@ -361,31 +349,27 @@ export function SubtitleManagerModal({
                 id="default_track_cb"
                 checked={newIsDefault}
                 onChange={(e) => setNewIsDefault(e.target.checked)}
-                className="rounded accent-[var(--color-pink-light)]"
+                className="rounded accent-[#F4C95D] cursor-pointer"
               />
-              <label htmlFor="default_track_cb" className="text-xs text-white">
+              <label htmlFor="default_track_cb" className="text-xs text-[#F5F1E8] cursor-pointer">
                 Set as default track for viewers
               </label>
             </div>
 
-            {errorMsg && <p className="text-xs text-red-400">{errorMsg}</p>}
+            {errorMsg && <p className="text-xs text-[#D96868]">{errorMsg}</p>}
 
             <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="px-3 py-1.5 rounded-xl text-xs text-[var(--text-muted)] hover:text-white"
+                className="px-3 py-1.5 rounded-xl text-xs text-[#7F8993] hover:text-[#F5F1E8] cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || !newSourceUrl.trim()}
-                className="px-4 py-1.5 rounded-xl text-xs font-semibold text-white transition-all shadow-md disabled:opacity-50"
-                style={{
-                  background: 'var(--gradient-neon)',
-                  boxShadow: 'var(--glow-purple)',
-                }}
+                className="px-4 py-1.5 rounded-xl text-xs font-semibold bg-[#F4C95D] hover:bg-[#FFD978] active:bg-[#DDB347] text-[#0B0F13] transition-all shadow-md disabled:opacity-50 cursor-pointer"
               >
                 {isSubmitting ? 'Saving...' : 'Add Track'}
               </button>
@@ -395,9 +379,9 @@ export function SubtitleManagerModal({
           <button
             type="button"
             onClick={() => setShowAddForm(true)}
-            className="w-full py-2.5 rounded-2xl border border-dashed border-white/20 hover:border-[var(--color-pink)] text-white text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-white/5 transition-all cursor-pointer"
+            className="w-full py-2.5 rounded-xl border border-dashed border-[#27313A] hover:border-[#F4C95D] text-[#F5F1E8] text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[#141D26] transition-all cursor-pointer"
           >
-            <Plus className="w-4 h-4 text-[var(--color-pink)]" />
+            <Plus className="w-4 h-4 text-[#F4C95D]" />
             <span>Add Subtitle Track</span>
           </button>
         )}

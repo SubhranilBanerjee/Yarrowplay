@@ -1,80 +1,132 @@
 /* ==========================================================================
-   YARROWPLAY THEME SPECIFICATION
-   Theme: Modern Electric Indigo
-   - Main Background: #0F0E17 (Deep Void Charcoal/Purple)
-   - Surface / Card Background: #161522 or #1E1B2E (Elevated Deep Violet Slate)
-   - Primary Accent (Active State / Pills): #8B5CF6 / #7C3AED (Tailwind Violet-500/600)
-   - Secondary Accent (CTAs / Badges): #EC4899 (Pink-500) / #A855F7 (Purple-500)
-   - Text Main: #F9FAFB (Gray-50)
-   - Text Muted / Icons: #9CA3AF (Gray-400)
-   - Borders / Separators: #2E2A45 (Subtle Soft Purple-Gray)
+   LIGHTHOUSE REELS - CENTRAL DESIGN TOKENS & CINEMATIC THEME SYSTEM
+   
+   Color System:
+   - Primary Background: #070B0F (Deep Obsidian)
+   - Secondary Background: #0B1117 (Dark Navy Slate)
+   - Tertiary Background: #101820 (Midnight Charcoal)
+   - Card Surface: #111A22 (Subtle Blue-Gray Slate)
+   - Elevated Surface: #151F28 (Elevated Card Surface)
+   - Input Background: #141D26
+   - Sidebar: #080D12
+   - Header: #0A1016
+   - Borders: #27313A (Primary), #1C252D (Subtle), rgba(255,255,255,0.08) (Faint)
+   - Brand / Gold: #F4C95D (Primary), #FFD978 (Light), #C99A32 (Dark), #A98235 (Muted)
+   - Typography: #F5F1E8 (Warm White), #B7BEC6 (Secondary), #7F8993 (Muted), #59636D (Disabled)
+   - Secondary Blue: #7E9BB5, #9DB9D0
+   - Status: #68B88A (Success), #E8B84A (Warning), #D96868 (Error), #C95353 (Danger)
    ========================================================================== */
 
 :root {
-  /* --- Primary Backgrounds --- */
-  --bg-primary: #0F0E17;
-  --bg-secondary: #161522;
-  --bg-tertiary: #1E1B2E;
-  
-  /* --- Surfaces & Glass --- */
-  --glass-surface-subtle: rgba(22, 21, 34, 0.6);
-  --glass-surface: #161522;
-  --glass-surface-elevated: #1E1B2E;
-  --glass-surface-hover: #26223B;
-  --glass-border: #2E2A45;
-  --glass-border-subtle: rgba(46, 42, 69, 0.6);
-  --glass-border-hover: #8B5CF6;
-  --glass-border-active: #7C3AED;
-  
-  /* --- Primary & Secondary Accent Colors --- */
-  --color-purple-dark: #6D28D9;      /* Violet-700 */
-  --color-purple-bright: #8B5CF6;    /* Violet-500 (Primary Accent) */
-  --color-primary-accent: #7C3AED;   /* Violet-600 */
-  --color-magenta: #EC4899;          /* Pink-500 (CTA & Highlight) */
-  --color-pink: #A855F7;             /* Purple-500 */
-  --color-pink-light: #F472B6;       /* Pink-400 */
-  --color-neon-blue: #6366F1;        /* Indigo-500 */
-  
-  /* --- Text & Content Colors --- */
-  --text-primary: #F9FAFB;           /* Gray-50 */
-  --text-secondary: #E5E7EB;         /* Gray-200 */
-  --text-muted: #9CA3AF;             /* Gray-400 */
-  --text-dim: #6B7280;               /* Gray-500 */
-  
-  /* --- Status Colors --- */
-  --status-success: #10B981;
-  --status-warning: #F59E0B;
-  --status-error: #EF4444;
-  
-  /* --- Gradients --- */
-  --gradient-brand-primary: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #EC4899 100%);
-  --gradient-button: linear-gradient(135deg, #EC4899 0%, #A855F7 100%);
-  --gradient-button-hover: linear-gradient(135deg, #F43F5E 0%, #C084FC 100%);
-  --gradient-active-pill: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%);
-  --gradient-card-border: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(46, 42, 69, 0.4) 50%, rgba(236, 72, 153, 0.3) 100%);
-  --gradient-text: linear-gradient(135deg, #F9FAFB 30%, #E5E7EB 70%, #8B5CF6 100%);
-  --gradient-text-pure: linear-gradient(90deg, #8B5CF6 0%, #A855F7 50%, #EC4899 100%);
-  --gradient-overlay-card: linear-gradient(180deg, rgba(15, 14, 23, 0.1) 0%, rgba(15, 14, 23, 0.85) 75%, rgba(15, 14, 23, 0.98) 100%);
-  --gradient-hero-ambient: radial-gradient(circle at 85% 20%, rgba(124, 58, 237, 0.15) 0%, rgba(236, 72, 153, 0.08) 35%, transparent 65%);
-  --gradient-bottom-ambient: radial-gradient(circle at 15% 90%, rgba(139, 92, 246, 0.1) 0%, transparent 60%);
+  /* ==========================================================================
+     LIGHTHOUSE REELS CANONICAL DESIGN TOKENS (--lr-*)
+     ========================================================================== */
+  --lr-bg-primary: #070B0F;
+  --lr-bg-secondary: #0B1117;
+  --lr-bg-tertiary: #101820;
 
-  /* --- Shadows & Glows --- */
-  --glow-button: 0 0 20px rgba(236, 72, 153, 0.35);
-  --glow-button-hover: 0 0 25px rgba(236, 72, 153, 0.55);
-  --glow-pill-active: 0 0 18px rgba(124, 58, 237, 0.45);
-  --glow-card: 0 4px 20px 0 rgba(0, 0, 0, 0.4);
-  --glow-card-hover: 0 8px 30px 0 rgba(0, 0, 0, 0.6), 0 0 20px 0 rgba(139, 92, 246, 0.25);
-  --glow-card-featured: 0 0 25px rgba(139, 92, 246, 0.35);
-  --glow-icon: 0 0 12px rgba(139, 92, 246, 0.5);
-  --glow-search-focus: 0 0 0 2px rgba(139, 92, 246, 0.4), 0 0 20px rgba(124, 58, 237, 0.25);
-  --glow-form: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 24px rgba(139, 92, 246, 0.25);
+  --lr-bg-surface: #111A22;
+  --lr-bg-elevated: #151F28;
+  --lr-bg-input: #141D26;
+  --lr-bg-sidebar: #080D12;
+  --lr-bg-header: #0A1016;
+  --lr-bg-modal: #101820;
+  --lr-bg-player: #05080B;
 
-  /* --- Border Radius --- */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-2xl: 24px;
+  --lr-border-primary: #27313A;
+  --lr-border-subtle: #1C252D;
+  --lr-border-faint: rgba(255, 255, 255, 0.08);
+
+  --lr-gold: #F4C95D;
+  --lr-gold-light: #FFD978;
+  --lr-gold-hover: #FFD978;
+  --lr-gold-active: #DDB347;
+  --lr-gold-dark: #C99A32;
+  --lr-gold-muted: #A98235;
+
+  --lr-text-primary: #F5F1E8;
+  --lr-text-secondary: #B7BEC6;
+  --lr-text-muted: #7F8993;
+  --lr-text-disabled: #59636D;
+
+  --lr-blue: #7E9BB5;
+  --lr-blue-bright: #9DB9D0;
+
+  --lr-success: #68B88A;
+  --lr-warning: #E8B84A;
+  --lr-error: #D96868;
+  --lr-danger: #C95353;
+
+  /* ==========================================================================
+     CORE THEME COMPATIBILITY MAPPINGS (Standardized to Lighthouse Reels)
+     ========================================================================== */
+  --bg-primary: var(--lr-bg-primary);
+  --bg-secondary: var(--lr-bg-secondary);
+  --bg-tertiary: var(--lr-bg-tertiary);
+
+  --glass-surface: var(--lr-bg-surface);
+  --glass-surface-elevated: var(--lr-bg-elevated);
+  --glass-surface-hover: var(--lr-bg-elevated);
+  --glass-surface-subtle: rgba(17, 26, 34, 0.75);
+  --glass-surface-heavy: var(--lr-bg-surface);
+  --glass-border: var(--lr-border-primary);
+  --glass-border-subtle: var(--lr-border-subtle);
+  --glass-border-hover: rgba(244, 201, 93, 0.3);
+  --glass-border-active: var(--lr-gold);
+
+  /* Primary Brand Accent (Champagne Gold replaces old Violet/Pink) */
+  --color-purple-dark: var(--lr-gold-dark);
+  --color-purple-bright: var(--lr-gold);
+  --color-primary-accent: var(--lr-gold);
+  --color-magenta: var(--lr-gold);
+  --color-pink: var(--lr-gold);
+  --color-pink-light: var(--lr-gold-light);
+  --color-neon-blue: var(--lr-blue);
+
+  /* Typography */
+  --text-primary: var(--lr-text-primary);
+  --text-secondary: var(--lr-text-secondary);
+  --text-muted: var(--lr-text-muted);
+  --text-dim: var(--lr-text-disabled);
+
+  /* Status Colors */
+  --status-success: var(--lr-success);
+  --status-warning: var(--lr-warning);
+  --status-error: var(--lr-error);
+
+  /* Gradients */
+  --gradient-brand-primary: linear-gradient(135deg, #C99A32 0%, #F4C95D 100%);
+  --gradient-button: linear-gradient(135deg, #F4C95D 0%, #FFD978 100%);
+  --gradient-button-hover: linear-gradient(135deg, #FFD978 0%, #F4C95D 100%);
+  --gradient-active-pill: rgba(244, 201, 93, 0.12);
+  --gradient-card-border: rgba(255, 255, 255, 0.08);
+  --gradient-text: linear-gradient(135deg, #F5F1E8 60%, #F4C95D 100%);
+  --gradient-text-pure: linear-gradient(90deg, #F5F1E8 0%, #F4C95D 100%);
+  --gradient-overlay-card: linear-gradient(180deg, rgba(7, 11, 15, 0.1) 0%, rgba(7, 11, 15, 0.85) 75%, rgba(7, 11, 15, 0.98) 100%);
+  --gradient-hero-ambient: radial-gradient(circle at 85% 20%, rgba(244, 201, 93, 0.03) 0%, transparent 60%);
+  --gradient-bottom-ambient: radial-gradient(circle at 15% 90%, rgba(126, 155, 181, 0.03) 0%, transparent 60%);
+  --gradient-neon: var(--lr-gold);
+
+  /* Shadows (Restrained, subtle depth) */
+  --glow-button: 0 4px 14px rgba(0, 0, 0, 0.25);
+  --glow-button-hover: 0 6px 20px rgba(244, 201, 93, 0.22);
+  --glow-pill-active: none;
+  --glow-card: 0 8px 30px rgba(0, 0, 0, 0.25);
+  --glow-card-hover: 0 8px 30px rgba(0, 0, 0, 0.35);
+  --glow-card-featured: 0 8px 30px rgba(0, 0, 0, 0.35);
+  --glow-icon: none;
+  --glow-search-focus: 0 0 0 1px var(--lr-gold);
+  --glow-form: 0 8px 30px rgba(0, 0, 0, 0.35);
+  --glow-pink: none;
+  --glow-purple: none;
+  --neon-purple-glow: rgba(244, 201, 93, 0.12);
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+  --radius-2xl: 16px;
   --radius-full: 9999px;
 }
 
@@ -83,92 +135,118 @@
    ========================================================================== */
 
 .theme-bg-ambient {
-  background-color: var(--bg-primary);
+  background-color: var(--lr-bg-primary);
   background-image: var(--gradient-hero-ambient), var(--gradient-bottom-ambient);
   background-attachment: fixed;
 }
 
+/* Primary Button (Champagne Gold CTA) */
+.theme-neon-button {
+  background: var(--lr-gold);
+  color: #0B0F13;
+  border: none;
+  border-radius: 9px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theme-neon-button:hover {
+  background: var(--lr-gold-hover);
+  color: #0B0F13;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(244, 201, 93, 0.2);
+}
+
+.theme-neon-button:active {
+  background: var(--lr-gold-active);
+  transform: translateY(0);
+}
+
+/* Secondary Button */
+.theme-secondary-button {
+  background: transparent;
+  color: var(--lr-text-primary);
+  border: 1px solid #52606C;
+  border-radius: 9px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.theme-secondary-button:hover {
+  background: var(--lr-bg-elevated);
+  border-color: var(--lr-gold);
+  color: var(--lr-text-primary);
+}
+
+/* Cards */
 .theme-glass-card {
-  background-color: var(--glass-surface);
-  border: 1px solid var(--glass-border);
+  background-color: var(--lr-bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
   box-shadow: var(--glow-card);
   transition: all 0.2s ease;
 }
 
 .theme-glass-card:hover {
-  border-color: var(--glass-border-hover);
-  box-shadow: var(--glow-card-hover);
-  background-color: var(--glass-surface-hover);
+  border-color: rgba(244, 201, 93, 0.25);
+  background-color: var(--lr-bg-elevated);
 }
 
 .theme-glass-card-static {
-  background-color: var(--glass-surface);
-  border: 1px solid var(--glass-border);
+  background-color: var(--lr-bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
   box-shadow: var(--glow-card);
 }
 
 .theme-glow-frame {
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glow-card);
+  border: 1px solid var(--lr-border-primary);
+  border-radius: 12px;
   transition: all 0.2s ease;
 }
 
 .theme-glow-frame:hover {
-  border-color: var(--glass-border-hover);
-  box-shadow: var(--glow-card-hover);
+  border-color: rgba(244, 201, 93, 0.25);
+  background-color: var(--lr-bg-elevated);
 }
 
 .theme-form-card {
-  background-color: var(--glass-surface);
-  border: 1px solid var(--glass-border);
+  background-color: var(--lr-bg-modal);
+  border: 1px solid var(--lr-border-primary);
   box-shadow: var(--glow-form);
-  border-radius: var(--radius-2xl);
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  border-radius: 14px;
+  transition: border-color 0.25s ease;
 }
 
 .theme-form-card:hover {
-  border-color: var(--color-purple-bright);
+  border-color: rgba(244, 201, 93, 0.3);
 }
 
-.theme-neon-button {
-  background: var(--gradient-button);
-  color: var(--text-primary);
-  box-shadow: var(--glow-button);
-  transition: all 0.2s ease;
-}
-
-.theme-neon-button:hover {
-  background: var(--gradient-button-hover);
-  box-shadow: var(--glow-button-hover);
-  transform: scale(1.02);
-}
-
-.theme-neon-button:active {
-  transform: scale(0.98);
-}
-
+/* Genre / Filter Pills */
 .theme-active-pill {
-  background: var(--gradient-active-pill);
-  color: #F9FAFB;
-  box-shadow: var(--glow-pill-active);
+  background: var(--lr-gold) !important;
+  color: #0B0F13 !important;
+  border: 1px solid var(--lr-gold) !important;
+  font-weight: 600;
 }
 
 .theme-inactive-pill {
-  background-color: var(--glass-surface-subtle);
-  color: var(--text-muted);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background-color: var(--lr-bg-surface);
+  color: var(--lr-text-secondary);
+  border: 1px solid var(--lr-border-primary);
   transition: all 0.2s ease;
 }
 
 .theme-inactive-pill:hover {
-  background-color: var(--glass-surface-elevated);
-  color: var(--text-primary);
-  border-color: rgba(139, 92, 246, 0.4);
+  background-color: var(--lr-bg-elevated);
+  color: var(--lr-text-primary);
+  border-color: rgba(244, 201, 93, 0.25);
 }
 
+/* Headings */
 .theme-gradient-heading {
+  color: var(--lr-text-primary);
   background: var(--gradient-text-pure);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
