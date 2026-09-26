@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useSidebar } from '@/context/SidebarContext';
 import {
   Search,
   Plus,
@@ -11,16 +12,11 @@ import {
   User as UserIcon,
   LogOut,
   Film,
-  BookOpen,
   BarChart3,
-  Megaphone,
-  Home,
-  Compass,
   Bookmark,
-  Heart,
-  PenTool,
   Clock,
-  Tv,
+  Menu,
+  X,
 } from 'lucide-react';
 import Image from 'next/image';
 import { BrandLogo } from '@/components/landing/BrandLogo';
@@ -28,8 +24,10 @@ import { NotificationDropdown } from '@/components/notifications/NotificationDro
 
 export function Header() {
   const { user, profile, signOut } = useAuth();
+  const { toggleMobileSidebar } = useSidebar();
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -53,21 +51,33 @@ export function Header() {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
+      setShowMobileSearch(false);
     }
   };
 
-  const defaultAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80';
+  const defaultAvatar =
+    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80';
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#090D12]/95 backdrop-blur-md border-b border-[#182029] px-4 md:px-6 py-2.5 transition-all">
-      <div className="w-full flex items-center justify-between gap-4">
-        {/* Left: Brand Logo matching screenshot */}
-        <div className="shrink-0 flex items-center">
+    <header className="sticky top-0 z-40 w-full bg-[#090D12]/95 backdrop-blur-md border-b border-[#182029] px-3 sm:px-4 md:px-6 py-2.5 transition-all">
+      <div className="w-full flex items-center justify-between gap-2 sm:gap-4">
+        {/* Left: Mobile Drawer Trigger + Brand Logo */}
+        <div className="shrink-0 flex items-center gap-2 sm:gap-3">
+          {/* Hamburger toggle for mobile & tablet drawer */}
+          <button
+            type="button"
+            onClick={toggleMobileSidebar}
+            aria-label="Open navigation menu"
+            className="md:hidden p-1.5 rounded-lg text-[#9AA7B4] hover:text-[#F5F1E8] hover:bg-[#131920] transition-colors cursor-pointer"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
           <BrandLogo href={user ? '/home' : '/'} />
         </div>
 
-        {/* Center: Global Search Bar matching screenshot */}
-        <div className="flex-1 max-w-xl mx-2 md:mx-6">
+        {/* Center: Search Bar (Desktop & Tablet) */}
+        <div className="hidden sm:flex flex-1 max-w-xs md:max-w-md lg:max-w-xl mx-2 md:mx-4 lg:mx-6">
           <form onSubmit={handleSearch} className="relative w-full">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7A8694] pointer-events-none" />
             <input
@@ -80,15 +90,25 @@ export function Header() {
           </form>
         </div>
 
-        {/* Right: + Create Button, Notifications (Bell + 6), and User Avatar */}
-        <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+        {/* Right: Search Icon (Mobile), + Create Button, Notifications, Avatar */}
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 shrink-0">
+          {/* Mobile search toggle button (visible only on < sm) */}
+          <button
+            type="button"
+            onClick={() => setShowMobileSearch(!showMobileSearch)}
+            aria-label="Toggle search"
+            className="sm:hidden p-2 rounded-full text-[#9AA7B4] hover:text-[#F5F1E8] hover:bg-[#131920] transition-colors"
+          >
+            {showMobileSearch ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
+          </button>
+
           {/* + Create Button */}
           <Link
             href={user ? '/creator/studio' : '/login?redirect=/creator/studio'}
-            className="flex items-center gap-1.5 bg-[#ECC979] hover:bg-[#F4C95D] active:scale-95 text-[#101418] font-semibold text-xs sm:text-sm px-4 sm:px-5 py-2 rounded-full shadow-sm transition-all cursor-pointer font-sans"
+            className="flex items-center gap-1 sm:gap-1.5 bg-[#ECC979] hover:bg-[#F4C95D] active:scale-95 text-[#101418] font-semibold text-xs sm:text-sm px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 rounded-full shadow-sm transition-all cursor-pointer font-sans"
           >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Create</span>
+            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
+            <span className="inline">Create</span>
           </Link>
 
           {/* Notifications: Bell with red badge '6' */}
@@ -100,8 +120,8 @@ export function Header() {
               className="relative p-2 text-[#9EABB8] hover:text-[#F5F1E8] transition-colors"
               title="Notifications"
             >
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#E03E3E] text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
+              <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="absolute top-1 right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#E03E3E] text-white text-[9px] sm:text-[10px] font-bold flex items-center justify-center shadow-sm">
                 6
               </span>
             </Link>
@@ -115,7 +135,7 @@ export function Header() {
               className="flex items-center p-0.5 rounded-full border border-[#26313C] hover:border-[#ECC979] transition-all cursor-pointer focus:outline-none"
               aria-label="User menu"
             >
-              <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden bg-[#151D25]">
+              <div className="relative w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full overflow-hidden bg-[#151D25]">
                 <Image
                   src={profile?.avatar_url || defaultAvatar}
                   alt={profile?.display_name || 'User Profile'}
@@ -128,7 +148,7 @@ export function Header() {
 
             {/* Dropdown Menu */}
             {showUserMenu && (
-              <div className="absolute right-0 mt-2.5 w-60 rounded-xl bg-[#0F151B] border border-[#212A34] shadow-2xl py-2 z-50">
+              <div className="absolute right-0 mt-2.5 w-56 sm:w-60 rounded-xl bg-[#0F151B] border border-[#212A34] shadow-2xl py-2 z-50">
                 {user ? (
                   <>
                     <div className="px-4 py-2.5 border-b border-[#182029]">
@@ -228,6 +248,23 @@ export function Header() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Search Expandable Bar */}
+      {showMobileSearch && (
+        <div className="sm:hidden pt-2.5 pb-1 px-1 animate-in fade-in slide-in-from-top-1 duration-150">
+          <form onSubmit={handleSearch} className="relative w-full">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7A8694] pointer-events-none" />
+            <input
+              type="text"
+              autoFocus
+              placeholder="Search series, creators, genres..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#131920] text-[#F5F1E8] placeholder-[#76828F] text-xs rounded-full pl-10 pr-4 py-2 border border-[#212A34] focus:outline-none focus:border-[#ECC979]"
+            />
+          </form>
+        </div>
+      )}
     </header>
   );
 }

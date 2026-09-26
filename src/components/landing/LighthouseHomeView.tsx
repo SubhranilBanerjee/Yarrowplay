@@ -12,13 +12,7 @@ import {
   ChevronRight,
   ArrowRight,
   MoreVertical,
-  Clock,
-  Film,
   X,
-  Share2,
-  Heart,
-  Eye,
-  Bookmark,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/context/AuthContext';
@@ -435,7 +429,6 @@ export function LighthouseHomeView() {
             genre: v.category || v.genre || 'Drama',
           }));
 
-          // Merge without losing original 6 showcase items
           const existingIds = new Set(INITIAL_REELS.map((r) => r.id));
           const uniqueDb = mappedDbReels.filter((r) => !existingIds.has(r.id));
           setReels([...INITIAL_REELS, ...uniqueDb]);
@@ -603,12 +596,12 @@ export function LighthouseHomeView() {
   const currentHero = heroSlides[heroIndex] || heroSlides[0];
 
   return (
-    <div className="w-full min-h-screen bg-[#090D12] text-[#F5F1E8] px-4 md:px-6 lg:px-7 py-5">
-      <div className="w-full flex flex-col xl:flex-row gap-6 lg:gap-7 items-start">
+    <div className="w-full min-h-screen bg-[#090D12] text-[#F5F1E8] px-3 sm:px-4 md:px-6 lg:px-7 py-4 sm:py-5 pb-24 md:pb-12">
+      <div className="w-full flex flex-col xl:flex-row gap-5 lg:gap-7 items-start">
         {/* ─── Main Feed (Center Section) ─────────────────────────────────── */}
-        <div className="flex-1 min-w-0 w-full space-y-6">
+        <div className="flex-1 min-w-0 w-full space-y-5 sm:space-y-6">
           {/* 1. Hero Carousel Banner */}
-          <div className="relative w-full rounded-2xl overflow-hidden bg-[#11171E] border border-[#1E2732] shadow-2xl h-[340px] sm:h-[400px] md:h-[450px] lg:h-[480px] group select-none">
+          <div className="relative w-full rounded-2xl overflow-hidden bg-[#11171E] border border-[#1E2732] shadow-2xl h-[280px] xs:h-[320px] sm:h-[380px] md:h-[430px] lg:h-[480px] group select-none">
             {/* Background Image with smooth transitions */}
             <div className="absolute inset-0">
               <Image
@@ -619,8 +612,8 @@ export function LighthouseHomeView() {
                 className="object-cover object-center transition-all duration-700 ease-out group-hover:scale-105"
               />
               {/* Cinematic Vignette Gradients */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#090D12] via-[#090D12]/45 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#090D12]/95 via-[#090D12]/50 to-transparent w-full md:w-3/4" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#090D12] via-[#090D12]/50 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#090D12]/95 via-[#090D12]/60 to-transparent w-full sm:w-4/5 md:w-3/4" />
             </div>
 
             {/* Left Chevron Button */}
@@ -628,9 +621,9 @@ export function LighthouseHomeView() {
               type="button"
               onClick={prevHero}
               aria-label="Previous slide"
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 md:w-9 md:h-9 rounded-full bg-black/45 hover:bg-black/80 backdrop-blur-sm border border-white/10 text-white/90 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-md"
+              className="absolute left-2.5 sm:left-3.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/45 hover:bg-black/80 backdrop-blur-sm border border-white/10 text-white/90 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-md"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
 
             {/* Right Chevron Button */}
@@ -638,52 +631,52 @@ export function LighthouseHomeView() {
               type="button"
               onClick={nextHero}
               aria-label="Next slide"
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 md:w-9 md:h-9 rounded-full bg-black/45 hover:bg-black/80 backdrop-blur-sm border border-white/10 text-white/90 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-md"
+              className="absolute right-2.5 sm:right-3.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/45 hover:bg-black/80 backdrop-blur-sm border border-white/10 text-white/90 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-md"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
 
             {/* Hero Content Overlay */}
-            <div className="absolute inset-0 z-10 flex flex-col justify-end p-6 sm:p-8 md:p-10 max-w-2xl">
+            <div className="absolute inset-0 z-10 flex flex-col justify-end p-4 xs:p-5 sm:p-7 md:p-10 max-w-xl md:max-w-2xl">
               {/* Eyebrow */}
-              <span className="text-xs sm:text-sm font-semibold tracking-wide text-[#ECC979] mb-1.5 uppercase font-sans">
+              <span className="text-[11px] sm:text-xs md:text-sm font-semibold tracking-wide text-[#ECC979] mb-1 uppercase font-sans">
                 {currentHero.eyebrow}
               </span>
 
-              {/* Title in Elegant Serif Font matching screenshot */}
-              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-normal tracking-tight text-[#F5F1E8] leading-[1.08] drop-shadow-sm">
+              {/* Title in Elegant Serif Font */}
+              <h1 className="font-serif text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-normal tracking-tight text-[#F5F1E8] leading-[1.08] drop-shadow-sm line-clamp-2 sm:line-clamp-none">
                 {currentHero.title}
               </h1>
 
               {/* Tagline */}
-              <p className="text-xs sm:text-sm md:text-[15px] text-[#C6D2DC] font-normal mt-2.5 max-w-lg leading-relaxed drop-shadow">
+              <p className="text-xs sm:text-sm md:text-[15px] text-[#C6D2DC] font-normal mt-1.5 sm:mt-2.5 max-w-lg leading-relaxed drop-shadow line-clamp-2">
                 {currentHero.tagline}
               </p>
 
               {/* Call to Actions */}
-              <div className="flex items-center gap-3 mt-5 sm:mt-6">
+              <div className="flex items-center gap-2.5 sm:gap-3 mt-4 sm:mt-6">
                 <button
                   type="button"
                   onClick={() => router.push(`/explore?type=series`)}
-                  className="flex items-center gap-2 bg-[#ECC979] hover:bg-[#F4C95D] active:scale-95 text-[#101418] font-bold text-xs sm:text-sm px-6 py-2.5 rounded-full shadow-lg shadow-black/40 transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 sm:gap-2 bg-[#ECC979] hover:bg-[#F4C95D] active:scale-95 text-[#101418] font-bold text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-lg shadow-black/40 transition-all cursor-pointer"
                 >
-                  <Play className="w-4 h-4 fill-[#101418]" />
+                  <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-[#101418]" />
                   <span>Watch Now</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => handleToggleMyList(currentHero.id)}
-                  className="flex items-center gap-2 bg-[#121820]/75 hover:bg-[#16202C] active:scale-95 backdrop-blur-md border border-white/20 hover:border-white/40 text-[#F5F1E8] font-medium text-xs sm:text-sm px-5 py-2.5 rounded-full transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 sm:gap-2 bg-[#121820]/75 hover:bg-[#16202C] active:scale-95 backdrop-blur-md border border-white/20 hover:border-white/40 text-[#F5F1E8] font-medium text-xs sm:text-sm px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full transition-all cursor-pointer"
                 >
                   {myListIds.has(currentHero.id) ? (
                     <>
-                      <Check className="w-4 h-4 text-[#ECC979]" />
+                      <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ECC979]" />
                       <span>Added to List</span>
                     </>
                   ) : (
                     <>
-                      <Plus className="w-4 h-4 stroke-[2.5]" />
+                      <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
                       <span>My List</span>
                     </>
                   )}
@@ -691,8 +684,8 @@ export function LighthouseHomeView() {
               </div>
             </div>
 
-            {/* Pagination Dots at Bottom matching picture */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+            {/* Pagination Dots at Bottom */}
+            <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
               {heroSlides.map((_, idx) => (
                 <button
                   key={idx}
@@ -709,14 +702,14 @@ export function LighthouseHomeView() {
           </div>
 
           {/* 2. Genre / Category Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 scroll-smooth">
             {GENRE_TABS.map((tab) => {
               const isActive = activeGenre === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveGenre(tab.id)}
-                  className={`shrink-0 flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full transition-all cursor-pointer ${
+                  className={`shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all cursor-pointer ${
                     isActive
                       ? 'bg-[#ECC979] text-[#101418] shadow-sm font-bold'
                       : 'bg-[#121820] hover:bg-[#18212B] border border-[#212A34] text-[#A6B2BE] hover:text-[#F5F1E8]'
@@ -734,7 +727,7 @@ export function LighthouseHomeView() {
             <div className="flex items-center justify-between">
               <Link
                 href="/explore?type=shorts"
-                className="group flex items-center gap-1.5 text-base sm:text-lg font-bold text-[#F5F1E8] hover:text-[#ECC979] transition-colors"
+                className="group flex items-center gap-1.5 text-sm sm:text-base md:text-lg font-bold text-[#F5F1E8] hover:text-[#ECC979] transition-colors"
               >
                 <span>Trending Reels</span>
                 <ChevronRight className="w-4 h-4 text-[#8C98A5] group-hover:text-[#ECC979] transition-colors" />
@@ -748,15 +741,14 @@ export function LighthouseHomeView() {
               </Link>
             </div>
 
-            {/* 6 Vertical Reel Cards Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-3.5">
+            {/* Responsive Reel Cards Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3.5">
               {filteredReels.slice(0, 6).map((reel) => (
                 <div
                   key={reel.id}
                   onClick={() => setActiveVideoModal(reel)}
                   className="group flex flex-col cursor-pointer"
                 >
-                  {/* Portrait Thumbnail Container (9:16 aspect ratio) */}
                   <div className="relative aspect-[9/15] w-full rounded-xl overflow-hidden bg-[#11171E] border border-[#1E2732] group-hover:border-[#ECC979]/50 transition-all shadow-md">
                     <Image
                       src={reel.thumbnailUrl}
@@ -766,20 +758,19 @@ export function LighthouseHomeView() {
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
 
-                    {/* Gradient Overlay for bottom text legibility */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30" />
 
-                    {/* Top Right Duration Badge matching screenshot */}
-                    <div className="absolute top-2.5 right-2.5 z-10">
-                      <span className="bg-black/60 backdrop-blur-sm text-[10px] text-[#F5F1E8] px-2 py-0.5 rounded-md font-mono font-medium">
+                    {/* Top Right Duration Badge */}
+                    <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-10">
+                      <span className="bg-black/60 backdrop-blur-sm text-[9px] sm:text-[10px] text-[#F5F1E8] px-1.5 sm:px-2 py-0.5 rounded-md font-mono font-medium">
                         {reel.duration}
                       </span>
                     </div>
 
                     {/* Bottom Overlay: Views count + Three Dots */}
-                    <div className="absolute bottom-2 left-2.5 right-2.5 z-10 flex items-center justify-between text-white/95">
-                      <div className="flex items-center gap-1 text-[11px] font-semibold drop-shadow">
-                        <Play className="w-3 h-3 fill-current" />
+                    <div className="absolute bottom-2 left-2 right-2 sm:left-2.5 sm:right-2.5 z-10 flex items-center justify-between text-white/95">
+                      <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold drop-shadow">
+                        <Play className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" />
                         <span>{reel.views}</span>
                       </div>
                       <button
@@ -795,7 +786,6 @@ export function LighthouseHomeView() {
                     </div>
                   </div>
 
-                  {/* Below Thumbnail Info */}
                   <div className="mt-2 min-w-0">
                     <h3 className="text-xs sm:text-[13px] font-semibold text-[#F5F1E8] truncate group-hover:text-[#ECC979] transition-colors leading-tight">
                       {reel.title}
@@ -810,7 +800,7 @@ export function LighthouseHomeView() {
                           className="object-cover"
                         />
                       </div>
-                      <span className="text-[11px] text-[#86929F] truncate">
+                      <span className="text-[10px] sm:text-[11px] text-[#86929F] truncate">
                         {reel.creatorName}
                       </span>
                     </div>
@@ -825,7 +815,7 @@ export function LighthouseHomeView() {
             <div className="flex items-center justify-between">
               <Link
                 href="/explore?type=series"
-                className="group flex items-center gap-1.5 text-base sm:text-lg font-bold text-[#F5F1E8] hover:text-[#ECC979] transition-colors"
+                className="group flex items-center gap-1.5 text-sm sm:text-base md:text-lg font-bold text-[#F5F1E8] hover:text-[#ECC979] transition-colors"
               >
                 <span>Popular Series</span>
                 <ChevronRight className="w-4 h-4 text-[#8C98A5] group-hover:text-[#ECC979] transition-colors" />
@@ -839,8 +829,8 @@ export function LighthouseHomeView() {
               </Link>
             </div>
 
-            {/* 5 Landscape Series Cards Grid (16:9) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+            {/* Responsive Landscape Series Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-3.5">
               {filteredSeries.slice(0, 5).map((item) => (
                 <Link
                   key={item.id}
@@ -856,25 +846,22 @@ export function LighthouseHomeView() {
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
 
-                    {/* Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
 
-                    {/* New Episode Badge matching picture */}
                     {item.badge && (
-                      <div className="absolute bottom-2.5 right-2.5 z-10">
-                        <span className="bg-[#ECC979] text-[#101418] text-[9px] font-bold px-2 py-0.5 rounded-md shadow-sm">
+                      <div className="absolute bottom-2 right-2 sm:bottom-2.5 sm:right-2.5 z-10">
+                        <span className="bg-[#ECC979] text-[#101418] text-[8px] sm:text-[9px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md shadow-sm">
                           {item.badge}
                         </span>
                       </div>
                     )}
                   </div>
 
-                  {/* Below Card Info */}
-                  <div className="mt-2 min-w-0">
+                  <div className="mt-1.5 sm:mt-2 min-w-0">
                     <h3 className="text-xs sm:text-[13px] font-bold text-[#F5F1E8] truncate group-hover:text-[#ECC979] transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-[11px] text-[#86929F] mt-0.5 truncate">
+                    <p className="text-[10px] sm:text-[11px] text-[#86929F] mt-0.5 truncate">
                       {item.genre} • {item.seasons}
                     </p>
                   </div>
@@ -884,8 +871,8 @@ export function LighthouseHomeView() {
           </div>
         </div>
 
-        {/* ─── Right Rail (Sidebar Column) ─────────────────────────────────── */}
-        <div className="w-full xl:w-[285px] 2xl:w-[305px] shrink-0 space-y-6 pt-1 xl:pt-0">
+        {/* ─── Right Rail (Desktop Sidebar & Responsive Mobile/Tablet Section) ─ */}
+        <div className="w-full xl:w-[285px] 2xl:w-[305px] shrink-0 space-y-6 pt-3 xl:pt-0">
           {/* Section 1: Continue Watching */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -899,14 +886,13 @@ export function LighthouseHomeView() {
               </Link>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2.5">
               {continueWatching.map((item) => (
                 <Link
                   key={item.id}
                   href="/history"
                   className="flex items-center gap-3 p-1.5 rounded-xl bg-[#11171E] hover:bg-[#151D26] border border-[#1E2732] hover:border-[#2C3846] transition-all group"
                 >
-                  {/* Thumbnail with Play Icon & Progress Bar */}
                   <div className="relative w-24 h-14 rounded-lg overflow-hidden shrink-0 bg-[#151D26]">
                     <Image
                       src={item.thumbnailUrl}
@@ -920,7 +906,6 @@ export function LighthouseHomeView() {
                         <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
                       </div>
                     </div>
-                    {/* Bottom Progress Bar */}
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/60">
                       <div
                         className="h-full bg-[#ECC979]"
@@ -929,12 +914,11 @@ export function LighthouseHomeView() {
                     </div>
                   </div>
 
-                  {/* Info */}
                   <div className="flex-1 min-w-0 pr-1">
                     <h4 className="text-xs font-bold text-[#F5F1E8] truncate group-hover:text-[#ECC979] transition-colors">
                       {item.title}
                     </h4>
-                    <div className="flex items-center justify-between text-[11px] text-[#86929F] mt-1">
+                    <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-[#86929F] mt-1">
                       <span>{item.episode}</span>
                       <span>{item.timeLeft}</span>
                     </div>
@@ -950,7 +934,7 @@ export function LighthouseHomeView() {
               <span className="text-sm font-bold text-[#F5F1E8]">Recommended for You</span>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-1 gap-2.5">
               {recommended.map((item) => (
                 <Link
                   key={item.id}
@@ -970,7 +954,7 @@ export function LighthouseHomeView() {
                     <h4 className="text-xs font-bold text-[#F5F1E8] truncate group-hover:text-[#ECC979] transition-colors">
                       {item.title}
                     </h4>
-                    <p className="text-[11px] text-[#86929F] mt-0.5">
+                    <p className="text-[10px] sm:text-[11px] text-[#86929F] mt-0.5">
                       {item.genre} • {item.year}
                     </p>
                   </div>
@@ -992,7 +976,7 @@ export function LighthouseHomeView() {
               </Link>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-1 gap-2.5">
               {creators.map((c) => (
                 <div
                   key={c.id}
@@ -1024,7 +1008,7 @@ export function LighthouseHomeView() {
                   <button
                     type="button"
                     onClick={() => handleToggleFollow(c.id)}
-                    className={`shrink-0 text-[11px] font-semibold px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
+                    className={`shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer ${
                       c.isFollowing
                         ? 'bg-[#ECC979] text-[#101418] font-bold'
                         : 'border border-[#323D49] hover:border-[#ECC979] text-[#F5F1E8] hover:text-[#ECC979]'
@@ -1050,7 +1034,7 @@ export function LighthouseHomeView() {
               </Link>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-1 gap-2.5">
               {blogs.map((b) => (
                 <Link
                   key={b.id}
@@ -1084,11 +1068,11 @@ export function LighthouseHomeView() {
       {/* ─── Interactive Video Reel Modal ─────────────────────────────────── */}
       {activeVideoModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
           onClick={() => setActiveVideoModal(null)}
         >
           <div
-            className="relative w-full max-w-sm sm:max-w-md bg-[#11171E] border border-[#232D38] rounded-2xl overflow-hidden shadow-2xl"
+            className="relative w-full max-w-xs sm:max-w-sm md:max-w-md bg-[#11171E] border border-[#232D38] rounded-2xl overflow-hidden shadow-2xl max-h-[92vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Close Button */}
@@ -1115,17 +1099,17 @@ export function LighthouseHomeView() {
                 href={`/explore?type=shorts`}
                 className="absolute inset-0 flex items-center justify-center group cursor-pointer"
               >
-                <div className="w-16 h-16 rounded-full bg-[#ECC979] group-hover:scale-110 text-[#101418] flex items-center justify-center shadow-2xl transition-transform">
-                  <Play className="w-7 h-7 fill-current ml-1" />
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#ECC979] group-hover:scale-110 text-[#101418] flex items-center justify-center shadow-2xl transition-transform">
+                  <Play className="w-6 h-6 sm:w-7 sm:h-7 fill-current ml-1" />
                 </div>
               </Link>
 
               {/* Bottom Info in Modal */}
-              <div className="absolute bottom-4 left-4 right-4 z-20">
+              <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 z-20">
                 <span className="text-[10px] font-bold text-[#ECC979] uppercase tracking-wider">
                   {activeVideoModal.genre} Reel
                 </span>
-                <h3 className="text-base font-bold text-white mt-0.5">
+                <h3 className="text-sm sm:text-base font-bold text-white mt-0.5 line-clamp-1">
                   {activeVideoModal.title}
                 </h3>
                 <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/10 text-xs text-white/80">
@@ -1138,9 +1122,9 @@ export function LighthouseHomeView() {
                         className="object-cover"
                       />
                     </div>
-                    <span>{activeVideoModal.creatorName}</span>
+                    <span className="text-xs truncate max-w-[120px]">{activeVideoModal.creatorName}</span>
                   </div>
-                  <span className="text-white/60 font-mono">{activeVideoModal.duration}</span>
+                  <span className="text-white/60 font-mono text-[11px]">{activeVideoModal.duration}</span>
                 </div>
               </div>
             </div>

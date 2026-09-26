@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useSidebar } from '@/context/SidebarContext';
 import {
   Home,
   Compass,
@@ -16,11 +17,14 @@ import {
   Download,
   Clock,
   Crown,
+  X,
 } from 'lucide-react';
+import { BrandLogo } from '@/components/landing/BrandLogo';
 
 export function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { isMobileOpen, closeMobileSidebar } = useSidebar();
 
   const mainNav = [
     {
@@ -88,10 +92,8 @@ export function Sidebar() {
     },
   ];
 
-  return (
-    <aside
-      className="hidden md:flex flex-col shrink-0 w-56 lg:w-60 bg-[#090D12] border-r border-[#182029] sticky top-[57px] h-[calc(100vh-57px)] max-h-[calc(100vh-57px)] px-3 py-4 select-none justify-between overflow-y-auto no-scrollbar z-20"
-    >
+  const sidebarContent = (
+    <div className="flex flex-col h-full justify-between select-none">
       <div className="space-y-4">
         {/* Main Navigation Group */}
         <div className="space-y-1">
@@ -103,6 +105,7 @@ export function Sidebar() {
               <Link
                 key={item.label}
                 href={item.href}
+                onClick={closeMobileSidebar}
                 className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
                     ? 'bg-[#221C13] text-[#ECC979] border border-[#ECC979]/25 shadow-[0_2px_12px_rgba(236,201,121,0.08)]'
@@ -134,6 +137,7 @@ export function Sidebar() {
                 <Link
                   key={item.label}
                   href={item.href}
+                  onClick={closeMobileSidebar}
                   className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                     isActive
                       ? 'bg-[#221C13] text-[#ECC979] border border-[#ECC979]/25'
@@ -153,10 +157,9 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Bottom Pro Card: Lighthouse Pro matching picture */}
-      <div className="pt-4">
+      {/* Bottom Pro Card: Lighthouse Pro */}
+      <div className="pt-4 mt-auto">
         <div className="relative rounded-2xl p-4 bg-gradient-to-b from-[#161D26] to-[#0E141A] border border-[#232D38] overflow-hidden group">
-          {/* Subtle background glow/lighthouse silhouette */}
           <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#ECC979]/10 rounded-full blur-2xl pointer-events-none" />
           <div
             className="absolute inset-0 opacity-15 bg-cover bg-center pointer-events-none mix-blend-screen"
@@ -164,7 +167,6 @@ export function Sidebar() {
           />
 
           <div className="relative z-10">
-            {/* Crown Icon */}
             <div className="w-7 h-7 rounded-lg bg-[#2A2315] border border-[#ECC979]/30 flex items-center justify-center text-[#ECC979] mb-2.5 shadow-sm">
               <Crown className="w-4 h-4 fill-[#ECC979]/60 text-[#ECC979]" />
             </div>
@@ -178,6 +180,7 @@ export function Sidebar() {
 
             <Link
               href={user ? '/profile?tab=vip' : '/login?redirect=/profile?tab=vip'}
+              onClick={closeMobileSidebar}
               className="mt-3.5 w-full bg-[#ECC979] hover:bg-[#F4C95D] active:scale-98 text-[#101418] font-bold text-xs py-2 rounded-xl text-center block transition-all shadow-md"
             >
               Upgrade
@@ -185,6 +188,46 @@ export function Sidebar() {
           </div>
         </div>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* 1. Desktop & Tablet Landscape Sticky Sidebar */}
+      <aside className="hidden md:flex flex-col shrink-0 w-52 lg:w-60 bg-[#090D12] border-r border-[#182029] sticky top-[57px] h-[calc(100vh-57px)] max-h-[calc(100vh-57px)] px-3 py-4 select-none overflow-y-auto no-scrollbar z-20">
+        {sidebarContent}
+      </aside>
+
+      {/* 2. Mobile & Tablet Portrait Slide-over Drawer */}
+      {isMobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          {/* Backdrop blur overlay */}
+          <div
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+            onClick={closeMobileSidebar}
+            aria-hidden="true"
+          />
+
+          {/* Slide-in sidebar panel */}
+          <div className="relative w-72 max-w-[85vw] bg-[#090D12] border-r border-[#182029] h-full p-4 flex flex-col z-10 shadow-2xl animate-in slide-in-from-left duration-200 overflow-y-auto no-scrollbar">
+            {/* Drawer Header with Logo and Close Button */}
+            <div className="flex items-center justify-between pb-4 mb-2 border-b border-[#182029]">
+              <BrandLogo href={user ? '/home' : '/'} />
+              <button
+                type="button"
+                onClick={closeMobileSidebar}
+                aria-label="Close sidebar"
+                className="p-1.5 rounded-lg text-[#86929F] hover:text-[#F5F1E8] hover:bg-[#141B22] transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Sidebar nav items */}
+            {sidebarContent}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
