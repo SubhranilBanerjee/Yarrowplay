@@ -8,42 +8,64 @@ interface BrandLogoProps {
 
 export function BrandLogo({ href = '/', className = '' }: BrandLogoProps) {
   return (
-    <Link href={href} className={`flex items-center gap-2.5 group shrink-0 select-none ${className}`}>
-      {/* Brand Mark: Sophisticated geometric beam / reel crest */}
-      <div className="relative w-8 h-8 flex items-center justify-center filter drop-shadow-[0_2px_8px_rgba(244,201,93,0.3)] transition-transform duration-300 group-hover:scale-105">
-        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+    <Link
+      href={href}
+      className={`flex items-center gap-3 group shrink-0 select-none ${className}`}
+    >
+      {/* Golden Lighthouse Icon */}
+      <div className="relative w-8 h-9 flex items-center justify-center filter drop-shadow-[0_2px_8px_rgba(236,201,121,0.35)] transition-transform duration-300 group-hover:scale-105">
+        <svg
+          viewBox="0 0 40 48"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-8 h-9"
+        >
           <defs>
-            <linearGradient id="lr-gold-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FFD978" />
-              <stop offset="45%" stopColor="#F4C95D" />
-              <stop offset="100%" stopColor="#C99A32" />
+            <linearGradient id="logo-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#FFF0C2" />
+              <stop offset="40%" stopColor="#ECC979" />
+              <stop offset="80%" stopColor="#D4A745" />
+              <stop offset="100%" stopColor="#9C731A" />
             </linearGradient>
-            <linearGradient id="lr-beam-gradient" x1="0%" y1="50%" x2="100%" y2="50%">
-              <stop offset="0%" stopColor="#F4C95D" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#FFD978" stopOpacity="0.2" />
+            <linearGradient id="logo-glow" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stopColor="#FFF" stopOpacity="0.9" />
+              <stop offset="100%" stopColor="#ECC979" stopOpacity="0.3" />
             </linearGradient>
           </defs>
-          {/* Subtle stylized tower / reel projector shape */}
-          <path
-            d="M15 8L21 8L23 28H13L15 8Z"
-            fill="url(#lr-gold-gradient)"
-          />
-          {/* Lantern dome / lens */}
-          <circle cx="18" cy="7" r="3" fill="#F5F1E8" />
-          {/* Subtle light beacon flares */}
-          <path
-            d="M18 7L32 3L28 14Z"
-            fill="url(#lr-beam-gradient)"
-          />
-          {/* Base pedestal line */}
-          <rect x="11" y="28" width="14" height="2.5" rx="1" fill="#C99A32" />
+
+          {/* Roof finial and dome */}
+          <path d="M20 2L20 6" stroke="url(#logo-gold)" strokeWidth="2" strokeLinecap="round" />
+          <path d="M14 12C14 8 16 6 20 6C24 6 26 8 26 12Z" fill="url(#logo-gold)" />
+
+          {/* Lantern room with glow */}
+          <rect x="15" y="12" width="10" height="7" rx="1" fill="#151A20" stroke="url(#logo-gold)" strokeWidth="1.5" />
+          <rect x="18" y="14" width="4" height="4" rx="0.5" fill="url(#logo-glow)" />
+
+          {/* Balcony / Gallery Railing */}
+          <rect x="11" y="19" width="18" height="2.5" rx="1" fill="url(#logo-gold)" />
+
+          {/* Tower main shaft (tapered) */}
+          <path d="M13 21.5L10 40H30L27 21.5H13Z" fill="url(#logo-gold)" />
+
+          {/* Tower window cutouts */}
+          <rect x="18.5" y="24" width="3" height="4" rx="1" fill="#0D1217" />
+          <rect x="18" y="31" width="4" height="5" rx="1" fill="#0D1217" />
+
+          {/* Foundation stepped base */}
+          <rect x="8" y="40" width="24" height="3" rx="1" fill="url(#logo-gold)" />
+          <rect x="6" y="43" width="28" height="3" rx="1" fill="#B88A2D" />
         </svg>
       </div>
 
-      {/* Brand Text: Warm Ivory & Gold */}
-      <span className="text-lg md:text-xl font-black tracking-tight text-[#F5F1E8] flex items-center">
-        LIGHTHOUSE <span className="text-[#F4C95D] ml-1.5 font-black">REELS</span>
-      </span>
+      {/* Brand Text: LIGHTHOUSE over REELS */}
+      <div className="flex flex-col leading-none">
+        <span className="text-[13px] md:text-[15px] font-bold tracking-[0.16em] text-[#F5F1E8] uppercase font-serif">
+          LIGHTHOUSE
+        </span>
+        <span className="text-[10px] md:text-[11px] font-semibold tracking-[0.34em] text-[#ECC979] uppercase mt-0.5">
+          REELS
+        </span>
+      </div>
     </Link>
   );
 }

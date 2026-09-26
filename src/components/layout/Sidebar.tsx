@@ -4,190 +4,186 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { useSidebar } from '@/context/SidebarContext';
 import {
   Home,
-  Film,
-  BarChart3,
-  BookOpen,
-  Bookmark,
-  Heart,
   Compass,
-  Megaphone,
-  Sparkles,
-  PanelLeftClose,
-  PanelLeftOpen,
+  Tv,
+  Zap,
+  Headphones,
+  FileText,
+  Users,
+  Bookmark,
+  Download,
   Clock,
+  Crown,
 } from 'lucide-react';
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user, profile } = useAuth();
-  const { isCollapsed, toggleSidebar } = useSidebar();
+  const { user } = useAuth();
 
-  // Hide sidebar on the landing page
-  if (pathname === '/') {
-    return null;
-  }
+  const mainNav = [
+    {
+      label: 'Home',
+      href: '/home',
+      activeCheck: (p: string) => p === '/' || p === '/home',
+      icon: Home,
+    },
+    {
+      label: 'Explore',
+      href: '/explore',
+      activeCheck: (p: string) => p === '/explore' && !p.includes('type='),
+      icon: Compass,
+    },
+    {
+      label: 'Series',
+      href: '/explore?type=series',
+      activeCheck: (p: string) => p.includes('type=series'),
+      icon: Tv,
+    },
+    {
+      label: 'Shorts',
+      href: '/explore?type=shorts',
+      activeCheck: (p: string) => p.includes('type=shorts'),
+      icon: Zap,
+    },
+    {
+      label: 'Audio',
+      href: '/explore?type=audio',
+      activeCheck: (p: string) => p.includes('type=audio'),
+      icon: Headphones,
+    },
+    {
+      label: 'Blogs',
+      href: '/blogs',
+      activeCheck: (p: string) => p.startsWith('/blog'),
+      icon: FileText,
+    },
+    {
+      label: 'Creators',
+      href: '/explore?type=creators',
+      activeCheck: (p: string) => p.includes('type=creators'),
+      icon: Users,
+    },
+  ];
 
-  const navItems = [
-    { label: 'Home', href: '/home', icon: Home, show: true },
-    { label: 'Explore', href: '/explore', icon: Compass, show: true },
-    { label: 'Blogs', href: '/blogs', icon: BookOpen, show: true },
+  const libraryNav = [
     {
-      label: 'Creator Studio',
-      href: '/creator/studio',
-      icon: Film,
-      show: true,
-      highlight: true,
+      label: 'Saved',
+      href: user ? '/watchlist' : '/login',
+      activeCheck: (p: string) => p === '/watchlist' || p === '/favorites',
+      icon: Bookmark,
     },
     {
-      label: 'Analytics',
-      href: '/creator/analytics',
-      icon: BarChart3,
-      show: true,
+      label: 'Downloads',
+      href: user ? '/history' : '/login',
+      activeCheck: (p: string) => p === '/downloads',
+      icon: Download,
     },
     {
-      label: 'Advertiser Studio',
-      href: '/advertiser',
-      icon: Megaphone,
-      show: profile?.role === 'advertiser',
-      highlight: true,
+      label: 'History',
+      href: user ? '/history' : '/login',
+      activeCheck: (p: string) => p === '/history',
+      icon: Clock,
     },
-    { label: 'Watchlist', href: '/watchlist', icon: Bookmark, show: !!user },
-    { label: 'Favorites', href: '/favorites', icon: Heart, show: !!user },
-    { label: 'History', href: '/history', icon: Clock, show: !!user },
   ];
 
   return (
     <aside
-      onWheel={(e) => e.stopPropagation()}
-      className={`hidden md:flex flex-col shrink-0 bg-[#080D12] border-r border-[#1C252D] sticky top-[61px] h-[calc(100vh-61px)] max-h-[calc(100vh-61px)] overflow-hidden select-none overscroll-none transition-all duration-300 ease-in-out z-20 ${
-        isCollapsed ? 'w-20 px-2.5 py-3.5 items-center' : 'w-64 p-3.5'
-      }`}
+      className="hidden md:flex flex-col shrink-0 w-56 lg:w-60 bg-[#090D12] border-r border-[#182029] sticky top-[57px] h-[calc(100vh-57px)] max-h-[calc(100vh-57px)] px-3 py-4 select-none justify-between overflow-y-auto no-scrollbar z-20"
     >
-      {/* Top Sidebar Header & Collapse Toggle */}
-      <div
-        className={`flex items-center w-full mb-2.5 pb-2 border-b border-[#1C252D] shrink-0 ${
-          isCollapsed ? 'justify-center' : 'justify-between px-1'
-        }`}
-      >
-        {!isCollapsed && (
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#7F8993] pl-2">
-            Navigation
-          </span>
-        )}
-        <div className="relative group">
-          <button
-            type="button"
-            onClick={toggleSidebar}
-            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="flex items-center justify-center w-8 h-8 rounded-lg text-[#9AA5AF] hover:text-[#F5F1E8] hover:bg-[#111A22] border border-transparent hover:border-[#27313A] transition-all cursor-pointer"
-          >
-            {isCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
-          </button>
-          {isCollapsed && (
-            <div className="absolute left-full ml-3 px-3 py-1.5 rounded-lg bg-[#101820] border border-[#27313A] text-[#F5F1E8] text-xs font-semibold whitespace-nowrap shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-150 z-50 flex items-center gap-1.5">
-              <span>Expand sidebar</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Navigation Items */}
-      <div className={`space-y-1 w-full shrink-0 overflow-hidden ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
-        {navItems
-          .filter((item) => item.show)
-          .map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/home' && pathname.startsWith(item.href));
+      <div className="space-y-4">
+        {/* Main Navigation Group */}
+        <div className="space-y-1">
+          {mainNav.map((item) => {
+            const isActive = item.activeCheck(pathname);
             const Icon = item.icon;
 
             return (
               <Link
-                key={item.href}
+                key={item.label}
                 href={item.href}
-                title={isCollapsed ? item.label : undefined}
-                className={`relative group flex items-center rounded-lg font-medium text-sm transition-all duration-150 ${
-                  isCollapsed
-                    ? 'w-10 h-10 justify-center'
-                    : 'gap-3 px-3.5 py-2.5 w-full'
-                } ${
+                className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-[#F4C95D]/12 text-[#F5F1E8] font-semibold'
-                    : 'text-[#B7BEC6] hover:bg-[#111A22] hover:text-[#F5F1E8]'
+                    ? 'bg-[#221C13] text-[#ECC979] border border-[#ECC979]/25 shadow-[0_2px_12px_rgba(236,201,121,0.08)]'
+                    : 'text-[#9AA7B4] hover:text-[#F5F1E8] hover:bg-[#131920]'
                 }`}
               >
                 <Icon
-                  className={`w-5 h-5 shrink-0 transition-colors ${
-                    isActive ? 'text-[#F4C95D]' : 'text-[#9AA5AF]'
+                  className={`w-4 h-4 shrink-0 transition-transform ${
+                    isActive ? 'fill-[#ECC979] text-[#ECC979]' : 'text-[#85929F]'
                   }`}
                 />
-                {!isCollapsed && <span className="truncate">{item.label}</span>}
-
-                {/* Subtle active left border bar */}
-                {isActive && !isCollapsed && (
-                  <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#F4C95D] rounded-r" />
-                )}
-
-                {/* Hover tooltip when collapsed */}
-                {isCollapsed && (
-                  <div className="absolute left-full ml-3 px-3 py-1.5 rounded-lg bg-[#101820] border border-[#27313A] text-[#F5F1E8] text-xs font-semibold whitespace-nowrap shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-150 z-50 flex items-center gap-1.5">
-                    <span>{item.label}</span>
-                  </div>
-                )}
+                <span className="truncate">{item.label}</span>
               </Link>
             );
           })}
+        </div>
+
+        {/* Library Subheader & Section */}
+        <div>
+          <div className="text-[11px] font-medium text-[#6B7783] px-3.5 pb-1.5 uppercase tracking-wider">
+            Library
+          </div>
+          <div className="space-y-1">
+            {libraryNav.map((item) => {
+              const isActive = item.activeCheck(pathname);
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    isActive
+                      ? 'bg-[#221C13] text-[#ECC979] border border-[#ECC979]/25'
+                      : 'text-[#9AA7B4] hover:text-[#F5F1E8] hover:bg-[#131920]'
+                  }`}
+                >
+                  <Icon
+                    className={`w-4 h-4 shrink-0 ${
+                      isActive ? 'text-[#ECC979]' : 'text-[#85929F]'
+                    }`}
+                  />
+                  <span className="truncate">{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
-      {/* Bottom Profile / Auth */}
-      <div className={`mt-auto pt-3 border-t border-[#1C252D] w-full shrink-0 overflow-hidden ${isCollapsed ? 'flex flex-col items-center' : 'space-y-2'}`}>
-        {user ? (
-          <Link
-            href={`/profile/${profile?.username || user.id}`}
-            title={isCollapsed ? (profile?.display_name || 'My Profile') : undefined}
-            className={`relative group flex items-center rounded-lg font-medium text-sm transition-all ${
-              isCollapsed
-                ? 'w-10 h-10 justify-center'
-                : 'gap-3 px-3.5 py-2 w-full'
-            } ${
-              pathname.startsWith('/profile')
-                ? 'bg-[#F4C95D]/12 text-[#F5F1E8] font-semibold'
-                : 'text-[#B7BEC6] hover:bg-[#111A22] hover:text-[#F5F1E8]'
-            }`}
-          >
-            <div className="w-6 h-6 rounded-full bg-[#151F28] border border-[#27313A] flex items-center justify-center text-[#F4C95D] text-xs font-bold shrink-0">
-              {profile?.display_name ? profile.display_name[0].toUpperCase() : 'U'}
-            </div>
-            {!isCollapsed && <span className="truncate flex-1 text-xs text-[#F5F1E8]">{profile?.display_name || 'My Profile'}</span>}
+      {/* Bottom Pro Card: Lighthouse Pro matching picture */}
+      <div className="pt-4">
+        <div className="relative rounded-2xl p-4 bg-gradient-to-b from-[#161D26] to-[#0E141A] border border-[#232D38] overflow-hidden group">
+          {/* Subtle background glow/lighthouse silhouette */}
+          <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#ECC979]/10 rounded-full blur-2xl pointer-events-none" />
+          <div
+            className="absolute inset-0 opacity-15 bg-cover bg-center pointer-events-none mix-blend-screen"
+            style={{ backgroundImage: `url('/images/hero_distant_shore.jpg')` }}
+          />
 
-            {/* Hover Tooltip when collapsed */}
-            {isCollapsed && (
-              <div className="absolute left-full ml-3 px-3 py-1.5 rounded-lg bg-[#101820] border border-[#27313A] text-[#F5F1E8] text-xs font-semibold whitespace-nowrap shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-150 z-50">
-                <span>{profile?.display_name || 'My Profile'}</span>
-              </div>
-            )}
-          </Link>
-        ) : isCollapsed ? (
-          <Link
-            href="/register"
-            title="Sign Up"
-            className="w-10 h-10 rounded-lg theme-neon-button flex items-center justify-center text-[#0B0F13] text-xs font-bold transition-all"
-          >
-            <Sparkles className="w-4 h-4" />
-          </Link>
-        ) : (
-          <div className="p-3 rounded-xl bg-[#111A22] text-center border border-[#1C252D]">
-            <p className="text-[11px] text-[#B7BEC6] mb-2 leading-relaxed">Join Lighthouse Reels to stream, publish &amp; comment.</p>
+          <div className="relative z-10">
+            {/* Crown Icon */}
+            <div className="w-7 h-7 rounded-lg bg-[#2A2315] border border-[#ECC979]/30 flex items-center justify-center text-[#ECC979] mb-2.5 shadow-sm">
+              <Crown className="w-4 h-4 fill-[#ECC979]/60 text-[#ECC979]" />
+            </div>
+
+            <h4 className="text-sm font-bold text-[#F5F1E8] tracking-tight">
+              Lighthouse Pro
+            </h4>
+            <p className="text-[11px] text-[#86929F] mt-1 leading-snug">
+              Unlock exclusive series, early access, downloads and more.
+            </p>
+
             <Link
-              href="/register"
-              className="block w-full text-xs font-semibold py-1.5 theme-neon-button rounded-lg transition-all"
+              href={user ? '/profile?tab=vip' : '/login?redirect=/profile?tab=vip'}
+              className="mt-3.5 w-full bg-[#ECC979] hover:bg-[#F4C95D] active:scale-98 text-[#101418] font-bold text-xs py-2 rounded-xl text-center block transition-all shadow-md"
             >
-              Get Started
+              Upgrade
             </Link>
           </div>
-        )}
+        </div>
       </div>
     </aside>
   );
