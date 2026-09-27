@@ -263,43 +263,208 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     return { success: true };
   };
 
-  const purchaseCoins = async (packId: string) => {
+  const ensureRazorpayLoaded = (): Promise<boolean> => {
+    if (typeof window === 'undefined') return Promise.resolve(false);
+    if ((window as any).Razorpay) return Promise.resolve(true);
+    return new Promise((resolve) => {
+      const existing = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+      if (existing) {
+        existing.addEventListener('load', () => resolve(true));
+        existing.addEventListener('error', () => resolve(false));
+        if ((window as any).Razorpay) return resolve(true);
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const purchaseCoins = async (packId: string): Promise<{ success: boolean; message?: string; error?: string; new_balance?: number }> => {
+    if (!user) {
+      window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+      return { success: false, error: 'Authentication required. Please sign in.' };
+    }
+
     try {
-      const res = await fetch('/api/wallet/purchase-coins', {
+      // 1. Create order on server
+      const orderRes = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pack_id: packId }),
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setCoins(data.new_balance);
-        fetchTransactions();
-        return { success: true, message: data.message, new_balance: data.new_balance };
+      const orderData = await orderRes.json();
+      if (!orderRes.ok || !orderData.order_id) {
+        throw new Error(orderData.error || 'Failed to initialize payment');
       }
-      return { success: false, error: data.error, message: data.error };
+
+      // 2. Ensure Razorpay checkout script is loaded
+      await ensureRazorpayLoaded();
+      const Razorpay = (window as any).Razorpay;
+      if (!Razorpay) {
+        throw new Error('Payment gateway failed to load. Please refresh and try again.');
+      }
+
+      // 3. Open Razorpay checkout modal
+      return new Promise((resolve) => {
+        const rzp = new Razorpay({
+          key: orderData.key_id,
+          amount: orderData.amount,
+          currency: orderData.currency || 'INR',
+          name: 'Lighthouse Reels',
+          description: orderData.description || 'Coin Pack Purchase',
+          order_id: orderData.order_id,
+          prefill: {
+            name: user.user_metadata?.display_name || user.email?.split('@')[0],
+            email: user.email,
+          },
+          theme: { color: '#F4C95D' },
+          handler: async (response: any) => {
+            try {
+              const verifyRes = await fetch('/api/payments/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  pack_id: packId,
+                }),
+              });
+              const verifyData = await verifyRes.json();
+              if (verifyRes.ok && verifyData.success) {
+                if (verifyData.new_balance !== undefined) {
+                  setCoins(verifyData.new_balance);
+                }
+                refreshWallet();
+                fetchTransactions();
+                resolve({
+                  success: true,
+                  message: verifyData.message || 'Successfully purchased coins!',
+                  new_balance: verifyData.new_balance,
+                });
+              } else {
+                resolve({
+                  success: false,
+                  error: verifyData.error || 'Payment verification failed',
+                });
+              }
+            } catch (err: any) {
+              resolve({ success: false, error: err.message || 'Payment verification error' });
+            }
+          },
+          modal: {
+            ondismiss: () => {
+              resolve({ success: false, error: 'Payment window was closed' });
+            },
+          },
+        });
+
+        rzp.on('payment.failed', (resp: any) => {
+          resolve({
+            success: false,
+            error: resp?.error?.description || 'Payment failed',
+          });
+        });
+
+        rzp.open();
+      });
     } catch (err: any) {
-      return { success: false, error: err?.message, message: err?.message };
+      return { success: false, error: err.message || 'Payment initiation failed' };
     }
   };
 
-  const purchaseVIP = async (vipTierId: string) => {
+  const purchaseVIP = async (vipTierId: string): Promise<{ success: boolean; message?: string; error?: string }> => {
+    if (!user) {
+      window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+      return { success: false, error: 'Authentication required. Please sign in.' };
+    }
+
     try {
-      const res = await fetch('/api/wallet/purchase-coins', {
+      // 1. Create order on server
+      const orderRes = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ vip_tier_id: vipTierId }),
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setIsVIP(true);
-        setVipTier(data.vip_tier);
-        setVipExpiresAt(data.vip_expires_at);
-        fetchTransactions();
-        return { success: true, message: data.message };
+      const orderData = await orderRes.json();
+      if (!orderRes.ok || !orderData.order_id) {
+        throw new Error(orderData.error || 'Failed to initialize VIP pass order');
       }
-      return { success: false, error: data.error, message: data.error };
+
+      // 2. Ensure Razorpay checkout script is loaded
+      await ensureRazorpayLoaded();
+      const Razorpay = (window as any).Razorpay;
+      if (!Razorpay) {
+        throw new Error('Payment gateway failed to load. Please refresh and try again.');
+      }
+
+      // 3. Open Razorpay checkout modal
+      return new Promise((resolve) => {
+        const rzp = new Razorpay({
+          key: orderData.key_id,
+          amount: orderData.amount,
+          currency: orderData.currency || 'INR',
+          name: 'Lighthouse Reels VIP',
+          description: orderData.description || 'VIP Pass Subscription',
+          order_id: orderData.order_id,
+          prefill: {
+            name: user.user_metadata?.display_name || user.email?.split('@')[0],
+            email: user.email,
+          },
+          theme: { color: '#F4C95D' },
+          handler: async (response: any) => {
+            try {
+              const verifyRes = await fetch('/api/payments/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  vip_tier_id: vipTierId,
+                }),
+              });
+              const verifyData = await verifyRes.json();
+              if (verifyRes.ok && verifyData.success) {
+                setIsVIP(true);
+                if (verifyData.vip_tier) setVipTier(verifyData.vip_tier);
+                if (verifyData.vip_expires_at) setVipExpiresAt(verifyData.vip_expires_at);
+                refreshWallet();
+                fetchTransactions();
+                resolve({
+                  success: true,
+                  message: verifyData.message || 'VIP Pass activated successfully!',
+                });
+              } else {
+                resolve({
+                  success: false,
+                  error: verifyData.error || 'Payment verification failed',
+                });
+              }
+            } catch (err: any) {
+              resolve({ success: false, error: err.message || 'Payment verification error' });
+            }
+          },
+          modal: {
+            ondismiss: () => {
+              resolve({ success: false, error: 'Payment window was closed' });
+            },
+          },
+        });
+
+        rzp.on('payment.failed', (resp: any) => {
+          resolve({
+            success: false,
+            error: resp?.error?.description || 'Payment failed',
+          });
+        });
+
+        rzp.open();
+      });
     } catch (err: any) {
-      return { success: false, error: err?.message, message: err?.message };
+      return { success: false, error: err.message || 'Payment initiation failed' };
     }
   };
 

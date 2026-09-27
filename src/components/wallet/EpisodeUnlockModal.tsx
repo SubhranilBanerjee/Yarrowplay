@@ -86,10 +86,91 @@ export default function EpisodeUnlockModal({
     openCoinStore('vip');
   };
 
-  const handleRazorpay = () => {
-    closeUnlockModal();
+  const handleRazorpay = async () => {
     if (onOpenPayment) {
+      closeUnlockModal();
       onOpenPayment(video);
+      return;
+    }
+
+    if (!user) {
+      window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMsg(null);
+    try {
+      const res = await fetch('/api/payments/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ video_id: video.id }),
+      });
+      const orderData = await res.json();
+      if (!res.ok || !orderData.order_id) {
+        throw new Error(orderData.error || 'Failed to initialize payment');
+      }
+
+      const Razorpay = (window as any).Razorpay;
+      if (!Razorpay) {
+        throw new Error('Payment gateway not ready. Please refresh the page.');
+      }
+
+      const rzp = new Razorpay({
+        key: orderData.key_id,
+        amount: orderData.amount,
+        currency: orderData.currency || 'INR',
+        name: 'Lighthouse Reels',
+        description: orderData.description || `Episode ${epNum}`,
+        order_id: orderData.order_id,
+        prefill: {
+          name: user.user_metadata?.display_name || user.email?.split('@')[0],
+          email: user.email,
+        },
+        theme: { color: '#F4C95D' },
+        handler: async (response: any) => {
+          try {
+            const vRes = await fetch('/api/payments/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                video_id: video.id,
+              }),
+            });
+            const vData = await vRes.json();
+            if (vRes.ok && vData.success) {
+              setSuccessMsg('Payment successful! Episode unlocked.');
+              if (onUnlocked) onUnlocked();
+              setTimeout(() => {
+                closeUnlockModal();
+                window.location.reload();
+              }, 1200);
+            } else {
+              setErrorMsg(vData.error || 'Payment verification failed');
+            }
+          } catch (err: any) {
+            setErrorMsg(err.message || 'Verification error');
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setIsLoading(false);
+          },
+        },
+      });
+
+      rzp.on('payment.failed', (resp: any) => {
+        setErrorMsg(resp?.error?.description || 'Payment failed');
+        setIsLoading(false);
+      });
+
+      rzp.open();
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Payment initiation failed');
+      setIsLoading(false);
     }
   };
 

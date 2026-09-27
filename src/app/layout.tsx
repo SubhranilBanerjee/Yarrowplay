@@ -14,6 +14,7 @@ import CoinStoreModal from '@/components/wallet/CoinStoreModal';
 import DailyRewardsModal from '@/components/wallet/DailyRewardsModal';
 import RewardedAdModal from '@/components/wallet/RewardedAdModal';
 import EpisodeUnlockModal from '@/components/wallet/EpisodeUnlockModal';
+import Script from 'next/script';
 import { SITE_CONFIG, generateWebsiteJsonLd } from '@/lib/seo';
 
 export const metadata: Metadata = {
@@ -98,6 +99,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-[var(--lr-bg-primary)] text-[var(--lr-text-primary)] flex flex-col antialiased selection:bg-[#F4C95D]/25 selection:text-[#F5F1E8]">
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
         <AuthProvider>
           <SidebarProvider>
             <WalletProvider>
