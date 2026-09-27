@@ -17,12 +17,34 @@ export async function POST(req: NextRequest) {
 
     // 1. Handling Coin Pack Purchase
     if (pack_id) {
-      const pack = COIN_PACKS.find((p) => p.id === pack_id);
+      let pack: any = null;
+      try {
+        const { data: dbPack } = await supabase
+          .from('coin_packages')
+          .select('*')
+          .eq('id', pack_id)
+          .eq('is_active', true)
+          .maybeSingle();
+        if (dbPack) {
+          pack = {
+            id: dbPack.id,
+            coins: Number(dbPack.coins),
+            bonus_coins: Number(dbPack.bonus_coins || 0),
+            price_usd: Number(dbPack.price_usd),
+            price_inr: Number(dbPack.price_inr),
+          };
+        }
+      } catch {}
+
+      if (!pack) {
+        pack = COIN_PACKS.find((p) => p.id === pack_id);
+      }
+
       if (!pack) {
         return NextResponse.json({ error: 'Invalid coin pack' }, { status: 400 });
       }
 
-      const totalCoins = pack.coins + pack.bonus_coins;
+      const totalCoins = pack.coins + (pack.bonus_coins || 0);
 
       const { data: profile } = await supabase
         .from('profiles')

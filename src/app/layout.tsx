@@ -9,6 +9,11 @@ import { AudioPlayerBar } from '@/components/media/AudioPlayerBar';
 import { GalaxyBackground } from '@/components/common/GalaxyBackground';
 
 import { SidebarProvider } from '@/context/SidebarContext';
+import { WalletProvider } from '@/context/WalletContext';
+import CoinStoreModal from '@/components/wallet/CoinStoreModal';
+import DailyRewardsModal from '@/components/wallet/DailyRewardsModal';
+import RewardedAdModal from '@/components/wallet/RewardedAdModal';
+import EpisodeUnlockModal from '@/components/wallet/EpisodeUnlockModal';
 import { SITE_CONFIG, generateWebsiteJsonLd } from '@/lib/seo';
 
 export const metadata: Metadata = {
@@ -95,18 +100,26 @@ export default function RootLayout({
       <body className="min-h-screen bg-[var(--lr-bg-primary)] text-[var(--lr-text-primary)] flex flex-col antialiased selection:bg-[#F4C95D]/25 selection:text-[#F5F1E8]">
         <AuthProvider>
           <SidebarProvider>
-            <AudioPlayerProvider>
-              <GalaxyBackground />
-              <Header />
-              <div className="flex flex-1 min-h-[calc(100vh-61px)]">
-                <Sidebar />
-                <main className="flex-1 overflow-y-auto pb-28 md:pb-24 bg-transparent min-w-0">
-                  {children}
-                </main>
-              </div>
-              <AudioPlayerBar />
-              <MobileNavbar />
-            </AudioPlayerProvider>
+            <WalletProvider>
+              <AudioPlayerProvider>
+                <GalaxyBackground />
+                <Header />
+                <div className="flex flex-1 min-h-[calc(100vh-61px)]">
+                  <Sidebar />
+                  <main className="flex-1 overflow-y-auto pb-28 md:pb-24 bg-transparent min-w-0">
+                    {children}
+                  </main>
+                </div>
+                <AudioPlayerBar />
+                <MobileNavbar />
+
+                {/* DramaBox Monetization Modals */}
+                <CoinStoreModal />
+                <DailyRewardsModal />
+                <RewardedAdModal />
+                <EpisodeUnlockModal />
+              </AudioPlayerProvider>
+            </WalletProvider>
           </SidebarProvider>
         </AuthProvider>
       </body>

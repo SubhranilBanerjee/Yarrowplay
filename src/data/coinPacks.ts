@@ -105,5 +105,49 @@ export const DAILY_STREAK_REWARDS = [
 ];
 
 export const EPISODE_UNLOCK_COINS = 10;
-export const FREE_EPISODE_THRESHOLD = 5; // Episodes 1 to 5 are completely free
+export const FREE_EPISODE_THRESHOLD = 2; // Episodes 1 and 2 are completely free (DramaBox model)
 export const REWARD_AD_COINS = 2; // Coins earned per rewarded ad watched
+
+export interface Promotion {
+  id: string;
+  code: string;
+  title: string;
+  description?: string;
+  reward_type: 'coins' | 'vip_days' | 'discount_percent';
+  reward_value: number;
+  max_uses?: number;
+  times_used?: number;
+  valid_until?: string | null;
+  is_active: boolean;
+}
+
+export const DEFAULT_PROMOTIONS: Promotion[] = [
+  {
+    id: 'promo_welcome50',
+    code: 'WELCOME50',
+    title: '50 Free Coins',
+    description: 'Welcome gift for short drama lovers! Claim 50 free coins immediately.',
+    reward_type: 'coins',
+    reward_value: 50,
+    is_active: true,
+  },
+  {
+    id: 'promo_dramabox',
+    code: 'DRAMABOX',
+    title: '100 Mega Coins Bonus',
+    description: 'Exclusive DramaBox launch promo. Unlock up to 10 cliffhanger episodes!',
+    reward_type: 'coins',
+    reward_value: 100,
+    is_active: true,
+  },
+  {
+    id: 'promo_vipfree',
+    code: 'VIPFREE',
+    title: '3-Day VIP Pass',
+    description: 'Binge without limits. Enjoy 3 days of unlimited ad-free short series.',
+    reward_type: 'vip_days',
+    reward_value: 3,
+    is_active: true,
+  },
+];
+

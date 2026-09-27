@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Script from 'next/script';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/context/AuthContext';
+import { useWallet } from '@/context/WalletContext';
 import { VideoPlayer } from '@/components/media/VideoPlayer';
 import { FollowButton } from '@/components/ui/FollowButton';
 import { CommentSection } from '@/components/media/CommentSection';
@@ -199,6 +200,7 @@ export default function VideoDetailPage() {
   const initialTime = searchParams?.get('t') ? parseFloat(searchParams.get('t')!) : 0;
   const router = useRouter();
   const { user } = useAuth();
+  const { coins, isVIP, openUnlockModal, autoUnlockNext, unlockEpisode } = useWallet();
   const supabase = createClient();
 
   const isAdmin = !!user?.email && (
@@ -220,6 +222,8 @@ export default function VideoDetailPage() {
   const [copiedLink, setCopiedLink] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isPurchased, setIsPurchased] = useState(false);
+  const [isCoinUnlocked, setIsCoinUnlocked] = useState(false);
+  const [unlockedEpisodeIds, setUnlockedEpisodeIds] = useState<Set<string>>(new Set());
 
   // UI state
   const [commentsOpen, setCommentsOpen] = useState(true);
@@ -327,22 +331,43 @@ export default function VideoDetailPage() {
           { data: fav },
           { data: watchItem },
           { data: purchase },
+          { data: unlock },
         ] = await Promise.all([
           supabase.from('reactions').select('reaction_type').eq('user_id', user.id).eq('content_type', 'video').eq('content_id', videoId).maybeSingle(),
           supabase.from('favorites').select('id').eq('user_id', user.id).eq('content_type', 'video').eq('content_id', videoId).maybeSingle(),
           supabase.from('watchlists').select('id').eq('user_id', user.id).eq('video_id', videoId).maybeSingle(),
           supabase.from('video_purchases').select('id').eq('user_id', user.id).eq('video_id', videoId).eq('status', 'paid').maybeSingle(),
+          supabase.from('episode_unlocks').select('id').eq('user_id', user.id).eq('video_id', videoId).maybeSingle(),
         ]);
 
         if (reaction) setUserReaction(reaction.reaction_type as any);
         setIsFavorite(!!fav);
         setIsWatchlisted(!!watchItem);
         setIsPurchased(!!purchase);
+        setIsCoinUnlocked(!!unlock);
+
+        // Fetch unlocked episodes for series
+        if (vid?.series_id) {
+          try {
+            const [{ data: sUnlocks }, { data: sPurchases }] = await Promise.all([
+              supabase.from('episode_unlocks').select('video_id').eq('user_id', user.id).eq('series_id', vid.series_id),
+              supabase.from('video_purchases').select('video_id').eq('user_id', user.id).eq('status', 'paid'),
+            ]);
+            const unSet = new Set<string>();
+            if (sUnlocks) sUnlocks.forEach((u: any) => unSet.add(u.video_id));
+            if (sPurchases) sPurchases.forEach((p: any) => unSet.add(p.video_id));
+            if (unlock) unSet.add(videoId);
+            if (purchase) unSet.add(videoId);
+            setUnlockedEpisodeIds(unSet);
+          } catch {}
+        }
       } else {
         setUserReaction(null);
         setIsFavorite(false);
         setIsWatchlisted(false);
         setIsPurchased(false);
+        setIsCoinUnlocked(false);
+        setUnlockedEpisodeIds(new Set());
       }
     } catch (err) {
       console.error('Video fetch error:', err);
@@ -484,8 +509,13 @@ export default function VideoDetailPage() {
     }
   };
 
-  // Determine if video is locked for this user
-  const isLocked = !!video?.is_locked && !isPurchased && user?.id !== video?.creator_id && !isAdmin;
+  // DramaBox Rule: Only first two episodes are free! Episode 3+ require coins or VIP or payment.
+  const isFreeEpisode = (video?.episode_number !== null && video?.episode_number !== undefined)
+    ? video.episode_number <= 2
+    : !video?.is_locked;
+
+  const isUnlockedByUser = isPurchased || isCoinUnlocked || isVIP;
+  const isLocked = !isFreeEpisode && !isUnlockedByUser && user?.id !== video?.creator_id && !isAdmin;
 
   if (isLoading) {
     return (
@@ -559,7 +589,35 @@ export default function VideoDetailPage() {
                   if (!user) {
                     setShowAuthModal(true);
                   } else {
-                    setShowPaymentModal(true);
+                    openUnlockModal(video);
+                  }
+                }}
+                onEnded={() => {
+                  if (video.series_id && seriesEpisodes.length > 0) {
+                    const currentIndex = seriesEpisodes.findIndex((ep) => ep.id === video.id);
+                    if (currentIndex >= 0 && currentIndex < seriesEpisodes.length - 1) {
+                      const nextEp = seriesEpisodes[currentIndex + 1];
+                      const isNextFree = (nextEp.episode_number !== null && nextEp.episode_number !== undefined)
+                        ? nextEp.episode_number <= 2
+                        : !nextEp.is_locked;
+                      const isNextUnlocked = isNextFree || unlockedEpisodeIds.has(nextEp.id) || isVIP || user?.id === nextEp.creator_id || isAdmin;
+
+                      if (isNextUnlocked) {
+                        router.push(`/videos/${nextEp.id}`);
+                      } else if (autoUnlockNext && coins >= 10) {
+                        unlockEpisode(nextEp.id).then((res) => {
+                          if (res.success) {
+                            setToastMsg({ type: 'success', text: `Auto-unlocked Episode ${nextEp.episode_number} (-10 coins)` });
+                            setUnlockedEpisodeIds((prev) => new Set([...prev, nextEp.id]));
+                            router.push(`/videos/${nextEp.id}`);
+                          } else {
+                            router.push(`/videos/${nextEp.id}`);
+                          }
+                        });
+                      } else {
+                        router.push(`/videos/${nextEp.id}`);
+                      }
+                    }
                   }
                 }}
               />
@@ -676,14 +734,14 @@ export default function VideoDetailPage() {
                   <span>{copiedLink ? 'Copied!' : 'Share'}</span>
                 </button>
 
-                {/* Locked purchase button (when logged in but not purchased) */}
-                {video.is_locked && !isPurchased && user && user.id !== video.creator_id && !isAdmin && (
+                {/* Locked purchase / unlock button (DramaBox monetization) */}
+                {isLocked && user && user.id !== video.creator_id && !isAdmin && (
                   <button
-                    onClick={() => setShowPaymentModal(true)}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] text-[#0B0F13] text-xs font-semibold transition-all shadow-md"
+                    onClick={() => openUnlockModal(video)}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] text-[#0B0F13] text-xs font-bold transition-all shadow-md cursor-pointer active:scale-95"
                   >
                     <Lock className="w-3.5 h-3.5" />
-                    <span>₹{(video.price_inr as number)?.toFixed(0)}</span>
+                    <span>Unlock (10 Coins)</span>
                   </button>
                 )}
 
@@ -786,20 +844,28 @@ export default function VideoDetailPage() {
               <div className="grid grid-cols-5 gap-1.5 max-h-[70vh] overflow-y-auto pr-1 scrollbar-thin">
                 {seriesEpisodes.map((ep) => {
                   const isCurrent = ep.id === video.id;
-                  const epLocked = !!ep.is_locked && !isPurchased && user?.id !== video.creator_id && !isAdmin;
+                  const isEpFree = (ep.episode_number !== null && ep.episode_number !== undefined)
+                    ? ep.episode_number <= 2
+                    : !ep.is_locked;
+                  const epLocked = !isEpFree && !unlockedEpisodeIds.has(ep.id) && !isVIP && user?.id !== video.creator_id && !isAdmin;
                   return (
                     <Link
                       key={ep.id}
                       href={`/videos/${ep.id}`}
-                      title={ep.title}
+                      title={`${ep.title}${epLocked ? ' (Locked - 10 Coins)' : isEpFree ? ' (Free Episode)' : ' (Unlocked)'}`}
                       className={`relative aspect-square flex items-center justify-center rounded-lg text-xs font-bold transition-all border ${
                         isCurrent
                           ? 'bg-[#F4C95D] text-[#0B0F13] border-[#F4C95D] shadow-md'
+                          : epLocked
+                          ? 'bg-[#151F28]/60 text-[#7F8993] border-[#27313A] hover:border-[#F4C95D]/40 hover:text-[#F4C95D]'
                           : 'bg-[#151F28] text-[#B7BEC6] border-[#27313A] hover:border-[#52606C] hover:text-[#F5F1E8]'
                       }`}
                     >
                       {epLocked ? (
-                        <Lock className="w-3 h-3 text-[#F4C95D]" />
+                        <div className="flex flex-col items-center justify-center">
+                          <Lock className="w-3 h-3 text-[#F4C95D]" />
+                          <span className="text-[9px] text-[#7F8993] leading-none mt-0.5">{ep.episode_number || ''}</span>
+                        </div>
                       ) : (
                         ep.episode_number || '?'
                       )}

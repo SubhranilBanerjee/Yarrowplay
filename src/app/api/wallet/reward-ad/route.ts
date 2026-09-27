@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
-    const { campaign_id } = await req.json().catch(() => ({ campaign_id: null }));
+    const { campaign_id, unlock_video_id } = await req.json().catch(() => ({ campaign_id: null, unlock_video_id: null }));
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -37,15 +37,42 @@ export async function POST(req: NextRequest) {
       user_id: user.id,
       amount: REWARD_AD_COINS,
       type: 'reward_ad',
-      description: 'Watched Rewarded Sponsor Ad',
-      metadata: { campaign_id, coins: REWARD_AD_COINS },
+      description: unlock_video_id
+        ? 'Watched Rewarded Ad to Unlock Episode'
+        : 'Watched Rewarded Sponsor Ad',
+      metadata: { campaign_id, unlock_video_id, coins: REWARD_AD_COINS },
     });
+
+    // If an episode unlock was targeted
+    let unlockedEpisode = false;
+    if (unlock_video_id) {
+      try {
+        const { data: vid } = await supabase
+          .from('videos')
+          .select('series_id')
+          .eq('id', unlock_video_id)
+          .maybeSingle();
+
+        await supabase.from('episode_unlocks').upsert({
+          user_id: user.id,
+          video_id: unlock_video_id,
+          series_id: vid?.series_id || null,
+          coins_spent: 0,
+          unlock_type: 'ad_reward',
+        });
+        unlockedEpisode = true;
+      } catch {}
+    }
 
     return NextResponse.json({
       success: true,
       coins_earned: REWARD_AD_COINS,
       new_balance: newBalance,
-      message: `Earned +${REWARD_AD_COINS} coins!`,
+      unlocked_episode: unlockedEpisode,
+      video_id: unlock_video_id,
+      message: unlockedEpisode
+        ? `Episode unlocked! (+${REWARD_AD_COINS} bonus coins)`
+        : `Earned +${REWARD_AD_COINS} coins!`,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message || 'Failed to claim ad reward' }, { status: 500 });

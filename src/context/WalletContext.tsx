@@ -2,6 +2,9 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useAuth } from './AuthContext';
+import { COIN_PACKS, VIP_TIERS, DEFAULT_PROMOTIONS, CoinPack, VIPTier, Promotion } from '@/data/coinPacks';
+
+export type StoreTab = 'coins' | 'vip' | 'promo' | 'history';
 
 interface WalletContextType {
   coins: number;
@@ -17,24 +20,44 @@ interface WalletContextType {
   refreshWallet: () => Promise<void>;
   unlockEpisode: (videoId: string) => Promise<{ success: boolean; error?: string; message?: string; new_balance?: number }>;
   unlockEpisodeWithCoins: (videoId: string) => Promise<{ success: boolean; error?: string; message?: string; new_balance?: number }>; // alias
+  unlockEpisodeWithAd: (videoId: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   claimDailyCheckIn: () => Promise<{ success: boolean; coins_earned?: number; coins_awarded?: number; message?: string; error?: string }>;
-  watchRewardAd: (campaignId?: string) => Promise<{ success: boolean; coins_earned?: number; message?: string; error?: string }>;
+  watchRewardAd: (campaignId?: string, unlockVideoId?: string) => Promise<{ success: boolean; coins_earned?: number; message?: string; error?: string }>;
   purchaseCoins: (packId: string) => Promise<{ success: boolean; message?: string; error?: string; new_balance?: number }>;
   purchaseVIP: (vipTierId: string) => Promise<{ success: boolean; message?: string; error?: string }>;
+  redeemPromo: (code: string) => Promise<{ success: boolean; message?: string; error?: string; new_balance?: number; vip_tier?: string; vip_expires_at?: string }>;
+  
+  // Data
+  packages: CoinPack[];
+  promotions: Promotion[];
+  transactions: any[];
+  fetchTransactions: (type?: string) => Promise<any[]>;
+
   // Modal controllers
   isCoinStoreOpen: boolean;
   isStoreOpen: boolean; // alias
-  openCoinStore: () => void;
+  activeStoreTab: StoreTab;
+  setActiveStoreTab: (tab: StoreTab) => void;
+  openCoinStore: (tab?: StoreTab) => void;
   closeCoinStore: () => void;
+
   isDailyRewardsOpen: boolean;
   openDailyRewards: () => void;
   closeDailyRewards: () => void;
+
   isRewardAdOpen: boolean;
   isRewardedAdOpen: boolean; // alias
-  openRewardAd: () => void;
-  openRewardedAd: () => void; // alias
+  rewardAdVideoId: string | null;
+  openRewardAd: (unlockVideoId?: string) => void;
+  openRewardedAd: (unlockVideoId?: string) => void; // alias
   closeRewardAd: () => void;
   closeRewardedAd: () => void; // alias
+
+  // DramaBox Episode Unlock Modal
+  isUnlockModalOpen: boolean;
+  unlockModalVideo: any | null;
+  openUnlockModal: (video: any) => void;
+  closeUnlockModal: () => void;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -49,13 +72,24 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [canCheckIn, setCanCheckIn] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Configurable packages & promotions from DB (or fallback)
+  const [packages, setPackages] = useState<CoinPack[]>(COIN_PACKS);
+  const [promotions, setPromotions] = useState<Promotion[]>(DEFAULT_PROMOTIONS);
+  const [transactions, setTransactions] = useState<any[]>([]);
+
   // Auto unlock preference (saved in localStorage)
   const [autoUnlockNext, setAutoUnlockNextState] = useState<boolean>(true);
 
   // Modals state
   const [isCoinStoreOpen, setIsCoinStoreOpen] = useState<boolean>(false);
+  const [activeStoreTab, setActiveStoreTab] = useState<StoreTab>('coins');
   const [isDailyRewardsOpen, setIsDailyRewardsOpen] = useState<boolean>(false);
   const [isRewardAdOpen, setIsRewardAdOpen] = useState<boolean>(false);
+  const [rewardAdVideoId, setRewardAdVideoId] = useState<string | null>(null);
+
+  // DramaBox Episode Unlock Modal state
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState<boolean>(false);
+  const [unlockModalVideo, setUnlockModalVideo] = useState<any | null>(null);
 
   useEffect(() => {
     try {
@@ -73,13 +107,37 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   };
 
+  // Fetch dynamic packages & promotions
+  const loadPackagesAndPromos = useCallback(async () => {
+    try {
+      const res = await fetch('/api/wallet/packages');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.packages && data.packages.length > 0) {
+          setPackages(data.packages);
+        }
+        if (data.promotions && data.promotions.length > 0) {
+          setPromotions(data.promotions);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPackagesAndPromos();
+  }, [loadPackagesAndPromos]);
+
   const refreshWallet = useCallback(async () => {
     if (!user) {
       setCoins(0);
       setIsVIP(false);
       setVipTier('none');
+      setVipExpiresAt(null);
       setCheckInStreak(0);
       setCanCheckIn(false);
+      setTransactions([]);
       setIsLoading(false);
       return;
     }
@@ -94,6 +152,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         setVipExpiresAt(data.vip_expires_at || null);
         setCheckInStreak(data.check_in_streak || 0);
         setCanCheckIn(!!data.can_check_in);
+        if (data.transactions) {
+          setTransactions(data.transactions);
+        }
       }
     } catch {
       // ignore
@@ -105,6 +166,21 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     refreshWallet();
   }, [refreshWallet]);
+
+  const fetchTransactions = async (type: string = 'all') => {
+    if (!user) return [];
+    try {
+      const res = await fetch(`/api/wallet/transactions?type=${type}`);
+      if (res.ok) {
+        const data = await res.json();
+        setTransactions(data.transactions || []);
+        return data.transactions || [];
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  };
 
   const unlockEpisode = async (videoId: string) => {
     if (!user) {
@@ -122,6 +198,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       const data = await res.json();
       if (!res.ok) {
         if (data.error === 'INSUFFICIENT_COINS') {
+          setActiveStoreTab('coins');
           setIsCoinStoreOpen(true);
         }
         return { success: false, error: data.error, message: data.message };
@@ -133,6 +210,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         refreshWallet();
       }
 
+      setIsUnlockModalOpen(false);
       return { success: true, message: data.message, new_balance: data.new_balance };
     } catch (err: any) {
       return { success: false, error: err?.message || 'Failed to unlock' };
@@ -147,6 +225,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         setCoins(data.new_balance);
         setCheckInStreak(data.current_streak);
         setCanCheckIn(false);
+        fetchTransactions();
         return { success: true, coins_earned: data.coins_earned, coins_awarded: data.coins_earned, message: data.message };
       }
       return { success: false, error: data.error, message: data.error };
@@ -155,22 +234,33 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const watchRewardAd = async (campaignId?: string) => {
+  const watchRewardAd = async (campaignId?: string, unlockVideoId?: string) => {
     try {
+      const targetVideoId = unlockVideoId || rewardAdVideoId;
       const res = await fetch('/api/wallet/reward-ad', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ campaign_id: campaignId }),
+        body: JSON.stringify({ campaign_id: campaignId, unlock_video_id: targetVideoId }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
         setCoins(data.new_balance);
+        if (targetVideoId) {
+          setIsUnlockModalOpen(false);
+        }
+        fetchTransactions();
         return { success: true, coins_earned: data.coins_earned, message: data.message };
       }
       return { success: false, error: data.error, message: data.error };
     } catch (err: any) {
       return { success: false, error: err?.message, message: err?.message };
     }
+  };
+
+  const unlockEpisodeWithAd = async (videoId: string) => {
+    setRewardAdVideoId(videoId);
+    setIsRewardAdOpen(true);
+    return { success: true };
   };
 
   const purchaseCoins = async (packId: string) => {
@@ -183,7 +273,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       const data = await res.json();
       if (res.ok && data.success) {
         setCoins(data.new_balance);
-        setIsCoinStoreOpen(false);
+        fetchTransactions();
         return { success: true, message: data.message, new_balance: data.new_balance };
       }
       return { success: false, error: data.error, message: data.error };
@@ -204,13 +294,60 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         setIsVIP(true);
         setVipTier(data.vip_tier);
         setVipExpiresAt(data.vip_expires_at);
-        setIsCoinStoreOpen(false);
+        fetchTransactions();
         return { success: true, message: data.message };
       }
       return { success: false, error: data.error, message: data.error };
     } catch (err: any) {
       return { success: false, error: err?.message, message: err?.message };
     }
+  };
+
+  const redeemPromo = async (code: string) => {
+    try {
+      const res = await fetch('/api/wallet/promo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.new_balance !== undefined) {
+          setCoins(data.new_balance);
+        }
+        if (data.vip_tier && data.vip_tier !== 'none') {
+          setIsVIP(true);
+          setVipTier(data.vip_tier);
+          setVipExpiresAt(data.vip_expires_at);
+        }
+        fetchTransactions();
+        return {
+          success: true,
+          message: data.message,
+          new_balance: data.new_balance,
+          vip_tier: data.vip_tier,
+          vip_expires_at: data.vip_expires_at,
+        };
+      }
+      return { success: false, error: data.error, message: data.error };
+    } catch (err: any) {
+      return { success: false, error: err?.message, message: err?.message };
+    }
+  };
+
+  const openCoinStore = (tab: StoreTab = 'coins') => {
+    setActiveStoreTab(tab);
+    setIsCoinStoreOpen(true);
+  };
+
+  const openUnlockModal = (video: any) => {
+    setUnlockModalVideo(video);
+    setIsUnlockModalOpen(true);
+  };
+
+  const closeUnlockModal = () => {
+    setIsUnlockModalOpen(false);
+    setUnlockModalVideo(null);
   };
 
   return (
@@ -229,23 +366,48 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         refreshWallet,
         unlockEpisode,
         unlockEpisodeWithCoins: unlockEpisode,
+        unlockEpisodeWithAd,
         claimDailyCheckIn,
         watchRewardAd,
         purchaseCoins,
         purchaseVIP,
+        redeemPromo,
+        packages,
+        promotions,
+        transactions,
+        fetchTransactions,
         isCoinStoreOpen,
         isStoreOpen: isCoinStoreOpen,
-        openCoinStore: () => setIsCoinStoreOpen(true),
+        activeStoreTab,
+        setActiveStoreTab,
+        openCoinStore,
         closeCoinStore: () => setIsCoinStoreOpen(false),
         isDailyRewardsOpen,
         openDailyRewards: () => setIsDailyRewardsOpen(true),
         closeDailyRewards: () => setIsDailyRewardsOpen(false),
         isRewardAdOpen,
         isRewardedAdOpen: isRewardAdOpen,
-        openRewardAd: () => setIsRewardAdOpen(true),
-        openRewardedAd: () => setIsRewardAdOpen(true),
-        closeRewardAd: () => setIsRewardAdOpen(false),
-        closeRewardedAd: () => setIsRewardAdOpen(false),
+        rewardAdVideoId,
+        openRewardAd: (vidId?: string) => {
+          if (vidId) setRewardAdVideoId(vidId);
+          setIsRewardAdOpen(true);
+        },
+        openRewardedAd: (vidId?: string) => {
+          if (vidId) setRewardAdVideoId(vidId);
+          setIsRewardAdOpen(true);
+        },
+        closeRewardAd: () => {
+          setIsRewardAdOpen(false);
+          setRewardAdVideoId(null);
+        },
+        closeRewardedAd: () => {
+          setIsRewardAdOpen(false);
+          setRewardAdVideoId(null);
+        },
+        isUnlockModalOpen,
+        unlockModalVideo,
+        openUnlockModal,
+        closeUnlockModal,
       }}
     >
       {children}

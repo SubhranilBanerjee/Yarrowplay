@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
+import { useWallet } from '@/context/WalletContext';
 import {
   Search,
   Plus,
@@ -17,6 +18,11 @@ import {
   Clock,
   Menu,
   X,
+  Coins,
+  Crown,
+  Gift,
+  Tag,
+  History,
 } from 'lucide-react';
 import Image from 'next/image';
 import { BrandLogo } from '@/components/landing/BrandLogo';
@@ -25,6 +31,7 @@ import { NotificationDropdown } from '@/components/notifications/NotificationDro
 export function Header() {
   const { user, profile, signOut } = useAuth();
   const { toggleMobileSidebar } = useSidebar();
+  const { coins, isVIP, openCoinStore, openDailyRewards } = useWallet();
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileSearch, setShowMobileSearch] = useState(false);
@@ -102,6 +109,22 @@ export function Header() {
             {showMobileSearch ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
           </button>
 
+          {/* Coin Wallet Button */}
+          <button
+            type="button"
+            onClick={() => openCoinStore('coins')}
+            title="Coin Store & Wallet"
+            className="flex items-center gap-1.5 bg-[#141D26] hover:bg-[#1A2530] text-[#F4C95D] border border-[#F4C95D]/30 hover:border-[#F4C95D]/60 text-xs sm:text-sm font-bold px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full shadow-sm transition-all active:scale-95 cursor-pointer font-sans"
+          >
+            <span>🪙</span>
+            <span>{coins}</span>
+            {isVIP && (
+              <span className="text-[10px] bg-[#F4C95D] text-[#0B0F13] px-1.5 py-0.2 rounded-full font-black flex items-center gap-0.5 ml-0.5">
+                VIP
+              </span>
+            )}
+          </button>
+
           {/* + Create Button */}
           <Link
             href={user ? '/creator/studio' : '/login?redirect=/creator/studio'}
@@ -163,6 +186,77 @@ export function Header() {
                     </div>
 
                     <div className="py-1 text-xs text-[#B7BEC6]">
+                      {/* Monetization & Rewards Section */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          openCoinStore('coins');
+                        }}
+                        className="w-full flex items-center justify-between px-4 py-2 hover:bg-[#151D25] text-left transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Coins className="w-4 h-4 text-[#F4C95D]" />
+                          <span className="text-[#F5F1E8]">Coin Wallet</span>
+                        </div>
+                        <span className="text-xs font-bold text-[#F4C95D]">🪙 {coins}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          openCoinStore('vip');
+                        }}
+                        className="w-full flex items-center justify-between px-4 py-2 hover:bg-[#151D25] text-left transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Crown className="w-4 h-4 text-[#F4C95D]" />
+                          <span className="text-[#F5F1E8]">VIP Subscription</span>
+                        </div>
+                        {isVIP ? (
+                          <span className="text-[10px] text-[#68B88A] bg-[#68B88A]/15 px-1.5 py-0.5 rounded border border-[#68B88A]/30">Active</span>
+                        ) : (
+                          <span className="text-[10px] text-[#F4C95D]">Get VIP</span>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          openDailyRewards();
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2 hover:bg-[#151D25] text-[#F5F1E8] text-left transition-colors cursor-pointer"
+                      >
+                        <Gift className="w-4 h-4 text-[#F4C95D]" />
+                        <span>Daily Rewards Streak</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          openCoinStore('promo');
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2 hover:bg-[#151D25] text-[#F5F1E8] text-left transition-colors cursor-pointer"
+                      >
+                        <Tag className="w-4 h-4 text-[#F4C95D]" />
+                        <span>Redeem Promo Code</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          openCoinStore('history');
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2 hover:bg-[#151D25] text-[#B7BEC6] hover:text-[#F5F1E8] text-left transition-colors cursor-pointer border-b border-[#182029]/80 pb-2 mb-1"
+                      >
+                        <History className="w-4 h-4 text-[#7A8694]" />
+                        <span>Transaction History</span>
+                      </button>
+
                       <Link
                         href={`/profile/${profile?.username || user.id}`}
                         onClick={() => setShowUserMenu(false)}
