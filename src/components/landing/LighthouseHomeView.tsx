@@ -19,6 +19,17 @@ import { useAuth } from '@/context/AuthContext';
 
 // ─── Interfaces ─────────────────────────────────────────────────────────────
 
+interface HeroSlide {
+  id: string;
+  eyebrow: string;
+  title: string;
+  tagline: string;
+  imageUrl: string;
+  genre: string;
+  seriesId?: string;
+  firstEpisodeId?: string;
+}
+
 interface ReelItem {
   id: string;
   title: string;
@@ -41,6 +52,7 @@ interface SeriesShowcaseItem {
   badge?: string;
   description?: string;
   year?: string;
+  firstEpisodeId?: string;
 }
 
 interface CreatorShowcaseItem {
@@ -71,265 +83,14 @@ interface ContinueWatchingItem {
   videoId?: string;
 }
 
-// ─── Curated Base Data Matching The Reference Picture ───────────────────────────
-
-const INITIAL_HERO_SLIDES = [
-  {
-    id: 'distant-shore',
-    eyebrow: 'Original Series',
-    title: 'The Distant Shore',
-    tagline: 'Some places change you forever.',
-    imageUrl: '/images/hero_distant_shore.jpg',
-    genre: 'Drama',
-    seriesId: 'distant-shore',
-  },
-  {
-    id: 'city-lights',
-    eyebrow: 'Original Series',
-    title: 'City Lights',
-    tagline: 'Two souls collide against the glow of a sleepless city.',
-    imageUrl: '/images/series_city_lights.jpg',
-    genre: 'Drama',
-    seriesId: 'city-lights',
-  },
-  {
-    id: 'parallel-lives',
-    eyebrow: 'Original Series',
-    title: 'Parallel Lives',
-    tagline: 'Destiny separated by oceans and decades of silence.',
-    imageUrl: '/images/series_parallel_lives.jpg',
-    genre: 'Romance',
-    seriesId: 'parallel-lives',
-  },
-  {
-    id: 'midnight-drive',
-    eyebrow: 'Original Series',
-    title: 'Midnight Drive',
-    tagline: 'When neon reflections hide dangerous secrets.',
-    imageUrl: '/images/series_midnight_drive.jpg',
-    genre: 'Action',
-    seriesId: 'midnight-drive',
-  },
-  {
-    id: 'island-life',
-    eyebrow: 'Original Series',
-    title: 'Island Life',
-    tagline: 'Uncharted coasts where every sunrise tells a story.',
-    imageUrl: '/images/series_island_life.jpg',
-    genre: 'Travel',
-    seriesId: 'island-life',
-  },
-];
-
-const INITIAL_REELS: ReelItem[] = [
-  {
-    id: 'reel-1',
-    title: 'A Day in Kolkata',
-    creatorName: 'Maya Sen',
-    creatorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
-    creatorHandle: '@mayasen',
-    thumbnailUrl: '/images/reel_kolkata.jpg',
-    duration: '00:32',
-    views: '1.2M',
-    genre: 'Travel',
-  },
-  {
-    id: 'reel-2',
-    title: 'City Nights',
-    creatorName: 'Arjun Malik',
-    creatorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
-    creatorHandle: '@arjunmalik',
-    thumbnailUrl: '/images/reel_city_nights.jpg',
-    duration: '00:48',
-    views: '853K',
-    genre: 'Lifestyle',
-  },
-  {
-    id: 'reel-3',
-    title: 'Hidden Shores',
-    creatorName: 'TravelTales',
-    creatorAvatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=80',
-    creatorHandle: '@traveltales',
-    thumbnailUrl: '/images/reel_hidden_shores.jpg',
-    duration: '00:26',
-    views: '2.1M',
-    genre: 'Travel',
-  },
-  {
-    id: 'reel-4',
-    title: 'Whispers',
-    creatorName: 'Ananya Verma',
-    creatorAvatar: '/images/avatar_ananya.jpg',
-    creatorHandle: '@ananyav',
-    thumbnailUrl: '/images/reel_whispers.jpg',
-    duration: '00:59',
-    views: '980K',
-    genre: 'Drama',
-  },
-  {
-    id: 'reel-5',
-    title: 'The Last Light',
-    creatorName: 'Rohan Mehta',
-    creatorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
-    creatorHandle: '@rohanframes',
-    thumbnailUrl: '/images/reel_last_light.jpg',
-    duration: '00:31',
-    views: '1.4M',
-    genre: 'Romance',
-  },
-  {
-    id: 'reel-6',
-    title: 'Parallel Streets',
-    creatorName: 'Kavya Nair',
-    creatorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80',
-    creatorHandle: '@kavyanair',
-    thumbnailUrl: '/images/reel_parallel_streets.jpg',
-    duration: '00:40',
-    views: '720K',
-    genre: 'Action',
-  },
-];
-
-const INITIAL_SERIES: SeriesShowcaseItem[] = [
-  {
-    id: 'series-city-lights',
-    title: 'City Lights',
-    genre: 'Drama',
-    seasons: '1 Season',
-    badge: 'New Episode',
-    thumbnailUrl: '/images/series_city_lights.jpg',
-    year: '2024',
-  },
-  {
-    id: 'series-parallel-lives',
-    title: 'Parallel Lives',
-    genre: 'Romance',
-    seasons: '1 Season',
-    thumbnailUrl: '/images/series_parallel_lives.jpg',
-    year: '2024',
-  },
-  {
-    id: 'series-midnight-drive',
-    title: 'Midnight Drive',
-    genre: 'Thriller',
-    seasons: '1 Season',
-    thumbnailUrl: '/images/series_midnight_drive.jpg',
-    year: '2024',
-  },
-  {
-    id: 'series-island-life',
-    title: 'Island Life',
-    genre: 'Travel',
-    seasons: '1 Season',
-    thumbnailUrl: '/images/series_island_life.jpg',
-    year: '2024',
-  },
-  {
-    id: 'series-the-crew',
-    title: 'The Crew',
-    genre: 'Comedy',
-    seasons: '1 Season',
-    thumbnailUrl: '/images/series_the_crew.jpg',
-    year: '2024',
-  },
-];
-
-const INITIAL_RECOMMENDED = [
-  {
-    id: 'rec-1',
-    title: 'Before the Rain',
-    genre: 'Drama',
-    year: '2024',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'rec-2',
-    title: 'The Last Train',
-    genre: 'Romance',
-    year: '2024',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=500&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'rec-3',
-    title: 'Neon Streets',
-    genre: 'Thriller',
-    year: '2024',
-    thumbnailUrl: '/images/series_midnight_drive.jpg',
-  },
-];
-
-const INITIAL_CREATORS: CreatorShowcaseItem[] = [
-  {
-    id: 'c-ananya',
-    name: 'Ananya Verma',
-    handle: '@ananyav',
-    followers: '1.2M followers',
-    avatarUrl: '/images/avatar_ananya.jpg',
-    isFollowing: false,
-  },
-  {
-    id: 'c-rohan',
-    name: 'Rohan Mehta',
-    handle: '@rohanframes',
-    followers: '980K followers',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80',
-    isFollowing: false,
-  },
-  {
-    id: 'c-kavya',
-    name: 'Kavya Nair',
-    handle: '@kavyanair',
-    followers: '750K followers',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
-    isFollowing: false,
-  },
-];
-
-const INITIAL_BLOGS: BlogShowcaseItem[] = [
-  {
-    id: 'b-1',
-    title: '5 Tips for Creating Better Short Films',
-    date: 'Mar 12, 2024',
-    readTime: '6 min read',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=500&auto=format&fit=crop&q=80',
-    slug: '5-tips-for-creating-better-short-films',
-  },
-  {
-    id: 'b-2',
-    title: 'Hidden Cafés in Coastal Towns',
-    date: 'Mar 8, 2024',
-    readTime: '4 min read',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500&auto=format&fit=crop&q=80',
-    slug: 'hidden-cafes-in-coastal-towns',
-  },
-  {
-    id: 'b-3',
-    title: 'The Art of Visual Storytelling',
-    date: 'Mar 1, 2024',
-    readTime: '7 min read',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518173946687-a4c8a383392e?w=500&auto=format&fit=crop&q=80',
-    slug: 'the-art-of-visual-storytelling',
-  },
-];
-
-const INITIAL_CONTINUE_WATCHING: ContinueWatchingItem[] = [
-  {
-    id: 'cw-1',
-    title: 'City Lights',
-    episode: 'S1 • E3',
-    timeLeft: '12 min left',
-    progressPercent: 62,
-    thumbnailUrl: '/images/series_city_lights.jpg',
-  },
-  {
-    id: 'cw-2',
-    title: 'Parallel Lives',
-    episode: 'S1 • E1',
-    timeLeft: '28 min left',
-    progressPercent: 35,
-    thumbnailUrl: '/images/series_parallel_lives.jpg',
-  },
-];
+interface RecommendedItem {
+  id: string;
+  title: string;
+  genre: string;
+  year: string;
+  thumbnailUrl: string;
+  href?: string;
+}
 
 const GENRE_TABS = [
   { id: 'all', label: 'All', emoji: '' },
@@ -348,28 +109,31 @@ export function LighthouseHomeView() {
   const { user } = useAuth();
   const supabase = createClient();
 
-  // State
+  // State - only real dynamic content from Supabase
+  const [isLoading, setIsLoading] = useState(true);
   const [activeGenre, setActiveGenre] = useState('all');
   const [heroIndex, setHeroIndex] = useState(0);
-  const [heroSlides, setHeroSlides] = useState(INITIAL_HERO_SLIDES);
-  const [reels, setReels] = useState<ReelItem[]>(INITIAL_REELS);
-  const [seriesList, setSeriesList] = useState<SeriesShowcaseItem[]>(INITIAL_SERIES);
-  const [recommended, setRecommended] = useState(INITIAL_RECOMMENDED);
-  const [creators, setCreators] = useState<CreatorShowcaseItem[]>(INITIAL_CREATORS);
-  const [blogs, setBlogs] = useState<BlogShowcaseItem[]>(INITIAL_BLOGS);
-  const [continueWatching, setContinueWatching] = useState<ContinueWatchingItem[]>(INITIAL_CONTINUE_WATCHING);
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
+  const [reels, setReels] = useState<ReelItem[]>([]);
+  const [seriesList, setSeriesList] = useState<SeriesShowcaseItem[]>([]);
+  const [recommended, setRecommended] = useState<RecommendedItem[]>([]);
+  const [creators, setCreators] = useState<CreatorShowcaseItem[]>([]);
+  const [blogs, setBlogs] = useState<BlogShowcaseItem[]>([]);
+  const [continueWatching, setContinueWatching] = useState<ContinueWatchingItem[]>([]);
   const [myListIds, setMyListIds] = useState<Set<string>>(new Set());
   const [activeVideoModal, setActiveVideoModal] = useState<ReelItem | null>(null);
 
   // ─── Live Dynamic Data Fetching from Supabase ─────────────────────────────
   useEffect(() => {
     async function loadDynamicData() {
+      setIsLoading(true);
       try {
         const [
           { data: dbVideos },
           { data: dbSeries },
           { data: dbBlogs },
           { data: dbProfiles },
+          { data: dbFollows },
           { data: dbWatchHistory },
         ] = await Promise.all([
           supabase
@@ -377,10 +141,10 @@ export function LighthouseHomeView() {
             .select('*, creator:profiles(*)')
             .eq('status', 'published')
             .order('views_count', { ascending: false })
-            .limit(20),
+            .limit(24),
           supabase
             .from('content_series')
-            .select('*, creator:profiles(*), episodes:videos(*)')
+            .select('*, creator:profiles(*), episodes:videos(id, episode_number, thumbnail_url, duration_seconds, views_count)')
             .order('created_at', { ascending: false })
             .limit(15),
           supabase
@@ -388,12 +152,15 @@ export function LighthouseHomeView() {
             .select('*, author:profiles(*)')
             .eq('status', 'published')
             .order('published_at', { ascending: false })
-            .limit(10),
+            .limit(6),
           supabase
             .from('profiles')
             .select('*')
             .eq('role', 'creator')
             .limit(10),
+          supabase
+            .from('creator_follows')
+            .select('creator_id, follower_id'),
           user
             ? supabase
                 .from('watch_history')
@@ -404,58 +171,164 @@ export function LighthouseHomeView() {
             : Promise.resolve({ data: null }),
         ]);
 
-        // Merge real Supabase videos into Reels if available
-        if (dbVideos && dbVideos.length > 0) {
-          const mappedDbReels: ReelItem[] = dbVideos.map((v: any) => ({
-            id: v.id,
-            title: v.title || 'Untitled Reel',
-            creatorName: v.creator?.display_name || v.creator?.username || 'Creator',
-            creatorAvatar:
-              v.creator?.avatar_url ||
-              'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80',
-            creatorHandle: v.creator?.username ? `@${v.creator.username}` : '@creator',
-            thumbnailUrl: v.thumbnail_url || '/images/reel_kolkata.jpg',
-            videoUrl: v.video_url,
-            duration: v.duration_seconds
-              ? `00:${String(Math.min(59, v.duration_seconds)).padStart(2, '0')}`
-              : '00:30',
-            views: v.views_count
-              ? v.views_count >= 1000000
-                ? `${(v.views_count / 1000000).toFixed(1)}M`
-                : v.views_count >= 1000
-                ? `${(v.views_count / 1000).toFixed(0)}K`
-                : `${v.views_count}`
-              : '1.2M',
-            genre: v.category || v.genre || 'Drama',
-          }));
-
-          const existingIds = new Set(INITIAL_REELS.map((r) => r.id));
-          const uniqueDb = mappedDbReels.filter((r) => !existingIds.has(r.id));
-          setReels([...INITIAL_REELS, ...uniqueDb]);
-        }
-
-        // Merge real Supabase series if available
+        // 1. Dynamic Hero Slides
         if (dbSeries && dbSeries.length > 0) {
-          const mappedDbSeries: SeriesShowcaseItem[] = dbSeries.map((s: any) => ({
-            id: s.id,
-            title: s.title || 'Original Series',
-            genre: s.category || 'Drama',
-            seasons: `${s.total_episodes || (s.episodes ? s.episodes.length : 1)} Episode${
-              (s.total_episodes || (s.episodes ? s.episodes.length : 1)) > 1 ? 's' : ''
-            }`,
-            thumbnailUrl: s.cover_url || '/images/series_city_lights.jpg',
-            badge: s.total_episodes ? 'Popular' : undefined,
-            year: new Date(s.created_at || Date.now()).getFullYear().toString(),
-          }));
+          const dynamicHero: HeroSlide[] = dbSeries
+            .filter((s: any) => s.cover_url || (s.episodes && s.episodes.length > 0))
+            .slice(0, 5)
+            .map((s: any) => {
+              const firstEp =
+                s.episodes?.find((e: any) => e.episode_number === 1) || s.episodes?.[0];
+              return {
+                id: s.id,
+                eyebrow: 'Original Series',
+                title: s.title || 'Original Series',
+                tagline:
+                  s.description ||
+                  `Experience the best of ${s.category || 'drama'} on Yarrowplay.`,
+                imageUrl:
+                  s.cover_url ||
+                  firstEp?.thumbnail_url ||
+                  '/images/series_city_lights.jpg',
+                genre: s.category || 'Drama',
+                seriesId: s.id,
+                firstEpisodeId: firstEp?.id || s.id,
+              };
+            });
 
-          const existingSeriesTitles = new Set(INITIAL_SERIES.map((s) => s.title.toLowerCase()));
-          const newSeries = mappedDbSeries.filter(
-            (s) => !existingSeriesTitles.has(s.title.toLowerCase())
-          );
-          setSeriesList([...INITIAL_SERIES, ...newSeries]);
+          setHeroSlides(dynamicHero);
+        } else {
+          setHeroSlides([]);
         }
 
-        // Merge real Supabase blogs if available
+        // 2. Dynamic Trending Reels
+        if (dbVideos && dbVideos.length > 0) {
+          const mappedDbReels: ReelItem[] = dbVideos.map((v: any) => {
+            const durSec = v.duration_seconds || 0;
+            const minStr = Math.floor(durSec / 60).toString().padStart(2, '0');
+            const secStr = (durSec % 60).toString().padStart(2, '0');
+            const durationDisplay = durSec > 0 ? `${minStr}:${secStr}` : '00:30';
+
+            const vc = v.views_count || 0;
+            const viewsDisplay =
+              vc >= 1000000
+                ? `${(vc / 1000000).toFixed(1)}M`
+                : vc >= 1000
+                ? `${(vc / 1000).toFixed(0)}K`
+                : `${vc}`;
+
+            return {
+              id: v.id,
+              title: v.title || 'Untitled Reel',
+              creatorName: v.creator?.display_name || v.creator?.username || 'Creator',
+              creatorAvatar: v.creator?.avatar_url || '',
+              creatorHandle: v.creator?.username ? `@${v.creator.username}` : '@creator',
+              thumbnailUrl: v.thumbnail_url || '/images/reel_kolkata.jpg',
+              videoUrl: v.video_url,
+              duration: durationDisplay,
+              views: viewsDisplay,
+              genre: v.category || v.genre || 'Drama',
+            };
+          });
+
+          setReels(mappedDbReels);
+        } else {
+          setReels([]);
+        }
+
+        // 3. Dynamic Popular Series
+        if (dbSeries && dbSeries.length > 0) {
+          const mappedDbSeries: SeriesShowcaseItem[] = dbSeries.map((s: any) => {
+            const epCount = s.episodes?.length || s.total_episodes || 1;
+            const firstEp =
+              s.episodes?.find((e: any) => e.episode_number === 1) || s.episodes?.[0];
+            return {
+              id: s.id,
+              title: s.title || 'Original Series',
+              genre: s.category || 'Drama',
+              seasons: `${epCount} Episode${epCount > 1 ? 's' : ''}`,
+              thumbnailUrl:
+                s.cover_url ||
+                firstEp?.thumbnail_url ||
+                '/images/series_city_lights.jpg',
+              badge: epCount > 1 ? `${epCount} Episodes` : 'Popular',
+              year: new Date(s.created_at || Date.now()).getFullYear().toString(),
+              firstEpisodeId: firstEp?.id || s.id,
+            };
+          });
+
+          setSeriesList(mappedDbSeries);
+        } else {
+          setSeriesList([]);
+        }
+
+        // 4. Dynamic Recommended Content
+        const mappedRec: RecommendedItem[] = [];
+        if (dbSeries && dbSeries.length > 0) {
+          const seriesRec = dbSeries
+            .filter((s: any) => s.cover_url || (s.episodes && s.episodes.length > 0))
+            .slice(0, 4)
+            .map((s: any) => {
+              const firstEp = s.episodes?.[0];
+              return {
+                id: s.id,
+                title: s.title || 'Recommended',
+                genre: s.category || 'Drama',
+                year: new Date(s.created_at || Date.now()).getFullYear().toString(),
+                thumbnailUrl:
+                  s.cover_url ||
+                  firstEp?.thumbnail_url ||
+                  '/images/series_midnight_drive.jpg',
+                href: `/videos/${firstEp?.id || s.id}`,
+              };
+            });
+          mappedRec.push(...seriesRec);
+        }
+        if (mappedRec.length < 3 && dbVideos && dbVideos.length > 0) {
+          const existingIds = new Set(mappedRec.map((r) => r.id));
+          const addl = dbVideos
+            .filter((v: any) => !existingIds.has(v.id))
+            .slice(0, 3 - mappedRec.length)
+            .map((v: any) => ({
+              id: v.id,
+              title: v.title || 'Featured Video',
+              genre: v.category || v.genre || 'Drama',
+              year: new Date(v.created_at || Date.now()).getFullYear().toString(),
+              thumbnailUrl: v.thumbnail_url || '/images/series_midnight_drive.jpg',
+              href: `/videos/${v.id}`,
+            }));
+          mappedRec.push(...addl);
+        }
+        setRecommended(mappedRec);
+
+        // 5. Dynamic Creators from profiles
+        if (dbProfiles && dbProfiles.length > 0) {
+          const mappedCreators: CreatorShowcaseItem[] = dbProfiles.map((p: any) => {
+            const followCount = (dbFollows || []).filter(
+              (f: any) => f.creator_id === p.id
+            ).length;
+            const isUserFollowing = user
+              ? (dbFollows || []).some(
+                  (f: any) => f.creator_id === p.id && f.follower_id === user.id
+                )
+              : false;
+
+            return {
+              id: p.id,
+              name: p.display_name || p.username || 'Creator',
+              handle: p.username ? `@${p.username}` : `@${p.id.slice(0, 6)}`,
+              followers: `${followCount} follower${followCount === 1 ? '' : 's'}`,
+              avatarUrl: p.avatar_url || '',
+              isFollowing: isUserFollowing,
+            };
+          });
+
+          setCreators(mappedCreators);
+        } else {
+          setCreators([]);
+        }
+
+        // 6. Dynamic Blogs
         if (dbBlogs && dbBlogs.length > 0) {
           const mappedBlogs: BlogShowcaseItem[] = dbBlogs.map((b: any) => ({
             id: b.id,
@@ -465,56 +338,44 @@ export function LighthouseHomeView() {
               day: 'numeric',
               year: 'numeric',
             }),
-            readTime: '5 min read',
-            thumbnailUrl: b.cover_url || INITIAL_BLOGS[0].thumbnailUrl,
+            readTime: `${Math.max(1, Math.ceil((b.body?.length || 500) / 500))} min read`,
+            thumbnailUrl: b.cover_url || '/images/series_city_lights.jpg',
             slug: b.slug || b.id,
           }));
-          setBlogs([...mappedBlogs, ...INITIAL_BLOGS.slice(mappedBlogs.length)]);
+          setBlogs(mappedBlogs);
+        } else {
+          setBlogs([]);
         }
 
-        // Merge real Supabase creators
-        if (dbProfiles && dbProfiles.length > 0) {
-          const mappedCreators: CreatorShowcaseItem[] = dbProfiles.map((p: any) => ({
-            id: p.id,
-            name: p.display_name || p.username || 'Creator',
-            handle: p.username ? `@${p.username}` : `@${p.id.slice(0, 6)}`,
-            followers: `${Math.floor(Math.random() * 500 + 500)}K followers`,
-            avatarUrl:
-              p.avatar_url ||
-              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
-            isFollowing: false,
-          }));
-
-          const existingHandles = new Set(INITIAL_CREATORS.map((c) => c.handle));
-          const uniqueCreators = mappedCreators.filter((c) => !existingHandles.has(c.handle));
-          if (uniqueCreators.length > 0) {
-            setCreators([...INITIAL_CREATORS.slice(0, 2), uniqueCreators[0]]);
-          }
-        }
-
-        // Live watch history
+        // 7. Dynamic Watch History
         if (dbWatchHistory && dbWatchHistory.length > 0) {
-          const mappedHistory: ContinueWatchingItem[] = dbWatchHistory.map((h: any) => {
-            const v = h.video || {};
-            const total = h.total_duration || 600;
-            const progress = h.progress_seconds || 0;
-            const percent = Math.min(100, Math.round((progress / total) * 100));
-            const minLeft = Math.max(1, Math.round((total - progress) / 60));
+          const mappedHistory: ContinueWatchingItem[] = dbWatchHistory
+            .filter((h: any) => h.video)
+            .map((h: any) => {
+              const v = h.video || {};
+              const total = h.total_duration || v.duration_seconds || 600;
+              const progress = h.progress_seconds || 0;
+              const percent = Math.min(100, Math.round((progress / total) * 100));
+              const minLeft = Math.max(1, Math.round((total - progress) / 60));
 
-            return {
-              id: h.id,
-              title: v.title || 'Continue Watching',
-              episode: v.episode_number ? `S1 • E${v.episode_number}` : 'S1 • E1',
-              timeLeft: `${minLeft} min left`,
-              progressPercent: percent || 40,
-              thumbnailUrl: v.thumbnail_url || '/images/series_city_lights.jpg',
-              videoId: v.id,
-            };
-          });
-          setContinueWatching([...mappedHistory, ...INITIAL_CONTINUE_WATCHING].slice(0, 2));
+              return {
+                id: h.id,
+                title: v.title || 'Untitled Video',
+                episode: v.episode_number ? `S1 • E${v.episode_number}` : 'Episode 1',
+                timeLeft: `${minLeft} min left`,
+                progressPercent: percent || 10,
+                thumbnailUrl: v.thumbnail_url || '/images/series_city_lights.jpg',
+                videoId: v.id,
+              };
+            });
+          setContinueWatching(mappedHistory);
+        } else {
+          setContinueWatching([]);
         }
       } catch (err) {
         console.error('Error loading dynamic homepage data:', err);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -527,7 +388,7 @@ export function LighthouseHomeView() {
       if (!user) return;
       try {
         const { data } = await supabase
-          .from('watchlist')
+          .from('watchlists')
           .select('video_id')
           .eq('user_id', user.id);
         if (data) {
@@ -549,13 +410,13 @@ export function LighthouseHomeView() {
       newSet.delete(id);
       setMyListIds(newSet);
       try {
-        await supabase.from('watchlist').delete().match({ user_id: user.id, video_id: id });
+        await supabase.from('watchlists').delete().match({ user_id: user.id, video_id: id });
       } catch {}
     } else {
       newSet.add(id);
       setMyListIds(newSet);
       try {
-        await supabase.from('watchlist').insert({ user_id: user.id, video_id: id });
+        await supabase.from('watchlists').insert({ user_id: user.id, video_id: id });
       } catch {}
     }
   };
@@ -565,33 +426,77 @@ export function LighthouseHomeView() {
       router.push('/login');
       return;
     }
+    // Optimistic toggle
     setCreators((prev) =>
-      prev.map((c) => (c.id === creatorId ? { ...c, isFollowing: !c.isFollowing } : c))
+      prev.map((c) => {
+        if (c.id === creatorId) {
+          const nextFollowing = !c.isFollowing;
+          const currentCountMatch = c.followers.match(/\d+/);
+          const currentCount = currentCountMatch ? parseInt(currentCountMatch[0], 10) : 0;
+          const newCount = nextFollowing ? currentCount + 1 : Math.max(0, currentCount - 1);
+          return {
+            ...c,
+            isFollowing: nextFollowing,
+            followers: `${newCount} follower${newCount === 1 ? '' : 's'}`,
+          };
+        }
+        return c;
+      })
     );
+
+    try {
+      const res = await fetch('/api/creators/follow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ creator_id: creatorId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCreators((prev) =>
+          prev.map((c) =>
+            c.id === creatorId
+              ? {
+                  ...c,
+                  isFollowing: data.isFollowing,
+                  followers: `${data.followersCount} follower${data.followersCount === 1 ? '' : 's'}`,
+                }
+              : c
+          )
+        );
+      }
+    } catch (err) {
+      console.error('Error toggling follow:', err);
+    }
   };
 
   const nextHero = () => {
+    if (heroSlides.length === 0) return;
     setHeroIndex((prev) => (prev + 1) % heroSlides.length);
   };
 
   const prevHero = () => {
+    if (heroSlides.length === 0) return;
     setHeroIndex((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
   };
 
-  // Filter content based on active tab
+  // Filter dynamic content based on active genre tab
   const filteredReels =
     activeGenre === 'all'
       ? reels
-      : reels.filter(
-          (r) => r.genre.toLowerCase() === activeGenre || activeGenre.includes(r.genre.toLowerCase())
-        );
+      : reels.filter((r) => {
+          const g = r.genre.toLowerCase();
+          const target = activeGenre.toLowerCase();
+          return g === target || g.includes(target) || target.includes(g);
+        });
 
   const filteredSeries =
     activeGenre === 'all'
       ? seriesList
-      : seriesList.filter(
-          (s) => s.genre.toLowerCase() === activeGenre || activeGenre.includes(s.genre.toLowerCase())
-        );
+      : seriesList.filter((s) => {
+          const g = s.genre.toLowerCase();
+          const target = activeGenre.toLowerCase();
+          return g === target || g.includes(target) || target.includes(g);
+        });
 
   const currentHero = heroSlides[heroIndex] || heroSlides[0];
 
@@ -601,105 +506,129 @@ export function LighthouseHomeView() {
         {/* ─── Main Feed (Center Section) ─────────────────────────────────── */}
         <div className="flex-1 min-w-0 w-full space-y-5 sm:space-y-6">
           {/* 1. Hero Carousel Banner */}
-          <div className="relative w-full rounded-2xl overflow-hidden bg-[#11171E] border border-[#1E2732] shadow-2xl h-[280px] xs:h-[320px] sm:h-[380px] md:h-[430px] lg:h-[480px] group select-none">
-            {/* Background Image with smooth transitions */}
-            <div className="absolute inset-0">
-              <Image
-                src={currentHero.imageUrl}
-                alt={currentHero.title}
-                fill
-                priority
-                className="object-cover object-center transition-all duration-700 ease-out group-hover:scale-105"
-              />
-              {/* Cinematic Vignette Gradients */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#090D12] via-[#090D12]/50 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#090D12]/95 via-[#090D12]/60 to-transparent w-full sm:w-4/5 md:w-3/4" />
-            </div>
-
-            {/* Left Chevron Button */}
-            <button
-              type="button"
-              onClick={prevHero}
-              aria-label="Previous slide"
-              className="absolute left-2.5 sm:left-3.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/45 hover:bg-black/80 backdrop-blur-sm border border-white/10 text-white/90 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-md"
-            >
-              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-
-            {/* Right Chevron Button */}
-            <button
-              type="button"
-              onClick={nextHero}
-              aria-label="Next slide"
-              className="absolute right-2.5 sm:right-3.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/45 hover:bg-black/80 backdrop-blur-sm border border-white/10 text-white/90 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-md"
-            >
-              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-
-            {/* Hero Content Overlay */}
-            <div className="absolute inset-0 z-10 flex flex-col justify-end p-4 xs:p-5 sm:p-7 md:p-10 max-w-xl md:max-w-2xl">
-              {/* Eyebrow */}
-              <span className="text-[11px] sm:text-xs md:text-sm font-semibold tracking-wide text-[#ECC979] mb-1 uppercase font-sans">
-                {currentHero.eyebrow}
-              </span>
-
-              {/* Title in Elegant Serif Font */}
-              <h1 className="font-serif text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-normal tracking-tight text-[#F5F1E8] leading-[1.08] drop-shadow-sm line-clamp-2 sm:line-clamp-none">
-                {currentHero.title}
-              </h1>
-
-              {/* Tagline */}
-              <p className="text-xs sm:text-sm md:text-[15px] text-[#C6D2DC] font-normal mt-1.5 sm:mt-2.5 max-w-lg leading-relaxed drop-shadow line-clamp-2">
-                {currentHero.tagline}
-              </p>
-
-              {/* Call to Actions */}
-              <div className="flex items-center gap-2.5 sm:gap-3 mt-4 sm:mt-6">
-                <button
-                  type="button"
-                  onClick={() => router.push(`/explore?type=series`)}
-                  className="flex items-center gap-1.5 sm:gap-2 bg-[#ECC979] hover:bg-[#F4C95D] active:scale-95 text-[#101418] font-bold text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-lg shadow-black/40 transition-all cursor-pointer"
-                >
-                  <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-[#101418]" />
-                  <span>Watch Now</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleToggleMyList(currentHero.id)}
-                  className="flex items-center gap-1.5 sm:gap-2 bg-[#121820]/75 hover:bg-[#16202C] active:scale-95 backdrop-blur-md border border-white/20 hover:border-white/40 text-[#F5F1E8] font-medium text-xs sm:text-sm px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full transition-all cursor-pointer"
-                >
-                  {myListIds.has(currentHero.id) ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ECC979]" />
-                      <span>Added to List</span>
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
-                      <span>My List</span>
-                    </>
-                  )}
-                </button>
+          {isLoading && heroSlides.length === 0 ? (
+            <div className="relative w-full rounded-2xl overflow-hidden bg-[#11171E] border border-[#1E2732] h-[280px] xs:h-[320px] sm:h-[380px] md:h-[430px] lg:h-[480px] animate-pulse flex flex-col justify-end p-4 xs:p-5 sm:p-7 md:p-10">
+              <div className="w-24 h-3 bg-white/10 rounded mb-2" />
+              <div className="w-64 h-8 bg-white/10 rounded mb-3" />
+              <div className="w-96 max-w-full h-4 bg-white/10 rounded mb-5" />
+              <div className="flex gap-3">
+                <div className="w-28 h-9 bg-white/10 rounded-full" />
+                <div className="w-28 h-9 bg-white/10 rounded-full" />
               </div>
             </div>
-
-            {/* Pagination Dots at Bottom */}
-            <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
-              {heroSlides.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setHeroIndex(idx)}
-                  aria-label={`Go to slide ${idx + 1}`}
-                  className={`transition-all duration-300 rounded-full cursor-pointer ${
-                    heroIndex === idx
-                      ? 'w-5 h-1.5 bg-[#F5F1E8]'
-                      : 'w-1.5 h-1.5 bg-white/40 hover:bg-white/70'
-                  }`}
+          ) : currentHero ? (
+            <div className="relative w-full rounded-2xl overflow-hidden bg-[#11171E] border border-[#1E2732] shadow-2xl h-[280px] xs:h-[320px] sm:h-[380px] md:h-[430px] lg:h-[480px] group select-none">
+              {/* Background Image with smooth transitions */}
+              <div className="absolute inset-0">
+                <Image
+                  src={currentHero.imageUrl}
+                  alt={currentHero.title}
+                  fill
+                  priority
+                  className="object-cover object-center transition-all duration-700 ease-out group-hover:scale-105"
                 />
-              ))}
+                {/* Cinematic Vignette Gradients */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#090D12] via-[#090D12]/50 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#090D12]/95 via-[#090D12]/60 to-transparent w-full sm:w-4/5 md:w-3/4" />
+              </div>
+
+              {/* Left Chevron Button */}
+              {heroSlides.length > 1 && (
+                <button
+                  type="button"
+                  onClick={prevHero}
+                  aria-label="Previous slide"
+                  className="absolute left-2.5 sm:left-3.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/45 hover:bg-black/80 backdrop-blur-sm border border-white/10 text-white/90 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-md"
+                >
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+              )}
+
+              {/* Right Chevron Button */}
+              {heroSlides.length > 1 && (
+                <button
+                  type="button"
+                  onClick={nextHero}
+                  aria-label="Next slide"
+                  className="absolute right-2.5 sm:right-3.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/45 hover:bg-black/80 backdrop-blur-sm border border-white/10 text-white/90 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-md"
+                >
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+              )}
+
+              {/* Hero Content Overlay */}
+              <div className="absolute inset-0 z-10 flex flex-col justify-end p-4 xs:p-5 sm:p-7 md:p-10 max-w-xl md:max-w-2xl">
+                {/* Eyebrow */}
+                <span className="text-[11px] sm:text-xs md:text-sm font-semibold tracking-wide text-[#ECC979] mb-1 uppercase font-sans">
+                  {currentHero.eyebrow}
+                </span>
+
+                {/* Title in Elegant Serif Font */}
+                <h1 className="font-serif text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-normal tracking-tight text-[#F5F1E8] leading-[1.08] drop-shadow-sm line-clamp-2 sm:line-clamp-none">
+                  {currentHero.title}
+                </h1>
+
+                {/* Tagline */}
+                <p className="text-xs sm:text-sm md:text-[15px] text-[#C6D2DC] font-normal mt-1.5 sm:mt-2.5 max-w-lg leading-relaxed drop-shadow line-clamp-2">
+                  {currentHero.tagline}
+                </p>
+
+                {/* Call to Actions */}
+                <div className="flex items-center gap-2.5 sm:gap-3 mt-4 sm:mt-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (currentHero.firstEpisodeId) {
+                        router.push(`/videos/${currentHero.firstEpisodeId}`);
+                      } else {
+                        router.push('/explore?type=series');
+                      }
+                    }}
+                    className="flex items-center gap-1.5 sm:gap-2 bg-[#ECC979] hover:bg-[#F4C95D] active:scale-95 text-[#101418] font-bold text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-lg shadow-black/40 transition-all cursor-pointer"
+                  >
+                    <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-[#101418]" />
+                    <span>Watch Now</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleToggleMyList(currentHero.id)}
+                    className="flex items-center gap-1.5 sm:gap-2 bg-[#121820]/75 hover:bg-[#16202C] active:scale-95 backdrop-blur-md border border-white/20 hover:border-white/40 text-[#F5F1E8] font-medium text-xs sm:text-sm px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full transition-all cursor-pointer"
+                  >
+                    {myListIds.has(currentHero.id) ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ECC979]" />
+                        <span>Added to List</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
+                        <span>My List</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Pagination Dots at Bottom */}
+              {heroSlides.length > 1 && (
+                <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+                  {heroSlides.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setHeroIndex(idx)}
+                      aria-label={`Go to slide ${idx + 1}`}
+                      className={`transition-all duration-300 rounded-full cursor-pointer ${
+                        heroIndex === idx
+                          ? 'w-5 h-1.5 bg-[#F5F1E8]'
+                          : 'w-1.5 h-1.5 bg-white/40 hover:bg-white/70'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
+          ) : null}
 
           {/* 2. Genre / Category Filter Pills */}
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 scroll-smooth">
@@ -741,73 +670,95 @@ export function LighthouseHomeView() {
               </Link>
             </div>
 
-            {/* Responsive Reel Cards Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3.5">
-              {filteredReels.slice(0, 6).map((reel) => (
-                <div
-                  key={reel.id}
-                  onClick={() => setActiveVideoModal(reel)}
-                  className="group flex flex-col cursor-pointer"
-                >
-                  <div className="relative aspect-[9/15] w-full rounded-xl overflow-hidden bg-[#11171E] border border-[#1E2732] group-hover:border-[#ECC979]/50 transition-all shadow-md">
-                    <Image
-                      src={reel.thumbnailUrl}
-                      alt={reel.title}
-                      fill
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
+            {/* Dynamic Reel Cards Grid */}
+            {isLoading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3.5">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="flex flex-col animate-pulse">
+                    <div className="aspect-[9/15] w-full rounded-xl bg-[#11171E] border border-[#1E2732]" />
+                    <div className="w-3/4 h-3 bg-white/10 rounded mt-2" />
+                    <div className="w-1/2 h-2.5 bg-white/10 rounded mt-1.5" />
+                  </div>
+                ))}
+              </div>
+            ) : filteredReels.length === 0 ? (
+              <div className="py-8 px-4 rounded-xl bg-[#11171E] border border-[#1E2732] text-center">
+                <p className="text-xs text-[#86929F]">No reels available in this category yet</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3.5">
+                {filteredReels.slice(0, 6).map((reel) => (
+                  <div
+                    key={reel.id}
+                    onClick={() => setActiveVideoModal(reel)}
+                    className="group flex flex-col cursor-pointer"
+                  >
+                    <div className="relative aspect-[9/15] w-full rounded-xl overflow-hidden bg-[#11171E] border border-[#1E2732] group-hover:border-[#ECC979]/50 transition-all shadow-md">
+                      <Image
+                        src={reel.thumbnailUrl}
+                        alt={reel.title}
+                        fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30" />
 
-                    {/* Top Right Duration Badge */}
-                    <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-10">
-                      <span className="bg-black/60 backdrop-blur-sm text-[9px] sm:text-[10px] text-[#F5F1E8] px-1.5 sm:px-2 py-0.5 rounded-md font-mono font-medium">
-                        {reel.duration}
-                      </span>
+                      {/* Top Right Duration Badge */}
+                      <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-10">
+                        <span className="bg-black/60 backdrop-blur-sm text-[9px] sm:text-[10px] text-[#F5F1E8] px-1.5 sm:px-2 py-0.5 rounded-md font-mono font-medium">
+                          {reel.duration}
+                        </span>
+                      </div>
+
+                      {/* Bottom Overlay: Views count + Three Dots */}
+                      <div className="absolute bottom-2 left-2 right-2 sm:left-2.5 sm:right-2.5 z-10 flex items-center justify-between text-white/95">
+                        <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold drop-shadow">
+                          <Play className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" />
+                          <span>{reel.views}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                          className="text-white/80 hover:text-white p-0.5 transition-colors"
+                          aria-label="More options"
+                        >
+                          <MoreVertical className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
 
-                    {/* Bottom Overlay: Views count + Three Dots */}
-                    <div className="absolute bottom-2 left-2 right-2 sm:left-2.5 sm:right-2.5 z-10 flex items-center justify-between text-white/95">
-                      <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold drop-shadow">
-                        <Play className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" />
-                        <span>{reel.views}</span>
+                    <div className="mt-2 min-w-0">
+                      <h3 className="text-xs sm:text-[13px] font-semibold text-[#F5F1E8] truncate group-hover:text-[#ECC979] transition-colors leading-tight">
+                        {reel.title}
+                      </h3>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <div className="relative w-4 h-4 rounded-full overflow-hidden shrink-0 bg-[#1D252E] flex items-center justify-center">
+                          {reel.creatorAvatar ? (
+                            <Image
+                              src={reel.creatorAvatar}
+                              alt={reel.creatorName}
+                              fill
+                              sizes="16px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <span className="text-[8px] font-bold text-[#ECC979]">
+                              {reel.creatorName?.[0]?.toUpperCase() || 'C'}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[10px] sm:text-[11px] text-[#86929F] truncate">
+                          {reel.creatorName}
+                        </span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}
-                        className="text-white/80 hover:text-white p-0.5 transition-colors"
-                        aria-label="More options"
-                      >
-                        <MoreVertical className="w-3.5 h-3.5" />
-                      </button>
                     </div>
                   </div>
-
-                  <div className="mt-2 min-w-0">
-                    <h3 className="text-xs sm:text-[13px] font-semibold text-[#F5F1E8] truncate group-hover:text-[#ECC979] transition-colors leading-tight">
-                      {reel.title}
-                    </h3>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <div className="relative w-4 h-4 rounded-full overflow-hidden shrink-0 bg-[#1D252E]">
-                        <Image
-                          src={reel.creatorAvatar}
-                          alt={reel.creatorName}
-                          fill
-                          sizes="16px"
-                          className="object-cover"
-                        />
-                      </div>
-                      <span className="text-[10px] sm:text-[11px] text-[#86929F] truncate">
-                        {reel.creatorName}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* 4. Popular Series Section */}
@@ -829,45 +780,61 @@ export function LighthouseHomeView() {
               </Link>
             </div>
 
-            {/* Responsive Landscape Series Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-3.5">
-              {filteredSeries.slice(0, 5).map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/explore?type=series`}
-                  className="group flex flex-col cursor-pointer"
-                >
-                  <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-[#11171E] border border-[#1E2732] group-hover:border-[#ECC979]/50 transition-all shadow-md">
-                    <Image
-                      src={item.thumbnailUrl}
-                      alt={item.title}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-
-                    {item.badge && (
-                      <div className="absolute bottom-2 right-2 sm:bottom-2.5 sm:right-2.5 z-10">
-                        <span className="bg-[#ECC979] text-[#101418] text-[8px] sm:text-[9px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md shadow-sm">
-                          {item.badge}
-                        </span>
-                      </div>
-                    )}
+            {/* Dynamic Landscape Series Cards Grid */}
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-3.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex flex-col animate-pulse">
+                    <div className="aspect-[16/9] w-full rounded-xl bg-[#11171E] border border-[#1E2732]" />
+                    <div className="w-3/4 h-3 bg-white/10 rounded mt-2" />
+                    <div className="w-1/2 h-2.5 bg-white/10 rounded mt-1" />
                   </div>
+                ))}
+              </div>
+            ) : filteredSeries.length === 0 ? (
+              <div className="py-8 px-4 rounded-xl bg-[#11171E] border border-[#1E2732] text-center">
+                <p className="text-xs text-[#86929F]">No series available in this category yet</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-3.5">
+                {filteredSeries.slice(0, 5).map((item) => (
+                  <Link
+                    key={item.id}
+                    href={item.firstEpisodeId ? `/videos/${item.firstEpisodeId}` : `/explore?type=series`}
+                    className="group flex flex-col cursor-pointer"
+                  >
+                    <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-[#11171E] border border-[#1E2732] group-hover:border-[#ECC979]/50 transition-all shadow-md">
+                      <Image
+                        src={item.thumbnailUrl}
+                        alt={item.title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
 
-                  <div className="mt-1.5 sm:mt-2 min-w-0">
-                    <h3 className="text-xs sm:text-[13px] font-bold text-[#F5F1E8] truncate group-hover:text-[#ECC979] transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-[10px] sm:text-[11px] text-[#86929F] mt-0.5 truncate">
-                      {item.genre} • {item.seasons}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+
+                      {item.badge && (
+                        <div className="absolute bottom-2 right-2 sm:bottom-2.5 sm:right-2.5 z-10">
+                          <span className="bg-[#ECC979] text-[#101418] text-[8px] sm:text-[9px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md shadow-sm">
+                            {item.badge}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-1.5 sm:mt-2 min-w-0">
+                      <h3 className="text-xs sm:text-[13px] font-bold text-[#F5F1E8] truncate group-hover:text-[#ECC979] transition-colors">
+                        {item.title}
+                      </h3>
+                      <p className="text-[10px] sm:text-[11px] text-[#86929F] mt-0.5 truncate">
+                        {item.genre} • {item.seasons}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -886,46 +853,59 @@ export function LighthouseHomeView() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2.5">
-              {continueWatching.map((item) => (
-                <Link
-                  key={item.id}
-                  href="/history"
-                  className="flex items-center gap-3 p-1.5 rounded-xl bg-[#11171E] hover:bg-[#151D26] border border-[#1E2732] hover:border-[#2C3846] transition-all group"
-                >
-                  <div className="relative w-24 h-14 rounded-lg overflow-hidden shrink-0 bg-[#151D26]">
-                    <Image
-                      src={item.thumbnailUrl}
-                      alt={item.title}
-                      fill
-                      sizes="96px"
-                      className="object-cover group-hover:scale-105 transition-transform"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <div className="w-5 h-5 rounded-full bg-black/60 flex items-center justify-center text-white">
-                        <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
+            {isLoading ? (
+              <div className="space-y-2">
+                <div className="h-16 rounded-xl bg-[#11171E] border border-[#1E2732] animate-pulse" />
+                <div className="h-16 rounded-xl bg-[#11171E] border border-[#1E2732] animate-pulse" />
+              </div>
+            ) : continueWatching.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2.5">
+                {continueWatching.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={item.videoId ? `/videos/${item.videoId}` : '/history'}
+                    className="flex items-center gap-3 p-1.5 rounded-xl bg-[#11171E] hover:bg-[#151D26] border border-[#1E2732] hover:border-[#2C3846] transition-all group"
+                  >
+                    <div className="relative w-24 h-14 rounded-lg overflow-hidden shrink-0 bg-[#151D26]">
+                      <Image
+                        src={item.thumbnailUrl}
+                        alt={item.title}
+                        fill
+                        sizes="96px"
+                        className="object-cover group-hover:scale-105 transition-transform"
+                      />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <div className="w-5 h-5 rounded-full bg-black/60 flex items-center justify-center text-white">
+                          <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
+                        </div>
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/60">
+                        <div
+                          className="h-full bg-[#ECC979]"
+                          style={{ width: `${item.progressPercent}%` }}
+                        />
                       </div>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/60">
-                      <div
-                        className="h-full bg-[#ECC979]"
-                        style={{ width: `${item.progressPercent}%` }}
-                      />
-                    </div>
-                  </div>
 
-                  <div className="flex-1 min-w-0 pr-1">
-                    <h4 className="text-xs font-bold text-[#F5F1E8] truncate group-hover:text-[#ECC979] transition-colors">
-                      {item.title}
-                    </h4>
-                    <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-[#86929F] mt-1">
-                      <span>{item.episode}</span>
-                      <span>{item.timeLeft}</span>
+                    <div className="flex-1 min-w-0 pr-1">
+                      <h4 className="text-xs font-bold text-[#F5F1E8] truncate group-hover:text-[#ECC979] transition-colors">
+                        {item.title}
+                      </h4>
+                      <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-[#86929F] mt-1">
+                        <span>{item.episode}</span>
+                        <span>{item.timeLeft}</span>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-xl bg-[#11171E] border border-[#1E2732] text-center">
+                <p className="text-xs text-[#86929F]">
+                  {user ? 'No watch history yet' : 'Sign in to track your watch history'}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Section 2: Recommended for You */}
@@ -934,33 +914,44 @@ export function LighthouseHomeView() {
               <span className="text-sm font-bold text-[#F5F1E8]">Recommended for You</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-1 gap-2.5">
-              {recommended.map((item) => (
-                <Link
-                  key={item.id}
-                  href="/explore?type=series"
-                  className="flex items-center gap-3 p-1.5 rounded-xl bg-[#11171E] hover:bg-[#151D26] border border-[#1E2732] hover:border-[#2C3846] transition-all group"
-                >
-                  <div className="relative w-20 h-13 rounded-lg overflow-hidden shrink-0 bg-[#151D26]">
-                    <Image
-                      src={item.thumbnailUrl}
-                      alt={item.title}
-                      fill
-                      sizes="80px"
-                      className="object-cover group-hover:scale-105 transition-transform"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0 pr-1">
-                    <h4 className="text-xs font-bold text-[#F5F1E8] truncate group-hover:text-[#ECC979] transition-colors">
-                      {item.title}
-                    </h4>
-                    <p className="text-[10px] sm:text-[11px] text-[#86929F] mt-0.5">
-                      {item.genre} • {item.year}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="space-y-2">
+                <div className="h-16 rounded-xl bg-[#11171E] border border-[#1E2732] animate-pulse" />
+                <div className="h-16 rounded-xl bg-[#11171E] border border-[#1E2732] animate-pulse" />
+              </div>
+            ) : recommended.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-1 gap-2.5">
+                {recommended.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={item.href || '/explore?type=series'}
+                    className="flex items-center gap-3 p-1.5 rounded-xl bg-[#11171E] hover:bg-[#151D26] border border-[#1E2732] hover:border-[#2C3846] transition-all group"
+                  >
+                    <div className="relative w-20 h-13 rounded-lg overflow-hidden shrink-0 bg-[#151D26]">
+                      <Image
+                        src={item.thumbnailUrl}
+                        alt={item.title}
+                        fill
+                        sizes="80px"
+                        className="object-cover group-hover:scale-105 transition-transform"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0 pr-1">
+                      <h4 className="text-xs font-bold text-[#F5F1E8] truncate group-hover:text-[#ECC979] transition-colors">
+                        {item.title}
+                      </h4>
+                      <p className="text-[10px] sm:text-[11px] text-[#86929F] mt-0.5">
+                        {item.genre} • {item.year}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-xl bg-[#11171E] border border-[#1E2732] text-center">
+                <p className="text-xs text-[#86929F]">No recommendations available</p>
+              </div>
+            )}
           </div>
 
           {/* Section 3: Top Creators */}
@@ -976,49 +967,69 @@ export function LighthouseHomeView() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-1 gap-2.5">
-              {creators.map((c) => (
-                <div
-                  key={c.id}
-                  className="flex items-center justify-between gap-2.5 p-2 rounded-xl bg-[#11171E] border border-[#1E2732]"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 bg-[#1D252E]">
-                      <Image
-                        src={c.avatarUrl}
-                        alt={c.name}
-                        fill
-                        sizes="36px"
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="text-xs font-bold text-[#F5F1E8] truncate leading-tight">
-                        {c.name}
-                      </h4>
-                      <p className="text-[10px] text-[#86929F] truncate mt-0.5">
-                        {c.handle}
-                      </p>
-                      <p className="text-[10px] text-[#717E8C] truncate">
-                        {c.followers}
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleToggleFollow(c.id)}
-                    className={`shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer ${
-                      c.isFollowing
-                        ? 'bg-[#ECC979] text-[#101418] font-bold'
-                        : 'border border-[#323D49] hover:border-[#ECC979] text-[#F5F1E8] hover:text-[#ECC979]'
-                    }`}
+            {isLoading ? (
+              <div className="space-y-2">
+                <div className="h-14 rounded-xl bg-[#11171E] border border-[#1E2732] animate-pulse" />
+                <div className="h-14 rounded-xl bg-[#11171E] border border-[#1E2732] animate-pulse" />
+              </div>
+            ) : creators.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-1 gap-2.5">
+                {creators.map((c) => (
+                  <div
+                    key={c.id}
+                    className="flex items-center justify-between gap-2.5 p-2 rounded-xl bg-[#11171E] border border-[#1E2732]"
                   >
-                    {c.isFollowing ? 'Following' : 'Follow'}
-                  </button>
-                </div>
-              ))}
-            </div>
+                    <Link
+                      href={`/profile/${c.handle.replace('@', '')}`}
+                      className="flex items-center gap-2.5 min-w-0 group cursor-pointer"
+                    >
+                      <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 bg-[#1D252E] flex items-center justify-center">
+                        {c.avatarUrl ? (
+                          <Image
+                            src={c.avatarUrl}
+                            alt={c.name}
+                            fill
+                            sizes="36px"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <span className="text-xs font-bold text-[#ECC979]">
+                            {c.name?.[0]?.toUpperCase() || 'C'}
+                          </span>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-bold text-[#F5F1E8] truncate leading-tight group-hover:text-[#ECC979] transition-colors">
+                          {c.name}
+                        </h4>
+                        <p className="text-[10px] text-[#86929F] truncate mt-0.5">
+                          {c.handle}
+                        </p>
+                        <p className="text-[10px] text-[#717E8C] truncate">
+                          {c.followers}
+                        </p>
+                      </div>
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => handleToggleFollow(c.id)}
+                      className={`shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer ${
+                        c.isFollowing
+                          ? 'bg-[#ECC979] text-[#101418] font-bold'
+                          : 'border border-[#323D49] hover:border-[#ECC979] text-[#F5F1E8] hover:text-[#ECC979]'
+                      }`}
+                    >
+                      {c.isFollowing ? 'Following' : 'Follow'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-xl bg-[#11171E] border border-[#1E2732] text-center">
+                <p className="text-xs text-[#86929F]">No creators found</p>
+              </div>
+            )}
           </div>
 
           {/* Section 4: Latest Blogs */}
@@ -1034,33 +1045,44 @@ export function LighthouseHomeView() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-1 gap-2.5">
-              {blogs.map((b) => (
-                <Link
-                  key={b.id}
-                  href={`/blogs/${b.slug}`}
-                  className="flex items-center gap-3 p-1.5 rounded-xl bg-[#11171E] hover:bg-[#151D26] border border-[#1E2732] hover:border-[#2C3846] transition-all group"
-                >
-                  <div className="relative w-16 h-13 rounded-lg overflow-hidden shrink-0 bg-[#151D26]">
-                    <Image
-                      src={b.thumbnailUrl}
-                      alt={b.title}
-                      fill
-                      sizes="64px"
-                      className="object-cover group-hover:scale-105 transition-transform"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0 pr-1">
-                    <h4 className="text-xs font-semibold text-[#F5F1E8] line-clamp-2 group-hover:text-[#ECC979] transition-colors leading-snug">
-                      {b.title}
-                    </h4>
-                    <p className="text-[10px] text-[#86929F] mt-1">
-                      {b.date} • {b.readTime}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="space-y-2">
+                <div className="h-16 rounded-xl bg-[#11171E] border border-[#1E2732] animate-pulse" />
+                <div className="h-16 rounded-xl bg-[#11171E] border border-[#1E2732] animate-pulse" />
+              </div>
+            ) : blogs.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-1 gap-2.5">
+                {blogs.map((b) => (
+                  <Link
+                    key={b.id}
+                    href={`/blogs/${b.slug}`}
+                    className="flex items-center gap-3 p-1.5 rounded-xl bg-[#11171E] hover:bg-[#151D26] border border-[#1E2732] hover:border-[#2C3846] transition-all group"
+                  >
+                    <div className="relative w-16 h-13 rounded-lg overflow-hidden shrink-0 bg-[#151D26]">
+                      <Image
+                        src={b.thumbnailUrl}
+                        alt={b.title}
+                        fill
+                        sizes="64px"
+                        className="object-cover group-hover:scale-105 transition-transform"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0 pr-1">
+                      <h4 className="text-xs font-semibold text-[#F5F1E8] line-clamp-2 group-hover:text-[#ECC979] transition-colors leading-snug">
+                        {b.title}
+                      </h4>
+                      <p className="text-[10px] text-[#86929F] mt-1">
+                        {b.date} • {b.readTime}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-xl bg-[#11171E] border border-[#1E2732] text-center">
+                <p className="text-xs text-[#86929F]">No articles published yet</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1096,7 +1118,7 @@ export function LighthouseHomeView() {
 
               {/* Center Play Button */}
               <Link
-                href={`/explore?type=shorts`}
+                href={`/videos/${activeVideoModal.id}`}
                 className="absolute inset-0 flex items-center justify-center group cursor-pointer"
               >
                 <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#ECC979] group-hover:scale-110 text-[#101418] flex items-center justify-center shadow-2xl transition-transform">
@@ -1114,17 +1136,27 @@ export function LighthouseHomeView() {
                 </h3>
                 <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/10 text-xs text-white/80">
                   <div className="flex items-center gap-2">
-                    <div className="relative w-5 h-5 rounded-full overflow-hidden">
-                      <Image
-                        src={activeVideoModal.creatorAvatar}
-                        alt={activeVideoModal.creatorName}
-                        fill
-                        className="object-cover"
-                      />
+                    <div className="relative w-5 h-5 rounded-full overflow-hidden bg-[#1D252E] flex items-center justify-center">
+                      {activeVideoModal.creatorAvatar ? (
+                        <Image
+                          src={activeVideoModal.creatorAvatar}
+                          alt={activeVideoModal.creatorName}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="text-[9px] font-bold text-[#ECC979]">
+                          {activeVideoModal.creatorName?.[0]?.toUpperCase() || 'C'}
+                        </span>
+                      )}
                     </div>
-                    <span className="text-xs truncate max-w-[120px]">{activeVideoModal.creatorName}</span>
+                    <span className="text-xs truncate max-w-[120px]">
+                      {activeVideoModal.creatorName}
+                    </span>
                   </div>
-                  <span className="text-white/60 font-mono text-[11px]">{activeVideoModal.duration}</span>
+                  <span className="text-white/60 font-mono text-[11px]">
+                    {activeVideoModal.duration}
+                  </span>
                 </div>
               </div>
             </div>
