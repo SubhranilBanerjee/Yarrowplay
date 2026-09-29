@@ -10,6 +10,7 @@ import {
   AlertCircle, CheckCircle, ChevronDown,
 } from 'lucide-react';
 import { BottomToast } from '@/components/ui/BottomToast';
+import { BrandLogo } from '@/components/landing/BrandLogo';
 
 type CreatorSubRole = 'Professional' | 'Student' | 'Hobbyist';
 
@@ -143,17 +144,8 @@ function RegisterForm() {
       <div className="w-full max-w-md bg-[#101820] border border-[#27313A] rounded-2xl p-6 sm:p-8 relative shadow-2xl">
         {/* Header Branding */}
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#151F28] to-[#0B1117] border border-[#27313A] flex items-center justify-center shadow-md">
-              <svg className="w-5 h-5 text-[#F4C95D]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2v20M8 6l8 4M8 18l8-4M5 10l14 4" />
-                <circle cx="12" cy="12" r="3" fill="#F4C95D" fillOpacity="0.2" />
-              </svg>
-            </div>
-            <div className="flex items-center gap-1.5 text-lg font-black tracking-wider">
-              <span className="text-[#F5F1E8]">LIGHTHOUSE</span>
-              <span className="text-[#F4C95D]">REELS</span>
-            </div>
+          <div className="mb-3">
+            <BrandLogo href="/" size="lg" priority />
           </div>
           <h1 className="text-xl sm:text-2xl font-black tracking-tight text-[#F5F1E8]">
             {role === 'advertiser' ? 'ADVERTISER REGISTRATION' : 'CREATE ACCOUNT'}

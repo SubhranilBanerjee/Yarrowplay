@@ -47,6 +47,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: result.error?.message || 'Upload failed' }, { status: 400 });
     }
 
+    if (targetResourceType === 'video' && result.duration && result.duration > 120) {
+      return NextResponse.json(
+        {
+          error: `Episode duration (${Math.round(result.duration)}s) exceeds the maximum allowed limit of 2 minutes (120 seconds). Upload rejected.`,
+        },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json({
       secure_url: result.secure_url,
       public_id: result.public_id,

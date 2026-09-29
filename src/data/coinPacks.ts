@@ -55,23 +55,27 @@ export const COIN_PACKS: CoinPack[] = [
 ];
 
 export interface VIPTier {
-  id: 'weekly' | 'annual';
+  id: 'weekly' | 'monthly' | 'yearly' | 'annual';
   name: string;
   duration_days: number;
   price_usd: number;
   price_inr: number;
   intro_price_inr?: number;
+  billing_frequency: string;
+  popular?: boolean;
+  best_value?: boolean;
   benefits: string[];
 }
 
 export const VIP_TIERS: VIPTier[] = [
   {
     id: 'weekly',
-    name: 'Weekly VIP Pass',
+    name: 'Weekly Pass',
     duration_days: 7,
     price_usd: 5.99,
     price_inr: 199,
     intro_price_inr: 99,
+    billing_frequency: 'Billed every 7 days',
     benefits: [
       'Unlimited episode unlocks',
       '100% Ad-Free experience',
@@ -80,16 +84,51 @@ export const VIP_TIERS: VIPTier[] = [
     ],
   },
   {
-    id: 'annual',
-    name: 'Annual VIP Pass',
+    id: 'monthly',
+    name: 'Monthly Pass',
+    duration_days: 30,
+    price_usd: 14.99,
+    price_inr: 599,
+    intro_price_inr: 499,
+    billing_frequency: 'Billed monthly',
+    popular: true,
+    benefits: [
+      '30 days of unlimited unlocks',
+      '100% Ad-Free streaming',
+      'All original series & shorts',
+      'HD & 4K cinematic quality',
+      'Priority streaming bandwidth',
+    ],
+  },
+  {
+    id: 'yearly',
+    name: 'Yearly Pass',
     duration_days: 365,
     price_usd: 49.99,
     price_inr: 1999,
+    intro_price_inr: 1499,
+    billing_frequency: 'Billed annually',
+    best_value: true,
     benefits: [
       '365 days of unlimited unlocks',
       'Save over 70% vs weekly pass',
-      'Zero ads across entire app',
-      'VIP priority server speed',
+      'Zero ads across entire platform',
+      'Full offline downloads access',
+      'Exclusive VIP community badge',
+    ],
+  },
+  {
+    id: 'annual',
+    name: 'Annual Pass',
+    duration_days: 365,
+    price_usd: 49.99,
+    price_inr: 1999,
+    intro_price_inr: 1499,
+    billing_frequency: 'Billed annually',
+    benefits: [
+      '365 days of unlimited unlocks',
+      'Save over 70% vs weekly pass',
+      'Zero ads across entire platform',
     ],
   },
 ];

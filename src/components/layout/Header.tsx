@@ -23,15 +23,21 @@ import {
   Gift,
   Tag,
   History,
+  Sun,
+  Moon,
+  Settings,
+  ShieldCheck,
 } from 'lucide-react';
 import Image from 'next/image';
 import { BrandLogo } from '@/components/landing/BrandLogo';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
+import { useTheme } from '@/context/ThemeContext';
 
 export function Header() {
   const { user, profile, signOut } = useAuth();
   const { toggleMobileSidebar } = useSidebar();
   const { coins, isVIP, openCoinStore, openDailyRewards } = useWallet();
+  const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileSearch, setShowMobileSearch] = useState(false);
@@ -54,10 +60,16 @@ export function Header() {
     };
   }, [showUserMenu]);
 
+  const isAdmin =
+    !!user?.email &&
+    (user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
+      user.email === 'admin@dramabox.stream' ||
+      profile?.role === 'admin');
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setShowMobileSearch(false);
     }
   };
@@ -66,7 +78,7 @@ export function Header() {
     'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80';
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#090D12]/95 backdrop-blur-md border-b border-[#182029] px-3 sm:px-4 md:px-6 py-2.5 transition-all">
+    <header className="sticky top-0 z-40 w-full bg-[var(--lr-bg-header,#090D12)]/95 backdrop-blur-md border-b border-[var(--lr-border-primary,#182029)] px-3 sm:px-4 md:px-6 py-2.5 transition-all">
       <div className="w-full flex items-center justify-between gap-2 sm:gap-4">
         {/* Left: Mobile Drawer Trigger + Brand Logo */}
         <div className="shrink-0 flex items-center gap-2 sm:gap-3">
@@ -75,7 +87,7 @@ export function Header() {
             type="button"
             onClick={toggleMobileSidebar}
             aria-label="Open navigation menu"
-            className="md:hidden p-1.5 rounded-lg text-[#9AA7B4] hover:text-[#F5F1E8] hover:bg-[#131920] transition-colors cursor-pointer"
+            className="md:hidden p-1.5 rounded-lg text-[var(--lr-text-muted,#9AA7B4)] hover:text-[var(--lr-text-primary,#F5F1E8)] hover:bg-[var(--lr-bg-elevated,#131920)] transition-colors cursor-pointer"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -86,27 +98,42 @@ export function Header() {
         {/* Center: Search Bar (Desktop & Tablet) */}
         <div className="hidden sm:flex flex-1 max-w-xs md:max-w-md lg:max-w-xl mx-2 md:mx-4 lg:mx-6">
           <form onSubmit={handleSearch} className="relative w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7A8694] pointer-events-none" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--lr-text-muted,#7A8694)] pointer-events-none" />
             <input
               type="text"
               placeholder="Search series, creators, genres..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#131920] hover:bg-[#151D25] focus:bg-[#151D25] text-[#F5F1E8] placeholder-[#76828F] text-xs sm:text-sm rounded-full pl-11 pr-4 py-2 border border-[#212A34] focus:outline-none focus:border-[#ECC979]/70 transition-all shadow-inner"
+              className="w-full bg-[var(--lr-bg-surface,#131920)] hover:bg-[var(--lr-bg-elevated,#151D25)] focus:bg-[var(--lr-bg-elevated,#151D25)] text-[var(--lr-text-primary,#F5F1E8)] placeholder-[var(--lr-text-muted,#76828F)] text-xs sm:text-sm rounded-full pl-11 pr-4 py-2 border border-[var(--lr-border-primary,#212A34)] focus:outline-none focus:border-[#ECC979]/70 transition-all shadow-inner"
             />
           </form>
         </div>
 
-        {/* Right: Search Icon (Mobile), + Create Button, Notifications, Avatar */}
+        {/* Right: Search Icon (Mobile), Theme Toggle, + Create Button, Notifications, Avatar */}
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4 shrink-0">
           {/* Mobile search toggle button (visible only on < sm) */}
           <button
             type="button"
             onClick={() => setShowMobileSearch(!showMobileSearch)}
             aria-label="Toggle search"
-            className="sm:hidden p-2 rounded-full text-[#9AA7B4] hover:text-[#F5F1E8] hover:bg-[#131920] transition-colors"
+            className="sm:hidden p-2 rounded-full text-[var(--lr-text-muted,#9AA7B4)] hover:text-[var(--lr-text-primary,#F5F1E8)] hover:bg-[var(--lr-bg-elevated,#131920)] transition-colors"
           >
             {showMobileSearch ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
+          </button>
+
+          {/* Theme Toggle (Dark / Light Mode) */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            className="p-2 rounded-full text-[var(--lr-text-muted,#9AA7B4)] hover:text-[#ECC979] hover:bg-[var(--lr-bg-elevated,#131920)] border border-[var(--lr-border-primary,#212A34)] transition-all cursor-pointer"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-[#ECC979]" />
+            ) : (
+              <Moon className="w-4 h-4 text-[#C99A32]" />
+            )}
           </button>
 
           {/* Coin Wallet Button */}
@@ -114,7 +141,7 @@ export function Header() {
             type="button"
             onClick={() => openCoinStore('coins')}
             title="Coin Store & Wallet"
-            className="flex items-center gap-1.5 bg-[#141D26] hover:bg-[#1A2530] text-[#F4C95D] border border-[#F4C95D]/30 hover:border-[#F4C95D]/60 text-xs sm:text-sm font-bold px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full shadow-sm transition-all active:scale-95 cursor-pointer font-sans"
+            className="flex items-center gap-1.5 bg-[var(--lr-bg-surface,#141D26)] hover:bg-[var(--lr-bg-elevated,#1A2530)] text-[#F4C95D] border border-[#F4C95D]/30 hover:border-[#F4C95D]/60 text-xs sm:text-sm font-bold px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full shadow-sm transition-all active:scale-95 cursor-pointer font-sans"
           >
             <span>🪙</span>
             <span>{coins}</span>
@@ -294,13 +321,24 @@ export function Header() {
                       </Link>
 
                       <Link
-                        href="/history"
+                        href="/settings"
                         onClick={() => setShowUserMenu(false)}
                         className="flex items-center gap-3 px-4 py-2 hover:bg-[#151D25] hover:text-[#F5F1E8] transition-colors"
                       >
-                        <Clock className="w-4 h-4 text-[#9AA5AF]" />
-                        <span>History</span>
+                        <Settings className="w-4 h-4 text-[#ECC979]" />
+                        <span>Account Settings</span>
                       </Link>
+
+                      {isAdmin && (
+                        <Link
+                          href="/admin"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-4 py-2 hover:bg-[#151D25] text-[#F4C95D] font-semibold transition-colors border-t border-[#182029]/60 mt-1 pt-2"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-[#F4C95D]" />
+                          <span>Admin Portal</span>
+                        </Link>
+                      )}
                     </div>
 
                     <div className="pt-1 mt-1 border-t border-[#182029]">

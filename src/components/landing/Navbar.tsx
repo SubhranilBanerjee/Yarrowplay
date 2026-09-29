@@ -13,10 +13,9 @@ interface NavRoute {
 }
 
 const NAV_ROUTES: NavRoute[] = [
-  { label: 'Discover', href: '/explore' },
-  { label: 'Shorts Feed', href: '/home' },
-  { label: 'Creators', href: '/explore?q=creators' },
-  { label: 'Trending', href: '/explore?q=trending' },
+  { label: 'Home', href: '/home' },
+  { label: 'Following', href: '/following' },
+  { label: 'Blogs', href: '/blogs' },
 ];
 
 export function Navbar() {
@@ -25,7 +24,7 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-black/30 border-b border-white/5 px-4 sm:px-6 lg:px-8 py-3.5 transition-all">
+    <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-black/40 border-b border-white/10 px-4 sm:px-6 lg:px-8 py-3.5 transition-all">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Left: Brand Logo & Mark */}
         <BrandLogo href={user ? '/home' : '/'} />
@@ -40,7 +39,7 @@ export function Navbar() {
                 href={route.href}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
                   isActive
-                    ? 'text-white bg-[#8B5CF6] shadow-[0_0_15px_rgba(139,92,246,0.4)]'
+                    ? 'text-[#101418] bg-[#ECC979] font-bold shadow-[0_0_15px_rgba(236,201,121,0.3)]'
                     : 'text-[#9CA3AF] hover:text-[#F9FAFB] hover:bg-white/5'
                 }`}
               >
@@ -56,7 +55,7 @@ export function Navbar() {
             <div className="flex items-center gap-3">
               <Link
                 href="/creator/studio"
-                className="hidden sm:flex items-center gap-2 bg-[#EC4899]/15 border border-[#EC4899]/35 text-[#EC4899] hover:bg-[#EC4899] hover:text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-all shadow-sm hover:shadow-[0_0_15px_rgba(236,72,153,0.4)]"
+                className="hidden sm:flex items-center gap-2 bg-[#ECC979]/15 border border-[#ECC979]/35 text-[#ECC979] hover:bg-[#ECC979] hover:text-[#101418] text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-all shadow-sm"
               >
                 <Film className="w-4 h-4" />
                 <span>Creator Studio</span>

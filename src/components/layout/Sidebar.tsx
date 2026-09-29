@@ -5,27 +5,28 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
+import { useWallet } from '@/context/WalletContext';
 import {
   Home,
-  Compass,
-  Tv,
-  Zap,
-  Headphones,
-  FileText,
   Users,
+  FileText,
   Bookmark,
-  Download,
   Clock,
   Crown,
+  ChevronLeft,
+  ChevronRight,
   X,
+  Sparkles,
 } from 'lucide-react';
 import { BrandLogo } from '@/components/landing/BrandLogo';
 
 export function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const { isMobileOpen, closeMobileSidebar } = useSidebar();
+  const { isCollapsed, toggleSidebar, isMobileOpen, closeMobileSidebar } = useSidebar();
+  const { openSubscriptionModal } = useWallet();
 
+  // Canonical Phase 3 Main Navigation: HOME, FOLLOWING, BLOGS
   const mainNav = [
     {
       label: 'Home',
@@ -34,40 +35,16 @@ export function Sidebar() {
       icon: Home,
     },
     {
-      label: 'Explore',
-      href: '/explore',
-      activeCheck: (p: string) => p === '/explore' && !p.includes('type='),
-      icon: Compass,
-    },
-    {
-      label: 'Series',
-      href: '/explore?type=series',
-      activeCheck: (p: string) => p.includes('type=series'),
-      icon: Tv,
-    },
-    {
-      label: 'Shorts',
-      href: '/explore?type=shorts',
-      activeCheck: (p: string) => p.includes('type=shorts'),
-      icon: Zap,
-    },
-    {
-      label: 'Audio',
-      href: '/explore?type=audio',
-      activeCheck: (p: string) => p.includes('type=audio'),
-      icon: Headphones,
+      label: 'Following',
+      href: '/following',
+      activeCheck: (p: string) => p === '/following',
+      icon: Users,
     },
     {
       label: 'Blogs',
       href: '/blogs',
       activeCheck: (p: string) => p.startsWith('/blog'),
       icon: FileText,
-    },
-    {
-      label: 'Creators',
-      href: '/explore?type=creators',
-      activeCheck: (p: string) => p.includes('type=creators'),
-      icon: Users,
     },
   ];
 
@@ -79,12 +56,6 @@ export function Sidebar() {
       icon: Bookmark,
     },
     {
-      label: 'Downloads',
-      href: user ? '/history' : '/login',
-      activeCheck: (p: string) => p === '/downloads',
-      icon: Download,
-    },
-    {
       label: 'History',
       href: user ? '/history' : '/login',
       activeCheck: (p: string) => p === '/history',
@@ -92,9 +63,22 @@ export function Sidebar() {
     },
   ];
 
-  const sidebarContent = (
+  const renderNavLinks = (collapsed: boolean) => (
     <div className="flex flex-col h-full justify-between select-none">
       <div className="space-y-4">
+        {/* Collapse Toggle Button (Desktop only) */}
+        <div className="hidden md:flex items-center justify-end px-1 pb-1">
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="p-1.5 rounded-lg text-[var(--lr-text-muted,#7E8B99)] hover:text-[var(--lr-text-primary,#F5F1E8)] hover:bg-[var(--lr-bg-elevated,#131920)] border border-[var(--lr-border-subtle,#1A232D)] transition-colors cursor-pointer"
+          >
+            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </button>
+        </div>
+
         {/* Main Navigation Group */}
         <div className="space-y-1">
           {mainNav.map((item) => {
@@ -106,18 +90,21 @@ export function Sidebar() {
                 key={item.label}
                 href={item.href}
                 onClick={closeMobileSidebar}
-                className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                title={collapsed ? item.label : undefined}
+                className={`flex items-center ${
+                  collapsed ? 'justify-center px-2' : 'gap-3.5 px-3.5'
+                } py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-[#221C13] text-[#ECC979] border border-[#ECC979]/25 shadow-[0_2px_12px_rgba(236,201,121,0.08)]'
-                    : 'text-[#9AA7B4] hover:text-[#F5F1E8] hover:bg-[#131920]'
+                    ? 'bg-[#221C13] text-[#ECC979] border border-[#ECC979]/30 shadow-[0_2px_12px_rgba(236,201,121,0.08)]'
+                    : 'text-[var(--lr-text-secondary,#9AA7B4)] hover:text-[var(--lr-text-primary,#F5F1E8)] hover:bg-[var(--lr-bg-elevated,#131920)]'
                 }`}
               >
                 <Icon
                   className={`w-4 h-4 shrink-0 transition-transform ${
-                    isActive ? 'fill-[#ECC979] text-[#ECC979]' : 'text-[#85929F]'
+                    isActive ? 'fill-[#ECC979] text-[#ECC979]' : 'text-[var(--lr-text-muted,#85929F)]'
                   }`}
                 />
-                <span className="truncate">{item.label}</span>
+                {!collapsed && <span className="truncate">{item.label}</span>}
               </Link>
             );
           })}
@@ -125,9 +112,11 @@ export function Sidebar() {
 
         {/* Library Subheader & Section */}
         <div>
-          <div className="text-[11px] font-medium text-[#6B7783] px-3.5 pb-1.5 uppercase tracking-wider">
-            Library
-          </div>
+          {!collapsed && (
+            <div className="text-[11px] font-medium text-[var(--lr-text-muted,#6B7783)] px-3.5 pb-1.5 uppercase tracking-wider">
+              Library
+            </div>
+          )}
           <div className="space-y-1">
             {libraryNav.map((item) => {
               const isActive = item.activeCheck(pathname);
@@ -138,18 +127,21 @@ export function Sidebar() {
                   key={item.label}
                   href={item.href}
                   onClick={closeMobileSidebar}
-                  className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  title={collapsed ? item.label : undefined}
+                  className={`flex items-center ${
+                    collapsed ? 'justify-center px-2' : 'gap-3.5 px-3.5'
+                  } py-2.5 rounded-xl text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-[#221C13] text-[#ECC979] border border-[#ECC979]/25'
-                      : 'text-[#9AA7B4] hover:text-[#F5F1E8] hover:bg-[#131920]'
+                      ? 'bg-[#221C13] text-[#ECC979] border border-[#ECC979]/30'
+                      : 'text-[var(--lr-text-secondary,#9AA7B4)] hover:text-[var(--lr-text-primary,#F5F1E8)] hover:bg-[var(--lr-bg-elevated,#131920)]'
                   }`}
                 >
                   <Icon
                     className={`w-4 h-4 shrink-0 ${
-                      isActive ? 'text-[#ECC979]' : 'text-[#85929F]'
+                      isActive ? 'text-[#ECC979]' : 'text-[var(--lr-text-muted,#85929F)]'
                     }`}
                   />
-                  <span className="truncate">{item.label}</span>
+                  {!collapsed && <span className="truncate">{item.label}</span>}
                 </Link>
               );
             })}
@@ -157,45 +149,61 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Bottom Pro Card: Lighthouse Pro */}
+      {/* Bottom Pro Card: Subscribe (Replacing Upgrade per Phase 4) */}
       <div className="pt-4 mt-auto">
-        <div className="relative rounded-2xl p-4 bg-gradient-to-b from-[#161D26] to-[#0E141A] border border-[#232D38] overflow-hidden group">
-          <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#ECC979]/10 rounded-full blur-2xl pointer-events-none" />
-          <div
-            className="absolute inset-0 opacity-15 bg-cover bg-center pointer-events-none mix-blend-screen"
-            style={{ backgroundImage: `url('/images/hero_distant_shore.jpg')` }}
-          />
+        {collapsed ? (
+          <button
+            type="button"
+            onClick={() => openSubscriptionModal('monthly')}
+            title="Subscribe to Lighthouse Pro"
+            aria-label="Subscribe to Lighthouse Pro"
+            className="w-full flex items-center justify-center p-3 rounded-2xl bg-gradient-to-b from-[#1F1910] to-[#121820] border border-[#ECC979]/40 text-[#ECC979] hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
+          >
+            <Crown className="w-5 h-5 fill-[#ECC979]/60 text-[#ECC979]" />
+          </button>
+        ) : (
+          <div className="relative rounded-2xl p-4 bg-gradient-to-b from-[var(--lr-bg-surface,#161D26)] to-[var(--lr-bg-primary,#0E141A)] border border-[var(--lr-border-primary,#232D38)] overflow-hidden group">
+            <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#ECC979]/15 rounded-full blur-2xl pointer-events-none" />
 
-          <div className="relative z-10">
-            <div className="w-7 h-7 rounded-lg bg-[#2A2315] border border-[#ECC979]/30 flex items-center justify-center text-[#ECC979] mb-2.5 shadow-sm">
-              <Crown className="w-4 h-4 fill-[#ECC979]/60 text-[#ECC979]" />
+            <div className="relative z-10">
+              <div className="w-7 h-7 rounded-lg bg-[#2A2315] border border-[#ECC979]/30 flex items-center justify-center text-[#ECC979] mb-2.5 shadow-sm">
+                <Crown className="w-4 h-4 fill-[#ECC979]/60 text-[#ECC979]" />
+              </div>
+
+              <h4 className="text-sm font-bold text-[var(--lr-text-primary,#F5F1E8)] tracking-tight flex items-center gap-1.5">
+                <span>Lighthouse Pro</span>
+                <Sparkles className="w-3 h-3 text-[#ECC979]" />
+              </h4>
+              <p className="text-[11px] text-[var(--lr-text-secondary,#86929F)] mt-1 leading-snug">
+                Unlimited ad-free episodes, 4K quality, offline downloads, and creator exclusives.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => {
+                  closeMobileSidebar();
+                  openSubscriptionModal('monthly');
+                }}
+                className="mt-3.5 w-full bg-[#ECC979] hover:bg-[#F4C95D] active:scale-98 text-[#101418] font-bold text-xs py-2 rounded-xl text-center block transition-all shadow-md cursor-pointer"
+              >
+                Subscribe
+              </button>
             </div>
-
-            <h4 className="text-sm font-bold text-[#F5F1E8] tracking-tight">
-              Lighthouse Pro
-            </h4>
-            <p className="text-[11px] text-[#86929F] mt-1 leading-snug">
-              Unlock exclusive series, early access, downloads and more.
-            </p>
-
-            <Link
-              href={user ? '/profile?tab=vip' : '/login?redirect=/profile?tab=vip'}
-              onClick={closeMobileSidebar}
-              className="mt-3.5 w-full bg-[#ECC979] hover:bg-[#F4C95D] active:scale-98 text-[#101418] font-bold text-xs py-2 rounded-xl text-center block transition-all shadow-md"
-            >
-              Upgrade
-            </Link>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 
   return (
     <>
-      {/* 1. Desktop & Tablet Landscape Sticky Sidebar */}
-      <aside className="hidden md:flex flex-col shrink-0 w-52 lg:w-60 bg-[#090D12] border-r border-[#182029] sticky top-[57px] h-[calc(100vh-57px)] max-h-[calc(100vh-57px)] px-3 py-4 select-none overflow-y-auto no-scrollbar z-20">
-        {sidebarContent}
+      {/* 1. Desktop & Tablet Landscape Collapsible Sticky Sidebar */}
+      <aside
+        className={`hidden md:flex flex-col shrink-0 bg-[var(--lr-bg-sidebar,#080D12)] border-r border-[var(--lr-border-primary,#182029)] sticky top-[57px] h-[calc(100vh-57px)] max-h-[calc(100vh-57px)] py-4 select-none overflow-y-auto no-scrollbar z-20 transition-all duration-300 ease-in-out ${
+          isCollapsed ? 'w-16 lg:w-20 px-2' : 'w-56 lg:w-60 px-3'
+        }`}
+      >
+        {renderNavLinks(isCollapsed)}
       </aside>
 
       {/* 2. Mobile & Tablet Portrait Slide-over Drawer */}
@@ -209,22 +217,22 @@ export function Sidebar() {
           />
 
           {/* Slide-in sidebar panel */}
-          <div className="relative w-72 max-w-[85vw] bg-[#090D12] border-r border-[#182029] h-full p-4 flex flex-col z-10 shadow-2xl animate-in slide-in-from-left duration-200 overflow-y-auto no-scrollbar">
+          <div className="relative w-72 max-w-[85vw] bg-[var(--lr-bg-sidebar,#080D12)] border-r border-[var(--lr-border-primary,#182029)] h-full p-4 flex flex-col z-10 shadow-2xl animate-in slide-in-from-left duration-200 overflow-y-auto no-scrollbar">
             {/* Drawer Header with Logo and Close Button */}
-            <div className="flex items-center justify-between pb-4 mb-2 border-b border-[#182029]">
+            <div className="flex items-center justify-between pb-4 mb-2 border-b border-[var(--lr-border-primary,#182029)]">
               <BrandLogo href={user ? '/home' : '/'} />
               <button
                 type="button"
                 onClick={closeMobileSidebar}
                 aria-label="Close sidebar"
-                className="p-1.5 rounded-lg text-[#86929F] hover:text-[#F5F1E8] hover:bg-[#141B22] transition-colors"
+                className="p-1.5 rounded-lg text-[var(--lr-text-muted,#86929F)] hover:text-[var(--lr-text-primary,#F5F1E8)] hover:bg-[var(--lr-bg-elevated,#141B22)] transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Sidebar nav items */}
-            {sidebarContent}
+            {renderNavLinks(false)}
           </div>
         </div>
       )}

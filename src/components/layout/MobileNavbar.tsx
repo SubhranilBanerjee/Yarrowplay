@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
-import { Home, Compass, Plus, FileText, Menu } from 'lucide-react';
+import { Home, Users, Plus, FileText, Menu } from 'lucide-react';
 
 export function MobileNavbar() {
   const pathname = usePathname();
@@ -32,15 +32,15 @@ export function MobileNavbar() {
           <span className="text-[10px] font-medium">Home</span>
         </Link>
 
-        {/* Explore */}
+        {/* Following */}
         <Link
-          href="/explore"
+          href="/following"
           className={`flex flex-col items-center gap-1 py-1 px-3 rounded-lg transition-all ${
-            pathname === '/explore' ? 'text-[#ECC979]' : 'text-[#8E9BA7] hover:text-[#F5F1E8]'
+            pathname === '/following' ? 'text-[#ECC979]' : 'text-[#8E9BA7] hover:text-[#F5F1E8]'
           }`}
         >
-          <Compass className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Explore</span>
+          <Users className="w-5 h-5" />
+          <span className="text-[10px] font-medium">Following</span>
         </Link>
 
         {/* Floating Center Create Button */}

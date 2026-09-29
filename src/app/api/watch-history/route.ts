@@ -77,6 +77,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, guest: true });
     }
 
+    // Check if user has paused watch history
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('pause_watch_history')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profile?.pause_watch_history) {
+        return NextResponse.json({ success: true, paused: true });
+      }
+    } catch {}
+
     const { video_id, progress_seconds, total_duration, completed } = await req.json();
 
     if (!video_id) {

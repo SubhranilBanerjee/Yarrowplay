@@ -13,9 +13,11 @@ import {
   ArrowRight,
   MoreVertical,
   X,
+  Sparkles,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/context/AuthContext';
+import { toggleWatchlist } from '@/lib/watchlist';
 
 // ─── Interfaces ─────────────────────────────────────────────────────────────
 
@@ -119,6 +121,7 @@ export function LighthouseHomeView() {
   const [recommended, setRecommended] = useState<RecommendedItem[]>([]);
   const [creators, setCreators] = useState<CreatorShowcaseItem[]>([]);
   const [blogs, setBlogs] = useState<BlogShowcaseItem[]>([]);
+  const [mustSeeItems, setMustSeeItems] = useState<any[]>([]);
   const [continueWatching, setContinueWatching] = useState<ContinueWatchingItem[]>([]);
   const [myListIds, setMyListIds] = useState<Set<string>>(new Set());
   const [activeVideoModal, setActiveVideoModal] = useState<ReelItem | null>(null);
@@ -135,6 +138,8 @@ export function LighthouseHomeView() {
           { data: dbProfiles },
           { data: dbFollows },
           { data: dbWatchHistory },
+          { data: dbMustSeeSeries },
+          { data: dbMustSeeVideos },
         ] = await Promise.all([
           supabase
             .from('videos')
@@ -169,6 +174,19 @@ export function LighthouseHomeView() {
                 .order('last_watched_at', { ascending: false })
                 .limit(5)
             : Promise.resolve({ data: null }),
+          supabase
+            .from('content_series')
+            .select('*, creator:profiles(*), episodes:videos(id, episode_number, thumbnail_url, duration_seconds, views_count)')
+            .eq('is_must_see', true)
+            .order('created_at', { ascending: false })
+            .limit(10),
+          supabase
+            .from('videos')
+            .select('*, creator:profiles(*)')
+            .eq('is_must_see', true)
+            .eq('status', 'published')
+            .order('views_count', { ascending: false })
+            .limit(10),
         ]);
 
         // 1. Dynamic Hero Slides
@@ -372,6 +390,44 @@ export function LighthouseHomeView() {
         } else {
           setContinueWatching([]);
         }
+
+        // 8. Dynamic Must-See Content (Admin controlled)
+        const mappedMustSee: any[] = [];
+        if (dbMustSeeSeries && dbMustSeeSeries.length > 0) {
+          dbMustSeeSeries.forEach((s: any) => {
+            const epCount = s.episodes?.length || s.total_episodes || 1;
+            const firstEp =
+              s.episodes?.find((e: any) => e.episode_number === 1) || s.episodes?.[0];
+            mappedMustSee.push({
+              id: s.id,
+              type: 'series' as const,
+              title: s.title || 'Original Series',
+              genre: s.category || 'Drama',
+              thumbnailUrl:
+                s.cover_url || firstEp?.thumbnail_url || '/images/series_city_lights.jpg',
+              badge: 'Must See Series',
+              href: `/videos/${firstEp?.id || s.id}`,
+              description: s.description || 'Critically acclaimed lighthouse original series.',
+              episodesCount: epCount,
+            });
+          });
+        }
+        if (dbMustSeeVideos && dbMustSeeVideos.length > 0) {
+          dbMustSeeVideos.forEach((v: any) => {
+            mappedMustSee.push({
+              id: v.id,
+              type: 'video' as const,
+              title: v.title || 'Must-See Video',
+              genre: v.category || v.genre || 'Drama',
+              thumbnailUrl: v.thumbnail_url || '/images/reel_kolkata.jpg',
+              badge: 'Must See',
+              href: `/videos/${v.id}`,
+              description: v.description || 'Editor-picked must-see reel.',
+              duration: v.duration_seconds ? `${Math.floor(v.duration_seconds / 60)}m` : 'Reel',
+            });
+          });
+        }
+        setMustSeeItems(mappedMustSee);
       } catch (err) {
         console.error('Error loading dynamic homepage data:', err);
       } finally {
@@ -382,42 +438,57 @@ export function LighthouseHomeView() {
     loadDynamicData();
   }, [user]);
 
-  // Load user's watchlist
+  // Load user's watchlist across series and videos
   useEffect(() => {
     async function loadWatchlist() {
       if (!user) return;
       try {
-        const { data } = await supabase
-          .from('watchlists')
-          .select('video_id')
-          .eq('user_id', user.id);
-        if (data) {
-          setMyListIds(new Set(data.map((d: any) => d.video_id).filter(Boolean)));
+        const res = await fetch('/api/watchlist');
+        if (res.ok) {
+          const json = await res.json();
+          const nextSet = new Set<string>();
+          (json.series || []).forEach((s: any) => nextSet.add(s.id));
+          (json.videos || []).forEach((v: any) => nextSet.add(v.id));
+          (json.audios || []).forEach((a: any) => nextSet.add(a.id));
+          setMyListIds(nextSet);
         }
-      } catch {}
+      } catch (err) {
+        console.error('Failed to load watchlist:', err);
+      }
     }
     loadWatchlist();
   }, [user]);
 
   // Handlers
-  const handleToggleMyList = async (id: string) => {
+  const handleToggleMyList = async (id: string, type: 'series' | 'video' = 'series') => {
     if (!user) {
       router.push('/login');
       return;
     }
+    const isCurrentlyIn = myListIds.has(id);
     const newSet = new Set(myListIds);
-    if (newSet.has(id)) {
+    if (isCurrentlyIn) {
       newSet.delete(id);
-      setMyListIds(newSet);
-      try {
-        await supabase.from('watchlists').delete().match({ user_id: user.id, video_id: id });
-      } catch {}
     } else {
       newSet.add(id);
-      setMyListIds(newSet);
-      try {
-        await supabase.from('watchlists').insert({ user_id: user.id, video_id: id });
-      } catch {}
+    }
+    setMyListIds(newSet);
+
+    try {
+      const isNowIn = await toggleWatchlist(type, id);
+      setMyListIds((prev) => {
+        const updated = new Set(prev);
+        if (isNowIn) {
+          updated.add(id);
+        } else {
+          updated.delete(id);
+        }
+        return updated;
+      });
+    } catch (err) {
+      console.error('Error toggling watchlist:', err);
+      // Revert on error
+      setMyListIds(myListIds);
     }
   };
 
@@ -581,7 +652,7 @@ export function LighthouseHomeView() {
                       if (currentHero.firstEpisodeId) {
                         router.push(`/videos/${currentHero.firstEpisodeId}`);
                       } else {
-                        router.push('/explore?type=series');
+                        router.push('/search?type=series');
                       }
                     }}
                     className="flex items-center gap-1.5 sm:gap-2 bg-[#ECC979] hover:bg-[#F4C95D] active:scale-95 text-[#101418] font-bold text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-lg shadow-black/40 transition-all cursor-pointer"
@@ -651,18 +722,86 @@ export function LighthouseHomeView() {
             })}
           </div>
 
-          {/* 3. Trending Reels Section */}
+          {/* 3. Must See Section (Admin Controlled) */}
+          {mustSeeItems.length > 0 && (
+            <div className="space-y-3 pt-1">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center w-6 h-6 rounded-md bg-[#ECC979]/20 text-[#ECC979]">
+                    <Sparkles className="w-3.5 h-3.5 fill-[#ECC979]" />
+                  </div>
+                  <h2 className="text-sm sm:text-base md:text-lg font-bold text-[#F5F1E8]">
+                    Must See
+                  </h2>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#ECC979] bg-[#ECC979]/10 border border-[#ECC979]/30 px-2 py-0.5 rounded-full">
+                    Admin Picks
+                  </span>
+                </div>
+              </div>
+
+              {/* Responsive grid for Must See */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {mustSeeItems.slice(0, 3).map((item) => (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    className="group relative flex flex-col rounded-xl overflow-hidden bg-[#11171E] border border-[#ECC979]/40 hover:border-[#ECC979] transition-all p-3 shadow-md hover:shadow-[#ECC979]/5"
+                  >
+                    <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden bg-[#16202C]">
+                      <Image
+                        src={item.thumbnailUrl}
+                        alt={item.title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                      <div className="absolute top-2 left-2 z-10">
+                        <span className="bg-[#ECC979] text-[#101418] text-[9px] font-extrabold uppercase px-2 py-0.5 rounded shadow">
+                          ★ Must See
+                        </span>
+                      </div>
+                      <div className="absolute bottom-2 right-2 z-10">
+                        <span className="bg-black/70 backdrop-blur-sm text-[#F5F1E8] text-[10px] font-medium px-2 py-0.5 rounded">
+                          {item.type === 'series' ? `${item.episodesCount} Episodes` : item.duration}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mt-2.5 flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="text-xs sm:text-sm font-bold text-[#F5F1E8] group-hover:text-[#ECC979] transition-colors line-clamp-1">
+                          {item.title}
+                        </h3>
+                        <p className="text-[11px] text-[#86929F] mt-1 line-clamp-2 leading-relaxed">
+                          {item.description}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-white/5">
+                        <span className="text-[10px] text-[#ECC979] font-semibold">{item.genre}</span>
+                        <div className="flex items-center gap-1 text-[11px] text-[#F5F1E8] group-hover:text-[#ECC979] font-medium">
+                          <span>Watch</span>
+                          <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 4. Trending Reels Section */}
           <div className="space-y-3 pt-1">
             <div className="flex items-center justify-between">
               <Link
-                href="/explore?type=shorts"
+                href="/search?type=shorts"
                 className="group flex items-center gap-1.5 text-sm sm:text-base md:text-lg font-bold text-[#F5F1E8] hover:text-[#ECC979] transition-colors"
               >
                 <span>Trending Reels</span>
                 <ChevronRight className="w-4 h-4 text-[#8C98A5] group-hover:text-[#ECC979] transition-colors" />
               </Link>
               <Link
-                href="/explore?type=shorts"
+                href="/search?type=shorts"
                 className="text-xs text-[#8C98A5] hover:text-[#ECC979] flex items-center gap-1 font-medium transition-colors"
               >
                 <span>See All</span>
@@ -761,18 +900,18 @@ export function LighthouseHomeView() {
             )}
           </div>
 
-          {/* 4. Popular Series Section */}
+          {/* 5. Popular Series Section */}
           <div className="space-y-3 pt-2">
             <div className="flex items-center justify-between">
               <Link
-                href="/explore?type=series"
+                href="/search?type=series"
                 className="group flex items-center gap-1.5 text-sm sm:text-base md:text-lg font-bold text-[#F5F1E8] hover:text-[#ECC979] transition-colors"
               >
                 <span>Popular Series</span>
                 <ChevronRight className="w-4 h-4 text-[#8C98A5] group-hover:text-[#ECC979] transition-colors" />
               </Link>
               <Link
-                href="/explore?type=series"
+                href="/search?type=series"
                 className="text-xs text-[#8C98A5] hover:text-[#ECC979] flex items-center gap-1 font-medium transition-colors"
               >
                 <span>See All</span>
@@ -800,7 +939,7 @@ export function LighthouseHomeView() {
                 {filteredSeries.slice(0, 5).map((item) => (
                   <Link
                     key={item.id}
-                    href={item.firstEpisodeId ? `/videos/${item.firstEpisodeId}` : `/explore?type=series`}
+                    href={item.firstEpisodeId ? `/videos/${item.firstEpisodeId}` : `/search?type=series`}
                     className="group flex flex-col cursor-pointer"
                   >
                     <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-[#11171E] border border-[#1E2732] group-hover:border-[#ECC979]/50 transition-all shadow-md">
@@ -924,7 +1063,7 @@ export function LighthouseHomeView() {
                 {recommended.map((item) => (
                   <Link
                     key={item.id}
-                    href={item.href || '/explore?type=series'}
+                    href={item.href || '/search?type=series'}
                     className="flex items-center gap-3 p-1.5 rounded-xl bg-[#11171E] hover:bg-[#151D26] border border-[#1E2732] hover:border-[#2C3846] transition-all group"
                   >
                     <div className="relative w-20 h-13 rounded-lg overflow-hidden shrink-0 bg-[#151D26]">
@@ -959,7 +1098,7 @@ export function LighthouseHomeView() {
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold text-[#F5F1E8]">Top Creators</span>
               <Link
-                href="/explore?type=creators"
+                href="/following"
                 className="text-xs text-[#8C98A5] hover:text-[#ECC979] flex items-center gap-1 font-medium transition-colors"
               >
                 <span>See All</span>

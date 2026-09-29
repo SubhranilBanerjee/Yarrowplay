@@ -1,4 +1,4 @@
-export type UserRole = 'viewer' | 'creator' | 'advertiser';
+export type UserRole = 'viewer' | 'creator' | 'advertiser' | 'admin';
 export type CreatorSubRole = 'Professional' | 'Student' | 'Hobbyist';
 
 export interface Profile {
@@ -12,15 +12,18 @@ export interface Profile {
   avatar_url: string | null;
   bio: string | null;
   coins_balance?: number;
-  vip_tier?: 'none' | 'weekly' | 'monthly' | 'annual';
+  vip_tier?: 'none' | 'free' | 'weekly' | 'monthly' | 'annual' | 'yearly';
   vip_expires_at?: string | null;
   last_check_in_date?: string | null;
   check_in_streak?: number;
+  pause_watch_history?: boolean;
+  is_suspended?: boolean;
+  last_active_at?: string;
   created_at: string;
   updated_at: string;
 }
 
-export type CoinTransactionType = 'purchase' | 'reward_ad' | 'daily_check_in' | 'episode_unlock' | 'bonus';
+export type CoinTransactionType = 'purchase' | 'reward_ad' | 'daily_check_in' | 'episode_unlock' | 'bonus' | 'vip_subscription';
 
 export interface CoinTransaction {
   id: string;
@@ -62,6 +65,7 @@ export interface ContentSeries {
   cover_url: string | null;
   cover_public_id: string | null;
   total_episodes: number;
+  is_must_see?: boolean;
   created_at: string;
   updated_at: string;
   creator?: Profile;
@@ -92,6 +96,7 @@ export interface Video {
   shares_count: number;
   comments_count: number;
   is_locked: boolean;
+  is_must_see?: boolean;
   price_inr: number | null;
   created_at: string;
   updated_at: string;
@@ -152,6 +157,7 @@ export interface Blog {
   category: string | null;
   tags: string[];
   status: 'draft' | 'published';
+  is_must_see?: boolean;
   published_at: string;
   views_count: number;
   likes_count: number;
@@ -183,11 +189,20 @@ export interface Favorite {
 export interface Watchlist {
   id: string;
   user_id: string;
+  series_id?: string | null;
   video_id?: string | null;
   audio_id?: string | null;
   created_at: string;
+  series?: ContentSeries;
   video?: Video;
   audio?: AudioTrack;
+}
+
+export interface SearchHistoryItem {
+  id: string;
+  user_id: string;
+  query: string;
+  created_at: string;
 }
 
 export interface SubtitleTrack {

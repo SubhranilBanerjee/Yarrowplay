@@ -1,25 +1,12 @@
 /* ==========================================================================
    LIGHTHOUSE REELS - CENTRAL DESIGN TOKENS & CINEMATIC THEME SYSTEM
-   
-   Color System:
-   - Primary Background: #070B0F (Deep Obsidian)
-   - Secondary Background: #0B1117 (Dark Navy Slate)
-   - Tertiary Background: #101820 (Midnight Charcoal)
-   - Card Surface: #111A22 (Subtle Blue-Gray Slate)
-   - Elevated Surface: #151F28 (Elevated Card Surface)
-   - Input Background: #141D26
-   - Sidebar: #080D12
-   - Header: #0A1016
-   - Borders: #27313A (Primary), #1C252D (Subtle), rgba(255,255,255,0.08) (Faint)
-   - Brand / Gold: #F4C95D (Primary), #FFD978 (Light), #C99A32 (Dark), #A98235 (Muted)
-   - Typography: #F5F1E8 (Warm White), #B7BEC6 (Secondary), #7F8993 (Muted), #59636D (Disabled)
-   - Secondary Blue: #7E9BB5, #9DB9D0
-   - Status: #68B88A (Success), #E8B84A (Warning), #D96868 (Error), #C95353 (Danger)
+   Supports both Dark Mode and Light Mode with Semantic Tokens
    ========================================================================== */
 
-:root {
+:root,
+[data-theme="dark"] {
   /* ==========================================================================
-     LIGHTHOUSE REELS CANONICAL DESIGN TOKENS (--lr-*)
+     LIGHTHOUSE REELS CANONICAL DESIGN TOKENS (--lr-*) - DARK MODE
      ========================================================================== */
   --lr-bg-primary: #070B0F;
   --lr-bg-secondary: #0B1117;
@@ -58,7 +45,18 @@
   --lr-danger: #C95353;
 
   /* ==========================================================================
-     CORE THEME COMPATIBILITY MAPPINGS (Standardized to Lighthouse Reels)
+     SEMANTIC DESIGN TOKENS
+     ========================================================================== */
+  --background: var(--lr-bg-primary);
+  --foreground: var(--lr-text-primary);
+  --card: var(--lr-bg-surface);
+  --border: var(--lr-border-primary);
+  --muted: var(--lr-bg-tertiary);
+  --accent: var(--lr-gold);
+  --accent-foreground: #0B0F13;
+
+  /* ==========================================================================
+     CORE THEME COMPATIBILITY MAPPINGS
      ========================================================================== */
   --bg-primary: var(--lr-bg-primary);
   --bg-secondary: var(--lr-bg-secondary);
@@ -74,7 +72,7 @@
   --glass-border-hover: rgba(244, 201, 93, 0.3);
   --glass-border-active: var(--lr-gold);
 
-  /* Primary Brand Accent (Champagne Gold replaces old Violet/Pink) */
+  /* Primary Brand Accent */
   --color-purple-dark: var(--lr-gold-dark);
   --color-purple-bright: var(--lr-gold);
   --color-primary-accent: var(--lr-gold);
@@ -107,7 +105,7 @@
   --gradient-bottom-ambient: radial-gradient(circle at 15% 90%, rgba(126, 155, 181, 0.03) 0%, transparent 60%);
   --gradient-neon: var(--lr-gold);
 
-  /* Shadows (Restrained, subtle depth) */
+  /* Shadows */
   --glow-button: 0 4px 14px rgba(0, 0, 0, 0.25);
   --glow-button-hover: 0 6px 20px rgba(244, 201, 93, 0.22);
   --glow-pill-active: none;
@@ -131,6 +129,96 @@
 }
 
 /* ==========================================================================
+   LIGHT MODE DESIGN TOKENS
+   Clean, polished, high-contrast while maintaining warm gold branding
+   ========================================================================== */
+[data-theme="light"] {
+  --lr-bg-primary: #F8FAFC;
+  --lr-bg-secondary: #FFFFFF;
+  --lr-bg-tertiary: #F1F5F9;
+
+  --lr-bg-surface: #FFFFFF;
+  --lr-bg-elevated: #F8FAFC;
+  --lr-bg-input: #FFFFFF;
+  --lr-bg-sidebar: #FFFFFF;
+  --lr-bg-header: rgba(255, 255, 255, 0.95);
+  --lr-bg-modal: #FFFFFF;
+  --lr-bg-player: #05080B;
+
+  --lr-border-primary: #E2E8F0;
+  --lr-border-subtle: #EDF2F7;
+  --lr-border-faint: rgba(0, 0, 0, 0.05);
+
+  --lr-gold: #C99A32;
+  --lr-gold-light: #DDB347;
+  --lr-gold-hover: #D4A318;
+  --lr-gold-active: #B58422;
+  --lr-gold-dark: #9A6F14;
+  --lr-gold-muted: #805E1A;
+
+  --lr-text-primary: #0F172A;
+  --lr-text-secondary: #475569;
+  --lr-text-muted: #64748B;
+  --lr-text-disabled: #94A3B8;
+
+  --lr-blue: #2563EB;
+  --lr-blue-bright: #3B82F6;
+
+  --lr-success: #16A34A;
+  --lr-warning: #D97706;
+  --lr-error: #DC2626;
+  --lr-danger: #B91C1C;
+
+  /* Semantic Design Tokens */
+  --background: var(--lr-bg-primary);
+  --foreground: var(--lr-text-primary);
+  --card: var(--lr-bg-surface);
+  --border: var(--lr-border-primary);
+  --muted: var(--lr-bg-tertiary);
+  --accent: var(--lr-gold);
+  --accent-foreground: #FFFFFF;
+
+  /* Core compatibility mappings */
+  --bg-primary: var(--lr-bg-primary);
+  --bg-secondary: var(--lr-bg-secondary);
+  --bg-tertiary: var(--lr-bg-tertiary);
+
+  --glass-surface: var(--lr-bg-surface);
+  --glass-surface-elevated: var(--lr-bg-elevated);
+  --glass-surface-hover: #F1F5F9;
+  --glass-surface-subtle: rgba(255, 255, 255, 0.9);
+  --glass-surface-heavy: var(--lr-bg-surface);
+  --glass-border: var(--lr-border-primary);
+  --glass-border-subtle: var(--lr-border-subtle);
+  --glass-border-hover: rgba(201, 154, 50, 0.35);
+  --glass-border-active: var(--lr-gold);
+
+  --text-primary: var(--lr-text-primary);
+  --text-secondary: var(--lr-text-secondary);
+  --text-muted: var(--lr-text-muted);
+  --text-dim: var(--lr-text-disabled);
+
+  --gradient-brand-primary: linear-gradient(135deg, #B58422 0%, #C99A32 100%);
+  --gradient-button: linear-gradient(135deg, #C99A32 0%, #DDB347 100%);
+  --gradient-button-hover: linear-gradient(135deg, #DDB347 0%, #C99A32 100%);
+  --gradient-active-pill: rgba(201, 154, 50, 0.12);
+  --gradient-card-border: rgba(0, 0, 0, 0.06);
+  --gradient-text: linear-gradient(135deg, #0F172A 60%, #C99A32 100%);
+  --gradient-text-pure: linear-gradient(90deg, #0F172A 0%, #C99A32 100%);
+  --gradient-overlay-card: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(248, 250, 252, 0.85) 75%, rgba(248, 250, 252, 0.98) 100%);
+  --gradient-hero-ambient: radial-gradient(circle at 85% 20%, rgba(201, 154, 50, 0.05) 0%, transparent 60%);
+  --gradient-bottom-ambient: radial-gradient(circle at 15% 90%, rgba(37, 99, 235, 0.03) 0%, transparent 60%);
+
+  --glow-button: 0 2px 10px rgba(0, 0, 0, 0.08);
+  --glow-button-hover: 0 4px 16px rgba(201, 154, 50, 0.25);
+  --glow-card: 0 2px 12px rgba(0, 0, 0, 0.04);
+  --glow-card-hover: 0 6px 20px rgba(0, 0, 0, 0.08);
+  --glow-card-featured: 0 6px 20px rgba(0, 0, 0, 0.08);
+  --glow-search-focus: 0 0 0 1px var(--lr-gold);
+  --glow-form: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* ==========================================================================
    Reusable Utility Classes matching Theme Variables
    ========================================================================== */
 
@@ -147,7 +235,7 @@
   border: none;
   border-radius: 9px;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -167,7 +255,7 @@
 .theme-secondary-button {
   background: transparent;
   color: var(--lr-text-primary);
-  border: 1px solid #52606C;
+  border: 1px solid var(--lr-border-primary);
   border-radius: 9px;
   font-weight: 500;
   transition: all 0.2s ease;
@@ -182,20 +270,20 @@
 /* Cards */
 .theme-glass-card {
   background-color: var(--lr-bg-surface);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--lr-border-primary);
   border-radius: 12px;
   box-shadow: var(--glow-card);
   transition: all 0.2s ease;
 }
 
 .theme-glass-card:hover {
-  border-color: rgba(244, 201, 93, 0.25);
+  border-color: rgba(244, 201, 93, 0.35);
   background-color: var(--lr-bg-elevated);
 }
 
 .theme-glass-card-static {
   background-color: var(--lr-bg-surface);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--lr-border-primary);
   border-radius: 12px;
   box-shadow: var(--glow-card);
 }
@@ -207,7 +295,7 @@
 }
 
 .theme-glow-frame:hover {
-  border-color: rgba(244, 201, 93, 0.25);
+  border-color: rgba(244, 201, 93, 0.35);
   background-color: var(--lr-bg-elevated);
 }
 
@@ -220,7 +308,7 @@
 }
 
 .theme-form-card:hover {
-  border-color: rgba(244, 201, 93, 0.3);
+  border-color: rgba(244, 201, 93, 0.35);
 }
 
 /* Genre / Filter Pills */
@@ -241,7 +329,7 @@
 .theme-inactive-pill:hover {
   background-color: var(--lr-bg-elevated);
   color: var(--lr-text-primary);
-  border-color: rgba(244, 201, 93, 0.25);
+  border-color: rgba(244, 201, 93, 0.35);
 }
 
 /* Headings */

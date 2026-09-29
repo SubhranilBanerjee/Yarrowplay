@@ -8,12 +8,14 @@ import { MobileNavbar } from '@/components/layout/MobileNavbar';
 import { AudioPlayerBar } from '@/components/media/AudioPlayerBar';
 import { GalaxyBackground } from '@/components/common/GalaxyBackground';
 
+import { ThemeProvider } from '@/context/ThemeContext';
 import { SidebarProvider } from '@/context/SidebarContext';
 import { WalletProvider } from '@/context/WalletContext';
 import CoinStoreModal from '@/components/wallet/CoinStoreModal';
 import DailyRewardsModal from '@/components/wallet/DailyRewardsModal';
 import RewardedAdModal from '@/components/wallet/RewardedAdModal';
 import EpisodeUnlockModal from '@/components/wallet/EpisodeUnlockModal';
+import { SubscriptionModalContainer } from '@/components/wallet/SubscriptionModalContainer';
 import Script from 'next/script';
 import { SITE_CONFIG, generateWebsiteJsonLd } from '@/lib/seo';
 
@@ -39,8 +41,8 @@ export const metadata: Metadata = {
   creator: 'Lighthouse Reels',
   publisher: 'Lighthouse Reels Entertainment',
   icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
+    icon: '/branding/lighthouse-reels-logo.png',
+    apple: '/branding/lighthouse-reels-logo.png',
   },
   openGraph: {
     type: 'website',
@@ -91,8 +93,13 @@ export default function RootLayout({
 }>) {
   const jsonLd = generateWebsiteJsonLd();
   return (
-    <html lang="en" className="dark min-h-screen">
+    <html lang="en" className="dark min-h-screen" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('lighthouse_theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);if(t==='light'){document.documentElement.classList.remove('dark');document.documentElement.classList.add('light');}else{document.documentElement.classList.add('dark');}}else{document.documentElement.setAttribute('data-theme','dark');document.documentElement.classList.add('dark');}}catch(e){}})();`,
+          }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -100,30 +107,33 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-[var(--lr-bg-primary)] text-[var(--lr-text-primary)] flex flex-col antialiased selection:bg-[#F4C95D]/25 selection:text-[#F5F1E8]">
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-        <AuthProvider>
-          <SidebarProvider>
-            <WalletProvider>
-              <AudioPlayerProvider>
-                <GalaxyBackground />
-                <Header />
-                <div className="flex flex-1 min-h-[calc(100vh-61px)]">
-                  <Sidebar />
-                  <main className="flex-1 overflow-y-auto pb-28 md:pb-24 bg-transparent min-w-0">
-                    {children}
-                  </main>
-                </div>
-                <AudioPlayerBar />
-                <MobileNavbar />
+        <ThemeProvider>
+          <AuthProvider>
+            <SidebarProvider>
+              <WalletProvider>
+                <AudioPlayerProvider>
+                  <GalaxyBackground />
+                  <Header />
+                  <div className="flex flex-1 min-h-[calc(100vh-61px)]">
+                    <Sidebar />
+                    <main className="flex-1 overflow-y-auto pb-28 md:pb-24 bg-transparent min-w-0">
+                      {children}
+                    </main>
+                  </div>
+                  <AudioPlayerBar />
+                  <MobileNavbar />
 
-                {/* DramaBox Monetization Modals */}
-                <CoinStoreModal />
-                <DailyRewardsModal />
-                <RewardedAdModal />
-                <EpisodeUnlockModal />
-              </AudioPlayerProvider>
-            </WalletProvider>
-          </SidebarProvider>
-        </AuthProvider>
+                  {/* DramaBox Monetization Modals */}
+                  <CoinStoreModal />
+                  <DailyRewardsModal />
+                  <RewardedAdModal />
+                  <EpisodeUnlockModal />
+                  <SubscriptionModalContainer />
+                </AudioPlayerProvider>
+              </WalletProvider>
+            </SidebarProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

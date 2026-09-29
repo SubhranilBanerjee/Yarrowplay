@@ -58,6 +58,12 @@ interface WalletContextType {
   unlockModalVideo: any | null;
   openUnlockModal: (video: any) => void;
   closeUnlockModal: () => void;
+
+  // Lighthouse Reels Subscription Modal
+  isSubscriptionModalOpen: boolean;
+  subscriptionDefaultTier: 'weekly' | 'monthly' | 'yearly';
+  openSubscriptionModal: (tier?: 'weekly' | 'monthly' | 'yearly') => void;
+  closeSubscriptionModal: () => void;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -90,6 +96,16 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   // DramaBox Episode Unlock Modal state
   const [isUnlockModalOpen, setIsUnlockModalOpen] = useState<boolean>(false);
   const [unlockModalVideo, setUnlockModalVideo] = useState<any | null>(null);
+
+  // Subscription Modal state
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState<boolean>(false);
+  const [subscriptionDefaultTier, setSubscriptionDefaultTier] = useState<'weekly' | 'monthly' | 'yearly'>('monthly');
+
+  const openSubscriptionModal = (tier: 'weekly' | 'monthly' | 'yearly' = 'monthly') => {
+    setSubscriptionDefaultTier(tier);
+    setIsSubscriptionModalOpen(true);
+  };
+  const closeSubscriptionModal = () => setIsSubscriptionModalOpen(false);
 
   useEffect(() => {
     try {
@@ -573,6 +589,10 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         unlockModalVideo,
         openUnlockModal,
         closeUnlockModal,
+        isSubscriptionModalOpen,
+        subscriptionDefaultTier,
+        openSubscriptionModal,
+        closeSubscriptionModal,
       }}
     >
       {children}
