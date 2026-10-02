@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
 import { useWallet } from '@/context/WalletContext';
+import { CoinIcon } from '@/components/ui/CoinIcon';
 import {
   Search,
   Plus,
@@ -143,7 +144,7 @@ export function Header() {
             title="Coin Store & Wallet"
             className="flex items-center gap-1.5 bg-[var(--lr-bg-surface,#141D26)] hover:bg-[var(--lr-bg-elevated,#1A2530)] text-[#F4C95D] border border-[#F4C95D]/30 hover:border-[#F4C95D]/60 text-xs sm:text-sm font-bold px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full shadow-sm transition-all active:scale-95 cursor-pointer font-sans"
           >
-            <span>🪙</span>
+            <CoinIcon className="w-4 h-4 text-[#F4C95D]" />
             <span>{coins}</span>
             {isVIP && (
               <span className="text-[10px] bg-[#F4C95D] text-[#0B0F13] px-1.5 py-0.2 rounded-full font-black flex items-center gap-0.5 ml-0.5">
@@ -155,7 +156,7 @@ export function Header() {
           {/* + Create Button */}
           <Link
             href={user ? '/creator/studio' : '/login?redirect=/creator/studio'}
-            className="flex items-center gap-1 sm:gap-1.5 bg-[#ECC979] hover:bg-[#F4C95D] active:scale-95 text-[#101418] font-semibold text-xs sm:text-sm px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 rounded-full shadow-sm transition-all cursor-pointer font-sans"
+            className="btn-primary flex items-center gap-1 sm:gap-1.5 text-white font-bold text-xs sm:text-sm px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 rounded-full shadow-md transition-all cursor-pointer font-sans"
           >
             <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
             <span className="inline">Create</span>
@@ -226,7 +227,7 @@ export function Header() {
                           <Coins className="w-4 h-4 text-[#F4C95D]" />
                           <span className="text-[#F5F1E8]">Coin Wallet</span>
                         </div>
-                        <span className="text-xs font-bold text-[#F4C95D]">🪙 {coins}</span>
+                        <span className="text-xs font-bold text-[#F4C95D] flex items-center gap-1"><CoinIcon className="w-3.5 h-3.5" /> {coins}</span>
                       </button>
 
                       <button

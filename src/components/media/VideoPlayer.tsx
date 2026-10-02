@@ -1004,7 +1004,7 @@ export function VideoPlayer({
             )}
             <button
               onClick={onUnlockRequest}
-              className="px-8 py-3 rounded-lg font-bold text-sm bg-[#F4C95D] text-[#0B0F13] hover:bg-[#FFD978] transition-all shadow-xl active:scale-95 cursor-pointer"
+              className="btn-primary px-8 py-3 rounded-lg font-bold text-sm text-white transition-all shadow-xl active:scale-95 cursor-pointer"
             >
               Unlock Now
             </button>

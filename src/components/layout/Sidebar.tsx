@@ -95,13 +95,13 @@ export function Sidebar() {
                   collapsed ? 'justify-center px-2' : 'gap-3.5 px-3.5'
                 } py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-[#221C13] text-[#ECC979] border border-[#ECC979]/30 shadow-[0_2px_12px_rgba(236,201,121,0.08)]'
+                    ? 'btn-primary text-white font-bold shadow-md'
                     : 'text-[var(--lr-text-secondary,#9AA7B4)] hover:text-[var(--lr-text-primary,#F5F1E8)] hover:bg-[var(--lr-bg-elevated,#131920)]'
                 }`}
               >
                 <Icon
                   className={`w-4 h-4 shrink-0 transition-transform ${
-                    isActive ? 'fill-[#ECC979] text-[#ECC979]' : 'text-[var(--lr-text-muted,#85929F)]'
+                    isActive ? 'fill-white text-white' : 'text-[var(--lr-text-muted,#85929F)]'
                   }`}
                 />
                 {!collapsed && <span className="truncate">{item.label}</span>}
@@ -132,13 +132,13 @@ export function Sidebar() {
                     collapsed ? 'justify-center px-2' : 'gap-3.5 px-3.5'
                   } py-2.5 rounded-xl text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-[#221C13] text-[#ECC979] border border-[#ECC979]/30'
+                      ? 'btn-primary text-white font-bold shadow-md'
                       : 'text-[var(--lr-text-secondary,#9AA7B4)] hover:text-[var(--lr-text-primary,#F5F1E8)] hover:bg-[var(--lr-bg-elevated,#131920)]'
                   }`}
                 >
                   <Icon
                     className={`w-4 h-4 shrink-0 ${
-                      isActive ? 'text-[#ECC979]' : 'text-[var(--lr-text-muted,#85929F)]'
+                      isActive ? 'text-white' : 'text-[var(--lr-text-muted,#85929F)]'
                     }`}
                   />
                   {!collapsed && <span className="truncate">{item.label}</span>}
@@ -149,7 +149,7 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Bottom Pro Card: Subscribe (Replacing Upgrade per Phase 4) */}
+      {/* Bottom Pro Card: Subscribe */}
       <div className="pt-4 mt-auto">
         {collapsed ? (
           <button
@@ -157,22 +157,22 @@ export function Sidebar() {
             onClick={() => openSubscriptionModal('monthly')}
             title="Subscribe to Lighthouse Pro"
             aria-label="Subscribe to Lighthouse Pro"
-            className="w-full flex items-center justify-center p-3 rounded-2xl bg-gradient-to-b from-[#1F1910] to-[#121820] border border-[#ECC979]/40 text-[#ECC979] hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
+            className="btn-primary w-full flex items-center justify-center p-3 rounded-2xl text-white hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
           >
-            <Crown className="w-5 h-5 fill-[#ECC979]/60 text-[#ECC979]" />
+            <Crown className="w-5 h-5 fill-white text-white" />
           </button>
         ) : (
-          <div className="relative rounded-2xl p-4 bg-gradient-to-b from-[var(--lr-bg-surface,#161D26)] to-[var(--lr-bg-primary,#0E141A)] border border-[var(--lr-border-primary,#232D38)] overflow-hidden group">
-            <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#ECC979]/15 rounded-full blur-2xl pointer-events-none" />
+          <div className="relative rounded-2xl p-4 bg-gradient-to-b from-[var(--lr-bg-surface,#161D26)] to-[var(--lr-bg-primary,#0E141A)] border border-purple-500/30 overflow-hidden group">
+            <div className="absolute -top-10 -right-10 w-28 h-28 bg-purple-600/20 rounded-full blur-2xl pointer-events-none" />
 
             <div className="relative z-10">
-              <div className="w-7 h-7 rounded-lg bg-[#2A2315] border border-[#ECC979]/30 flex items-center justify-center text-[#ECC979] mb-2.5 shadow-sm">
-                <Crown className="w-4 h-4 fill-[#ECC979]/60 text-[#ECC979]" />
+              <div className="w-7 h-7 rounded-lg bg-purple-900/40 border border-purple-500/40 flex items-center justify-center text-purple-300 mb-2.5 shadow-sm">
+                <Crown className="w-4 h-4 fill-purple-300 text-purple-300" />
               </div>
 
               <h4 className="text-sm font-bold text-[var(--lr-text-primary,#F5F1E8)] tracking-tight flex items-center gap-1.5">
                 <span>Lighthouse Pro</span>
-                <Sparkles className="w-3 h-3 text-[#ECC979]" />
+                <Sparkles className="w-3 h-3 text-purple-400" />
               </h4>
               <p className="text-[11px] text-[var(--lr-text-secondary,#86929F)] mt-1 leading-snug">
                 Unlimited ad-free episodes, 4K quality, offline downloads, and creator exclusives.
@@ -184,7 +184,7 @@ export function Sidebar() {
                   closeMobileSidebar();
                   openSubscriptionModal('monthly');
                 }}
-                className="mt-3.5 w-full bg-[#ECC979] hover:bg-[#F4C95D] active:scale-98 text-[#101418] font-bold text-xs py-2 rounded-xl text-center block transition-all shadow-md cursor-pointer"
+                className="btn-primary mt-3.5 w-full text-white font-bold text-xs py-2.5 rounded-xl text-center block transition-all shadow-md cursor-pointer"
               >
                 Subscribe
               </button>

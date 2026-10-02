@@ -16,7 +16,7 @@
   letter-spacing: 0.01em;
   line-height: 1;
   color: var(--sb-text-color);
-  background: color-mix(in srgb, var(--sb-tint) calc(var(--sb-tint-opacity) * 100%), transparent);
+  background: var(--button-gradient, linear-gradient(135deg, #8B5CF6 0%, #6D28D9 50%, #4C1D95 100%)) !important;
   border-radius: var(--sb-radius);
   backdrop-filter: blur(var(--sb-blur));
   -webkit-backdrop-filter: blur(var(--sb-blur));

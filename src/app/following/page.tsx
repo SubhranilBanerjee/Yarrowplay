@@ -259,7 +259,7 @@ export default function FollowingPage() {
                       className={`mt-4 w-full py-2 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                         creator.isFollowing
                           ? 'bg-[var(--lr-bg-elevated,#1A232D)] border border-[var(--lr-border-primary,#27313A)] text-[var(--lr-text-primary,#F5F1E8)]'
-                          : 'bg-[#ECC979] hover:bg-[#F4C95D] text-[#101418] shadow-md'
+                          : 'btn-primary text-white font-bold shadow-md'
                       }`}
                     >
                       {creator.isFollowing ? (

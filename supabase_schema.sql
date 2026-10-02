@@ -20,6 +20,8 @@ create table if not exists public.profiles (
   role text not null check (role in ('viewer', 'creator', 'advertiser')) default 'viewer',
   sub_role text check (sub_role in ('Professional', 'Student', 'Hobbyist')),
   company_name text,
+  pan_number text,
+  bank_account_number text,
   avatar_url text,
   bio text,
   created_at timestamptz default now(),

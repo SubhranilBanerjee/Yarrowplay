@@ -148,8 +148,8 @@ export function FollowButton({
       style={
         !isFollowing
           ? {
-              background: 'var(--gradient-neon)',
-              boxShadow: 'var(--glow-purple)',
+              background: 'var(--button-gradient, linear-gradient(135deg, #8B5CF6 0%, #6D28D9 50%, #4C1D95 100%))',
+              boxShadow: '0 4px 14px rgba(109, 40, 217, 0.40)',
             }
           : undefined
       }

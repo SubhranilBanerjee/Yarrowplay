@@ -20,6 +20,7 @@ import {
   Copy,
   CheckCircle2,
 } from 'lucide-react';
+import { CoinIcon } from '@/components/ui/CoinIcon';
 
 export default function CoinStoreModal() {
   const {
@@ -156,8 +157,8 @@ export default function CoinStoreModal() {
           <div className="mt-4 flex items-center justify-between bg-[#0B1117] rounded-xl px-4 py-2.5 border border-[#27313A]">
             <div className="flex items-center gap-2">
               <span className="text-xs text-[#B7BEC6]">Your Wallet:</span>
-              <span className="text-lg font-black text-[#F4C95D] flex items-center gap-1">
-                🪙 {coins} <span className="text-xs font-normal text-[#B7BEC6]">coins</span>
+              <span className="text-lg font-black text-[#F4C95D] flex items-center gap-1.5">
+                <CoinIcon className="w-5 h-5" /> {coins} <span className="text-xs font-normal text-[#B7BEC6]">coins</span>
               </span>
             </div>
             <button
@@ -258,7 +259,7 @@ export default function CoinStoreModal() {
 
                   <div>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-black text-[#F4C95D]">🪙 {pack.coins}</span>
+                      <span className="text-2xl font-black text-[#F4C95D] flex items-center gap-1.5"><CoinIcon className="w-6 h-6" /> {pack.coins}</span>
                       {pack.bonus_coins > 0 && (
                         <span className="text-xs font-bold text-[#68B88A] bg-[#68B88A]/15 px-2 py-0.5 rounded border border-[#68B88A]/30">
                           +{pack.bonus_coins} Bonus
@@ -278,7 +279,7 @@ export default function CoinStoreModal() {
                     <button
                       onClick={() => handleBuyPack(pack.id)}
                       disabled={loadingId === pack.id}
-                      className="px-4 py-2 rounded-lg bg-[#F4C95D] hover:bg-[#FFD978] active:bg-[#DDB347] text-[#0B0F13] font-bold text-xs shadow-md active:scale-95 transition-transform disabled:opacity-50 cursor-pointer"
+                      className="btn-primary px-4 py-2 rounded-lg text-white font-bold text-xs shadow-md transition-transform disabled:opacity-50 cursor-pointer"
                     >
                       {loadingId === pack.id ? 'Processing...' : 'Buy Now'}
                     </button>
@@ -340,7 +341,7 @@ export default function CoinStoreModal() {
                       className={`w-full py-2.5 rounded-lg font-bold text-xs shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer ${
                         isVIP && vipTier === tier.id
                           ? 'bg-[#68B88A]/20 text-[#68B88A] border border-[#68B88A]/40'
-                          : 'bg-[#F4C95D] hover:bg-[#FFD978] active:bg-[#DDB347] text-[#0B0F13]'
+                          : 'btn-primary text-white font-bold'
                       }`}
                     >
                       {loadingId === tier.id
@@ -378,7 +379,7 @@ export default function CoinStoreModal() {
                   <button
                     onClick={() => handleRedeemPromo()}
                     disabled={isRedeeming || !promoCodeInput.trim()}
-                    className="px-5 py-2 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] text-[#0B0F13] font-bold text-xs shadow-md transition-all disabled:opacity-50 cursor-pointer"
+                    className="btn-primary px-5 py-2 rounded-xl text-white font-bold text-xs shadow-md transition-all disabled:opacity-50 cursor-pointer"
                   >
                     {isRedeeming ? 'Applying...' : 'Apply Code'}
                   </button>
@@ -400,7 +401,7 @@ export default function CoinStoreModal() {
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-bold text-[#F4C95D] flex items-center gap-1">
                             {promo.reward_type === 'coins' ? (
-                              <>🪙 +{promo.reward_value} Coins</>
+                              <><CoinIcon className="w-4 h-4" /> +{promo.reward_value} Coins</>
                             ) : (
                               <>👑 {promo.reward_value} Days VIP</>
                             )}

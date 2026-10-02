@@ -113,7 +113,7 @@ export default function AdminMustSeePage() {
         </p>
         <Link
           href="/home"
-          className="mt-4 px-4 py-2 rounded-xl bg-[#ECC979] text-[#101418] text-xs font-bold"
+          className="mt-4 px-4 py-2 rounded-xl btn-primary text-white text-xs font-bold shadow-md"
         >
           Return Home
         </Link>
@@ -182,7 +182,7 @@ export default function AdminMustSeePage() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-[#ECC979] text-[#101418] shadow-md'
+                    ? 'btn-primary text-white font-bold shadow-md'
                     : 'bg-[var(--lr-bg-surface,#111A22)] text-[var(--lr-text-secondary,#9AA7B4)] border border-[var(--lr-border-primary,#27313A)] hover:bg-[var(--lr-bg-elevated,#151F28)]'
                 }`}
               >

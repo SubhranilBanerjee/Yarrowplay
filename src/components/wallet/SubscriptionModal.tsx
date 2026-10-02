@@ -128,7 +128,7 @@ export function SubscriptionModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full py-3 px-6 rounded-xl bg-[#ECC979] hover:bg-[#F4C95D] text-[#101418] font-bold text-sm transition-all shadow-md active:scale-95 cursor-pointer"
+                className="btn-primary w-full py-3 px-6 rounded-xl text-white font-bold text-sm transition-all shadow-md cursor-pointer"
               >
                 Start Watching Now
               </button>
@@ -152,7 +152,7 @@ export function SubscriptionModal({
               <button
                 type="button"
                 onClick={handleReset}
-                className="w-full py-3 px-6 rounded-xl bg-[#ECC979] hover:bg-[#F4C95D] text-[#101418] font-bold text-sm transition-all shadow-md active:scale-95 cursor-pointer"
+                className="btn-primary w-full py-3 px-6 rounded-xl text-white font-bold text-sm transition-all shadow-md cursor-pointer"
               >
                 Try Again
               </button>
@@ -290,7 +290,7 @@ export function SubscriptionModal({
                 type="button"
                 disabled={paymentState === 'initiating'}
                 onClick={handleSubscribe}
-                className="w-full sm:w-auto px-8 py-3 rounded-xl bg-[#ECC979] hover:bg-[#F4C95D] active:scale-95 disabled:opacity-50 text-[#101418] font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#ECC979]/20 transition-all cursor-pointer font-sans"
+                className="btn-primary w-full sm:w-auto px-8 py-3 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer font-sans"
               >
                 {paymentState === 'initiating' ? (
                   <>

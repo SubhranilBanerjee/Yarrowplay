@@ -9,6 +9,8 @@ export interface Profile {
   role: UserRole;
   sub_role: CreatorSubRole | null;
   company_name: string | null;
+  pan_number?: string | null;
+  bank_account_number?: string | null;
   avatar_url: string | null;
   bio: string | null;
   coins_balance?: number;

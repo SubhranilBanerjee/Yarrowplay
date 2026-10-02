@@ -239,7 +239,7 @@ function SearchPageContent() {
                 onClick={() => setActiveFilter(tab.id as any)}
                 className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-[#ECC979] text-[#101418] shadow-sm font-bold'
+                    ? 'btn-primary text-white font-bold shadow-md'
                     : 'bg-[var(--lr-bg-surface,#111A22)] text-[var(--lr-text-secondary,#9AA7B4)] border border-[var(--lr-border-primary,#27313A)] hover:bg-[var(--lr-bg-elevated,#151F28)] hover:text-[var(--lr-text-primary,#F5F1E8)]'
                 }`}
               >

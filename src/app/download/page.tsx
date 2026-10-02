@@ -92,7 +92,7 @@ export default function DownloadAppPage() {
                       href={platform.downloadUrl}
                       target={platform.downloadUrl.startsWith('http') ? '_blank' : '_self'}
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 bg-[#ECC979] hover:bg-[#F4C95D] active:scale-95 text-[#101418] font-bold text-xs px-4 py-2 rounded-xl shadow transition-all cursor-pointer"
+                      className="btn-primary inline-flex items-center gap-2 text-white font-bold text-xs px-4 py-2 rounded-xl shadow transition-all cursor-pointer"
                     >
                       <Download className="w-4 h-4" />
                       <span>{platform.platform === 'pwa' ? 'Launch Web App' : 'Download Now'}</span>

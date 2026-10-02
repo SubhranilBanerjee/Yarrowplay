@@ -655,20 +655,20 @@ export function LighthouseHomeView() {
                         router.push('/search?type=series');
                       }
                     }}
-                    className="flex items-center gap-1.5 sm:gap-2 bg-[#ECC979] hover:bg-[#F4C95D] active:scale-95 text-[#101418] font-bold text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-lg shadow-black/40 transition-all cursor-pointer"
+                    className="btn-primary flex items-center gap-1.5 sm:gap-2 text-white font-bold text-xs sm:text-sm px-4 sm:px-6 py-2.5 sm:py-3 rounded-full shadow-lg transition-all cursor-pointer"
                   >
-                    <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-[#101418]" />
+                    <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white text-white" />
                     <span>Watch Now</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => handleToggleMyList(currentHero.id)}
-                    className="flex items-center gap-1.5 sm:gap-2 bg-[#121820]/75 hover:bg-[#16202C] active:scale-95 backdrop-blur-md border border-white/20 hover:border-white/40 text-[#F5F1E8] font-medium text-xs sm:text-sm px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full transition-all cursor-pointer"
+                    className="btn-secondary flex items-center gap-1.5 sm:gap-2 text-white font-medium text-xs sm:text-sm px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-full transition-all cursor-pointer"
                   >
                     {myListIds.has(currentHero.id) ? (
                       <>
-                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ECC979]" />
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#A855F7]" />
                         <span>Added to List</span>
                       </>
                     ) : (
@@ -711,7 +711,7 @@ export function LighthouseHomeView() {
                   onClick={() => setActiveGenre(tab.id)}
                   className={`shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-[#ECC979] text-[#101418] shadow-sm font-bold'
+                      ? 'btn-primary text-white font-bold shadow-md'
                       : 'bg-[#121820] hover:bg-[#18212B] border border-[#212A34] text-[#A6B2BE] hover:text-[#F5F1E8]'
                   }`}
                 >
@@ -1153,10 +1153,10 @@ export function LighthouseHomeView() {
                     <button
                       type="button"
                       onClick={() => handleToggleFollow(c.id)}
-                      className={`shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer ${
+                      className={`shrink-0 text-[11px] font-semibold px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
                         c.isFollowing
-                          ? 'bg-[#ECC979] text-[#101418] font-bold'
-                          : 'border border-[#323D49] hover:border-[#ECC979] text-[#F5F1E8] hover:text-[#ECC979]'
+                          ? 'btn-secondary text-white font-semibold'
+                          : 'btn-primary text-white font-bold shadow-md'
                       }`}
                     >
                       {c.isFollowing ? 'Following' : 'Follow'}

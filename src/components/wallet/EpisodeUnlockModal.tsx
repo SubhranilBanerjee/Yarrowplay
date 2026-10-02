@@ -17,6 +17,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { EPISODE_UNLOCK_COINS } from '@/data/coinPacks';
+import { CoinIcon } from '@/components/ui/CoinIcon';
 
 export default function EpisodeUnlockModal({
   onUnlocked,
@@ -234,7 +235,7 @@ export default function EpisodeUnlockModal({
             <div className="flex items-center gap-2">
               <span className="text-xs text-[#B7BEC6]">Your Balance:</span>
               <span className="text-sm font-bold text-[#F4C95D] flex items-center gap-1">
-                🪙 {coins} coins
+                <CoinIcon className="w-4 h-4" /> {coins} coins
               </span>
             </div>
             {!hasEnoughCoins && (
@@ -266,8 +267,8 @@ export default function EpisodeUnlockModal({
             disabled={isLoading}
             className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer ${
               hasEnoughCoins
-                ? 'bg-[#F4C95D] hover:bg-[#FFD978] text-[#0B0F13]'
-                : 'bg-[#151F28] text-[#F4C95D] border border-[#F4C95D]/40 hover:bg-[#151F28]/80'
+                ? 'btn-primary text-white font-bold'
+                : 'btn-secondary text-white'
             }`}
           >
             {isLoading ? (

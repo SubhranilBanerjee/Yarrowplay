@@ -22,6 +22,7 @@ import {
   Coins,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { CoinIcon } from '@/components/ui/CoinIcon';
 
 export default function AdminCrmPage() {
   const router = useRouter();
@@ -123,7 +124,7 @@ export default function AdminCrmPage() {
           </p>
           <Link
             href="/home"
-            className="inline-flex items-center gap-2 bg-[#ECC979] text-[#101418] font-bold text-xs px-4 py-2 rounded-xl"
+            className="btn-primary inline-flex items-center gap-2 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-md"
           >
             Return to Home
           </Link>
@@ -294,8 +295,8 @@ export default function AdminCrmPage() {
                           <span className="text-[11px] text-[var(--lr-text-muted)]">Free Tier</span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 font-mono font-semibold text-[var(--lr-text-primary)]">
-                        🪙 {u.coin_balance || 0}
+                      <td className="py-3.5 px-4 font-mono font-semibold text-[var(--lr-text-primary)] flex items-center gap-1">
+                        <CoinIcon className="w-3.5 h-3.5" /> {u.coin_balance || 0}
                       </td>
                       <td className="py-3.5 px-4 text-[var(--lr-text-muted)] font-mono">
                         {new Date(u.created_at || Date.now()).toLocaleDateString('en-US', {
@@ -406,8 +407,8 @@ export default function AdminCrmPage() {
                 </div>
                 <div>
                   <span className="text-[var(--lr-text-muted)]">Coin Balance:</span>
-                  <p className="font-bold text-[#F4C95D] font-mono mt-0.5">
-                    🪙 {selectedUser.coin_balance || 0}
+                  <p className="font-bold text-[#F4C95D] font-mono mt-0.5 flex items-center gap-1">
+                    <CoinIcon className="w-3.5 h-3.5" /> {selectedUser.coin_balance || 0}
                   </p>
                 </div>
                 <div>

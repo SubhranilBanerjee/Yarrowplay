@@ -1045,7 +1045,7 @@ export default function CreatorStudioPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] active:bg-[#DDB347] text-[#0B0F13] font-bold text-sm tracking-wide transition-all shadow-md active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
+                className="btn-primary w-full py-4 rounded-xl text-white font-bold text-sm tracking-wide transition-all shadow-md active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Upload className="w-4 h-4" />
                 <span>{isSubmitting ? 'Publishing Series...' : 'Upload Series'}</span>

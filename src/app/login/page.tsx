@@ -2,12 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { BottomToast } from '@/components/ui/BottomToast';
 import { Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { BrandLogo } from '@/components/landing/BrandLogo';
+import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -66,7 +66,6 @@ export default function LoginPage() {
     }
   };
 
-
   return (
     <div className="min-h-[85vh] flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-[#101820] border border-[#27313A] rounded-2xl p-6 sm:p-8 relative shadow-2xl">
@@ -98,7 +97,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Form */}
+        {/* Form with all text boxes */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-xs uppercase tracking-wider font-semibold text-[#B7BEC6] mb-1.5">
@@ -112,7 +111,7 @@ export default function LoginPage() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#141D26] text-[#F5F1E8] placeholder-[#7F8993] text-sm rounded-xl pl-10 pr-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D] transition-colors"
+                className="w-full bg-[#141D26] text-[#F5F1E8] placeholder-[#7F8993] text-sm rounded-xl pl-10 pr-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#8B5CF6] transition-colors"
               />
             </div>
           </div>
@@ -129,7 +128,7 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#141D26] text-[#F5F1E8] placeholder-[#7F8993] text-sm rounded-xl pl-10 pr-11 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D] transition-colors"
+                className="w-full bg-[#141D26] text-[#F5F1E8] placeholder-[#7F8993] text-sm rounded-xl pl-10 pr-11 py-3 border border-[#27313A] focus:outline-none focus:border-[#8B5CF6] transition-colors"
               />
               <button
                 type="button"
@@ -139,21 +138,43 @@ export default function LoginPage() {
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+            {/* Forgot Password link positioned below password text box */}
+            <div className="mt-2 text-right">
+              <Link
+                href="/forgot-password"
+                className="text-xs text-[#A855F7] hover:text-[#C084FC] font-semibold transition-colors"
+              >
+                Forgot Password?
+              </Link>
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3.5 px-4 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] active:bg-[#DDB347] text-[#0B0F13] font-bold text-sm tracking-wide transition-all shadow-md active:scale-98 disabled:opacity-50 mt-2 cursor-pointer"
+            className="btn-primary w-full py-3.5 px-4 rounded-xl text-white font-bold text-sm tracking-wide transition-all shadow-lg active:scale-98 disabled:opacity-50 mt-2 cursor-pointer"
           >
             {isLoading ? 'SIGNING IN...' : 'SIGN IN'}
           </button>
         </form>
 
+        {/* Google OAuth Button positioned BELOW all text boxes */}
+        <div className="mt-6">
+          <div className="relative my-4 text-center">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[#27313A]" />
+            </div>
+            <span className="relative bg-[#101820] px-3 text-[11px] uppercase font-bold text-[#7F8993] tracking-wider">
+              or continue with
+            </span>
+          </div>
+          <GoogleAuthButton label="Sign in with Google" onError={(err) => setErrorMsg(err)} />
+        </div>
+
         {/* Footer link */}
         <div className="mt-6 text-center text-xs text-[#B7BEC6]">
           <span>Don&apos;t have an account? </span>
-          <Link href="/register" className="text-[#F4C95D] hover:underline font-semibold ml-1">
+          <Link href="/register" className="text-[#8B5CF6] hover:underline font-semibold ml-1">
             Create Account
           </Link>
         </div>

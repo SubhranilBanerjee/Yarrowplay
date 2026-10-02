@@ -387,7 +387,7 @@ export default function BlogStudioPage() {
                       type="button"
                       disabled={isSubmitting}
                       onClick={() => handleSaveBlog('published')}
-                      className="w-full flex items-center justify-center gap-2 bg-[#ECC979] hover:bg-[#F4C95D] active:scale-95 text-[#101418] font-bold text-xs py-2.5 rounded-xl shadow transition-all cursor-pointer disabled:opacity-50"
+                      className="btn-primary w-full flex items-center justify-center gap-2 text-white font-bold text-xs py-2.5 rounded-xl shadow transition-all cursor-pointer disabled:opacity-50"
                     >
                       {isSubmitting ? (
                         <Loader2 className="w-4 h-4 animate-spin" />

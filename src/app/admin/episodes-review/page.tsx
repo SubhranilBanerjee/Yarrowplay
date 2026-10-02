@@ -57,7 +57,7 @@ export default function EpisodeReviewPage() {
           </p>
           <Link
             href="/home"
-            className="inline-flex items-center gap-2 bg-[#ECC979] text-[#101418] font-bold text-xs px-4 py-2 rounded-xl"
+            className="btn-primary inline-flex items-center gap-2 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-md"
           >
             Return to Home
           </Link>

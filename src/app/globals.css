@@ -57,6 +57,9 @@
 :root {
   --background: var(--lr-bg-primary);
   --foreground: var(--lr-text-primary);
+  --button-gradient: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 50%, #4C1D95 100%);
+  --button-gradient-hover: linear-gradient(135deg, #9333EA 0%, #7E22CE 50%, #581C87 100%);
+  --button-gradient-active: linear-gradient(135deg, #6B21A8 0%, #581C87 50%, #3B0764 100%);
 }
 
 body {

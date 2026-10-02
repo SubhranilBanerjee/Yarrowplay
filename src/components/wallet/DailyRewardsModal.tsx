@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useWallet } from '@/context/WalletContext';
 import { DAILY_STREAK_REWARDS } from '@/data/coinPacks';
 import { X, Gift, CheckCircle2, Flame, Sparkles } from 'lucide-react';
+import { CoinIcon } from '@/components/ui/CoinIcon';
 
 export default function DailyRewardsModal() {
   const {
@@ -66,7 +67,7 @@ export default function DailyRewardsModal() {
               <Sparkles className="w-4 h-4 text-[#F4C95D]" />
               Claimed +{claimedReward} Free Coins!
             </p>
-            <p className="text-xs text-[#B7BEC6] mt-0.5">Your updated balance is 🪙 {coins} coins</p>
+            <p className="text-xs text-[#B7BEC6] mt-0.5 flex items-center justify-center gap-1">Your updated balance is <CoinIcon className="w-3.5 h-3.5" /> {coins} coins</p>
           </div>
         )}
 
@@ -94,7 +95,7 @@ export default function DailyRewardsModal() {
                   <span className="text-[11px] font-semibold text-[#7F8993]">Day {item.day}</span>
 
                   <div className="my-2 flex flex-col items-center">
-                    <span className="text-xl">🪙</span>
+                    <CoinIcon className="w-5 h-5 my-0.5" />
                     <span className="text-sm font-black text-[#F4C95D]">+{item.coins}</span>
                   </div>
 
@@ -121,7 +122,7 @@ export default function DailyRewardsModal() {
               disabled={!canCheckIn || loading}
               className={`w-full py-3.5 rounded-xl font-bold text-sm tracking-wide shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
                 canCheckIn
-                  ? 'bg-[#F4C95D] hover:bg-[#FFD978] active:bg-[#DDB347] text-[#0B0F13]'
+                  ? 'btn-primary text-white font-bold'
                   : 'bg-[#141D26] text-[#7F8993] border border-[#27313A]'
               }`}
             >

@@ -226,7 +226,7 @@ function CommentItem({
               <button
                 type="submit"
                 disabled={isSubmittingEdit || !editText.trim()}
-                className="px-3 py-1 rounded-lg text-xs font-semibold text-[#0B0F13] bg-[#F4C95D] hover:bg-[#FFD978] disabled:opacity-50"
+                className="btn-primary px-3 py-1 rounded-lg text-xs font-semibold text-white disabled:opacity-50"
               >
                 {isSubmittingEdit ? 'Saving...' : 'Save'}
               </button>
@@ -324,7 +324,7 @@ function CommentItem({
               <button
                 type="submit"
                 disabled={isSubmittingReply || !replyText.trim()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] text-[#0B0F13] text-xs font-semibold disabled:opacity-40 shadow-md"
+                className="btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-white text-xs font-semibold disabled:opacity-40 shadow-md"
               >
                 {isSubmittingReply ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />

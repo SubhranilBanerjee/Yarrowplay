@@ -93,9 +93,9 @@
   --status-error: var(--lr-error);
 
   /* Gradients */
-  --gradient-brand-primary: linear-gradient(135deg, #C99A32 0%, #F4C95D 100%);
-  --gradient-button: linear-gradient(135deg, #F4C95D 0%, #FFD978 100%);
-  --gradient-button-hover: linear-gradient(135deg, #FFD978 0%, #F4C95D 100%);
+  --gradient-brand-primary: linear-gradient(135deg, #9333EA 0%, #7E22CE 45%, #4C1D95 100%);
+  --gradient-button: linear-gradient(135deg, #9333EA 0%, #7E22CE 45%, #4C1D95 100%);
+  --gradient-button-hover: linear-gradient(135deg, #A855F7 0%, #8B5CF6 45%, #581C87 100%);
   --gradient-active-pill: rgba(244, 201, 93, 0.12);
   --gradient-card-border: rgba(255, 255, 255, 0.08);
   --gradient-text: linear-gradient(135deg, #F5F1E8 60%, #F4C95D 100%);
@@ -228,43 +228,72 @@
   background-attachment: fixed;
 }
 
-/* Primary Button (Champagne Gold CTA) */
+/* ==========================================================================
+   GLOBAL BUTTON GRADIENT SYSTEM — LIGHTHOUSE REELS
+   ========================================================================== */
+
+/* Primary Button (Violet/Purple Gradient CTA) */
+.btn-primary,
 .theme-neon-button {
-  background: var(--lr-gold);
-  color: #0B0F13;
-  border: none;
-  border-radius: 9px;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--button-gradient, linear-gradient(135deg, #8B5CF6 0%, #6D28D9 50%, #4C1D95 100%)) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 16px rgba(109, 40, 217, 0.40) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer;
 }
 
+.btn-primary:hover,
 .theme-neon-button:hover {
-  background: var(--lr-gold-hover);
-  color: #0B0F13;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(244, 201, 93, 0.2);
+  background: var(--button-gradient-hover, linear-gradient(135deg, #9333EA 0%, #7E22CE 50%, #581C87 100%)) !important;
+  color: #FFFFFF !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 22px rgba(147, 51, 234, 0.55) !important;
 }
 
+.btn-primary:active,
 .theme-neon-button:active {
-  background: var(--lr-gold-active);
-  transform: translateY(0);
+  background: var(--button-gradient-active, linear-gradient(135deg, #6B21A8 0%, #581C87 50%, #3B0764 100%)) !important;
+  transform: scale(0.98) !important;
+  box-shadow: 0 2px 8px rgba(109, 40, 217, 0.35) !important;
 }
 
-/* Secondary Button */
+.btn-primary:disabled,
+.theme-neon-button:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.btn-primary:focus-visible,
+.theme-neon-button:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.35) !important;
+}
+
+/* Secondary Button (Dark translucent violet surface) */
+.btn-secondary,
 .theme-secondary-button {
-  background: transparent;
-  color: var(--lr-text-primary);
-  border: 1px solid var(--lr-border-primary);
-  border-radius: 9px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  background: rgba(24, 18, 43, 0.8) !important;
+  border: 1px solid rgba(126, 34, 206, 0.35) !important;
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer;
 }
 
+.btn-secondary:hover,
 .theme-secondary-button:hover {
-  background: var(--lr-bg-elevated);
-  border-color: var(--lr-gold);
-  color: var(--lr-text-primary);
+  background: rgba(37, 27, 66, 0.9) !important;
+  border-color: rgba(168, 85, 247, 0.6) !important;
+  color: #E0D7F5 !important;
+}
+
+.btn-secondary:active,
+.theme-secondary-button:active {
+  transform: scale(0.98) !important;
 }
 
 /* Cards */

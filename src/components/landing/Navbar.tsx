@@ -55,7 +55,7 @@ export function Navbar() {
             <div className="flex items-center gap-3">
               <Link
                 href="/creator/studio"
-                className="hidden sm:flex items-center gap-2 bg-[#ECC979]/15 border border-[#ECC979]/35 text-[#ECC979] hover:bg-[#ECC979] hover:text-[#101418] text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-all shadow-sm"
+                className="hidden sm:flex items-center gap-2 btn-secondary text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-all shadow-sm"
               >
                 <Film className="w-4 h-4" />
                 <span>Creator Studio</span>
@@ -78,10 +78,10 @@ export function Navbar() {
                 Log In
               </Link>
 
-              {/* Join Now pill button with #EC4899 pink gradient fill */}
+              {/* Join Now pill button with centralized purple gradient */}
               <Link
                 href="/register"
-                className="text-sm font-bold px-5 py-2 rounded-full bg-gradient-to-r from-[#EC4899] to-[#F43F5E] text-white shadow-[0_0_20px_rgba(236,72,153,0.4)] hover:shadow-[0_0_25px_rgba(236,72,153,0.6)] hover:scale-105 active:scale-95 transition-all"
+                className="btn-primary text-sm font-bold px-5 py-2 rounded-full text-white shadow-lg transition-all"
               >
                 Join Now
               </Link>

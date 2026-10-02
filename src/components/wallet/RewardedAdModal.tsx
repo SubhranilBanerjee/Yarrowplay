@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useWallet } from '@/context/WalletContext';
 import { X, Play, Volume2, VolumeX, CheckCircle, Coins, Sparkles } from 'lucide-react';
+import { CoinIcon } from '@/components/ui/CoinIcon';
 
 const SPONSOR_ADS = [
   {
@@ -131,8 +132,8 @@ export default function RewardedAdModal() {
             <div className="absolute inset-0 bg-[#070B0F]/90 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 animate-in zoom-in-95 duration-200">
               <CheckCircle className="w-16 h-16 text-[#68B88A] mb-2" />
               <h3 className="text-xl font-black text-[#F5F1E8]">Reward Claimed!</h3>
-              <p className="text-sm text-[#F4C95D] font-bold mt-1">
-                🪙 +2 Free Coins added to your wallet!
+              <p className="text-sm text-[#F4C95D] font-bold mt-1 flex items-center justify-center gap-1">
+                <CoinIcon className="w-4 h-4" /> +2 Free Coins added to your wallet!
               </p>
               <p className="text-xs text-[#B7BEC6] mt-2">New Balance: {coins} coins</p>
             </div>
@@ -160,9 +161,9 @@ export default function RewardedAdModal() {
               disabled={!adFinished || claiming || rewardClaimed}
               className={`px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer ${
                 rewardClaimed
-                  ? 'bg-[#68B88A] text-[#0B0F13]'
+                  ? 'bg-[#68B88A] text-white'
                   : adFinished
-                  ? 'bg-[#F4C95D] hover:bg-[#FFD978] active:bg-[#DDB347] text-[#0B0F13]'
+                  ? 'btn-primary text-white font-bold'
                   : 'bg-[#141D26] text-[#7F8993] cursor-not-allowed border border-[#27313A]'
               }`}
             >

@@ -369,7 +369,7 @@ export function SubtitleManagerModal({
               <button
                 type="submit"
                 disabled={isSubmitting || !newSourceUrl.trim()}
-                className="px-4 py-1.5 rounded-xl text-xs font-semibold bg-[#F4C95D] hover:bg-[#FFD978] active:bg-[#DDB347] text-[#0B0F13] transition-all shadow-md disabled:opacity-50 cursor-pointer"
+                className="btn-primary px-4 py-1.5 rounded-xl text-xs font-semibold text-white transition-all shadow-md disabled:opacity-50 cursor-pointer"
               >
                 {isSubmitting ? 'Saving...' : 'Add Track'}
               </button>
