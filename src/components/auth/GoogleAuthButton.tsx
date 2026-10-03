@@ -20,10 +20,22 @@ export function GoogleAuthButton({
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
+      const getRedirectUrl = () => {
+        if (typeof window !== 'undefined' && window.location.origin) {
+          return `${window.location.origin}/auth/callback`;
+        }
+        let envUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_VERCEL_URL;
+        if (envUrl) {
+          const formatted = envUrl.startsWith('http') ? envUrl : `https://${envUrl}`;
+          return `${formatted.replace(/\/$/, '')}/auth/callback`;
+        }
+        return 'http://localhost:3000/auth/callback';
+      };
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: getRedirectUrl(),
         },
       });
 

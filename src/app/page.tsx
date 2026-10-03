@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { LighthouseHomeView } from '@/components/landing/LighthouseHomeView';
+import { LandingHeroView } from '@/components/landing/LandingHeroView';
 
 export default function LandingPage() {
-  return <LighthouseHomeView />;
+  return <LandingHeroView />;
 }
+
