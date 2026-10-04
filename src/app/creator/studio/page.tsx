@@ -312,15 +312,15 @@ export default function CreatorStudioPage() {
             thumbnail_url: ep.thumbnailUrl || seriesCoverUrl || null,
             thumbnail_public_id: ep.thumbnailPublicId || null,
             visibility: 'public',
-            status: 'published',
+            status: 'processing', // Pending admin approval
           });
         }
       }
 
-      setStatusMsg({ type: 'success', text: 'Series and episodes uploaded successfully!' });
+      setStatusMsg({ type: 'success', text: 'Series submitted for Admin Moderation! Once approved, it will go live.' });
       setTimeout(() => {
         router.push('/home');
-      }, 1200);
+      }, 1500);
     } catch (err: any) {
       setStatusMsg({ type: 'error', text: err.message || 'Failed to publish series.' });
     } finally {
@@ -358,15 +358,15 @@ export default function CreatorStudioPage() {
         thumbnail_public_id: singleVideoThumbPublicId || null,
         duration_seconds: singleVideoDuration,
         visibility: 'public',
-        status: 'published',
+        status: 'processing', // Pending admin approval
       });
 
       if (error) throw error;
 
-      setStatusMsg({ type: 'success', text: 'Video uploaded and published successfully!' });
+      setStatusMsg({ type: 'success', text: 'Video submitted for Admin Moderation! Once approved, it will go live.' });
       setTimeout(() => {
         router.push('/home');
-      }, 1200);
+      }, 1500);
     } catch (err: any) {
       setStatusMsg({ type: 'error', text: err.message || 'Failed to upload video.' });
     } finally {
