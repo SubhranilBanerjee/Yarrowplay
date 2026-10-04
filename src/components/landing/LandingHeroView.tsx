@@ -17,22 +17,12 @@ import {
   X,
   MoreHorizontal,
   ChevronRight,
-  Sun,
-  Moon,
   CheckCircle,
-  TrendingUp,
-  Volume2,
-  VolumeX,
-  ExternalLink,
-  ShieldCheck,
   Megaphone,
-  Briefcase,
-  Heart,
-  Share2,
+  ShieldCheck,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { getStoredSiteContent, SiteContent, DEFAULT_SITE_CONTENT } from '@/lib/siteContent';
-import { useTheme } from '@/context/ThemeContext';
 
 // Category Definitions
 const CATEGORY_TABS = [
@@ -134,14 +124,52 @@ const SAMPLE_REELS = [
   },
 ];
 
+// Rotating Dynamic Words for 3rd Headline Line
+const ROTATING_WORDS = ['Shine.', 'Glow.', 'Create.', 'Inspire.', 'Dream.'];
+
 export function LandingHeroView() {
   const router = useRouter();
   const supabase = createClient();
-  const { theme, setTheme } = useTheme();
 
   const [activeNav, setActiveNav] = useState('Home');
   const [showTrailerModal, setShowTrailerModal] = useState(false);
-  const [cardDismissed, setCardDismissed] = useState(false);
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+
+  // Dynamic Word Typing / Rotation Effect
+  const [wordIndex, setWordIndex] = useState(0);
+  const [currentText, setCurrentText] = useState('Shine.');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [typingSpeed, setTypingSpeed] = useState(200);
+
+  useEffect(() => {
+    const fullWord = ROTATING_WORDS[wordIndex];
+
+    const timer = setTimeout(() => {
+      if (!isDeleting) {
+        // Typing
+        setCurrentText(fullWord.substring(0, currentText.length + 1));
+        if (currentText === fullWord) {
+          // Pause when word is complete
+          setTypingSpeed(2400);
+          setIsDeleting(true);
+        } else {
+          setTypingSpeed(110);
+        }
+      } else {
+        // Deleting
+        setCurrentText(fullWord.substring(0, currentText.length - 1));
+        if (currentText === '') {
+          setIsDeleting(false);
+          setWordIndex((prev) => (prev + 1) % ROTATING_WORDS.length);
+          setTypingSpeed(250);
+        } else {
+          setTypingSpeed(60);
+        }
+      }
+    }, typingSpeed);
+
+    return () => clearTimeout(timer);
+  }, [currentText, isDeleting, wordIndex, typingSpeed]);
 
   // Dynamic Site Text CMS
   const [siteText, setSiteText] = useState<SiteContent>(DEFAULT_SITE_CONTENT);
@@ -202,500 +230,416 @@ export function LandingHeroView() {
     ? reels
     : reels.filter((r) => (r.category || '').toLowerCase().includes(selectedCategory.toLowerCase()));
 
-  // Style themes matching the user's images exactly:
-  // Light Mode (Image 1): soft lavender aurora twilight sky, frosted lilac glass card, delicate white/purple borders
-  // Dark Mode (Image 2): deep midnight starry cosmos, obsidian purple frosted glass, vibrant glowing purple neon rims
-  const isLight = theme === 'light';
-
   return (
-    <div
-      className={`min-h-screen transition-colors duration-700 font-sans relative selection:bg-purple-600 selection:text-white pb-24 overflow-x-hidden ${
-        isLight ? 'bg-[#7E6CA8] text-white' : 'bg-[#06030F] text-[#F5F1E8]'
-      }`}
-    >
+    <div className="min-h-screen bg-[#070216] text-[#F5F1E8] font-sans relative selection:bg-purple-600 selection:text-white pb-24 overflow-x-hidden">
       {/* ========================================================================= */}
-      {/* DYNAMIC AMBIENT BACKGROUND (Matching uploaded images)                     */}
+      {/* 1. DREAMY NIGHT SKY BACKGROUND (Aurora, Stars, Nebula & Clouds)             */}
       {/* ========================================================================= */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {isLight ? (
-          /* Light Mode: Ethereal lavender twilight sky with soft glowing clouds and starlight */
-          <>
-            <div className="absolute inset-0 bg-gradient-to-b from-[#6A579B] via-[#7F6EA9] to-[#5C488C]" />
-            <div className="absolute top-0 right-0 w-[80vw] h-[80vw] rounded-full bg-radial from-[#B099DE]/40 via-[#9278C9]/20 to-transparent blur-3xl opacity-80" />
-            <div className="absolute bottom-0 left-0 w-[70vw] h-[70vw] rounded-full bg-radial from-[#9375C9]/35 via-[#684E9E]/20 to-transparent blur-3xl opacity-75" />
-            {/* Soft cloud and star speckles */}
-            <div
-              className="absolute inset-0 opacity-40 bg-repeat"
-              style={{
-                backgroundImage: `radial-gradient(1.5px 1.5px at 30px 40px, #ffffff, rgba(0,0,0,0)), 
-                                  radial-gradient(1.2px 1.2px at 120px 140px, #ffffff, rgba(0,0,0,0)), 
-                                  radial-gradient(2px 2px at 220px 90px, #f3e8ff, rgba(0,0,0,0)), 
-                                  radial-gradient(1.5px 1.5px at 310px 240px, #ffffff, rgba(0,0,0,0))`,
-                backgroundSize: '340px 340px',
-              }}
-            />
-          </>
-        ) : (
-          /* Dark Mode: Deep midnight purple/indigo cosmos with bright stars and violet nebula */
-          <>
-            <div className="absolute inset-0 bg-radial from-[#150A33] via-[#080417] to-[#040209]" />
-            <div className="absolute -top-20 -right-20 w-[90vw] sm:w-[750px] h-[750px] rounded-full bg-radial from-[#9333EA]/35 via-[#6B21A8]/20 to-transparent blur-3xl opacity-90 animate-pulse duration-[8000ms]" />
-            <div className="absolute -bottom-30 -left-20 w-[80vw] sm:w-[650px] h-[650px] rounded-full bg-radial from-[#7E22CE]/30 via-[#4C1D95]/15 to-transparent blur-3xl opacity-80" />
-            {/* Sparkle background dots */}
-            <div
-              className="absolute inset-0 opacity-60 bg-repeat"
-              style={{
-                backgroundImage: `radial-gradient(1.5px 1.5px at 20px 30px, #ffffff, rgba(0,0,0,0)), 
-                                  radial-gradient(1px 1px at 80px 120px, #e9d5ff, rgba(0,0,0,0)), 
-                                  radial-gradient(2px 2px at 150px 70px, #c084fc, rgba(0,0,0,0)), 
-                                  radial-gradient(1.5px 1.5px at 240px 200px, #ffffff, rgba(0,0,0,0)),
-                                  radial-gradient(1px 1px at 320px 110px, #e9d5ff, rgba(0,0,0,0))`,
-                backgroundSize: '350px 350px',
-              }}
-            />
-          </>
-        )}
+        {/* Base cosmic deep purple gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0c0522] via-[#070216] to-[#04010b]" />
+
+        {/* Ethereal Aurora Streaks */}
+        <div className="absolute top-0 left-1/4 w-[55vw] h-[75vh] bg-gradient-to-b from-[#8b5cf6]/20 via-[#06b6d4]/15 to-transparent blur-3xl opacity-75 transform -rotate-12" />
+        <div className="absolute top-0 right-1/4 w-[45vw] h-[65vh] bg-gradient-to-b from-[#c084fc]/25 via-[#a855f7]/15 to-transparent blur-3xl opacity-80 transform rotate-6" />
+
+        {/* Ambient Glowing Purple Nebulas */}
+        <div className="absolute -top-32 -left-32 w-[65vw] h-[65vw] max-w-[800px] max-h-[800px] rounded-full bg-radial from-[#9333ea]/25 via-[#6b21a8]/10 to-transparent blur-3xl opacity-85" />
+        <div className="absolute top-1/3 -right-28 w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] rounded-full bg-radial from-[#c084fc]/20 via-[#4c1d95]/10 to-transparent blur-3xl opacity-90" />
+        <div className="absolute -bottom-20 left-1/4 w-[60vw] h-[50vw] max-w-[700px] max-h-[500px] rounded-full bg-radial from-[#7e22ce]/20 via-[#3b0764]/10 to-transparent blur-3xl opacity-75" />
+
+        {/* Dreamy clouds at bottom */}
+        <div className="absolute -bottom-10 left-0 right-0 h-48 bg-gradient-to-t from-[#1b0d3a]/60 via-[#120728]/30 to-transparent blur-2xl" />
+        <div className="absolute bottom-6 left-10 w-96 h-36 rounded-full bg-purple-400/10 blur-[80px]" />
+        <div className="absolute bottom-10 right-16 w-96 h-40 rounded-full bg-pink-500/10 blur-[90px]" />
+
+        {/* Twinkling Starfield Pattern */}
+        <div
+          className="absolute inset-0 opacity-80 bg-repeat"
+          style={{
+            backgroundImage: `radial-gradient(1.5px 1.5px at 25px 35px, #ffffff, rgba(0,0,0,0)), 
+                              radial-gradient(1.2px 1.2px at 110px 145px, #e9d5ff, rgba(0,0,0,0)), 
+                              radial-gradient(2px 2px at 210px 80px, #ffffff, rgba(0,0,0,0)), 
+                              radial-gradient(1.5px 1.5px at 320px 220px, #c084fc, rgba(0,0,0,0)),
+                              radial-gradient(2.5px 2.5px at 420px 130px, #ffffff, rgba(0,0,0,0)),
+                              radial-gradient(1.2px 1.2px at 510px 290px, #fbcfe8, rgba(0,0,0,0))`,
+            backgroundSize: '380px 380px',
+          }}
+        />
       </div>
 
-      {/* Main Outer Content Container */}
-      <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-8 space-y-16 sm:space-y-24">
+      {/* Floating animation keyframes style */}
+      <style jsx global>{`
+        @keyframes floatLighthouse {
+          0%, 100% {
+            transform: translateY(0px) scale(1);
+          }
+          50% {
+            transform: translateY(-9px) scale(1.01);
+          }
+        }
+        .animate-float-lighthouse {
+          animation: floatLighthouse 5.5s ease-in-out infinite;
+        }
+        @keyframes blinkCursor {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+        .animate-cursor-blink {
+          animation: blinkCursor 1s step-end infinite;
+        }
+      `}</style>
+
+      {/* Main Content Container */}
+      <div className="relative z-10 max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 space-y-16 sm:space-y-24">
         {/* ========================================================================= */}
-        {/* REQUIREMENT 1: THE EXACT HERO CARD (Matching Images 1 & 2)                */}
+        {/* REQUIREMENT: THE EXACT HERO SHOWCASE MODAL/CARD (Matching Image 2)        */}
         {/* ========================================================================= */}
-        {!cardDismissed ? (
-          <div
-            className={`relative rounded-[28px] sm:rounded-[40px] p-4 sm:p-8 lg:p-10 transition-all duration-700 ${
-              isLight
-                ? 'bg-[#8977B5]/45 backdrop-blur-2xl border border-white/40 shadow-[0_20px_70px_rgba(79,48,138,0.3)]'
-                : 'bg-[#0E0824]/85 backdrop-blur-2xl border border-purple-500/35 shadow-[0_0_90px_rgba(147,51,234,0.3)]'
-            }`}
-          >
-            {/* WINDOW TOP CONTROLS (Left X, Center Theme Switcher, Right ...) */}
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
-              {/* Left X Button */}
+        <div className="relative">
+          {/* Top Floating Control Buttons (Outside Top-Left & Top-Right corners) */}
+          <div className="flex items-center justify-between mb-3 px-2 sm:px-4">
+            {/* Top Left X Button */}
+            <button
+              onClick={() => router.push('/home')}
+              title="Enter App"
+              className="w-11 h-11 rounded-2xl bg-white/[0.09] hover:bg-white/[0.20] backdrop-blur-xl border border-white/20 text-white flex items-center justify-center shadow-[0_8px_24px_rgba(0,0,0,0.4)] transition-all active:scale-95 cursor-pointer group"
+            >
+              <X className="w-5 h-5 text-white/90 group-hover:text-white transition-colors" />
+            </button>
+
+            {/* Top Right ... Button */}
+            <div className="relative">
               <button
-                onClick={() => setCardDismissed(false)}
-                title="Hero Card Window"
-                className={`w-9 h-9 rounded-2xl flex items-center justify-center transition-all cursor-pointer shadow-inner active:scale-95 ${
-                  isLight
-                    ? 'bg-white/25 hover:bg-white/40 border border-white/50 text-white'
-                    : 'bg-[#231545]/70 hover:bg-purple-900/60 border border-purple-500/30 text-purple-200 hover:text-white'
-                }`}
+                onClick={() => setShowOptionsMenu(!showOptionsMenu)}
+                title="Options"
+                className="w-11 h-11 rounded-2xl bg-white/[0.09] hover:bg-white/[0.20] backdrop-blur-xl border border-white/20 text-white flex items-center justify-center shadow-[0_8px_24px_rgba(0,0,0,0.4)] transition-all active:scale-95 cursor-pointer group"
               >
-                <X className="w-4 h-4" />
+                <MoreHorizontal className="w-5 h-5 text-white/90 group-hover:text-white transition-colors" />
               </button>
 
-              {/* Theme Mode Toggle (Light Mode / Dark Mode switcher) */}
-              <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-black/25 backdrop-blur-md border border-white/20">
-                <button
-                  onClick={() => setTheme('light')}
-                  className={`px-3 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    isLight
-                      ? 'bg-white text-purple-950 shadow-md'
-                      : 'text-purple-200/80 hover:text-white'
-                  }`}
-                >
-                  <Sun className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                  <span>Light Mode</span>
-                </button>
-                <button
-                  onClick={() => setTheme('dark')}
-                  className={`px-3 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    !isLight
-                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
-                      : 'text-white/80 hover:text-white'
-                  }`}
-                >
-                  <Moon className="w-3.5 h-3.5 text-purple-300" />
-                  <span>Dark Mode</span>
-                </button>
-              </div>
+              {/* Options dropdown */}
+              {showOptionsMenu && (
+                <div className="absolute right-0 mt-2 w-48 rounded-2xl bg-[#180C38]/95 backdrop-blur-2xl border border-purple-500/30 shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+                  <Link
+                    href="/admin"
+                    onClick={() => setShowOptionsMenu(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-purple-200 hover:bg-purple-900/50 hover:text-white transition-colors"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-purple-400" />
+                    <span>Admin Portal</span>
+                  </Link>
+                  <Link
+                    href="/register?role=creator"
+                    onClick={() => setShowOptionsMenu(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-purple-200 hover:bg-purple-900/50 hover:text-white transition-colors"
+                  >
+                    <Sparkles className="w-4 h-4 text-pink-400" />
+                    <span>Creator Studio</span>
+                  </Link>
+                  <Link
+                    href="/terms"
+                    onClick={() => setShowOptionsMenu(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-purple-200 hover:bg-purple-900/50 hover:text-white transition-colors"
+                  >
+                    <Shield className="w-4 h-4 text-cyan-400" />
+                    <span>About & Terms</span>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
 
-              {/* Right ... Button */}
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/admin"
-                  title="Admin Center"
-                  className={`hidden sm:flex px-3 py-1 rounded-xl text-[11px] font-bold items-center gap-1.5 transition-all ${
-                    isLight
-                      ? 'bg-white/20 hover:bg-white/35 text-white border border-white/40'
-                      : 'bg-purple-950/60 hover:bg-purple-900 text-purple-200 border border-purple-500/30'
-                  }`}
-                >
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Admin</span>
+          {/* MAIN FROSTED GLASS WINDOW */}
+          <div className="relative rounded-[32px] sm:rounded-[44px] bg-[#1a0f37]/40 backdrop-blur-3xl border border-white/25 shadow-[0_30px_100px_rgba(0,0,0,0.7),inset_0_1px_2px_rgba(255,255,255,0.35),0_0_80px_rgba(168,85,247,0.2)] p-5 sm:p-9 lg:p-11 overflow-hidden">
+            
+            {/* INNER CARD CONTENT */}
+            <div className="relative z-10 space-y-8 sm:space-y-11">
+              {/* TOP NAVIGATION BAR INSIDE GLASS CONTAINER */}
+              <nav className="flex items-center justify-between gap-4 pb-4 sm:pb-6">
+                {/* Brand Logo & Title (Left Side) */}
+                <Link href="/" className="flex items-center gap-3 group shrink-0">
+                  <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-2xl overflow-hidden border border-purple-400/40 shadow-[0_0_18px_rgba(192,132,252,0.45)] flex items-center justify-center bg-[#180936]">
+                    <Image
+                      src="/images/lighthouse_hero_dark.jpg"
+                      alt="Logo Beacon"
+                      fill
+                      className="object-cover scale-150 group-hover:scale-175 transition-transform duration-500"
+                    />
+                  </div>
+                  <span className="text-xl sm:text-2xl font-black text-white tracking-tight drop-shadow-md">
+                    LightHouse Reels
+                  </span>
                 </Link>
 
-                <button
-                  onClick={() => router.push('/explore')}
-                  title="Explore More"
-                  className={`w-9 h-9 rounded-2xl flex items-center justify-center transition-all cursor-pointer shadow-inner active:scale-95 ${
-                    isLight
-                      ? 'bg-white/25 hover:bg-white/40 border border-white/50 text-white'
-                      : 'bg-[#231545]/70 hover:bg-purple-900/60 border border-purple-500/30 text-purple-200 hover:text-white'
-                  }`}
-                >
-                  <MoreHorizontal className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* INNER NAVIGATION BAR */}
-            <nav
-              className={`flex flex-col md:flex-row items-center justify-between gap-4 pb-6 sm:pb-10 border-b ${
-                isLight ? 'border-white/25' : 'border-purple-500/20'
-              }`}
-            >
-              {/* Brand Logo & Title */}
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-pink-500 to-purple-400 p-0.5 shadow-lg shadow-purple-600/40 flex items-center justify-center">
-                  <div
-                    className={`w-full h-full rounded-[14px] flex items-center justify-center ${
-                      isLight ? 'bg-[#735F9E]' : 'bg-[#0E0824]'
-                    }`}
-                  >
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </div>
+                {/* Center Navigation Menu Links */}
+                <div className="hidden md:flex items-center gap-6 lg:gap-8 text-sm font-semibold tracking-wide text-white/80">
+                  {[
+                    { name: 'Home', href: '/' },
+                    { name: 'Explore', href: '/explore' },
+                    { name: 'Trending', href: '/home' },
+                    { name: 'Categories', href: '#categories-section' },
+                    { name: 'About', href: '/terms' },
+                    { name: 'Blog', href: '/blog' },
+                  ].map((item) => {
+                    const isActive = activeNav === item.name;
+                    return (
+                      <button
+                        key={item.name}
+                        onClick={() => {
+                          setActiveNav(item.name);
+                          if (item.href.startsWith('#')) {
+                            document.querySelector(item.href)?.scrollIntoView({ behavior: 'smooth' });
+                          } else if (item.href !== '/') {
+                            router.push(item.href);
+                          }
+                        }}
+                        className={`relative py-1.5 transition-colors cursor-pointer whitespace-nowrap ${
+                          isActive ? 'text-white font-bold' : 'hover:text-white'
+                        }`}
+                      >
+                        {item.name}
+                        {isActive && (
+                          <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-300 rounded-full shadow-[0_0_10px_#f472b6]" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-                <span className="text-xl sm:text-2xl font-black text-white tracking-tight drop-shadow-sm">
-                  LightHouse <span className={isLight ? 'text-purple-200' : 'text-purple-300'}>Reels</span>
-                </span>
-              </div>
 
-              {/* Navigation Menu Links */}
-              <div className="flex items-center gap-4 sm:gap-7 text-xs sm:text-sm font-semibold tracking-wide text-white/80 overflow-x-auto max-w-full py-1">
-                {[
-                  { name: 'Home', href: '/' },
-                  { name: 'Explore', href: '/explore' },
-                  { name: 'Trending', href: '/home' },
-                  { name: 'Categories', href: '#categories-section' },
-                  { name: 'About', href: '/terms' },
-                  { name: 'Blog', href: '/blog' },
-                ].map((item) => {
-                  const isActive = activeNav === item.name;
-                  return (
-                    <button
-                      key={item.name}
-                      onClick={() => {
-                        setActiveNav(item.name);
-                        if (item.href.startsWith('#')) {
-                          document.querySelector(item.href)?.scrollIntoView({ behavior: 'smooth' });
-                        } else if (item.href !== '/') {
-                          router.push(item.href);
-                        }
-                      }}
-                      className={`relative py-1 transition-colors cursor-pointer whitespace-nowrap ${
-                        isActive ? 'text-white font-bold' : 'hover:text-white'
-                      }`}
+                {/* Right Side - Purple Gradient Button "Join Now ->" */}
+                <Link
+                  href="/register"
+                  className="px-5 sm:px-6 py-2.5 rounded-full bg-gradient-to-r from-[#D946EF] via-[#C026D3] to-[#8B5CF6] hover:from-[#E879F9] hover:to-[#9333EA] text-white font-bold text-xs sm:text-sm shadow-[0_4px_20px_rgba(217,70,239,0.45)] hover:shadow-[0_4px_25px_rgba(217,70,239,0.7)] transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 shrink-0"
+                >
+                  <span>Join Now</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </nav>
+
+              {/* HERO CONTENT: 2 COLUMN GRID */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[380px] sm:min-h-[440px]">
+                {/* ========================================================================= */}
+                {/* LEFT COLUMN                                                               */}
+                {/* ========================================================================= */}
+                <div className="lg:col-span-6 space-y-6 sm:space-y-7 text-left">
+                  {/* Small pill badge with sparkle icon: "Dive into Short Reels" */}
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-white/[0.12] backdrop-blur-md border border-purple-300/40 text-white shadow-[0_0_15px_rgba(192,132,252,0.25)]">
+                    <Sparkles className="w-3.5 h-3.5 text-pink-300" />
+                    <span>Dive into Short Reels</span>
+                  </div>
+
+                  {/* Large headline in 3 lines: "Watch.", "Discover.", and dynamic "Shine." / "Glow." / "Create." */}
+                  <div className="space-y-0.5">
+                    <h1 className="text-4xl sm:text-6xl lg:text-[58px] font-black text-white leading-[1.08] tracking-tight drop-shadow-lg">
+                      Watch.
+                    </h1>
+                    <h1 className="text-4xl sm:text-6xl lg:text-[58px] font-black text-white leading-[1.08] tracking-tight drop-shadow-lg">
+                      Discover.
+                    </h1>
+                    <div className="flex items-center">
+                      <h1 className="text-4xl sm:text-6xl lg:text-[58px] font-black bg-gradient-to-r from-[#F3E8FF] via-[#E9D5FF] to-[#C084FC] bg-clip-text text-transparent leading-[1.08] tracking-tight drop-shadow-[0_4px_25px_rgba(192,132,252,0.45)]">
+                        {currentText}
+                      </h1>
+                      <span className="inline-block w-[3px] h-9 sm:h-12 ml-1 bg-purple-300 rounded-full animate-cursor-blink shadow-[0_0_8px_#c084fc]" />
+                    </div>
+                  </div>
+
+                  {/* Subheading */}
+                  <p className="text-base sm:text-lg text-white/90 font-normal leading-relaxed max-w-lg drop-shadow">
+                    Dive into bite-sized stories that light up your world.
+                  </p>
+
+                  {/* Two CTA buttons: Primary purple gradient & secondary glass button */}
+                  <div className="flex flex-wrap items-center gap-4 pt-1">
+                    <Link
+                      href="/home"
+                      className="px-7 sm:px-8 py-3.5 rounded-full bg-gradient-to-r from-[#D946EF] via-[#C026D3] to-[#9333EA] hover:from-[#E879F9] hover:to-[#A855F7] text-white font-bold text-sm sm:text-base shadow-[0_6px_25px_rgba(217,70,239,0.5)] hover:shadow-[0_6px_30px_rgba(217,70,239,0.75)] transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
                     >
-                      {item.name}
-                      {isActive && (
-                        <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-purple-300 via-pink-400 to-purple-400 rounded-full shadow-[0_0_8px_#c084fc]" />
-                      )}
+                      <span>Start Watching</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+
+                    <button
+                      onClick={() => setShowTrailerModal(true)}
+                      className="px-6 py-3.5 rounded-full bg-white/[0.14] hover:bg-white/[0.24] backdrop-blur-md border border-white/30 text-white font-semibold text-sm sm:text-base transition-all flex items-center gap-2.5 shadow-lg active:scale-95 cursor-pointer"
+                    >
+                      <div className="w-5 h-5 rounded-full bg-white/20 border border-white/40 flex items-center justify-center">
+                        <Play className="w-3 h-3 fill-white text-white ml-0.5" />
+                      </div>
+                      <span>Watch Trailer</span>
                     </button>
-                  );
-                })}
-              </div>
-
-              {/* "Join Now ->" Vibrant Gradient Button */}
-              <Link
-                href="/register"
-                className="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#D946EF] via-[#C026D3] to-[#9333EA] hover:from-[#E879F9] hover:to-[#A855F7] text-white font-bold text-xs sm:text-sm shadow-lg shadow-purple-600/40 hover:shadow-pink-500/50 transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 shrink-0"
-              >
-                <span>Join Now</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </nav>
-
-            {/* HERO CONTENT GRID */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center pt-8 sm:pt-12">
-              {/* LEFT COLUMN: Headings, Subtitle, Buttons, and Feature Badges */}
-              <div className="lg:col-span-6 space-y-6 sm:space-y-8 text-center lg:text-left">
-                {/* Eyebrow Badge */}
-                <div
-                  className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold shadow-inner ${
-                    isLight
-                      ? 'bg-white/20 border border-white/50 text-white'
-                      : 'bg-purple-950/60 border border-purple-400/40 text-purple-200'
-                  }`}
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-purple-300" />
-                  <span>{siteText.hero.badgeText}</span>
-                </div>
-
-                {/* Main Headline (Dynamic) */}
-                <div className="space-y-1">
-                  <h1 className="text-4xl sm:text-6xl lg:text-[62px] font-black text-white leading-[1.08] tracking-tight drop-shadow-md">
-                    {siteText.hero.headlineLine1}
-                  </h1>
-                  <h1
-                    className={`text-4xl sm:text-6xl lg:text-[62px] font-black leading-[1.08] tracking-tight ${
-                      isLight ? 'text-purple-200' : 'text-purple-300'
-                    }`}
-                  >
-                    {siteText.hero.headlineLine2}
-                  </h1>
-                </div>
-
-                {/* Dynamic Subtitle */}
-                <p
-                  className={`text-sm sm:text-base lg:text-lg max-w-lg mx-auto lg:mx-0 font-medium leading-relaxed ${
-                    isLight ? 'text-white/90' : 'text-purple-200/85'
-                  }`}
-                >
-                  {siteText.hero.subtitle}
-                </p>
-
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-                  <Link
-                    href="/home"
-                    className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-gradient-to-r from-[#D946EF] via-[#9333EA] to-[#7E22CE] hover:from-[#E879F9] hover:to-[#A855F7] text-white font-bold text-sm shadow-xl shadow-purple-600/40 hover:shadow-purple-500/60 transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
-                  >
-                    <span>{siteText.hero.ctaPrimary}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-
-                  <button
-                    onClick={() => setShowTrailerModal(true)}
-                    className={`w-full sm:w-auto px-6 py-3.5 rounded-full font-semibold text-sm transition-all flex items-center justify-center gap-2.5 cursor-pointer active:scale-95 ${
-                      isLight
-                        ? 'bg-white/25 hover:bg-white/35 border border-white/50 text-white'
-                        : 'bg-[#1A113B]/70 hover:bg-purple-900/40 border border-purple-500/40 text-white'
-                    }`}
-                  >
-                    <div className="w-5 h-5 rounded-full bg-purple-500/40 border border-purple-400/50 flex items-center justify-center">
-                      <Play className="w-3 h-3 fill-white text-white ml-0.5" />
-                    </div>
-                    <span>{siteText.hero.ctaSecondary}</span>
-                  </button>
-                </div>
-
-                {/* 3 FEATURE PILLS ROW (Creator Friendly, Fast & Trending, Safe & Curated) */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
-                  {/* Badge 1 */}
-                  <div
-                    className={`p-3.5 rounded-2xl transition-all flex items-center gap-3 text-left ${
-                      isLight
-                        ? 'bg-white/20 border border-white/40'
-                        : 'bg-[#180E38]/70 border border-purple-500/25 hover:border-purple-400/40'
-                    }`}
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-purple-600/30 border border-purple-400/40 flex items-center justify-center text-white shrink-0">
-                      <Sparkles className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-white leading-snug">{siteText.hero.feature1Title}</p>
-                      <p className={`text-[10px] ${isLight ? 'text-white/80' : 'text-purple-300/80'}`}>
-                        {siteText.hero.feature1Subtitle}
-                      </p>
-                    </div>
                   </div>
 
-                  {/* Badge 2 */}
-                  <div
-                    className={`p-3.5 rounded-2xl transition-all flex items-center gap-3 text-left ${
-                      isLight
-                        ? 'bg-white/20 border border-white/40'
-                        : 'bg-[#180E38]/70 border border-purple-500/25 hover:border-purple-400/40'
-                    }`}
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-purple-600/30 border border-purple-400/40 flex items-center justify-center text-white shrink-0">
-                      <Zap className="w-4 h-4" />
+                  {/* 3 small feature pills below (16px-24px rounded corners) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3">
+                    {/* Badge 1: Creator Friendly with sparkle icon */}
+                    <div className="p-3 sm:p-3.5 rounded-[20px] bg-white/[0.09] hover:bg-white/[0.16] backdrop-blur-xl border border-white/20 hover:border-white/35 transition-all flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-purple-500/30 border border-purple-400/40 flex items-center justify-center text-white shrink-0 shadow-inner">
+                        <Sparkles className="w-4 h-4 text-purple-200" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-white leading-snug">
+                          Creator Friendly
+                        </p>
+                        <p className="text-[10px] text-purple-200/80 leading-tight">
+                          Empowering Creators
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-white leading-snug">{siteText.hero.feature2Title}</p>
-                      <p className={`text-[10px] ${isLight ? 'text-white/80' : 'text-purple-300/80'}`}>
-                        {siteText.hero.feature2Subtitle}
-                      </p>
+
+                    {/* Badge 2: Fast & Trending with bolt icon */}
+                    <div className="p-3 sm:p-3.5 rounded-[20px] bg-white/[0.09] hover:bg-white/[0.16] backdrop-blur-xl border border-white/20 hover:border-white/35 transition-all flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-purple-500/30 border border-purple-400/40 flex items-center justify-center text-white shrink-0 shadow-inner">
+                        <Zap className="w-4 h-4 text-amber-300" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-white leading-snug">
+                          Fast & Trending
+                        </p>
+                        <p className="text-[10px] text-purple-200/80 leading-tight">
+                          Fresh Content Daily
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Badge 3: Safe & Curated with shield icon */}
+                    <div className="p-3 sm:p-3.5 rounded-[20px] bg-white/[0.09] hover:bg-white/[0.16] backdrop-blur-xl border border-white/20 hover:border-white/35 transition-all flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-purple-500/30 border border-purple-400/40 flex items-center justify-center text-white shrink-0 shadow-inner">
+                        <Shield className="w-4 h-4 text-cyan-300" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-white leading-snug">
+                          Safe & Curated
+                        </p>
+                        <p className="text-[10px] text-purple-200/80 leading-tight">
+                          Family-Friendly
+                        </p>
+                      </div>
                     </div>
                   </div>
+                </div>
 
-                  {/* Badge 3 */}
-                  <div
-                    className={`p-3.5 rounded-2xl transition-all flex items-center gap-3 text-left ${
-                      isLight
-                        ? 'bg-white/20 border border-white/40'
-                        : 'bg-[#180E38]/70 border border-purple-500/25 hover:border-purple-400/40'
-                    }`}
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-purple-600/30 border border-purple-400/40 flex items-center justify-center text-white shrink-0">
-                      <Shield className="w-4 h-4" />
+                {/* ========================================================================= */}
+                {/* RIGHT COLUMN: 3D CLAY-STYLE CUTE LIGHTHOUSE (Floating Slightly)           */}
+                {/* ========================================================================= */}
+                <div className="lg:col-span-6 relative flex items-center justify-center min-h-[380px] sm:min-h-[460px]">
+                  {/* Floating 3D Lighthouse Container */}
+                  <div className="relative w-full h-[380px] sm:h-[460px] animate-float-lighthouse flex items-center justify-center">
+                    
+                    {/* Glowing light beam radiating to the right */}
+                    <div className="absolute top-1/4 -right-10 w-[240px] sm:w-[360px] h-[120px] sm:h-[180px] bg-gradient-to-r from-amber-300/40 via-amber-200/20 to-transparent blur-2xl transform rotate-12 pointer-events-none" />
+
+                    {/* Ambient Glow behind lighthouse */}
+                    <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-purple-500/30 blur-3xl pointer-events-none" />
+
+                    {/* 3D Lighthouse Artwork */}
+                    <div className="relative w-full h-full rounded-[28px] overflow-hidden">
+                      <Image
+                        src="/images/lighthouse_hero_dark.jpg"
+                        alt="3D Clay Lighthouse"
+                        fill
+                        priority
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                        className="object-contain object-center scale-105"
+                      />
+                      {/* Gentle blend edges */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#1a0f37]/60 via-transparent to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#1a0f37]/40 via-transparent to-transparent pointer-events-none" />
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-white leading-snug">{siteText.hero.feature3Title}</p>
-                      <p className={`text-[10px] ${isLight ? 'text-white/80' : 'text-purple-300/80'}`}>
-                        {siteText.hero.feature3Subtitle}
-                      </p>
-                    </div>
+
+                    {/* Sparkling stars / lights around the floating base */}
+                    <div className="absolute bottom-6 left-12 w-2 h-2 rounded-full bg-pink-300 blur-[1px] animate-pulse" />
+                    <div className="absolute bottom-16 right-16 w-2.5 h-2.5 rounded-full bg-purple-200 blur-[1px] animate-pulse delay-300" />
+                    <div className="absolute top-20 right-8 w-2 h-2 rounded-full bg-amber-200 blur-[1px] animate-pulse delay-700" />
                   </div>
                 </div>
               </div>
 
-              {/* RIGHT COLUMN: 3D LIGHTHOUSE ARTWORK */}
-              <div className="lg:col-span-6 relative flex justify-center items-center">
-                {/* Glow aura */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/30 via-pink-600/20 to-purple-900/40 rounded-3xl blur-2xl transform scale-95" />
-
-                {/* 3D Render Lighthouse Artwork Card */}
-                <div
-                  className={`relative w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl transition-all duration-700 group ${
-                    isLight
-                      ? 'border border-white/50 shadow-[0_20px_60px_rgba(100,60,170,0.35)]'
-                      : 'border border-purple-500/40 shadow-[0_20px_60px_rgba(147,51,234,0.4)]'
-                  }`}
-                >
-                  <div className="relative aspect-[16/10] sm:aspect-[4/3] w-full bg-[#100726]">
-                    <Image
-                      src={isLight ? '/images/lighthouse_hero_light.jpg' : '/images/lighthouse_hero_dark.jpg'}
-                      alt="LightHouse Reels 3D Beacon"
-                      fill
-                      priority
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                    />
-
-                    {/* Gradient Overlay for subtle bottom blend */}
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-t via-transparent to-transparent opacity-50 ${
-                        isLight ? 'from-[#735F9E]' : 'from-[#0E0824]'
-                      }`}
-                    />
+              {/* BOTTOM STATS PILL DOCK (Rounded 24px - Pill) */}
+              <div className="p-4 sm:p-5 rounded-[24px] sm:rounded-full bg-white/[0.09] backdrop-blur-2xl border border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.3)] grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 items-center">
+                {/* Stat 1: Creators */}
+                <div className="flex items-center gap-3 px-2 sm:px-4">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-purple-500/25 border border-purple-400/40 flex items-center justify-center text-white shrink-0 shadow-inner">
+                    <Users className="w-4 h-4 sm:w-5 sm:h-5 text-purple-200" />
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* BOTTOM STATS DOCK (Inside Hero Card) */}
-            <div
-              className={`mt-10 sm:mt-12 p-4 sm:p-5 rounded-2xl grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 items-center backdrop-blur-md ${
-                isLight
-                  ? 'bg-white/20 border border-white/40'
-                  : 'bg-[#130B30]/80 border border-purple-500/30'
-              }`}
-            >
-              {/* Stat 1 */}
-              <div className="flex items-center gap-3 p-2">
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                    isLight
-                      ? 'bg-white/25 border border-white/40 text-white'
-                      : 'bg-purple-900/50 border border-purple-500/30 text-purple-300'
-                  }`}
-                >
-                  <Users className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-base sm:text-lg font-black text-white leading-tight">
-                    {siteText.hero.stat1Value}
-                  </p>
-                  <p className={`text-xs ${isLight ? 'text-white/80' : 'text-purple-300/80'}`}>
-                    {siteText.hero.stat1Label}
-                  </p>
-                </div>
-              </div>
-
-              {/* Stat 2 */}
-              <div className="flex items-center gap-3 p-2">
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                    isLight
-                      ? 'bg-white/25 border border-white/40 text-white'
-                      : 'bg-purple-900/50 border border-purple-500/30 text-purple-300'
-                  }`}
-                >
-                  <Film className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-base sm:text-lg font-black text-white leading-tight">
-                    {siteText.hero.stat2Value}
-                  </p>
-                  <p className={`text-xs ${isLight ? 'text-white/80' : 'text-purple-300/80'}`}>
-                    {siteText.hero.stat2Label}
-                  </p>
-                </div>
-              </div>
-
-              {/* Stat 3 */}
-              <div className="flex items-center gap-3 p-2">
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                    isLight
-                      ? 'bg-white/25 border border-white/40 text-white'
-                      : 'bg-purple-900/50 border border-purple-500/30 text-purple-300'
-                  }`}
-                >
-                  <Eye className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-base sm:text-lg font-black text-white leading-tight">
-                    {siteText.hero.stat3Value}
-                  </p>
-                  <p className={`text-xs ${isLight ? 'text-white/80' : 'text-purple-300/80'}`}>
-                    {siteText.hero.stat3Label}
-                  </p>
-                </div>
-              </div>
-
-              {/* Stat 4 */}
-              <div className="flex items-center gap-3 p-2">
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                    isLight
-                      ? 'bg-white/25 border border-white/40 text-amber-300'
-                      : 'bg-purple-900/50 border border-purple-500/30 text-amber-400'
-                  }`}
-                >
-                  <Star className="w-5 h-5 fill-amber-400" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-base sm:text-lg font-black text-white leading-tight">
-                      {siteText.hero.stat4Value}
+                  <div>
+                    <p className="text-sm sm:text-base font-black text-white leading-tight">
+                      10K+ Creators
                     </p>
-                    <span className={`text-xs ${isLight ? 'text-white/80' : 'text-purple-300/80'}`}>
-                      {siteText.hero.stat4Label}
-                    </span>
+                    <p className="text-[11px] sm:text-xs text-purple-200/80">
+                      Active Creators
+                    </p>
                   </div>
-                  <div className="flex items-center text-amber-300 text-xs mt-0.5">
-                    ★★★★★
+                </div>
+
+                {/* Stat 2: Reels */}
+                <div className="flex items-center gap-3 px-2 sm:px-4">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-purple-500/25 border border-purple-400/40 flex items-center justify-center text-white shrink-0 shadow-inner">
+                    <Film className="w-4 h-4 sm:w-5 sm:h-5 text-purple-200" />
+                  </div>
+                  <div>
+                    <p className="text-sm sm:text-base font-black text-white leading-tight">
+                      100K+ Reels
+                    </p>
+                    <p className="text-[11px] sm:text-xs text-purple-200/80">
+                      Short Videos
+                    </p>
+                  </div>
+                </div>
+
+                {/* Stat 3: Views */}
+                <div className="flex items-center gap-3 px-2 sm:px-4">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-purple-500/25 border border-purple-400/40 flex items-center justify-center text-white shrink-0 shadow-inner">
+                    <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-purple-200" />
+                  </div>
+                  <div>
+                    <p className="text-sm sm:text-base font-black text-white leading-tight">
+                      50M+ Views
+                    </p>
+                    <p className="text-[11px] sm:text-xs text-purple-200/80">
+                      Monthly Views
+                    </p>
+                  </div>
+                </div>
+
+                {/* Stat 4: Rating */}
+                <div className="flex items-center gap-3 px-2 sm:px-4">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300 shrink-0 shadow-inner">
+                    <Star className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-300 text-amber-300" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm sm:text-base font-black text-white leading-tight">
+                        4.9
+                      </p>
+                      <span className="text-[11px] sm:text-xs text-purple-200/80">
+                        User Rating
+                      </span>
+                    </div>
+                    <div className="text-amber-300 text-xs tracking-wider">
+                      ★★★★★
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <button
-              onClick={() => setCardDismissed(false)}
-              className="px-6 py-3 rounded-full bg-purple-600 text-white font-bold text-sm shadow-lg hover:bg-purple-500 transition-all cursor-pointer"
-            >
-              Restore Hero Showcase
-            </button>
-          </div>
-        )}
+        </div>
 
         {/* ========================================================================= */}
-        {/* REQUIREMENT 2a: DYNAMIC CONTENT ACCORDING TO CATEGORIES (Same as Home)    */}
+        {/* SECTION 2: DYNAMIC FEATURED STREAMS & CATEGORIES                          */}
         {/* ========================================================================= */}
         <section id="categories-section" className="space-y-8 scroll-mt-12">
-          {/* Section Heading & Subtitle (Dynamic) */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-2">
-              <div
-                className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
-                  isLight
-                    ? 'bg-white/20 text-white border border-white/40'
-                    : 'bg-purple-950/70 text-purple-300 border border-purple-500/30'
-                }`}
-              >
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-purple-950/70 text-purple-300 border border-purple-500/30">
                 <Film className="w-3.5 h-3.5" />
                 <span>Featured Streams</span>
               </div>
               <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
                 {siteText.categories.sectionTitle}
               </h2>
-              <p className={`text-xs sm:text-sm max-w-xl ${isLight ? 'text-white/80' : 'text-purple-200/80'}`}>
+              <p className="text-xs sm:text-sm text-purple-200/80 max-w-xl">
                 {siteText.categories.sectionSubtitle}
               </p>
             </div>
@@ -720,8 +664,6 @@ export function LandingHeroView() {
                   className={`px-4 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-gradient-to-r from-[#D946EF] to-[#9333EA] text-white shadow-lg shadow-purple-600/30 scale-105'
-                      : isLight
-                      ? 'bg-white/20 hover:bg-white/30 text-white border border-white/30'
                       : 'bg-[#130B30]/80 hover:bg-purple-900/40 text-purple-200 border border-purple-500/25'
                   }`}
                 >
@@ -732,16 +674,12 @@ export function LandingHeroView() {
             })}
           </div>
 
-          {/* Dynamic Video Cards Grid */}
+          {/* Video Cards Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {filteredReels.map((reel) => (
               <div
                 key={reel.id}
-                className={`group relative rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between ${
-                  isLight
-                    ? 'bg-white/20 border border-white/40 shadow-lg hover:shadow-2xl'
-                    : 'bg-[#12082B]/90 border border-purple-500/25 hover:border-purple-400/50 shadow-xl'
-                }`}
+                className="group relative rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between bg-[#12082B]/90 border border-purple-500/25 hover:border-purple-400/50 shadow-xl"
               >
                 {/* Poster & Play Hover */}
                 <div className="relative aspect-[9/14] w-full bg-black/60 overflow-hidden">
@@ -798,28 +736,21 @@ export function LandingHeroView() {
         </section>
 
         {/* ========================================================================= */}
-        {/* REQUIREMENT 2b: ADVERTISER & CREATOR SIGN UP CARDS (Working Links)        */}
+        {/* SECTION 3: ADVERTISER & CREATOR SIGN UP CARDS                             */}
         {/* ========================================================================= */}
         <section className="space-y-6">
           <div className="text-center space-y-2 max-w-2xl mx-auto">
             <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
               Join The Lighthouse Ecosystem
             </h2>
-            <p className={`text-xs sm:text-sm ${isLight ? 'text-white/80' : 'text-purple-200/80'}`}>
+            <p className="text-xs sm:text-sm text-purple-200/80">
               Whether you are an ambitious storyteller or a visionary brand, our platform accelerates your impact.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 pt-4">
-            {/* CARD 1: CREATOR SIGN UP CARD */}
-            <div
-              className={`relative rounded-3xl p-6 sm:p-8 flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-300 hover:scale-[1.01] ${
-                isLight
-                  ? 'bg-white/25 backdrop-blur-2xl border border-white/50'
-                  : 'bg-[#12092D]/90 backdrop-blur-2xl border border-purple-500/35 hover:border-purple-400/60 shadow-[0_0_50px_rgba(168,85,247,0.2)]'
-              }`}
-            >
-              {/* Background ambient decorative orb */}
+            {/* CARD 1: CREATOR SIGN UP */}
+            <div className="relative rounded-3xl p-6 sm:p-8 flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-300 hover:scale-[1.01] bg-[#12092D]/90 backdrop-blur-2xl border border-purple-500/35 hover:border-purple-400/60 shadow-[0_0_50px_rgba(168,85,247,0.2)]">
               <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-purple-600/20 blur-3xl pointer-events-none" />
 
               <div className="space-y-5 relative z-10">
@@ -832,12 +763,11 @@ export function LandingHeroView() {
                   <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                     {siteText.creatorCard.title}
                   </h3>
-                  <p className={`text-xs sm:text-sm leading-relaxed ${isLight ? 'text-white/85' : 'text-purple-200/80'}`}>
+                  <p className="text-xs sm:text-sm text-purple-200/80 leading-relaxed">
                     {siteText.creatorCard.subtitle}
                   </p>
                 </div>
 
-                {/* Perkz Checklist */}
                 <div className="space-y-2.5 pt-2 text-xs">
                   {[
                     siteText.creatorCard.perk1,
@@ -849,13 +779,12 @@ export function LandingHeroView() {
                       <div className="w-4 h-4 rounded-full bg-purple-500/30 border border-purple-400/50 flex items-center justify-center shrink-0 mt-0.5">
                         <CheckCircle className="w-3 h-3 text-emerald-400" />
                       </div>
-                      <span className={isLight ? 'text-white/90' : 'text-purple-100'}>{perk}</span>
+                      <span className="text-purple-100">{perk}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Working Creator Signup Link */}
               <div className="pt-8 relative z-10">
                 <Link
                   href="/register?role=creator"
@@ -867,15 +796,8 @@ export function LandingHeroView() {
               </div>
             </div>
 
-            {/* CARD 2: ADVERTISER SIGN UP CARD */}
-            <div
-              className={`relative rounded-3xl p-6 sm:p-8 flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-300 hover:scale-[1.01] ${
-                isLight
-                  ? 'bg-white/25 backdrop-blur-2xl border border-white/50'
-                  : 'bg-[#0E0C2D]/90 backdrop-blur-2xl border border-blue-500/35 hover:border-cyan-400/60 shadow-[0_0_50px_rgba(59,130,246,0.2)]'
-              }`}
-            >
-              {/* Background ambient decorative orb */}
+            {/* CARD 2: ADVERTISER SIGN UP */}
+            <div className="relative rounded-3xl p-6 sm:p-8 flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-300 hover:scale-[1.01] bg-[#0E0C2D]/90 backdrop-blur-2xl border border-blue-500/35 hover:border-cyan-400/60 shadow-[0_0_50px_rgba(59,130,246,0.2)]">
               <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-blue-600/20 blur-3xl pointer-events-none" />
 
               <div className="space-y-5 relative z-10">
@@ -888,12 +810,11 @@ export function LandingHeroView() {
                   <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                     {siteText.advertiserCard.title}
                   </h3>
-                  <p className={`text-xs sm:text-sm leading-relaxed ${isLight ? 'text-white/85' : 'text-blue-100/80'}`}>
+                  <p className="text-xs sm:text-sm text-blue-100/80 leading-relaxed">
                     {siteText.advertiserCard.subtitle}
                   </p>
                 </div>
 
-                {/* Perkz Checklist */}
                 <div className="space-y-2.5 pt-2 text-xs">
                   {[
                     siteText.advertiserCard.perk1,
@@ -905,13 +826,12 @@ export function LandingHeroView() {
                       <div className="w-4 h-4 rounded-full bg-blue-500/30 border border-blue-400/50 flex items-center justify-center shrink-0 mt-0.5">
                         <CheckCircle className="w-3 h-3 text-cyan-400" />
                       </div>
-                      <span className={isLight ? 'text-white/90' : 'text-blue-100'}>{perk}</span>
+                      <span className="text-blue-100">{perk}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Working Advertiser Signup Link */}
               <div className="pt-8 relative z-10">
                 <Link
                   href="/register?role=advertiser"
@@ -926,17 +846,11 @@ export function LandingHeroView() {
         </section>
 
         {/* ========================================================================= */}
-        {/* REQUIREMENT 2c: FOOTER SECTION                                            */}
+        {/* SECTION 4: FOOTER                                                         */}
         {/* ========================================================================= */}
-        <footer
-          className={`rounded-3xl p-8 sm:p-12 transition-all border ${
-            isLight
-              ? 'bg-white/20 backdrop-blur-xl border-white/40'
-              : 'bg-[#0D0722]/90 backdrop-blur-xl border-purple-500/25'
-          }`}
-        >
+        <footer className="rounded-3xl p-8 sm:p-12 transition-all border bg-[#0D0722]/90 backdrop-blur-xl border-purple-500/25">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-8 border-b border-white/15">
-            {/* Col 1 & 2: Brand & Mission */}
+            {/* Col 1 & 2: Brand */}
             <div className="lg:col-span-2 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-500 p-0.5 flex items-center justify-center shadow-md">
@@ -949,7 +863,7 @@ export function LandingHeroView() {
                 </span>
               </div>
 
-              <p className={`text-xs leading-relaxed max-w-sm ${isLight ? 'text-white/80' : 'text-purple-300/80'}`}>
+              <p className="text-xs text-purple-300/80 leading-relaxed max-w-sm">
                 {siteText.footer.mission}
               </p>
 
@@ -985,7 +899,7 @@ export function LandingHeroView() {
               </ul>
             </div>
 
-            {/* Col 5: Legal & Trust */}
+            {/* Col 5: Legal */}
             <div className="space-y-3 text-xs">
               <h4 className="font-bold text-white uppercase tracking-wider text-[11px]">Legal & Trust</h4>
               <ul className="space-y-2 text-white/80">
@@ -997,7 +911,6 @@ export function LandingHeroView() {
             </div>
           </div>
 
-          {/* Bottom Copyright & Disclaimer */}
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/70">
             <p>{siteText.footer.copyright}</p>
             <div className="flex items-center gap-4">
@@ -1077,7 +990,7 @@ export function LandingHeroView() {
 
             <div className="mt-4 aspect-video w-full rounded-2xl bg-black overflow-hidden flex items-center justify-center relative">
               <Image
-                src={isLight ? '/images/lighthouse_hero_light.jpg' : '/images/lighthouse_hero_dark.jpg'}
+                src="/images/lighthouse_hero_dark.jpg"
                 alt="Trailer preview"
                 fill
                 className="object-cover opacity-80"

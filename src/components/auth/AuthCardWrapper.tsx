@@ -23,124 +23,220 @@ interface AuthCardWrapperProps {
 }
 
 export function AuthCardWrapper({
-  heroTitle = 'Welcome back to\nLight House Reels',
-  heroSubtitle = 'Watch. Discover. Shine.',
+  heroTitle = 'Stream, Discover, and Relax',
+  heroSubtitle = 'Your stories, guided by the light.',
   cardTitle,
-  cardSubtitle,
+  cardSubtitle = 'Join Light House Reels and start streaming today',
   children,
   footerLink,
   showGoogleAuth = false,
   googleLabel = 'Google',
   onGoogleError,
-  maxWidthClass = 'max-w-md',
+  maxWidthClass = 'max-w-[440px]',
 }: AuthCardWrapperProps) {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-3 sm:p-6 md:p-10 bg-gradient-to-br from-[#EAE5FC] via-[#F4F1FD] to-[#E5DCFA] dark:from-[#070B0F] dark:via-[#0B1117] dark:to-[#111A22] transition-colors duration-300">
-      {/* Main Container Card / Dual Panel */}
-      <div className="w-full max-w-5xl bg-white/75 dark:bg-[#111A22]/85 backdrop-blur-2xl border border-white/80 dark:border-[#27313A] rounded-[28px] sm:rounded-[36px] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[620px]">
-        
-        {/* Left Side: 3D Lighthouse Hero (Visible on Desktop / Hero banner on Mobile) */}
-        <div className="lg:col-span-6 relative flex flex-col justify-between items-center text-center p-6 sm:p-10 bg-gradient-to-b from-[#D8CEF8]/60 via-[#E4DCFC]/40 to-[#CEC0F6]/50 dark:from-[#151D28] dark:via-[#11171E] dark:to-[#0B1117] overflow-hidden border-b lg:border-b-0 lg:border-r border-[#E2D9F8] dark:border-[#27313A]">
-          {/* Soft background glow circles */}
-          <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-purple-400/20 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-indigo-400/20 blur-3xl pointer-events-none" />
-          
-          {/* Hero Typography */}
-          <div className="relative z-10 pt-2 sm:pt-4">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-[#2E2856] dark:text-[#EDE8FC] leading-tight whitespace-pre-line">
+    <main className="min-h-screen w-full overflow-hidden bg-[#EAE3F7]">
+      {/* =========================================================
+          FULL PAGE 2-COLUMN SPLIT (Matching Picture 2)
+      ========================================================= */}
+      <div className="min-h-screen w-full lg:grid lg:grid-cols-2">
+
+        {/* =======================================================
+            LEFT SIDE — 3D LIGHTHOUSE VISUAL (Desktop only)
+        ======================================================= */}
+        <section className="hidden lg:flex relative min-h-screen overflow-hidden flex-col justify-between">
+          {/* Background 3D Clay Lighthouse Image */}
+          <Image
+            src="/images/auth_lighthouse_clay.jpg"
+            alt="Light House Reels"
+            fill
+            priority
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="object-cover object-center"
+          />
+
+          {/* Gentle lavender haze tint */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#cfc1f3]/15 via-transparent to-[#8a72be]/25 pointer-events-none" />
+
+          {/* TOP-LEFT BRAND (Lighthouse Icon + "Light House Reels") */}
+          <div className="absolute left-6 top-6 sm:left-9 sm:top-9 lg:left-10 lg:top-10 z-20">
+            <Link href="/" className="group flex items-center gap-3">
+              {/* Clean Lighthouse Outline Icon from Picture 2 */}
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 32 32"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="shrink-0 text-[#30206D]"
+              >
+                <path
+                  d="M13 4L10 9H22L19 4"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M11 9H21L22.5 12H9.5L11 9Z"
+                  fill="currentColor"
+                  fillOpacity="0.15"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M11 12L9.5 27H22.5L21 12"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M14 14H18V19H14V14Z"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                />
+                <path
+                  d="M8 27H24"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M7 10L3.5 8.5M25 10L28.5 8.5"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  opacity="0.7"
+                />
+              </svg>
+
+              <span className="text-xl sm:text-2xl lg:text-[27px] font-bold tracking-tight text-[#30206D]">
+                Light House Reels
+              </span>
+            </Link>
+          </div>
+
+          {/* BOTTOM HERO CAPTION from Picture 2 */}
+          <div className="absolute inset-x-0 bottom-6 sm:bottom-10 z-20 px-6 text-center">
+            <p className="text-base sm:text-lg font-bold text-[#3E306E] drop-shadow-sm">
               {heroTitle}
-            </h1>
-            <p className="mt-2 text-sm sm:text-base font-semibold text-[#6B5E99] dark:text-[#B7AEE2] tracking-wide">
+            </p>
+            <p className="text-xs sm:text-sm font-medium text-[#564882]/90 mt-1">
               {heroSubtitle}
             </p>
           </div>
+        </section>
 
-          {/* 3D Lighthouse Image */}
-          <div className="relative z-10 my-4 sm:my-6 w-full max-w-[280px] sm:max-w-[340px] aspect-square rounded-3xl overflow-hidden shadow-xl border border-white/60 dark:border-white/10 group hover:scale-[1.02] transition-transform duration-500">
-            <Image
-              src="/branding/auth_lighthouse_hero.jpg"
-              alt="Light House Reels"
-              fill
-              className="object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-purple-900/20 via-transparent to-transparent pointer-events-none" />
-          </div>
+        {/* =======================================================
+            RIGHT SIDE — FROSTED GLASS FORM CARD (Picture 2)
+        ======================================================= */}
+        <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#EAE4F8] via-[#E2D8F6] to-[#D5C6F0] px-4 py-8 sm:px-8 lg:px-10">
+          {/* Ambient Decorative Glowing Blobs */}
+          <div className="pointer-events-none absolute -right-32 -top-32 h-[420px] w-[420px] rounded-full bg-white/50 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-32 -left-32 h-[380px] w-[380px] rounded-full bg-[#B99EE8]/30 blur-3xl" />
 
-          {/* Bottom subtle badge */}
-          <div className="relative z-10 hidden sm:flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/60 dark:bg-white/5 border border-white/80 dark:border-white/10 text-xs font-medium text-[#4C407B] dark:text-[#C2BAE7] backdrop-blur-md">
-            <span>✨ Premium Streaming & Creator Community</span>
-          </div>
-        </div>
-
-        {/* Right Side: Form Card */}
-        <div className="lg:col-span-6 flex flex-col justify-center p-6 sm:p-10 md:p-12 bg-white/90 dark:bg-[#0E151E]/90 backdrop-blur-md">
-          <div className={`w-full mx-auto ${maxWidthClass}`}>
-            
-            {/* Header with Lighthouse Icon & App Name */}
-            <div className="flex flex-col items-center text-center mb-6">
-              <Link href="/" className="group inline-flex items-center gap-2 mb-2">
-                <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-[#7C3AED] to-[#A855F7] flex items-center justify-center shadow-md shadow-purple-500/20 group-hover:scale-105 transition-transform">
-                  <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2L9 7h6l-3-5zm-2 6l-1 5h6l-1-5h-4zm-1.5 6l-1.5 8h9l-1.5-8h-6z" />
-                  </svg>
-                </div>
-                <span className="text-lg font-black tracking-tight text-[#2E2856] dark:text-[#EDE8FC]">
-                  Light House <span className="text-[#7C3AED] dark:text-[#A855F7]">Reels</span>
-                </span>
-              </Link>
-              
-              <h2 className="text-xl sm:text-2xl font-black text-[#1E1838] dark:text-[#F5F1E8] tracking-tight">
+          {/* Frosted Glass Form Card */}
+          <div
+            className={`relative z-10 w-full ${maxWidthClass} rounded-[32px] border border-white/80 bg-white/70 px-6 py-8 shadow-[0_20px_50px_rgba(95,65,160,0.14)] backdrop-blur-2xl sm:px-9 sm:py-10`}
+          >
+            {/* Mobile Brand Header */}
+            <div className="lg:hidden flex items-center justify-center gap-2.5 mb-5">
+              <svg
+                width="28"
+                height="28"
+                viewBox="0 0 32 32"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="shrink-0 text-[#30206D]"
+              >
+                <path
+                  d="M13 4L10 9H22L19 4"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M11 9H21L22.5 12H9.5L11 9Z"
+                  fill="currentColor"
+                  fillOpacity="0.15"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M11 12L9.5 27H22.5L21 12"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M14 14H18V19H14V14Z"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                />
+                <path
+                  d="M8 27H24"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <span className="text-xl font-bold tracking-tight text-[#30206D]">
+                Light House Reels
+              </span>
+            </div>
+            {/* CARD HEADER */}
+            <div className="mb-6 text-center">
+              <h2 className="text-2xl sm:text-[28px] font-extrabold leading-tight tracking-tight text-[#1E144F]">
                 {cardTitle}
               </h2>
+
               {cardSubtitle && (
-                <p className="text-xs sm:text-sm text-[#6B5E99] dark:text-[#9DA4B0] mt-1 font-medium">
+                <p className="mx-auto mt-1.5 text-xs sm:text-sm font-medium text-[#645982] leading-relaxed">
                   {cardSubtitle}
                 </p>
               )}
             </div>
 
-            {/* Form Content */}
-            {children}
+            {/* FORM CONTENT (CHILDREN) */}
+            <div className="w-full">{children}</div>
 
-            {/* Social Auth (Google Only, No Apple) */}
+            {/* SOCIAL LOGIN (Google & Apple Side-by-Side as in Picture 2) */}
             {showGoogleAuth && (
-              <div className="mt-6">
-                <div className="relative my-4 text-center">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-[#E2E8F0] dark:border-[#27313A]" />
-                  </div>
-                  <span className="relative bg-white dark:bg-[#0E151E] px-3 text-[11px] font-semibold text-[#8C84A7] dark:text-[#7F8993]">
-                    Or continue with
+              <div className="mt-5">
+                {/* Divider */}
+                <div className="relative flex items-center justify-center my-4">
+                  <div className="absolute inset-x-0 h-px bg-purple-200/60" />
+                  <span className="relative z-10 bg-transparent px-3 text-xs font-medium text-[#7E7399]">
+                    or continue with
                   </span>
                 </div>
-                
-                <div className="flex justify-center">
+
+                {/* Full-Width Google Sign-In Button */}
+                <div className="mt-3">
                   <GoogleAuthButton
                     label={googleLabel}
                     onError={onGoogleError}
-                    className="!bg-white dark:!bg-[#141D26] !text-[#1E1838] dark:!text-[#F5F1E8] !border-[#E2E8F0] dark:!border-[#27313A] !rounded-2xl !py-3 !shadow-sm hover:!bg-slate-50 dark:hover:!bg-[#1B2735] font-semibold text-sm"
                   />
                 </div>
               </div>
             )}
 
-            {/* Footer Navigation Link */}
+            {/* FOOTER LINK */}
             {footerLink && (
-              <div className="mt-6 text-center text-xs text-[#6B5E99] dark:text-[#9DA4B0]">
+              <div className="mt-6 text-center text-xs sm:text-sm text-[#645982] font-medium">
                 <span>{footerLink.text} </span>
                 <Link
                   href={footerLink.href}
-                  className="text-[#7C3AED] dark:text-[#A855F7] font-bold hover:underline ml-1"
+                  className="font-bold text-[#6355DE] transition-colors hover:text-[#4F3EC7] hover:underline"
                 >
                   {footerLink.linkText}
                 </Link>
               </div>
             )}
           </div>
-        </div>
-
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

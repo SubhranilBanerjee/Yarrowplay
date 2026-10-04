@@ -5,8 +5,19 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import {
-  User, Video, Megaphone, Lock, Eye, EyeOff, Building,
-  AlertCircle, CheckCircle, ChevronDown, CreditCard, FileText,
+  User,
+  Video,
+  Megaphone,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Building,
+  AlertCircle,
+  CheckCircle,
+  ChevronDown,
+  CreditCard,
+  FileText,
 } from 'lucide-react';
 import { BottomToast } from '@/components/ui/BottomToast';
 import { AuthCardWrapper } from '@/components/auth/AuthCardWrapper';
@@ -30,7 +41,7 @@ function RegisterForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(true);
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -52,7 +63,7 @@ function RegisterForm() {
 
     try {
       if (!agreeTerms) {
-        setErrorMsg('You must agree to the Terms of Use and Privacy Policy to register.');
+        setErrorMsg('You must agree to the Terms & Privacy Policy to register.');
         setIsLoading(false);
         return;
       }
@@ -60,7 +71,7 @@ function RegisterForm() {
       const metadataName = role === 'advertiser' ? companyName : displayName;
 
       if (!metadataName.trim()) {
-        setErrorMsg(role === 'advertiser' ? 'Please enter your company name.' : 'Please enter your display name.');
+        setErrorMsg(role === 'advertiser' ? 'Please enter your company name.' : 'Please enter your full name.');
         setIsLoading(false);
         return;
       }
@@ -153,15 +164,15 @@ function RegisterForm() {
   };
 
   const heroTitles: Record<string, string> = {
-    viewer: 'Welcome to\nLight House Reels',
-    creator: 'Welcome to\nCreator Studio',
-    advertiser: 'Welcome to\nLight House Ads',
+    viewer: 'Stream, Discover, and Relax',
+    creator: 'Publish, Monetize, and Grow',
+    advertiser: 'Reach, Engage, and Convert',
   };
 
   const heroSubtitles: Record<string, string> = {
-    viewer: 'Watch. Discover. Shine.',
-    creator: 'Publish Reels. Monetize. Shine.',
-    advertiser: 'Target Audience. Scale. Shine.',
+    viewer: 'Your stories, guided by the light.',
+    creator: 'Empower your vision with our global audience.',
+    advertiser: 'Connect with engaged short-video viewers.',
   };
 
   const cardTitles: Record<string, string> = {
@@ -173,28 +184,28 @@ function RegisterForm() {
   return (
     <>
       <AuthCardWrapper
-        heroTitle={heroTitles[role] || 'Welcome to\nLight House Reels'}
-        heroSubtitle={heroSubtitles[role] || 'Watch. Discover. Shine.'}
+        heroTitle={heroTitles[role] || 'Stream, Discover, and Relax'}
+        heroSubtitle={heroSubtitles[role] || 'Your stories, guided by the light.'}
         cardTitle={cardTitles[role] || 'Create your account'}
-        cardSubtitle="Join the next generation short video ecosystem"
-        showGoogleAuth={role === 'viewer'}
-        googleLabel="Google"
+        cardSubtitle="Join Light House Reels and start streaming today"
+        showGoogleAuth={true}
+        googleLabel="Sign up with Google"
         onGoogleError={(err) => setErrorMsg(err)}
         footerLink={{
           text: 'Already have an account?',
-          linkText: 'Sign in',
+          linkText: 'Login',
           href: '/login',
         }}
       >
-        {/* Role Switcher Tabs */}
-        <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#EEF2F6] dark:bg-[#141D26] rounded-2xl mb-5 border border-[#E2E8F0] dark:border-[#27313A]">
+        {/* Role Switcher Tabs (Soft lavender frosted pill) */}
+        <div className="grid grid-cols-3 gap-1 p-1 bg-[#F0EBFC]/80 border border-purple-200/50 rounded-xl mb-4">
           <button
             type="button"
             onClick={() => setRole('viewer')}
-            className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs font-bold transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               role === 'viewer'
-                ? 'bg-gradient-to-r from-[#7C3AED] to-[#6366F1] text-white shadow-md shadow-purple-500/20'
-                : 'text-[#6B5E99] dark:text-[#9DA4B0] hover:text-[#2E2856] dark:hover:text-white'
+                ? 'bg-gradient-to-r from-[#6355DE] to-[#7563E6] text-white shadow-sm'
+                : 'text-[#6B5E99] hover:text-[#1E144F]'
             }`}
           >
             <User className="w-3.5 h-3.5" />
@@ -204,10 +215,10 @@ function RegisterForm() {
           <button
             type="button"
             onClick={() => setRole('creator')}
-            className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs font-bold transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               role === 'creator'
-                ? 'bg-gradient-to-r from-[#7C3AED] to-[#6366F1] text-white shadow-md shadow-purple-500/20'
-                : 'text-[#6B5E99] dark:text-[#9DA4B0] hover:text-[#2E2856] dark:hover:text-white'
+                ? 'bg-gradient-to-r from-[#6355DE] to-[#7563E6] text-white shadow-sm'
+                : 'text-[#6B5E99] hover:text-[#1E144F]'
             }`}
           >
             <Video className="w-3.5 h-3.5" />
@@ -217,10 +228,10 @@ function RegisterForm() {
           <button
             type="button"
             onClick={() => setRole('advertiser')}
-            className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs font-bold transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               role === 'advertiser'
-                ? 'bg-gradient-to-r from-[#7C3AED] to-[#6366F1] text-white shadow-md shadow-purple-500/20'
-                : 'text-[#6B5E99] dark:text-[#9DA4B0] hover:text-[#2E2856] dark:hover:text-white'
+                ? 'bg-gradient-to-r from-[#6355DE] to-[#7563E6] text-white shadow-sm'
+                : 'text-[#6B5E99] hover:text-[#1E144F]'
             }`}
           >
             <Megaphone className="w-3.5 h-3.5" />
@@ -230,140 +241,84 @@ function RegisterForm() {
 
         {/* Error / Success Feedback */}
         {errorMsg && (
-          <div className="mb-4 p-3 rounded-2xl bg-[#D96868]/15 border border-[#D96868]/30 text-[#D96868] text-xs flex items-center gap-2">
+          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {successMsg && (
-          <div className="mb-4 p-3 rounded-2xl bg-[#68B88A]/15 border border-[#68B88A]/30 text-[#68B88A] text-xs flex items-center gap-2">
+          <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
             <CheckCircle className="w-4 h-4 shrink-0" />
             <span>{successMsg}</span>
           </div>
         )}
 
-        {/* Form */}
+        {/* Form matching Picture 2 */}
         <form onSubmit={handleRegister} className="space-y-3.5">
-          {role === 'advertiser' ? (
-            <div>
-              <label className="block text-xs font-bold text-[#3B3463] dark:text-[#C2BAE7] mb-1 ml-1">
-                Company Name
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Acme Corp"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full bg-[#EEF2F6] dark:bg-[#141D26] text-[#0F172A] dark:text-[#F5F1E8] placeholder-[#94A3B8] dark:placeholder-[#64748B] text-sm rounded-2xl px-4 py-2.5 border border-[#E2E8F0] dark:border-[#27313A] focus:outline-none focus:bg-white dark:focus:bg-[#1A2533] focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/20 transition-all"
-                />
-              </div>
+          {/* Full Name / Display Name / Company Name */}
+          <div>
+            <label className="block text-xs font-bold text-[#1E144F] mb-1.5 ml-0.5">
+              {role === 'advertiser' ? 'Company Name' : 'Full Name'}
+            </label>
+            <div className="relative flex items-center bg-[#F3EEFC]/90 hover:bg-[#F3EEFC] focus-within:bg-white focus-within:border-[#6355DE] focus-within:ring-2 focus-within:ring-[#6355DE]/15 border border-purple-200/70 rounded-xl px-3.5 py-2.5 transition-all">
+              {role === 'advertiser' ? (
+                <Building className="w-4 h-4 text-[#7C6FA0] shrink-0 mr-2.5" />
+              ) : (
+                <User className="w-4 h-4 text-[#7C6FA0] shrink-0 mr-2.5" />
+              )}
+              <input
+                type="text"
+                required
+                placeholder={role === 'advertiser' ? 'e.g. Acme Corp' : 'Enter your full name'}
+                value={role === 'advertiser' ? companyName : displayName}
+                onChange={(e) =>
+                  role === 'advertiser'
+                    ? setCompanyName(e.target.value)
+                    : setDisplayName(e.target.value)
+                }
+                className="w-full bg-transparent text-[#1E144F] placeholder-[#8E82AA] text-sm focus:outline-none"
+              />
             </div>
-          ) : (
-            <div>
-              <label className="block text-xs font-bold text-[#3B3463] dark:text-[#C2BAE7] mb-1 ml-1">
-                Display Name
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Alex Vance"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full bg-[#EEF2F6] dark:bg-[#141D26] text-[#0F172A] dark:text-[#F5F1E8] placeholder-[#94A3B8] dark:placeholder-[#64748B] text-sm rounded-2xl px-4 py-2.5 border border-[#E2E8F0] dark:border-[#27313A] focus:outline-none focus:bg-white dark:focus:bg-[#1A2533] focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/20 transition-all"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Creator Details */}
-          {role === 'creator' && (
-            <>
-              <div>
-                <label className="block text-xs font-bold text-[#3B3463] dark:text-[#C2BAE7] mb-1 ml-1">
-                  Creator Type
-                </label>
-                <div className="relative">
-                  <select
-                    value={subRole}
-                    onChange={(e) => setSubRole(e.target.value as CreatorSubRole)}
-                    className="w-full bg-[#EEF2F6] dark:bg-[#141D26] text-[#0F172A] dark:text-[#F5F1E8] text-sm rounded-2xl pl-4 pr-10 py-2.5 border border-[#E2E8F0] dark:border-[#27313A] focus:outline-none focus:bg-white dark:focus:bg-[#1A2533] focus:border-[#7C3AED] transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="Professional">Professional (Studio/Filmmaker)</option>
-                    <option value="Student">Student</option>
-                    <option value="Hobbyist">Hobbyist / Independent</option>
-                  </select>
-                  <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8C84A7] pointer-events-none" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#3B3463] dark:text-[#C2BAE7] mb-1 ml-1">
-                  PAN Number <span className="text-[#7C3AED]">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  maxLength={10}
-                  placeholder="e.g. ABCDE1234F"
-                  value={panNumber}
-                  onChange={(e) => setPanNumber(e.target.value.toUpperCase())}
-                  className="w-full bg-[#EEF2F6] dark:bg-[#141D26] text-[#0F172A] dark:text-[#F5F1E8] placeholder-[#94A3B8] dark:placeholder-[#64748B] text-sm font-mono uppercase rounded-2xl px-4 py-2.5 border border-[#E2E8F0] dark:border-[#27313A] focus:outline-none focus:bg-white dark:focus:bg-[#1A2533] focus:border-[#7C3AED] transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#3B3463] dark:text-[#C2BAE7] mb-1 ml-1">
-                  Bank Account Number <span className="text-[#7C3AED]">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. 9876543210987"
-                  value={bankAccountNumber}
-                  onChange={(e) => setBankAccountNumber(e.target.value)}
-                  className="w-full bg-[#EEF2F6] dark:bg-[#141D26] text-[#0F172A] dark:text-[#F5F1E8] placeholder-[#94A3B8] dark:placeholder-[#64748B] text-sm font-mono rounded-2xl px-4 py-2.5 border border-[#E2E8F0] dark:border-[#27313A] focus:outline-none focus:bg-white dark:focus:bg-[#1A2533] focus:border-[#7C3AED] transition-all"
-                />
-              </div>
-            </>
-          )}
+          </div>
 
           {/* Email */}
           <div>
-            <label className="block text-xs font-bold text-[#3B3463] dark:text-[#C2BAE7] mb-1 ml-1">
-              Email Address
+            <label className="block text-xs font-bold text-[#1E144F] mb-1.5 ml-0.5">
+              Email
             </label>
-            <input
-              type="email"
-              required
-              placeholder="email@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-[#EEF2F6] dark:bg-[#141D26] text-[#0F172A] dark:text-[#F5F1E8] placeholder-[#94A3B8] dark:placeholder-[#64748B] text-sm rounded-2xl px-4 py-2.5 border border-[#E2E8F0] dark:border-[#27313A] focus:outline-none focus:bg-white dark:focus:bg-[#1A2533] focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/20 transition-all"
-            />
+            <div className="relative flex items-center bg-[#F3EEFC]/90 hover:bg-[#F3EEFC] focus-within:bg-white focus-within:border-[#6355DE] focus-within:ring-2 focus-within:ring-[#6355DE]/15 border border-purple-200/70 rounded-xl px-3.5 py-2.5 transition-all">
+              <Mail className="w-4 h-4 text-[#7C6FA0] shrink-0 mr-2.5" />
+              <input
+                type="email"
+                required
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-transparent text-[#1E144F] placeholder-[#8E82AA] text-sm focus:outline-none"
+              />
+            </div>
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-xs font-bold text-[#3B3463] dark:text-[#C2BAE7] mb-1 ml-1">
+            <label className="block text-xs font-bold text-[#1E144F] mb-1.5 ml-0.5">
               Password
             </label>
-            <div className="relative">
+            <div className="relative flex items-center bg-[#F3EEFC]/90 hover:bg-[#F3EEFC] focus-within:bg-white focus-within:border-[#6355DE] focus-within:ring-2 focus-within:ring-[#6355DE]/15 border border-purple-200/70 rounded-xl px-3.5 py-2.5 transition-all">
+              <Lock className="w-4 h-4 text-[#7C6FA0] shrink-0 mr-2.5" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
-                placeholder="••••••••••"
+                placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#EEF2F6] dark:bg-[#141D26] text-[#0F172A] dark:text-[#F5F1E8] placeholder-[#94A3B8] dark:placeholder-[#64748B] text-sm rounded-2xl pl-4 pr-11 py-2.5 border border-[#E2E8F0] dark:border-[#27313A] focus:outline-none focus:bg-white dark:focus:bg-[#1A2533] focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/20 transition-all"
+                className="w-full bg-transparent text-[#1E144F] placeholder-[#8E82AA] text-sm focus:outline-none"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C84A7] hover:text-[#4C407B] dark:hover:text-[#EDE8FC] transition-colors cursor-pointer"
+                className="text-[#7C6FA0] hover:text-[#1E144F] transition-colors p-1 cursor-pointer"
                 aria-label="Toggle password visibility"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -371,39 +326,97 @@ function RegisterForm() {
             </div>
           </div>
 
-          {/* Terms Agreement */}
+          {/* Creator Details (If Creator Role Selected) */}
+          {role === 'creator' && (
+            <div className="space-y-3.5 pt-1">
+              <div>
+                <label className="block text-xs font-bold text-[#1E144F] mb-1.5 ml-0.5">
+                  Creator Type
+                </label>
+                <div className="relative flex items-center bg-[#F3EEFC]/90 hover:bg-[#F3EEFC] focus-within:bg-white focus-within:border-[#6355DE] border border-purple-200/70 rounded-xl px-3.5 py-2.5 transition-all">
+                  <select
+                    value={subRole}
+                    onChange={(e) => setSubRole(e.target.value as CreatorSubRole)}
+                    className="w-full bg-transparent text-[#1E144F] text-sm focus:outline-none appearance-none cursor-pointer pr-6"
+                  >
+                    <option value="Professional">Professional (Studio/Filmmaker)</option>
+                    <option value="Student">Student</option>
+                    <option value="Hobbyist">Hobbyist / Independent</option>
+                  </select>
+                  <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7C6FA0] pointer-events-none" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#1E144F] mb-1.5 ml-0.5">
+                  PAN Number <span className="text-[#6355DE]">*</span>
+                </label>
+                <div className="relative flex items-center bg-[#F3EEFC]/90 hover:bg-[#F3EEFC] focus-within:bg-white focus-within:border-[#6355DE] border border-purple-200/70 rounded-xl px-3.5 py-2.5 transition-all">
+                  <CreditCard className="w-4 h-4 text-[#7C6FA0] shrink-0 mr-2.5" />
+                  <input
+                    type="text"
+                    required
+                    maxLength={10}
+                    placeholder="e.g. ABCDE1234F"
+                    value={panNumber}
+                    onChange={(e) => setPanNumber(e.target.value.toUpperCase())}
+                    className="w-full bg-transparent text-[#1E144F] placeholder-[#8E82AA] text-sm font-mono uppercase focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#1E144F] mb-1.5 ml-0.5">
+                  Bank Account Number <span className="text-[#6355DE]">*</span>
+                </label>
+                <div className="relative flex items-center bg-[#F3EEFC]/90 hover:bg-[#F3EEFC] focus-within:bg-white focus-within:border-[#6355DE] border border-purple-200/70 rounded-xl px-3.5 py-2.5 transition-all">
+                  <FileText className="w-4 h-4 text-[#7C6FA0] shrink-0 mr-2.5" />
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. 9876543210987"
+                    value={bankAccountNumber}
+                    onChange={(e) => setBankAccountNumber(e.target.value)}
+                    className="w-full bg-transparent text-[#1E144F] placeholder-[#8E82AA] text-sm font-mono focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Terms Agreement matching Picture 2 */}
           <div className="pt-1">
-            <label className="flex items-start gap-2.5 cursor-pointer select-none group text-xs text-[#6B5E99] dark:text-[#9DA4B0]">
+            <label className="flex items-center gap-2.5 cursor-pointer select-none group text-xs text-[#1E144F] font-medium">
               <input
                 type="checkbox"
                 required
                 checked={agreeTerms}
                 onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="mt-0.5 w-4 h-4 rounded border-[#CBD5E1] text-[#7C3AED] focus:ring-[#7C3AED]/30 cursor-pointer"
+                className="w-4 h-4 rounded border-purple-300 text-[#6355DE] accent-[#6355DE] focus:ring-[#6355DE]/20 cursor-pointer"
               />
               <span>
                 I agree to the{' '}
-                <Link href="/terms" target="_blank" className="text-[#6366F1] dark:text-[#A78BFA] font-bold hover:underline">
-                  Terms of Use
-                </Link>{' '}
-                and{' '}
-                <Link href="/privacy" target="_blank" className="text-[#6366F1] dark:text-[#A78BFA] font-bold hover:underline">
-                  Privacy Policy
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  className="text-[#6355DE] font-semibold hover:underline"
+                >
+                  Terms &amp; Privacy Policy
                 </Link>
               </span>
             </label>
           </div>
 
-          {/* Submit Button */}
+          {/* Submit Button ("Sign Up" in Picture 2) */}
           <button
             type="submit"
             disabled={isLoading || !agreeTerms}
-            className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#7C3AED] via-[#6D28D9] to-[#6366F1] hover:from-[#6D28D9] hover:to-[#4F46E5] text-white font-bold text-sm tracking-wide transition-all shadow-lg shadow-purple-500/25 active:scale-[0.99] disabled:opacity-50 mt-2 cursor-pointer"
+            className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#6355DE] via-[#7563E6] to-[#8F66E8] hover:opacity-95 text-white font-bold text-base tracking-wide transition-all shadow-lg shadow-purple-500/25 active:scale-[0.99] disabled:opacity-50 mt-3 cursor-pointer"
           >
             {isLoading
               ? 'Creating Account...'
               : role === 'viewer'
-              ? 'Create Account'
+              ? 'Sign Up'
               : role === 'creator'
               ? 'Register as Creator'
               : 'Register as Advertiser'}
@@ -423,8 +436,8 @@ export default function RegisterPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#EAE5FC] via-[#F4F1FD] to-[#E5DCFA] dark:from-[#070B0F] dark:to-[#111A22]">
-          <div className="w-10 h-10 rounded-full border-2 border-[#7C3AED] border-t-transparent animate-spin" />
+        <div className="min-h-screen flex items-center justify-center bg-[#EAE3F7]">
+          <div className="w-10 h-10 rounded-full border-2 border-[#6355DE] border-t-transparent animate-spin" />
         </div>
       }
     >

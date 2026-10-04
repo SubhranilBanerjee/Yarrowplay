@@ -2,10 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { AudioPlayerProvider } from '@/context/AudioPlayerContext';
-import { Header } from '@/components/layout/Header';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { MobileNavbar } from '@/components/layout/MobileNavbar';
-import { AudioPlayerBar } from '@/components/media/AudioPlayerBar';
+import { AppShell } from '@/components/layout/AppShell';
 import { GalaxyBackground } from '@/components/common/GalaxyBackground';
 
 import { ThemeProvider } from '@/context/ThemeContext';
@@ -113,15 +110,7 @@ export default function RootLayout({
               <WalletProvider>
                 <AudioPlayerProvider>
                   <GalaxyBackground />
-                  <Header />
-                  <div className="flex flex-1 min-h-[calc(100vh-61px)]">
-                    <Sidebar />
-                    <main className="flex-1 overflow-y-auto pb-28 md:pb-24 bg-transparent min-w-0">
-                      {children}
-                    </main>
-                  </div>
-                  <AudioPlayerBar />
-                  <MobileNavbar />
+                  <AppShell>{children}</AppShell>
 
                   {/* DramaBox Monetization Modals */}
                   <CoinStoreModal />

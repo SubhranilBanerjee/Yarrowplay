@@ -68,28 +68,29 @@ export default function LoginPage() {
   return (
     <>
       <AuthCardWrapper
-        heroTitle={'Welcome back to\nLight House Reels'}
-        heroSubtitle="Watch. Discover. Shine."
-        cardTitle="Login to your account"
+        heroTitle="Stream, Discover, and Relax"
+        heroSubtitle="Your stories, guided by the light."
+        cardTitle="Welcome back"
+        cardSubtitle="Login to your Light House Reels account"
         showGoogleAuth={true}
-        googleLabel="Google"
+        googleLabel="Sign in with Google"
         onGoogleError={(err) => setErrorMsg(err)}
         footerLink={{
           text: "Don't have an account?",
-          linkText: "Sign up",
-          href: "/register"
+          linkText: 'Sign up',
+          href: '/register',
         }}
       >
         {/* Error / Success Feedback */}
         {errorMsg && (
-          <div className="mb-4 p-3 rounded-2xl bg-[#D96868]/15 border border-[#D96868]/30 text-[#D96868] text-xs flex items-center gap-2">
+          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {successMsg && (
-          <div className="mb-4 p-3 rounded-2xl bg-[#68B88A]/15 border border-[#68B88A]/30 text-[#68B88A] text-xs flex items-center gap-2">
+          <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
             <CheckCircle className="w-4 h-4 shrink-0" />
             <span>{successMsg}</span>
           </div>
@@ -98,39 +99,41 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="space-y-4">
           {/* Email */}
           <div>
-            <label className="block text-xs font-bold text-[#3B3463] dark:text-[#C2BAE7] mb-1.5 ml-1">
+            <label className="block text-xs font-bold text-[#1E144F] mb-1.5 ml-0.5">
               Email
             </label>
-            <div className="relative">
+            <div className="relative flex items-center bg-[#F3EEFC]/90 hover:bg-[#F3EEFC] focus-within:bg-white focus-within:border-[#6355DE] focus-within:ring-2 focus-within:ring-[#6355DE]/15 border border-purple-200/70 rounded-xl px-3.5 py-2.5 transition-all">
+              <Mail className="w-4 h-4 text-[#7C6FA0] shrink-0 mr-2.5" />
               <input
                 type="email"
                 required
-                placeholder="email@example.com"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#EEF2F6] dark:bg-[#141D26] text-[#0F172A] dark:text-[#F5F1E8] placeholder-[#94A3B8] dark:placeholder-[#64748B] text-sm rounded-2xl px-4 py-3 border border-[#E2E8F0] dark:border-[#27313A] focus:outline-none focus:bg-white dark:focus:bg-[#1A2533] focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/20 transition-all"
+                className="w-full bg-transparent text-[#1E144F] placeholder-[#8E82AA] text-sm focus:outline-none"
               />
             </div>
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-xs font-bold text-[#3B3463] dark:text-[#C2BAE7] mb-1.5 ml-1">
+            <label className="block text-xs font-bold text-[#1E144F] mb-1.5 ml-0.5">
               Password
             </label>
-            <div className="relative">
+            <div className="relative flex items-center bg-[#F3EEFC]/90 hover:bg-[#F3EEFC] focus-within:bg-white focus-within:border-[#6355DE] focus-within:ring-2 focus-within:ring-[#6355DE]/15 border border-purple-200/70 rounded-xl px-3.5 py-2.5 transition-all">
+              <Lock className="w-4 h-4 text-[#7C6FA0] shrink-0 mr-2.5" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
-                placeholder="••••••••••"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#EEF2F6] dark:bg-[#141D26] text-[#0F172A] dark:text-[#F5F1E8] placeholder-[#94A3B8] dark:placeholder-[#64748B] text-sm rounded-2xl pl-4 pr-11 py-3 border border-[#E2E8F0] dark:border-[#27313A] focus:outline-none focus:bg-white dark:focus:bg-[#1A2533] focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/20 transition-all"
+                className="w-full bg-transparent text-[#1E144F] placeholder-[#8E82AA] text-sm focus:outline-none"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C84A7] hover:text-[#4C407B] dark:hover:text-[#EDE8FC] transition-colors cursor-pointer"
+                className="text-[#7C6FA0] hover:text-[#1E144F] transition-colors p-1 cursor-pointer"
                 aria-label="Toggle password visibility"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -140,18 +143,18 @@ export default function LoginPage() {
 
           {/* Remember me & Forgot password */}
           <div className="flex items-center justify-between text-xs pt-1">
-            <label className="flex items-center gap-2 text-[#6B5E99] dark:text-[#9DA4B0] cursor-pointer select-none">
+            <label className="flex items-center gap-2 text-[#4A3E6B] font-medium cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-[#CBD5E1] text-[#7C3AED] focus:ring-[#7C3AED]/30 cursor-pointer"
+                className="w-4 h-4 rounded border-purple-300 text-[#6355DE] accent-[#6355DE] focus:ring-[#6355DE]/20 cursor-pointer"
               />
               <span>Remember me</span>
             </label>
             <Link
               href="/forgot-password"
-              className="text-[#6366F1] dark:text-[#A78BFA] font-semibold hover:underline"
+              className="text-[#6355DE] font-semibold hover:underline"
             >
               Forgot password?
             </Link>
@@ -161,9 +164,9 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#7C3AED] via-[#6D28D9] to-[#6366F1] hover:from-[#6D28D9] hover:to-[#4F46E5] text-white font-bold text-sm tracking-wide transition-all shadow-lg shadow-purple-500/25 active:scale-[0.99] disabled:opacity-50 mt-4 cursor-pointer"
+            className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#6355DE] via-[#7563E6] to-[#8F66E8] hover:opacity-95 text-white font-bold text-base tracking-wide transition-all shadow-lg shadow-purple-500/25 active:scale-[0.99] disabled:opacity-50 mt-3 cursor-pointer"
           >
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? 'Logging in...' : 'Sign In'}
           </button>
         </form>
       </AuthCardWrapper>
