@@ -727,26 +727,26 @@ export default function ProfilePage() {
               boxShadow: '0 0 25px rgba(239, 68, 68, 0.2)',
             }}
           >
-            <div className="flex items-center gap-3 text-red-400">
+            <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
               <div className="p-3 bg-red-500/10 rounded-xl border border-red-500/20">
                 <Trash2 className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white capitalize">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white capitalize">
                   Delete {deleteTarget.type}
                 </h3>
-                <p className="text-xs text-[var(--text-muted)]">This action cannot be undone</p>
+                <p className="text-xs text-slate-500 dark:text-[var(--text-muted)]">This action cannot be undone</p>
               </div>
             </div>
 
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-sm text-slate-600 dark:text-[var(--text-secondary)] leading-relaxed">
               Are you sure you want to permanently delete{' '}
-              <strong className="text-white">"{deleteTarget.title}"</strong>? All associated comments,
+              <strong className="text-slate-900 dark:text-white">"{deleteTarget.title}"</strong>? All associated comments,
               reactions, and media references will be permanently removed.
             </p>
 
             {deleteError && (
-              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400">
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-500 dark:text-red-400 font-medium">
                 {deleteError}
               </div>
             )}
@@ -759,7 +759,7 @@ export default function ProfilePage() {
                   setDeleteTarget(null);
                   setDeleteError(null);
                 }}
-                className="px-4 py-2 text-xs font-semibold text-[var(--text-muted)] hover:text-white transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:text-[var(--text-muted)] dark:hover:text-white transition-colors cursor-pointer"
               >
                 Cancel
               </button>

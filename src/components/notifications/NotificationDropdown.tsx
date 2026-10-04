@@ -234,35 +234,35 @@ export function NotificationDropdown() {
       case 'like':
         return (
           <span>
-            <strong className="text-[#F5F1E8] font-medium">{actorName}</strong> liked your {typeLabel}{' '}
-            {n.content_title && <span className="text-[#F4C95D]">"{n.content_title}"</span>}
+            <strong className="text-slate-900 dark:text-[#F5F1E8] font-semibold">{actorName}</strong> liked your {typeLabel}{' '}
+            {n.content_title && <span className="text-amber-700 dark:text-[#F4C95D] font-medium">"{n.content_title}"</span>}
           </span>
         );
       case 'dislike':
         return (
           <span>
-            <strong className="text-[#F5F1E8] font-medium">{actorName}</strong> gave feedback on your {typeLabel}{' '}
-            {n.content_title && <span className="text-[#7E9BB5]">"{n.content_title}"</span>}
+            <strong className="text-slate-900 dark:text-[#F5F1E8] font-semibold">{actorName}</strong> gave feedback on your {typeLabel}{' '}
+            {n.content_title && <span className="text-sky-700 dark:text-[#7E9BB5] font-medium">"{n.content_title}"</span>}
           </span>
         );
       case 'comment':
         return (
           <span>
-            <strong className="text-[#F5F1E8] font-medium">{actorName}</strong> commented on your {typeLabel}{' '}
-            {n.content_title && <span className="text-[#F4C95D]">"{n.content_title}"</span>}
+            <strong className="text-slate-900 dark:text-[#F5F1E8] font-semibold">{actorName}</strong> commented on your {typeLabel}{' '}
+            {n.content_title && <span className="text-amber-700 dark:text-[#F4C95D] font-medium">"{n.content_title}"</span>}
           </span>
         );
       case 'favorite':
         return (
           <span>
-            <strong className="text-[#F5F1E8] font-medium">{actorName}</strong> favorited your {typeLabel}{' '}
-            {n.content_title && <span className="text-[#F4C95D]">"{n.content_title}"</span>}
+            <strong className="text-slate-900 dark:text-[#F5F1E8] font-semibold">{actorName}</strong> favorited your {typeLabel}{' '}
+            {n.content_title && <span className="text-amber-700 dark:text-[#F4C95D] font-medium">"{n.content_title}"</span>}
           </span>
         );
       default:
         return (
           <span>
-            <strong className="text-[#F5F1E8] font-medium">{actorName}</strong> interacted with your {typeLabel}
+            <strong className="text-slate-900 dark:text-[#F5F1E8] font-semibold">{actorName}</strong> interacted with your {typeLabel}
           </span>
         );
     }
@@ -278,13 +278,13 @@ export function NotificationDropdown() {
         onClick={handleToggle}
         className={`relative w-9 h-9 rounded-xl border transition-all flex items-center justify-center cursor-pointer ${
           isOpen
-            ? 'border-[#F4C95D] text-[#F4C95D] bg-[#141D26]'
-            : 'border-[#27313A] text-[#B7BEC6] hover:text-[#F5F1E8] hover:border-[#F4C95D]/40 bg-[#111A22]'
+            ? 'border-amber-400 text-amber-600 bg-amber-50/70 dark:border-[#F4C95D] dark:text-[#F4C95D] dark:bg-[#141D26]'
+            : 'border-slate-200 dark:border-[#27313A] text-slate-600 dark:text-[#B7BEC6] hover:text-slate-900 dark:hover:text-[#F5F1E8] hover:border-amber-400/50 dark:hover:border-[#F4C95D]/40 bg-white dark:bg-[#111A22]'
         }`}
       >
         <Bell className="w-4 h-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-[#F4C95D] text-[#0B0F13] text-[10px] font-black rounded-full flex items-center justify-center shadow">
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-amber-400 text-slate-950 dark:bg-[#F4C95D] dark:text-[#0B0F13] text-[10px] font-black rounded-full flex items-center justify-center shadow">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -292,14 +292,14 @@ export function NotificationDropdown() {
 
       {/* Glassmorphic Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-2xl bg-[#101820] border border-[#27313A] shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-2xl bg-white dark:bg-[#101820] border border-slate-200 dark:border-[#27313A] shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
           {/* Header */}
-          <div className="px-4 py-3 border-b border-[#27313A] flex items-center justify-between bg-[#151F28]">
+          <div className="px-4 py-3 border-b border-slate-200 dark:border-[#27313A] flex items-center justify-between bg-slate-50 dark:bg-[#151F28]">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-[#F5F1E8] flex items-center gap-2">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-[#F5F1E8] flex items-center gap-2">
                 Notifications
                 {unreadCount > 0 && (
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#F4C95D]/20 text-[#F4C95D] border border-[#F4C95D]/40">
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 dark:bg-[#F4C95D]/20 dark:text-[#F4C95D] dark:border-[#F4C95D]/40">
                     {unreadCount} new
                   </span>
                 )}
@@ -309,7 +309,7 @@ export function NotificationDropdown() {
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-xs text-[#F4C95D] hover:underline flex items-center gap-1.5 transition-colors font-medium cursor-pointer"
+                className="text-xs text-purple-700 hover:text-purple-900 dark:text-[#F4C95D] dark:hover:underline flex items-center gap-1.5 transition-colors font-semibold cursor-pointer"
                 title="Mark all as read"
               >
                 <CheckCheck className="w-3.5 h-3.5" />
@@ -319,13 +319,13 @@ export function NotificationDropdown() {
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex items-center px-4 py-2 border-b border-[#1C252D] gap-2 bg-[#0B1117]">
+          <div className="flex items-center px-4 py-2 border-b border-slate-200 dark:border-[#1C252D] gap-2 bg-slate-50/60 dark:bg-[#0B1117]">
             <button
               onClick={() => setFilter('all')}
               className={`text-xs px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
                 filter === 'all'
-                  ? 'bg-[#F4C95D] text-[#0B0F13] font-bold shadow'
-                  : 'text-[#B7BEC6] hover:text-[#F5F1E8] hover:bg-[#151F28]'
+                  ? 'bg-amber-400 text-slate-950 font-bold shadow-sm dark:bg-[#F4C95D] dark:text-[#0B0F13]'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-[#B7BEC6] dark:hover:text-[#F5F1E8] dark:hover:bg-[#151F28]'
               }`}
             >
               All
@@ -334,13 +334,13 @@ export function NotificationDropdown() {
               onClick={() => setFilter('unread')}
               className={`text-xs px-3 py-1 rounded-full font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                 filter === 'unread'
-                  ? 'bg-[#F4C95D] text-[#0B0F13] font-bold shadow'
-                  : 'text-[#B7BEC6] hover:text-[#F5F1E8] hover:bg-[#151F28]'
+                  ? 'bg-amber-400 text-slate-950 font-bold shadow-sm dark:bg-[#F4C95D] dark:text-[#0B0F13]'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-[#B7BEC6] dark:hover:text-[#F5F1E8] dark:hover:bg-[#151F28]'
               }`}
             >
               <span>Unread</span>
               {unreadCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-[#0B0F13] text-[#F4C95D] text-[10px] font-bold flex items-center justify-center">
+                <span className="w-4 h-4 rounded-full bg-slate-900 text-white dark:bg-[#0B0F13] dark:text-[#F4C95D] text-[10px] font-bold flex items-center justify-center">
                   {unreadCount}
                 </span>
               )}
@@ -348,14 +348,14 @@ export function NotificationDropdown() {
           </div>
 
           {/* Notifications List */}
-          <div className="max-h-[380px] overflow-y-auto divide-y divide-[#1C252D]">
+          <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-100 dark:divide-[#1C252D]">
             {filteredNotifications.length === 0 ? (
               <div className="py-12 px-4 text-center">
-                <div className="w-12 h-12 mx-auto rounded-full bg-[#151F28] border border-[#27313A] flex items-center justify-center text-[#7F8993] mb-3">
+                <div className="w-12 h-12 mx-auto rounded-full bg-slate-100 dark:bg-[#151F28] border border-slate-200 dark:border-[#27313A] flex items-center justify-center text-slate-400 dark:text-[#7F8993] mb-3">
                   <Bell className="w-6 h-6" />
                 </div>
-                <p className="text-sm font-semibold text-[#F5F1E8]">No notifications</p>
-                <p className="text-xs text-[#7F8993] mt-1">
+                <p className="text-sm font-semibold text-slate-800 dark:text-[#F5F1E8]">No notifications</p>
+                <p className="text-xs text-slate-500 dark:text-[#7F8993] mt-1">
                   {filter === 'unread'
                     ? "You have read all your notifications!"
                     : "You'll be notified when someone likes, comments, or interacts with your content."}
@@ -368,13 +368,13 @@ export function NotificationDropdown() {
                   onClick={() => handleNotificationClick(notification)}
                   className={`p-3.5 flex items-start gap-3 transition-colors cursor-pointer group ${
                     notification.is_read
-                      ? 'hover:bg-[#151F28]'
-                      : 'bg-[#141D26] hover:bg-[#151F28] border-l-2 border-l-[#F4C95D]'
+                      ? 'hover:bg-slate-50 dark:hover:bg-[#151F28]'
+                      : 'bg-amber-50/50 hover:bg-amber-50/80 border-l-2 border-l-amber-500 dark:bg-[#141D26] dark:hover:bg-[#151F28] dark:border-l-[#F4C95D]'
                   }`}
                 >
                   {/* Actor Avatar with Action Badge */}
                   <div className="relative shrink-0 mt-0.5">
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-[#151F28] border border-[#27313A] flex items-center justify-center text-xs font-bold text-[#F4C95D]">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 dark:bg-[#151F28] border border-slate-200 dark:border-[#27313A] flex items-center justify-center text-xs font-bold text-amber-700 dark:text-[#F4C95D]">
                       {notification.actor?.avatar_url ? (
                         <Image
                           src={notification.actor.avatar_url}
@@ -396,19 +396,19 @@ export function NotificationDropdown() {
 
                   {/* Body Text */}
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs text-[#B7BEC6] leading-relaxed">
+                    <div className="text-xs text-slate-600 dark:text-[#B7BEC6] leading-relaxed">
                       {getActionText(notification)}
                     </div>
 
                     {/* Comment preview if applicable */}
                     {notification.message && (
-                      <p className="mt-1 text-xs text-[#7F8993] bg-[#0B1117] px-2.5 py-1.5 rounded-lg border border-[#1C252D] italic line-clamp-2">
+                      <p className="mt-1 text-xs text-slate-700 dark:text-[#7F8993] bg-slate-100/80 dark:bg-[#0B1117] px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-[#1C252D] italic line-clamp-2">
                         "{notification.message}"
                       </p>
                     )}
 
                     <div className="flex items-center gap-2 mt-1.5">
-                      <span className="text-[11px] text-[#7F8993]">
+                      <span className="text-[11px] text-slate-400 dark:text-[#7F8993]">
                         {formatRelativeTime(notification.created_at)}
                       </span>
                     </div>
@@ -420,7 +420,7 @@ export function NotificationDropdown() {
                       <button
                         onClick={(e) => markAsRead(notification.id, e)}
                         title="Mark as read"
-                        className="p-1 rounded-md text-[#7F8993] hover:text-[#F5F1E8] hover:bg-[#151F28]"
+                        className="p-1 rounded-md text-slate-400 hover:text-slate-800 hover:bg-slate-100 dark:text-[#7F8993] dark:hover:text-[#F5F1E8] dark:hover:bg-[#151F28]"
                       >
                         <Check className="w-3.5 h-3.5" />
                       </button>
@@ -428,14 +428,14 @@ export function NotificationDropdown() {
                     <button
                       onClick={(e) => deleteNotification(notification.id, e)}
                       title="Delete notification"
-                      className="p-1 rounded-md text-[#7F8993] hover:text-[#D96868] hover:bg-[#D96868]/10"
+                      className="p-1 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 dark:text-[#7F8993] dark:hover:text-[#D96868] dark:hover:bg-[#D96868]/10"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
 
                   {!notification.is_read && (
-                    <div className="w-2 h-2 rounded-full bg-[#F4C95D] shrink-0 self-center group-hover:hidden" />
+                    <div className="w-2 h-2 rounded-full bg-amber-500 dark:bg-[#F4C95D] shrink-0 self-center group-hover:hidden" />
                   )}
                 </div>
               ))
@@ -443,11 +443,11 @@ export function NotificationDropdown() {
           </div>
 
           {/* Footer */}
-          <div className="p-2.5 border-t border-[#27313A] bg-[#151F28] text-center">
+          <div className="p-2.5 border-t border-slate-200 dark:border-[#27313A] bg-slate-50 dark:bg-[#151F28] text-center">
             <Link
               href="/notifications"
               onClick={() => setIsOpen(false)}
-              className="text-xs font-semibold text-[#F4C95D] hover:underline transition-colors flex items-center justify-center gap-1.5 py-1"
+              className="text-xs font-semibold text-purple-700 hover:text-purple-900 dark:text-[#F4C95D] dark:hover:underline transition-colors flex items-center justify-center gap-1.5 py-1"
             >
               <span>View all notifications</span>
               <ExternalLink className="w-3.5 h-3.5" />

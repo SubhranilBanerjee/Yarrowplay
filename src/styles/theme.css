@@ -298,6 +298,16 @@ body.light {
   color: #475569 !important;
 }
 
+[data-theme="light"] .bg-white,
+html.light .bg-white,
+body.light .bg-white,
+[data-theme="light"] [class*="bg-white"],
+html.light [class*="bg-white"],
+body.light [class*="bg-white"] {
+  background-color: #FFFFFF !important;
+}
+
+[data-theme="light"] .bg-\[\#101820\],
 [data-theme="light"] .bg-\[\#111A22\],
 [data-theme="light"] .bg-\[\#090D12\],
 [data-theme="light"] .bg-\[\#070B0F\],
@@ -307,8 +317,36 @@ body.light {
 [data-theme="light"] .bg-\[\#141D26\],
 [data-theme="light"] .bg-\[\#151F28\],
 [data-theme="light"] .bg-\[\#0F151B\],
-[data-theme="light"] .bg-\[\#0D131A\] {
+[data-theme="light"] .bg-\[\#0D131A\],
+[data-theme="light"] .bg-\[\#1C252D\],
+[data-theme="light"] .bg-\[\#1A232D\],
+[data-theme="light"] .bg-\[\#18212B\],
+[data-theme="light"] .bg-\[\#131920\],
+[data-theme="light"] .bg-\[\#161D26\],
+[data-theme="light"] .bg-\[\#181428\],
+[data-theme="light"] .bg-\[\#221C13\],
+[data-theme="light"] [class*="101820"],
+[data-theme="light"] [class*="111A22"],
+[data-theme="light"] [class*="131920"],
+[data-theme="light"] [class*="181428"],
+[data-theme="light"] [class*="141D26"],
+[data-theme="light"] [class*="151F28"],
+[data-theme="light"] [class*="0B1117"],
+[data-theme="light"] [class*="18212B"],
+[data-theme="light"] [class*="161D26"],
+[data-theme="light"] [class*="221C13"],
+html.light [class*="101820"],
+html.light [class*="111A22"],
+html.light [class*="131920"],
+html.light [class*="181428"],
+html.light [class*="141D26"],
+html.light [class*="151F28"],
+html.light [class*="0B1117"],
+html.light [class*="18212B"],
+html.light [class*="161D26"],
+html.light [class*="221C13"] {
   background-color: #FFFFFF !important;
+  background-image: none !important;
 }
 
 [data-theme="light"] .border-\[\#27313A\],
@@ -318,8 +356,46 @@ body.light {
 [data-theme="light"] .border-\[\#1A232D\],
 [data-theme="light"] .border-\[\#1C252D\],
 [data-theme="light"] .border-\[\#26313C\],
-[data-theme="light"] .border-\[\#24303D\] {
+[data-theme="light"] .border-\[\#24303D\],
+[data-theme="light"] .border-\[\#232D38\] {
   border-color: #E2E8F0 !important;
+}
+
+/* High contrast gold/amber text on light backgrounds */
+[data-theme="light"] span.text-\[\#F4C95D\]:not([class*="bg-"]):not([class*="btn"]):not([class*="badge"]),
+[data-theme="light"] div.text-\[\#F4C95D\]:not([class*="bg-"]):not([class*="btn"]):not([class*="badge"]),
+[data-theme="light"] p.text-\[\#F4C95D\]:not([class*="bg-"]):not([class*="btn"]):not([class*="badge"]),
+[data-theme="light"] span.text-\[\#ECC979\]:not([class*="bg-"]):not([class*="btn"]):not([class*="badge"]),
+[data-theme="light"] div.text-\[\#ECC979\]:not([class*="bg-"]):not([class*="btn"]):not([class*="badge"]),
+[data-theme="light"] p.text-\[\#ECC979\]:not([class*="bg-"]):not([class*="btn"]):not([class*="badge"]) {
+  color: #B45309 !important;
+}
+
+[data-theme="light"] svg.text-\[\#F4C95D\],
+[data-theme="light"] svg.text-\[\#ECC979\] {
+  color: #D97706 !important;
+}
+
+[data-theme="light"] .text-\[\#68B88A\] {
+  color: #047857 !important;
+}
+
+[data-theme="light"] .bg-\[\#68B88A\]\/15 {
+  background-color: #ECFDF5 !important;
+  border-color: #A7F3D0 !important;
+}
+
+[data-theme="light"] .bg-\[\#68B88A\]\/20 {
+  background-color: #D1FAE5 !important;
+}
+
+[data-theme="light"] .text-\[\#D96868\] {
+  color: #B91C1C !important;
+}
+
+[data-theme="light"] .bg-\[\#D96868\]\/15 {
+  background-color: #FEF2F2 !important;
+  border-color: #FECACA !important;
 }
 
 [data-theme="light"] .prose-invert {

@@ -73,14 +73,14 @@ export default function RewardedAdModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-[#101820] border border-[#27313A] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+      <div className="relative w-full max-w-lg bg-white dark:bg-[#101820] border border-slate-200 dark:border-[#27313A] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
         {/* Top Control Bar */}
-        <div className="p-4 bg-[#151F28] border-b border-[#27313A] flex items-center justify-between">
+        <div className="p-4 bg-slate-50 dark:bg-[#151F28] border-b border-slate-200 dark:border-[#27313A] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs px-2 py-0.5 rounded bg-[#F4C95D]/20 text-[#F4C95D] font-bold border border-[#F4C95D]/30 uppercase tracking-wide">
+            <span className="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300 dark:bg-[#F4C95D]/20 dark:text-[#F4C95D] dark:border-[#F4C95D]/30 font-bold uppercase tracking-wide">
               Rewarded Sponsor
             </span>
-            <span className="text-xs text-[#B7BEC6] font-medium">
+            <span className="text-xs text-slate-600 dark:text-[#B7BEC6] font-medium">
               {adFinished ? 'Reward Unlocked!' : `Reward in ${timeLeft}s`}
             </span>
           </div>
@@ -93,14 +93,14 @@ export default function RewardedAdModal() {
                   setIsMuted(videoRef.current.muted);
                 }
               }}
-              className="p-1.5 rounded-lg bg-[#101820] text-[#B7BEC6] hover:text-[#F5F1E8] cursor-pointer"
+              className="p-1.5 rounded-lg bg-white dark:bg-[#101820] text-slate-600 hover:text-slate-900 border border-slate-200 dark:border-transparent dark:text-[#B7BEC6] dark:hover:text-[#F5F1E8] cursor-pointer"
             >
               {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
             {adFinished && (
               <button
                 onClick={closeRewardedAd}
-                className="p-1.5 rounded-lg bg-[#101820] text-[#7F8993] hover:text-[#F5F1E8] transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg bg-white dark:bg-[#101820] text-slate-400 hover:text-slate-800 border border-slate-200 dark:border-transparent dark:text-[#7F8993] dark:hover:text-[#F5F1E8] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -141,17 +141,17 @@ export default function RewardedAdModal() {
         </div>
 
         {/* Ad details & Claim button footer */}
-        <div className="p-4 bg-[#111A22] border-t border-[#27313A] flex flex-col gap-3">
+        <div className="p-4 bg-white dark:bg-[#111A22] border-t border-slate-200 dark:border-[#27313A] flex flex-col gap-3">
           <div>
-            <span className="text-[10px] uppercase font-bold text-[#F4C95D] tracking-wider">
+            <span className="text-[10px] uppercase font-bold text-amber-700 dark:text-[#F4C95D] tracking-wider">
               {ad.sponsor}
             </span>
-            <h4 className="text-sm font-bold text-[#F5F1E8] leading-snug">{ad.title}</h4>
-            <p className="text-xs text-[#B7BEC6] mt-0.5">{ad.tagline}</p>
+            <h4 className="text-sm font-bold text-slate-900 dark:text-[#F5F1E8] leading-snug">{ad.title}</h4>
+            <p className="text-xs text-slate-600 dark:text-[#B7BEC6] mt-0.5">{ad.tagline}</p>
           </div>
 
           <div className="pt-2 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5 text-xs text-[#F4C95D] font-bold">
+            <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-[#F4C95D] font-bold">
               <Coins className="w-4 h-4" />
               <span>Reward: 2 Coins</span>
             </div>
@@ -161,10 +161,10 @@ export default function RewardedAdModal() {
               disabled={!adFinished || claiming || rewardClaimed}
               className={`px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer ${
                 rewardClaimed
-                  ? 'bg-[#68B88A] text-white'
+                  ? 'bg-emerald-600 text-white'
                   : adFinished
                   ? 'btn-primary text-white font-bold'
-                  : 'bg-[#141D26] text-[#7F8993] cursor-not-allowed border border-[#27313A]'
+                  : 'bg-slate-100 text-slate-400 border border-slate-200 dark:bg-[#141D26] dark:text-[#7F8993] dark:border-[#27313A] cursor-not-allowed'
               }`}
             >
               {rewardClaimed

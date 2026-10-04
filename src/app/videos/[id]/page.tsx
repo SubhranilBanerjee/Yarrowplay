@@ -38,32 +38,32 @@ import { BottomToast } from '@/components/ui/BottomToast';
 function AuthGateModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-5 relative bg-[#101820] border border-[#27313A]">
+      <div className="rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-5 relative bg-white dark:bg-[#101820] border border-slate-200 dark:border-[#27313A]">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-[#7F8993] hover:text-[#F5F1E8] transition-colors"
+          className="absolute top-3 right-3 text-slate-400 hover:text-slate-800 dark:text-[#7F8993] dark:hover:text-[#F5F1E8] transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
         <div className="text-center">
-          <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#F4C95D]/30 bg-[#F4C95D]/10">
-            <LogIn className="w-7 h-7 text-[#F4C95D]" />
+          <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-300 bg-amber-50 dark:border-[#F4C95D]/30 dark:bg-[#F4C95D]/10">
+            <LogIn className="w-7 h-7 text-amber-700 dark:text-[#F4C95D]" />
           </div>
-          <h3 className="text-[#F5F1E8] font-bold text-lg">Sign in to Continue</h3>
-          <p className="text-[#B7BEC6] text-sm mt-2 leading-relaxed">
+          <h3 className="text-slate-900 dark:text-[#F5F1E8] font-bold text-lg">Sign in to Continue</h3>
+          <p className="text-slate-600 dark:text-[#B7BEC6] text-sm mt-2 leading-relaxed">
             Create a free account to like, comment, save, and interact with content on Lighthouse Reels.
           </p>
         </div>
         <div className="flex flex-col gap-2.5">
           <Link
             href={`/login?redirect=${encodeURIComponent(window.location.pathname)}`}
-            className="w-full py-3 px-4 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] text-[#0B0F13] text-sm font-semibold text-center transition-all active:scale-[0.99] shadow-md"
+            className="w-full py-3 px-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 dark:bg-[#F4C95D] dark:hover:bg-[#FFD978] dark:text-[#0B0F13] text-sm font-bold text-center transition-all active:scale-[0.99] shadow-md"
           >
             Sign In
           </Link>
           <Link
             href="/register"
-            className="w-full py-3 px-4 rounded-xl text-[#F5F1E8] text-sm font-semibold text-center transition-all border border-[#52606C] hover:bg-[#151F28] hover:border-[#F4C95D]"
+            className="w-full py-3 px-4 rounded-xl text-slate-700 hover:text-slate-900 dark:text-[#F5F1E8] text-sm font-semibold text-center transition-all border border-slate-200 dark:border-[#52606C] hover:bg-slate-50 dark:hover:bg-[#151F28] hover:border-amber-400 dark:hover:border-[#F4C95D]"
           >
             Create Free Account
           </Link>
@@ -144,31 +144,31 @@ function PaymentModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-      <div className="rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-5 relative bg-[#101820] border border-[#27313A]">
+      <div className="rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-5 relative bg-white dark:bg-[#101820] border border-slate-200 dark:border-[#27313A]">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-[#7F8993] hover:text-[#F5F1E8] transition-colors"
+          className="absolute top-3 right-3 text-slate-400 hover:text-slate-800 dark:text-[#7F8993] dark:hover:text-[#F5F1E8] transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
         <div className="text-center">
-          <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#F4C95D]/30 bg-[#F4C95D]/10">
-            <Lock className="w-7 h-7 text-[#F4C95D]" />
+          <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-300 bg-amber-50 dark:border-[#F4C95D]/30 dark:bg-[#F4C95D]/10">
+            <Lock className="w-7 h-7 text-amber-700 dark:text-[#F4C95D]" />
           </div>
-          <h3 className="text-[#F5F1E8] font-bold text-lg">Unlock Episode</h3>
-          <p className="text-[#B7BEC6] text-sm mt-2 leading-relaxed line-clamp-2">
+          <h3 className="text-slate-900 dark:text-[#F5F1E8] font-bold text-lg">Unlock Episode</h3>
+          <p className="text-slate-600 dark:text-[#B7BEC6] text-sm mt-2 leading-relaxed line-clamp-2">
             {video.title}
           </p>
           {video.price_inr && video.price_inr > 0 && (
-            <p className="font-extrabold text-3xl mt-3 text-[#F4C95D]">
+            <p className="font-extrabold text-3xl mt-3 text-amber-600 dark:text-[#F4C95D]">
               ₹{(video.price_inr as number).toFixed(2)}
             </p>
           )}
-          <p className="text-[11px] text-[#7F8993] mt-1">One-time payment · Instant access</p>
+          <p className="text-[11px] text-slate-500 dark:text-[#7F8993] mt-1">One-time payment · Instant access</p>
         </div>
 
         {error && (
-          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400">
+          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-400 font-medium">
             {error}
           </div>
         )}
@@ -176,7 +176,7 @@ function PaymentModal({
         <button
           onClick={handlePay}
           disabled={isLoading}
-          className="w-full py-3 px-4 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] text-[#0B0F13] text-sm font-semibold transition-all active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2 shadow-md"
+          className="w-full py-3 px-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 dark:bg-[#F4C95D] dark:hover:bg-[#FFD978] dark:text-[#0B0F13] text-sm font-bold transition-all active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2 shadow-md cursor-pointer"
         >
           {isLoading ? (
             <>
@@ -895,21 +895,21 @@ export default function VideoDetailPage() {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border bg-[#101820] border-[#27313A]">
-            <div className="flex items-center gap-3 text-[#D96868]">
-              <div className="p-3 bg-[#D96868]/10 rounded-xl border border-[#D96868]/20">
+          <div className="rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border bg-white dark:bg-[#101820] border-slate-200 dark:border-[#27313A]">
+            <div className="flex items-center gap-3 text-red-600 dark:text-[#D96868]">
+              <div className="p-3 bg-red-50 dark:bg-[#D96868]/10 rounded-xl border border-red-200 dark:border-[#D96868]/20">
                 <Trash2 className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-[#F5F1E8]">Delete Video</h3>
-                <p className="text-xs text-[#7F8993]">This action cannot be undone</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-[#F5F1E8]">Delete Video</h3>
+                <p className="text-xs text-slate-500 dark:text-[#7F8993]">This action cannot be undone</p>
               </div>
             </div>
-            <p className="text-sm text-[#B7BEC6] leading-relaxed">
-              Are you sure you want to permanently delete <strong className="text-[#F5F1E8]">"{video.title}"</strong>? All associated comments, reactions, and history will be permanently deleted.
+            <p className="text-sm text-slate-600 dark:text-[#B7BEC6] leading-relaxed">
+              Are you sure you want to permanently delete <strong className="text-slate-900 dark:text-[#F5F1E8]">"{video.title}"</strong>? All associated comments, reactions, and history will be permanently deleted.
             </p>
             {deleteError && (
-              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400">
+              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-400 font-medium">
                 {deleteError}
               </div>
             )}
@@ -918,7 +918,7 @@ export default function VideoDetailPage() {
                 type="button"
                 disabled={isDeleting}
                 onClick={() => { setShowDeleteModal(false); setDeleteError(null); }}
-                className="px-4 py-2 text-xs font-semibold text-[#7F8993] hover:text-[#F5F1E8] transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:text-[#7F8993] dark:hover:text-[#F5F1E8] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -926,7 +926,7 @@ export default function VideoDetailPage() {
                 type="button"
                 disabled={isDeleting}
                 onClick={handleDeleteVideo}
-                className="px-4 py-2 rounded-xl bg-[#D96868] hover:bg-[#C95353] text-white text-xs font-semibold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer shadow-lg"
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer shadow-lg"
               >
                 {isDeleting ? (
                   <><Loader2 className="w-3.5 h-3.5 animate-spin" />Deleting...</>
