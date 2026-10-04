@@ -59,13 +59,13 @@ export default function WatchlistPage() {
   const currentItemsCount = activeTab === 'video' ? videoList.length : audioList.length;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-[var(--lr-text-primary)]">
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
-          <Bookmark className="w-7 h-7 text-[var(--color-pink-light)]" />
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--lr-text-primary)] flex items-center gap-2.5">
+          <Bookmark className="w-7 h-7 text-[var(--lr-gold)]" />
           My Watchlist
         </h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
+        <p className="text-sm text-[var(--lr-text-secondary)] mt-1">
           Continue watching and listening to your saved series and audio tracks.
         </p>
       </div>

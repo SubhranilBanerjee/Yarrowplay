@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +31,7 @@ async function checkIsAdmin(req: NextRequest, supabase: any) {
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const isAdmin = await checkIsAdmin(req, supabase);
 
     if (!isAdmin) {
@@ -86,7 +86,7 @@ export async function GET(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const isAdmin = await checkIsAdmin(req, supabase);
 
     if (!isAdmin) {
@@ -136,7 +136,7 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const isAdmin = await checkIsAdmin(req, supabase);
 
     if (!isAdmin) {

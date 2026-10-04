@@ -33,8 +33,10 @@ import {
   RefreshCw,
   LogOut,
   Sliders,
+  Layers,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 import { getStoredSiteContent, saveStoredSiteContent, resetStoredSiteContent, SiteContent, DEFAULT_SITE_CONTENT } from '@/lib/siteContent';
 
 type AdminTab = 'analytics' | 'users' | 'moderation' | 'text';
@@ -42,6 +44,8 @@ type AdminTab = 'analytics' | 'users' | 'moderation' | 'text';
 export default function AdminHubPage() {
   const router = useRouter();
   const { user, profile } = useAuth();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   // Local admin bypass / session token
   const [localAdminAuth, setLocalAdminAuth] = useState(false);
@@ -66,12 +70,21 @@ export default function AdminHubPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Moderation data
+  const [moderationContentType, setModerationContentType] = useState<'videos' | 'series'>('videos');
   const [moderationVideos, setModerationVideos] = useState<any[]>([]);
+  const [moderationSeries, setModerationSeries] = useState<any[]>([]);
   const [moderationLoading, setModerationLoading] = useState(false);
-  const [moderationFilter, setModerationFilter] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const [moderationFilter, setModerationFilter] = useState<'pending' | 'approved' | 'rejected' | 'all'>('approved');
+  const [moderationSearch, setModerationSearch] = useState('');
   const [activeVideoModal, setActiveVideoModal] = useState<any | null>(null);
   const [rejectionModalVideo, setRejectionModalVideo] = useState<any | null>(null);
   const [rejectionReason, setRejectionReason] = useState('Content does not comply with community guidelines');
+  const [videoToDelete, setVideoToDelete] = useState<any | null>(null);
+  const [isDeletingVideo, setIsDeletingVideo] = useState(false);
+  const [seriesToDelete, setSeriesToDelete] = useState<any | null>(null);
+  const [isDeletingSeries, setIsDeletingSeries] = useState(false);
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   // Site Text CMS state
   const [siteText, setSiteText] = useState<SiteContent>(DEFAULT_SITE_CONTENT);
@@ -184,8 +197,8 @@ export default function AdminHubPage() {
     setUsersLoading(true);
     try {
       const params = new URLSearchParams();
-      if (userSearch.trim()) params.set('q', userSearch.trim());
       if (userRoleFilter !== 'all') params.set('role', userRoleFilter);
+      if (userSearch.trim()) params.set('q', userSearch.trim());
       const res = await fetch(`/api/admin/crm?${params.toString()}`, { headers: getHeaders() });
       if (res.ok) {
         const data = await res.json();
@@ -198,7 +211,16 @@ export default function AdminHubPage() {
     }
   };
 
-  // Delete User Action
+  useEffect(() => {
+    if (isAdmin && activeTab === 'users') {
+      const timer = setTimeout(() => {
+        loadUsers();
+      }, 250);
+      return () => clearTimeout(timer);
+    }
+  }, [userRoleFilter, userSearch]);
+
+  // Delete User from Supabase
   const handleDeleteUser = async (targetUser: any) => {
     setIsDeleting(true);
     try {
@@ -208,11 +230,12 @@ export default function AdminHubPage() {
       });
       if (res.ok) {
         setUsersList((prev) => prev.filter((u) => u.id !== targetUser.id));
-        showNotification('success', `User ${targetUser.display_name || targetUser.email} was permanently deleted.`);
+        showNotification('success', `User ${targetUser.display_name || targetUser.email} deleted successfully.`);
         setUserToDelete(null);
+        loadAnalytics();
       } else {
-        const errData = await res.json();
-        showNotification('error', errData.error || 'Failed to delete user.');
+        const err = await res.json();
+        showNotification('error', err.error || 'Failed to delete user.');
       }
     } catch {
       showNotification('error', 'Network error during user deletion.');
@@ -221,14 +244,29 @@ export default function AdminHubPage() {
     }
   };
 
-  // 3. Fetch Moderation Videos
+  // 3. Fetch Moderation Content (Videos or Series)
   const loadModeration = async () => {
     setModerationLoading(true);
     try {
-      const res = await fetch(`/api/admin/moderation?filter=${moderationFilter}`, { headers: getHeaders() });
-      if (res.ok) {
-        const data = await res.json();
-        setModerationVideos(data.videos || []);
+      if (moderationContentType === 'series') {
+        const params = new URLSearchParams();
+        params.set('type', 'series');
+        if (moderationSearch.trim()) params.set('q', moderationSearch.trim());
+        const res = await fetch(`/api/admin/moderation?${params.toString()}`, { headers: getHeaders() });
+        if (res.ok) {
+          const data = await res.json();
+          setModerationSeries(data.series || []);
+        }
+      } else {
+        const params = new URLSearchParams();
+        params.set('type', 'videos');
+        params.set('filter', moderationFilter);
+        if (moderationSearch.trim()) params.set('q', moderationSearch.trim());
+        const res = await fetch(`/api/admin/moderation?${params.toString()}`, { headers: getHeaders() });
+        if (res.ok) {
+          const data = await res.json();
+          setModerationVideos(data.videos || []);
+        }
       }
     } catch (err) {
       console.error('Moderation load error:', err);
@@ -239,9 +277,12 @@ export default function AdminHubPage() {
 
   useEffect(() => {
     if (isAdmin && activeTab === 'moderation') {
-      loadModeration();
+      const timer = setTimeout(() => {
+        loadModeration();
+      }, 200);
+      return () => clearTimeout(timer);
     }
-  }, [moderationFilter]);
+  }, [moderationContentType, moderationFilter, moderationSearch]);
 
   // Approve / Reject Video
   const handleModerateVideo = async (videoId: string, action: 'approve' | 'reject', reason?: string) => {
@@ -266,6 +307,92 @@ export default function AdminHubPage() {
       }
     } catch {
       showNotification('error', 'Network error during moderation.');
+    }
+  };
+
+  // Delete Single Uploaded Video from Supabase
+  const handleDeleteVideo = async (targetVid: any) => {
+    setIsDeletingVideo(true);
+    try {
+      const res = await fetch(`/api/admin/moderation?videoId=${targetVid.id}`, {
+        method: 'DELETE',
+        headers: getHeaders(),
+      });
+      if (res.ok) {
+        setModerationVideos((prev) => prev.filter((v) => v.id !== targetVid.id));
+        showNotification('success', `Content "${targetVid.title}" permanently deleted from Supabase.`);
+        setVideoToDelete(null);
+        loadAnalytics();
+        loadModeration();
+      } else {
+        const err = await res.json();
+        showNotification('error', err.error || 'Failed to delete content.');
+      }
+    } catch {
+      showNotification('error', 'Network error during content deletion.');
+    } finally {
+      setIsDeletingVideo(false);
+    }
+  };
+
+  // Delete Single Content Series from Supabase
+  const handleDeleteSeries = async (targetSeries: any) => {
+    setIsDeletingSeries(true);
+    try {
+      const res = await fetch(`/api/admin/moderation?seriesId=${targetSeries.id}`, {
+        method: 'DELETE',
+        headers: getHeaders(),
+      });
+      if (res.ok) {
+        setModerationSeries((prev) => prev.filter((s) => s.id !== targetSeries.id));
+        showNotification('success', `Series "${targetSeries.title}" and its episodes deleted from Supabase.`);
+        setSeriesToDelete(null);
+        loadAnalytics();
+        loadModeration();
+      } else {
+        const err = await res.json();
+        showNotification('error', err.error || 'Failed to delete series.');
+      }
+    } catch {
+      showNotification('error', 'Network error during series deletion.');
+    } finally {
+      setIsDeletingSeries(false);
+    }
+  };
+
+  // Delete All (Videos or Series) from Supabase
+  const handleDeleteAll = async () => {
+    setIsDeletingAll(true);
+    try {
+      const params = new URLSearchParams();
+      params.set('action', 'delete_all');
+      params.set('targetType', moderationContentType);
+      if (moderationContentType === 'videos') {
+        params.set('filter', moderationFilter);
+      }
+      const res = await fetch(`/api/admin/moderation?${params.toString()}`, {
+        method: 'DELETE',
+        headers: getHeaders(),
+      });
+      if (res.ok) {
+        if (moderationContentType === 'series') {
+          setModerationSeries([]);
+          showNotification('success', 'All content series and episodes permanently deleted from Supabase.');
+        } else {
+          setModerationVideos([]);
+          showNotification('success', `All ${moderationFilter === 'all' ? '' : moderationFilter + ' '}videos permanently deleted from Supabase.`);
+        }
+        setShowDeleteAllModal(false);
+        loadAnalytics();
+        loadModeration();
+      } else {
+        const err = await res.json();
+        showNotification('error', err.error || 'Failed to delete all items.');
+      }
+    } catch {
+      showNotification('error', 'Network error during bulk deletion.');
+    } finally {
+      setIsDeletingAll(false);
     }
   };
 
@@ -300,20 +427,26 @@ export default function AdminHubPage() {
   // Render Login Card if not admin
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-[#070314] text-[#F3E8FF] flex items-center justify-center p-4 relative overflow-hidden">
+      <div className={`min-h-screen flex items-center justify-center p-4 relative overflow-hidden transition-colors ${
+        isLight ? 'bg-slate-100 text-slate-900' : 'bg-[#070314] text-[#F3E8FF]'
+      }`}>
         {/* Glow ambient background */}
         <div className="absolute top-1/4 -left-20 w-96 h-96 rounded-full bg-purple-600/20 blur-[120px] pointer-events-none" />
         <div className="absolute bottom-1/4 -right-20 w-96 h-96 rounded-full bg-pink-600/15 blur-[120px] pointer-events-none" />
 
-        <div className="relative w-full max-w-md p-8 rounded-3xl bg-[#110926]/90 backdrop-blur-2xl border border-purple-500/30 shadow-[0_0_80px_rgba(147,51,234,0.25)] space-y-6">
+        <div className={`relative w-full max-w-md p-8 rounded-3xl backdrop-blur-2xl border shadow-2xl space-y-6 transition-colors ${
+          isLight
+            ? 'bg-white/95 border-slate-200 text-slate-900 shadow-slate-200/50'
+            : 'bg-[#110926]/90 border-purple-500/30 text-white shadow-[0_0_80px_rgba(147,51,234,0.25)]'
+        }`}>
           <div className="text-center space-y-2">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-500 p-0.5 mx-auto shadow-lg shadow-purple-600/40 flex items-center justify-center">
-              <div className="w-full h-full rounded-[14px] bg-[#0E0824] flex items-center justify-center">
-                <ShieldCheck className="w-7 h-7 text-purple-400" />
+              <div className={`w-full h-full rounded-[14px] flex items-center justify-center ${isLight ? 'bg-white' : 'bg-[#0E0824]'}`}>
+                <ShieldCheck className="w-7 h-7 text-purple-600" />
               </div>
             </div>
-            <h1 className="text-2xl font-black text-white tracking-tight">Super Admin Portal</h1>
-            <p className="text-xs text-purple-300/70">
+            <h1 className={`text-2xl font-black tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>Super Admin Portal</h1>
+            <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-purple-300/70'}`}>
               Sign in with administrative credentials to access platform controls.
             </p>
           </div>
@@ -327,37 +460,49 @@ export default function AdminHubPage() {
 
           <form onSubmit={handleAdminLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-purple-200 mb-1.5">Admin Email</label>
+              <label className={`block text-xs font-semibold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>Admin Email</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-3 w-4 h-4 text-purple-400" />
+                <Mail className="absolute left-3.5 top-3 w-4 h-4 text-purple-500" />
                 <input
                   type="email"
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
-                  className="w-full bg-[#1B0F38]/80 border border-purple-500/30 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-400"
+                  className={`w-full border rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none transition-colors ${
+                    isLight
+                      ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                      : 'bg-[#1B0F38]/80 border-purple-500/30 text-white focus:border-purple-400'
+                  }`}
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-purple-200 mb-1.5">Password</label>
+              <label className={`block text-xs font-semibold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-3 w-4 h-4 text-purple-400" />
+                <Lock className="absolute left-3.5 top-3 w-4 h-4 text-purple-500" />
                 <input
                   type="password"
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  className="w-full bg-[#1B0F38]/80 border border-purple-500/30 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-400"
+                  className={`w-full border rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none transition-colors ${
+                    isLight
+                      ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                      : 'bg-[#1B0F38]/80 border-purple-500/30 text-white focus:border-purple-400'
+                  }`}
                   required
                 />
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-purple-900/30 border border-purple-400/20 text-[11px] text-purple-200/80 space-y-1">
-              <p className="font-semibold text-purple-300">Authorized Admin Credentials:</p>
-              <p>Email: <code className="text-white font-mono font-bold">admin@admin.com</code></p>
-              <p>Password: <code className="text-white font-mono font-bold">123456</code></p>
+            <div className={`p-3 rounded-xl border text-[11px] space-y-1 ${
+              isLight
+                ? 'bg-purple-50 border-purple-200 text-purple-900'
+                : 'bg-purple-900/30 border-purple-400/20 text-purple-200/80'
+            }`}>
+              <p className="font-semibold text-purple-600">Authorized Admin Credentials:</p>
+              <p>Email: <code className="font-mono font-bold">admin@admin.com</code></p>
+              <p>Password: <code className="font-mono font-bold">123456</code></p>
             </div>
 
             <button
@@ -371,7 +516,7 @@ export default function AdminHubPage() {
           </form>
 
           <div className="pt-2 text-center">
-            <Link href="/" className="text-xs text-purple-400 hover:text-purple-300 transition-colors">
+            <Link href="/" className="text-xs text-purple-600 hover:text-purple-700 transition-colors">
               ← Return to Lighthouse Reels
             </Link>
           </div>
@@ -381,7 +526,9 @@ export default function AdminHubPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070314] text-[#F3E8FF] pb-24 font-sans selection:bg-purple-600 selection:text-white">
+    <div className={`min-h-screen pb-24 font-sans transition-colors ${
+      isLight ? 'bg-slate-50 text-slate-900' : 'bg-[#070314] text-[#F3E8FF] selection:bg-purple-600 selection:text-white'
+    }`}>
       {/* Toast Notification */}
       {notification && (
         <div
@@ -397,19 +544,21 @@ export default function AdminHubPage() {
       )}
 
       {/* Top Admin Header */}
-      <header className="sticky top-0 z-40 bg-[#0E0824]/90 backdrop-blur-xl border-b border-purple-500/20 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      <header className={`sticky top-0 z-40 backdrop-blur-xl border-b px-4 sm:px-8 py-3.5 flex items-center justify-between transition-colors ${
+        isLight ? 'bg-white/95 border-slate-200 shadow-xs' : 'bg-[#0E0824]/90 border-purple-500/20'
+      }`}>
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-500 p-0.5 shadow-md flex items-center justify-center group-hover:scale-105 transition-transform">
-              <div className="w-full h-full rounded-[10px] bg-[#0E0824] flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-purple-400" />
+              <div className={`w-full h-full rounded-[10px] flex items-center justify-center ${isLight ? 'bg-white' : 'bg-[#0E0824]'}`}>
+                <Sparkles className="w-4 h-4 text-purple-600" />
               </div>
             </div>
             <div>
-              <span className="text-lg font-black text-white tracking-tight">
-                LightHouse <span className="text-purple-400">Reels</span>
+              <span className={`text-lg font-black tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                LightHouse <span className="text-purple-600">Reels</span>
               </span>
-              <span className="ml-2 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+              <span className="ml-2 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-xs">
                 ADMIN CONSOLE
               </span>
             </div>
@@ -417,15 +566,21 @@ export default function AdminHubPage() {
         </div>
 
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#1A1038] border border-purple-500/30 text-xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-purple-300 font-medium">Logged in as:</span>
-            <span className="font-mono font-bold text-white">admin@admin.com</span>
+          <div className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs ${
+            isLight ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-[#1A1038] border-purple-500/30 text-purple-300'
+          }`}>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+            <span className="font-medium">Logged in as:</span>
+            <span className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>admin@admin.com</span>
           </div>
 
           <Link
             href="/"
-            className="px-3.5 py-1.5 rounded-xl bg-purple-950/60 hover:bg-purple-900/60 border border-purple-400/30 text-xs font-semibold text-purple-200 hover:text-white transition-all"
+            className={`px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+              isLight
+                ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800'
+                : 'bg-purple-950/60 hover:bg-purple-900/60 border-purple-400/30 text-purple-200 hover:text-white'
+            }`}
           >
             View Live Site ↗
           </Link>
@@ -433,7 +588,11 @@ export default function AdminHubPage() {
           <button
             onClick={handleAdminLogout}
             title="Sign out of admin"
-            className="p-2 rounded-xl bg-red-950/50 hover:bg-red-900/50 border border-red-500/30 text-red-300 hover:text-white transition-all cursor-pointer"
+            className={`p-2 rounded-xl border transition-all cursor-pointer ${
+              isLight
+                ? 'bg-red-50 hover:bg-red-100 border-red-200 text-red-600'
+                : 'bg-red-950/50 hover:bg-red-900/50 border-red-500/30 text-red-300 hover:text-white'
+            }`}
           >
             <LogOut className="w-4 h-4" />
           </button>
@@ -443,12 +602,16 @@ export default function AdminHubPage() {
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
         {/* Navigation Tabs */}
-        <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-[#120A2E]/90 border border-purple-500/25 max-w-2xl">
+        <div className={`flex flex-wrap items-center gap-2 p-1.5 rounded-2xl border max-w-2xl transition-colors ${
+          isLight ? 'bg-slate-200/80 border-slate-300/80 shadow-inner' : 'bg-[#120A2E]/90 border-purple-500/25'
+        }`}>
           <button
             onClick={() => setActiveTab('analytics')}
             className={`flex-1 min-w-[120px] py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
               activeTab === 'analytics'
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-600/30'
+                : isLight
+                ? 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
                 : 'text-purple-200/70 hover:text-white hover:bg-purple-900/30'
             }`}
           >
@@ -461,6 +624,8 @@ export default function AdminHubPage() {
             className={`flex-1 min-w-[120px] py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
               activeTab === 'users'
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-600/30'
+                : isLight
+                ? 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
                 : 'text-purple-200/70 hover:text-white hover:bg-purple-900/30'
             }`}
           >
@@ -473,6 +638,8 @@ export default function AdminHubPage() {
             className={`flex-1 min-w-[120px] py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
               activeTab === 'moderation'
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-600/30'
+                : isLight
+                ? 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
                 : 'text-purple-200/70 hover:text-white hover:bg-purple-900/30'
             }`}
           >
@@ -485,6 +652,8 @@ export default function AdminHubPage() {
             className={`flex-1 min-w-[120px] py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
               activeTab === 'text'
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-600/30'
+                : isLight
+                ? 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
                 : 'text-purple-200/70 hover:text-white hover:bg-purple-900/30'
             }`}
           >
@@ -499,118 +668,138 @@ export default function AdminHubPage() {
         {activeTab === 'analytics' && (
           <div className="space-y-8 animate-fadeIn">
             {/* Header info & Supabase Live Connection Indicator */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-[#11082B]/80 backdrop-blur-xl border border-purple-500/25">
+            <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl backdrop-blur-xl border transition-colors ${
+              isLight ? 'bg-white border-slate-200 shadow-sm text-slate-900' : 'bg-[#11082B]/80 border-purple-500/25 text-white'
+            }`}>
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-400">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className={`text-[11px] font-extrabold uppercase tracking-wider ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>
                     Live Supabase Database Sync
                   </span>
-                  <span className="text-[10px] text-purple-300/70 font-mono">
+                  <span className={`text-[10px] font-mono ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
                     (postgres:yhtejnjrjqpzyowldhky)
                   </span>
                 </div>
-                <h2 className="text-2xl font-black text-white">Platform Analytics Hub</h2>
-                <p className="text-xs text-purple-300/80">
+                <h2 className={`text-2xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>Platform Analytics Hub</h2>
+                <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-purple-300/80'}`}>
                   Dynamic database aggregates: Profiles ({analytics?.signups?.total ?? 0}), Videos ({analytics?.content?.totalVideos ?? 0}), Series ({analytics?.content?.totalSeries ?? 0}), Comments ({analytics?.content?.commentsCount ?? 0}).
                 </p>
               </div>
               <button
                 onClick={loadAnalytics}
-                className="px-4 py-2 rounded-xl bg-purple-900/50 hover:bg-purple-800/60 border border-purple-500/40 text-xs font-bold text-white flex items-center gap-2 transition-all cursor-pointer self-start sm:self-auto shadow-md"
+                className={`px-4 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer self-start sm:self-auto shadow-xs ${
+                  isLight
+                    ? 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700'
+                    : 'bg-purple-900/50 hover:bg-purple-800/60 border-purple-500/40 text-white'
+                }`}
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${analyticsLoading ? 'animate-spin' : ''}`} />
                 <span>Sync Supabase Now</span>
               </button>
             </div>
 
-            {/* Top Counters Grid (Purely dynamic Supabase data) */}
+            {/* Top Counters Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Logins */}
-              <div className="p-5 rounded-2xl bg-[#140A33]/80 border border-purple-500/25 space-y-2">
-                <span className="text-xs font-semibold text-purple-300/80 uppercase tracking-wider">Active Logins</span>
+              <div className={`p-5 rounded-2xl border space-y-2 transition-colors ${
+                isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#140A33]/80 border-purple-500/25'
+              }`}>
+                <span className={`text-xs font-semibold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-purple-300/80'}`}>Active Logins</span>
                 <div className="flex items-baseline justify-between">
-                  <span className="text-3xl font-black text-white">
+                  <span className={`text-3xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
                     {analytics?.logins?.total ?? 0}
                   </span>
-                  <span className="text-xs font-bold text-emerald-400 bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                  <span className="text-xs font-bold text-emerald-600 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-500/30">
                     {analytics?.logins?.today ?? 0} today
                   </span>
                 </div>
-                <p className="text-[11px] text-purple-300/70">
+                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
                   Profiles logged in: {analytics?.logins?.total ?? 0} / {analytics?.signups?.total ?? 0}
                 </p>
               </div>
 
               {/* Signups */}
-              <div className="p-5 rounded-2xl bg-[#140A33]/80 border border-purple-500/25 space-y-2">
-                <span className="text-xs font-semibold text-purple-300/80 uppercase tracking-wider">Registered Signups</span>
+              <div className={`p-5 rounded-2xl border space-y-2 transition-colors ${
+                isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#140A33]/80 border-purple-500/25'
+              }`}>
+                <span className={`text-xs font-semibold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-purple-300/80'}`}>Registered Signups</span>
                 <div className="flex items-baseline justify-between">
-                  <span className="text-3xl font-black text-white">
+                  <span className={`text-3xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
                     {analytics?.signups?.total ?? 0}
                   </span>
-                  <span className="text-xs font-bold text-pink-400 bg-pink-950/50 px-2 py-0.5 rounded-full border border-pink-500/30">
+                  <span className="text-xs font-bold text-pink-600 bg-pink-100 dark:text-pink-400 dark:bg-pink-950/50 px-2 py-0.5 rounded-full border border-pink-300 dark:border-pink-500/30">
                     +{analytics?.signups?.today ?? 0} today
                   </span>
                 </div>
-                <p className="text-[11px] text-purple-300/70">
+                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
                   Last 30 days: +{analytics?.signups?.last30Days ?? 0}
                 </p>
               </div>
 
               {/* Page Views */}
-              <div className="p-5 rounded-2xl bg-[#140A33]/80 border border-purple-500/25 space-y-2">
-                <span className="text-xs font-semibold text-purple-300/80 uppercase tracking-wider">Page Views</span>
+              <div className={`p-5 rounded-2xl border space-y-2 transition-colors ${
+                isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#140A33]/80 border-purple-500/25'
+              }`}>
+                <span className={`text-xs font-semibold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-purple-300/80'}`}>Page Views</span>
                 <div className="flex items-baseline justify-between">
-                  <span className="text-3xl font-black text-white">
+                  <span className={`text-3xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
                     {analytics?.pageViews?.total ?? 0}
                   </span>
-                  <span className="text-xs font-bold text-purple-300">
+                  <span className={`text-xs font-bold ${isLight ? 'text-purple-700' : 'text-purple-300'}`}>
                     {analytics?.pageViews?.pagesPerSession ?? 1.0} / stream
                   </span>
                 </div>
-                <p className="text-[11px] text-purple-300/70">
+                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
                   Unique page visitors: {analytics?.pageViews?.unique ?? 0}
                 </p>
               </div>
 
               {/* Unique Viewers */}
-              <div className="p-5 rounded-2xl bg-[#140A33]/80 border border-purple-500/25 space-y-2">
-                <span className="text-xs font-semibold text-purple-300/80 uppercase tracking-wider">Unique Viewers</span>
+              <div className={`p-5 rounded-2xl border space-y-2 transition-colors ${
+                isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#140A33]/80 border-purple-500/25'
+              }`}>
+                <span className={`text-xs font-semibold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-purple-300/80'}`}>Unique Viewers</span>
                 <div className="flex items-baseline justify-between">
-                  <span className="text-3xl font-black text-white">
+                  <span className={`text-3xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
                     {analytics?.uniqueViewers?.total ?? 0}
                   </span>
-                  <span className="text-xs font-bold text-cyan-400 bg-cyan-950/50 px-2 py-0.5 rounded-full border border-cyan-500/30">
+                  <span className="text-xs font-bold text-cyan-600 bg-cyan-100 dark:text-cyan-400 dark:bg-cyan-950/50 px-2 py-0.5 rounded-full border border-cyan-300 dark:border-cyan-500/30">
                     Active
                   </span>
                 </div>
-                <p className="text-[11px] text-purple-300/70">
+                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
                   Monthly active: {analytics?.uniqueViewers?.monthlyActive ?? 0}
                 </p>
               </div>
             </div>
 
-            {/* WATCHES WITH SIGN UP vs WITHOUT SIGN UP (100% Dynamic from Supabase) */}
-            <div className="p-6 rounded-3xl bg-[#11082B]/90 border border-purple-500/30 space-y-6 shadow-xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-purple-500/20 pb-4">
+            {/* WATCHES WITH SIGN UP vs WITHOUT SIGN UP */}
+            <div className={`p-6 rounded-3xl border space-y-6 shadow-sm transition-colors ${
+              isLight ? 'bg-white border-slate-200' : 'bg-[#11082B]/90 border-purple-500/30'
+            }`}>
+              <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-4 ${
+                isLight ? 'border-slate-200' : 'border-purple-500/20'
+              }`}>
                 <div>
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <Film className="w-5 h-5 text-purple-400" />
+                  <h3 className={`text-lg font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    <Film className="w-5 h-5 text-purple-500" />
                     <span>Video Watches: With Sign-Up vs Without Sign-Up</span>
                   </h3>
-                  <p className="text-xs text-purple-300/70">
+                  <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
                     Aggregated directly from Supabase videos view counts and watch history records.
                   </p>
                 </div>
-                <span className="text-sm font-extrabold text-white">
+                <span className={`text-sm font-extrabold ${isLight ? 'text-slate-900' : 'text-white'}`}>
                   Total Views in DB: {analytics?.watches?.total ?? 0}
                 </span>
               </div>
 
               {/* Visual Split Bar */}
               <div className="space-y-2">
-                <div className="w-full h-5 rounded-full bg-[#1F1042] overflow-hidden flex p-0.5 border border-purple-500/30">
+                <div className={`w-full h-5 rounded-full overflow-hidden flex p-0.5 border ${
+                  isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#1F1042] border-purple-500/30'
+                }`}>
                   <div
                     className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-l-full transition-all duration-700"
                     style={{ width: `${analytics?.watches?.withSignupPct ?? 50}%` }}
@@ -623,13 +812,13 @@ export default function AdminHubPage() {
                   />
                 </div>
                 <div className="flex items-center justify-between text-xs font-semibold px-1">
-                  <div className="flex items-center gap-2 text-purple-300">
+                  <div className={`flex items-center gap-2 ${isLight ? 'text-purple-900' : 'text-purple-300'}`}>
                     <span className="w-3 h-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-500" />
                     <span>
                       Watches with Sign-Up (Authenticated): {analytics?.watches?.withSignup ?? 0} ({analytics?.watches?.withSignupPct ?? 0}%)
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-cyan-300">
+                  <div className={`flex items-center gap-2 ${isLight ? 'text-cyan-900' : 'text-cyan-300'}`}>
                     <span className="w-3 h-3 rounded-full bg-gradient-to-r from-cyan-600 to-blue-500" />
                     <span>
                       Watches without Sign-Up (Guest): {analytics?.watches?.withoutSignup ?? 0} ({analytics?.watches?.withoutSignupPct ?? 0}%)
@@ -639,15 +828,19 @@ export default function AdminHubPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className="p-4 rounded-2xl bg-[#170C3B] border border-purple-500/20 space-y-1">
-                  <p className="text-xs text-purple-300">Supabase Content Breakdown</p>
-                  <p className="text-xl font-black text-white">{analytics?.content?.totalVideos ?? 0} Videos across {analytics?.content?.totalSeries ?? 0} Series</p>
-                  <p className="text-[11px] text-purple-400/80">Approved: {analytics?.content?.approvedVideos ?? 0} • Pending Moderation: {analytics?.content?.pendingModeration ?? 0}</p>
+                <div className={`p-4 rounded-2xl border space-y-1 ${
+                  isLight ? 'bg-slate-50 border-slate-200 text-slate-900' : 'bg-[#170C3B] border-purple-500/20 text-white'
+                }`}>
+                  <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-purple-300'}`}>Supabase Content Breakdown</p>
+                  <p className="text-xl font-black">{analytics?.content?.totalVideos ?? 0} Videos across {analytics?.content?.totalSeries ?? 0} Series</p>
+                  <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-purple-400/80'}`}>Approved: {analytics?.content?.approvedVideos ?? 0} • Pending Moderation: {analytics?.content?.pendingModeration ?? 0}</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-[#170C3B] border border-cyan-500/20 space-y-1">
-                  <p className="text-xs text-cyan-300">Community Engagement</p>
-                  <p className="text-xl font-black text-white">{analytics?.content?.commentsCount ?? 0} Comments & {analytics?.watches?.totalLikes ?? 0} Video Likes</p>
-                  <p className="text-[11px] text-cyan-400/80">Creators: {analytics?.content?.creatorsCount ?? 0} • Advertisers: {analytics?.content?.advertisersCount ?? 0} • Viewers: {analytics?.content?.viewersCount ?? 0}</p>
+                <div className={`p-4 rounded-2xl border space-y-1 ${
+                  isLight ? 'bg-cyan-50/60 border-cyan-200 text-slate-900' : 'bg-[#170C3B] border-cyan-500/20 text-white'
+                }`}>
+                  <p className={`text-xs ${isLight ? 'text-cyan-800' : 'text-cyan-300'}`}>Community Engagement</p>
+                  <p className="text-xl font-black">{analytics?.content?.commentsCount ?? 0} Comments & {analytics?.watches?.totalLikes ?? 0} Video Likes</p>
+                  <p className={`text-[11px] ${isLight ? 'text-cyan-700' : 'text-cyan-400/80'}`}>Creators: {analytics?.content?.creatorsCount ?? 0} • Advertisers: {analytics?.content?.advertisersCount ?? 0} • Viewers: {analytics?.content?.viewersCount ?? 0}</p>
                 </div>
               </div>
             </div>
@@ -655,16 +848,20 @@ export default function AdminHubPage() {
             {/* TWO COLUMNS: Session Duration & Device Types */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Session Duration */}
-              <div className="p-6 rounded-3xl bg-[#11082B]/80 border border-purple-500/25 space-y-5">
-                <div className="flex items-center justify-between border-b border-purple-500/20 pb-3">
+              <div className={`p-6 rounded-3xl border space-y-5 shadow-sm transition-colors ${
+                isLight ? 'bg-white border-slate-200' : 'bg-[#11082B]/80 border-purple-500/25'
+              }`}>
+                <div className={`flex items-center justify-between border-b pb-3 ${
+                  isLight ? 'border-slate-200' : 'border-purple-500/20'
+                }`}>
                   <div>
-                    <h3 className="text-base font-bold text-white flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-purple-400" />
+                    <h3 className={`text-base font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                      <Clock className="w-4 h-4 text-purple-500" />
                       <span>Session Duration</span>
                     </h3>
-                    <p className="text-xs text-purple-300/70">Average time spent per user session (based on DB videos)</p>
+                    <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>Average time spent per user session (based on DB videos)</p>
                   </div>
-                  <span className="text-base font-black text-pink-400 bg-pink-950/40 px-3 py-1 rounded-xl border border-pink-500/30">
+                  <span className="text-base font-black text-pink-600 bg-pink-100 dark:text-pink-400 dark:bg-pink-950/40 px-3 py-1 rounded-xl border border-pink-200 dark:border-pink-500/30">
                     {analytics?.sessionDuration?.formattedAvg ?? '1m 30s'}
                   </span>
                 </div>
@@ -673,10 +870,10 @@ export default function AdminHubPage() {
                   {(analytics?.sessionDuration?.distribution || []).map((item: any) => (
                     <div key={item.bracket} className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span className="text-purple-200">{item.bracket}</span>
-                        <span className="text-white font-bold">{item.percentage}% ({item.count} viewers)</span>
+                        <span className={isLight ? 'text-slate-700' : 'text-purple-200'}>{item.bracket}</span>
+                        <span className={`font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{item.percentage}% ({item.count} viewers)</span>
                       </div>
-                      <div className="w-full h-2 rounded-full bg-[#1C103F] overflow-hidden">
+                      <div className={`w-full h-2 rounded-full overflow-hidden ${isLight ? 'bg-slate-100' : 'bg-[#1C103F]'}`}>
                         <div
                           className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
                           style={{ width: `${item.percentage}%` }}
@@ -688,24 +885,28 @@ export default function AdminHubPage() {
               </div>
 
               {/* Device Type */}
-              <div className="p-6 rounded-3xl bg-[#11082B]/80 border border-purple-500/25 space-y-5">
-                <div className="border-b border-purple-500/20 pb-3">
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <Smartphone className="w-4 h-4 text-purple-400" />
+              <div className={`p-6 rounded-3xl border space-y-5 shadow-sm transition-colors ${
+                isLight ? 'bg-white border-slate-200' : 'bg-[#11082B]/80 border-purple-500/25'
+              }`}>
+                <div className={`border-b pb-3 ${isLight ? 'border-slate-200' : 'border-purple-500/20'}`}>
+                  <h3 className={`text-base font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    <Smartphone className="w-4 h-4 text-purple-500" />
                     <span>Device Type Breakdown</span>
                   </h3>
-                  <p className="text-xs text-purple-300/70">Traffic origin across mobile, desktop, and tablet</p>
+                  <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>Traffic origin across mobile, desktop, and tablet</p>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {(analytics?.deviceType || []).map((dev: any) => (
-                    <div key={dev.type} className="p-3.5 rounded-2xl bg-[#170C3B] border border-purple-500/20 space-y-1">
-                      <p className="text-[11px] font-semibold text-purple-300">{dev.type}</p>
-                      <p className="text-2xl font-black text-white">{dev.percentage}%</p>
-                      <span className="text-[10px] text-purple-400/80">{dev.count} users</span>
-                      <div className="w-full h-1.5 rounded-full bg-[#201147] overflow-hidden mt-2">
+                    <div key={dev.type} className={`p-3.5 rounded-2xl border space-y-1 ${
+                      isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#170C3B] border-purple-500/20'
+                    }`}>
+                      <p className={`text-[11px] font-semibold ${isLight ? 'text-slate-600' : 'text-purple-300'}`}>{dev.type}</p>
+                      <p className={`text-2xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{dev.percentage}%</p>
+                      <span className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-purple-400/80'}`}>{dev.count} users</span>
+                      <div className={`w-full h-1.5 rounded-full overflow-hidden mt-2 ${isLight ? 'bg-slate-200' : 'bg-[#201147]'}`}>
                         <div
-                          className="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"
+                          className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
                           style={{ width: `${dev.percentage}%` }}
                         />
                       </div>
@@ -718,62 +919,68 @@ export default function AdminHubPage() {
             {/* TWO COLUMNS: App Downloads & Location Breakdown */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* App Downloads */}
-              <div className="p-6 rounded-3xl bg-[#11082B]/80 border border-purple-500/25 space-y-5">
-                <div className="flex items-center justify-between border-b border-purple-500/20 pb-3">
+              <div className={`p-6 rounded-3xl border space-y-5 shadow-sm transition-colors ${
+                isLight ? 'bg-white border-slate-200' : 'bg-[#11082B]/80 border-purple-500/25'
+              }`}>
+                <div className={`flex items-center justify-between border-b pb-3 ${isLight ? 'border-slate-200' : 'border-purple-500/20'}`}>
                   <div>
-                    <h3 className="text-base font-bold text-white flex items-center gap-2">
-                      <Download className="w-4 h-4 text-purple-400" />
+                    <h3 className={`text-base font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                      <Download className="w-4 h-4 text-purple-500" />
                       <span>App Downloads & Installs</span>
                     </h3>
-                    <p className="text-xs text-purple-300/70">Native application distribution across stores</p>
+                    <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>Native application distribution across stores</p>
                   </div>
-                  <span className="text-sm font-black text-emerald-400 bg-emerald-950/50 px-2.5 py-1 rounded-xl border border-emerald-500/30">
+                  <span className="text-sm font-black text-emerald-600 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-950/50 px-2.5 py-1 rounded-xl border border-emerald-200 dark:border-emerald-500/30">
                     {(analytics?.appDownloads?.total ?? 0).toLocaleString()} Total
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-2xl bg-[#160B37] border border-purple-500/20">
-                    <p className="text-[11px] text-purple-300 font-semibold">Google Play (Android)</p>
-                    <p className="text-xl font-black text-white">{(analytics?.appDownloads?.android ?? 0).toLocaleString()}</p>
-                    <span className="text-[10px] text-emerald-400">{analytics?.appDownloads?.growthRate ?? '+0%'}</span>
+                  <div className={`p-3 rounded-2xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'}`}>
+                    <p className={`text-[11px] font-semibold ${isLight ? 'text-slate-600' : 'text-purple-300'}`}>Google Play (Android)</p>
+                    <p className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{(analytics?.appDownloads?.android ?? 0).toLocaleString()}</p>
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{analytics?.appDownloads?.growthRate ?? '+0%'}</span>
                   </div>
-                  <div className="p-3 rounded-2xl bg-[#160B37] border border-purple-500/20">
-                    <p className="text-[11px] text-purple-300 font-semibold">Apple App Store (iOS)</p>
-                    <p className="text-xl font-black text-white">{(analytics?.appDownloads?.ios ?? 0).toLocaleString()}</p>
-                    <span className="text-[10px] text-emerald-400">{analytics?.appDownloads?.growthRate ?? '+0%'}</span>
+                  <div className={`p-3 rounded-2xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'}`}>
+                    <p className={`text-[11px] font-semibold ${isLight ? 'text-slate-600' : 'text-purple-300'}`}>Apple App Store (iOS)</p>
+                    <p className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{(analytics?.appDownloads?.ios ?? 0).toLocaleString()}</p>
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{analytics?.appDownloads?.growthRate ?? '+0%'}</span>
                   </div>
-                  <div className="p-3 rounded-2xl bg-[#160B37] border border-purple-500/20">
-                    <p className="text-[11px] text-purple-300 font-semibold">PWA / Web App</p>
-                    <p className="text-xl font-black text-white">{(analytics?.appDownloads?.pwa ?? 0).toLocaleString()}</p>
-                    <span className="text-[10px] text-purple-400">Desktop + Mobile</span>
+                  <div className={`p-3 rounded-2xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'}`}>
+                    <p className={`text-[11px] font-semibold ${isLight ? 'text-slate-600' : 'text-purple-300'}`}>PWA / Web App</p>
+                    <p className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{(analytics?.appDownloads?.pwa ?? 0).toLocaleString()}</p>
+                    <span className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-purple-400'}`}>Desktop + Mobile</span>
                   </div>
-                  <div className="p-3 rounded-2xl bg-[#160B37] border border-purple-500/20">
-                    <p className="text-[11px] text-purple-300 font-semibold">Windows Store / App</p>
-                    <p className="text-xl font-black text-white">{(analytics?.appDownloads?.windows ?? 0).toLocaleString()}</p>
-                    <span className="text-[10px] text-purple-400">Direct install</span>
+                  <div className={`p-3 rounded-2xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'}`}>
+                    <p className={`text-[11px] font-semibold ${isLight ? 'text-slate-600' : 'text-purple-300'}`}>Windows Store / App</p>
+                    <p className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{(analytics?.appDownloads?.windows ?? 0).toLocaleString()}</p>
+                    <span className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-purple-400'}`}>Direct install</span>
                   </div>
                 </div>
               </div>
 
               {/* Geographic / Location Breakdown */}
-              <div className="p-6 rounded-3xl bg-[#11082B]/80 border border-purple-500/25 space-y-5">
-                <div className="border-b border-purple-500/20 pb-3">
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-purple-400" />
+              <div className={`p-6 rounded-3xl border space-y-5 shadow-sm transition-colors ${
+                isLight ? 'bg-white border-slate-200' : 'bg-[#11082B]/80 border-purple-500/25'
+              }`}>
+                <div className={`border-b pb-3 ${isLight ? 'border-slate-200' : 'border-purple-500/20'}`}>
+                  <h3 className={`text-base font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    <Globe className="w-4 h-4 text-purple-500" />
                     <span>Location Breakdown</span>
                   </h3>
-                  <p className="text-xs text-purple-300/70">Top countries and audience distribution</p>
+                  <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>Top countries and audience distribution</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                   {(analytics?.locations?.countries || []).map((loc: any) => (
-                    <div key={loc.country} className="flex items-center justify-between p-2 rounded-xl bg-[#160B37]/60 border border-purple-500/15">
-                      <span className="flex items-center gap-1.5 text-purple-200">
+                    <div key={loc.country} className={`flex items-center justify-between p-2.5 rounded-xl border ${
+                      isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#160B37]/60 border-purple-500/15 text-purple-200'
+                    }`}>
+                      <span className="flex items-center gap-1.5 font-medium">
                         <span>{loc.flag}</span>
                         <span>{loc.country}</span>
                       </span>
-                      <span className="font-bold text-white">{loc.percentage}%</span>
+                      <span className={`font-bold ${isLight ? 'text-slate-900 font-mono' : 'text-white font-mono'}`}>{loc.percentage}%</span>
                     </div>
                   ))}
                 </div>
@@ -788,16 +995,20 @@ export default function AdminHubPage() {
         {activeTab === 'users' && (
           <div className="space-y-6 animate-fadeIn">
             {/* Header & Controls */}
-            <div className="p-6 rounded-3xl bg-[#11082B]/80 backdrop-blur-xl border border-purple-500/25 space-y-4">
+            <div className={`p-6 rounded-3xl border space-y-4 shadow-sm transition-colors ${
+              isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/80 border-purple-500/25 text-white'
+            }`}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-black text-white">User Management Portal</h2>
-                  <p className="text-xs text-purple-300/80 mt-1">
+                  <h2 className={`text-2xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>User Management Portal</h2>
+                  <p className={`text-xs mt-1 ${isLight ? 'text-slate-600' : 'text-purple-300/80'}`}>
                     List of all platform users (Viewers, Creators, Advertisers, Admins) with full power to delete or manage permissions.
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs px-3 py-1 rounded-full bg-purple-900/50 border border-purple-500/30 text-purple-200 font-bold">
+                  <span className={`text-xs px-3 py-1 rounded-full border font-bold ${
+                    isLight ? 'bg-purple-100 border-purple-200 text-purple-800' : 'bg-purple-900/50 border-purple-500/30 text-purple-200'
+                  }`}>
                     {usersList.length} Users Listed
                   </span>
                 </div>
@@ -806,13 +1017,17 @@ export default function AdminHubPage() {
               {/* Filters & Search */}
               <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
                 <div className="relative flex-1 w-full">
-                  <Search className="absolute left-3.5 top-3 w-4 h-4 text-purple-400" />
+                  <Search className="absolute left-3.5 top-3 w-4 h-4 text-purple-500" />
                   <input
                     type="text"
                     value={userSearch}
                     onChange={(e) => setUserSearch(e.target.value)}
                     placeholder="Search by username, display name, or email..."
-                    className="w-full bg-[#180E38] border border-purple-500/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-purple-300/50 focus:outline-none focus:border-purple-400"
+                    className={`w-full border rounded-xl pl-10 pr-4 py-2.5 text-xs focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white placeholder-purple-300/50 focus:border-purple-400'
+                    }`}
                   />
                 </div>
 
@@ -820,7 +1035,11 @@ export default function AdminHubPage() {
                   <select
                     value={userRoleFilter}
                     onChange={(e) => setUserRoleFilter(e.target.value)}
-                    className="bg-[#180E38] border border-purple-500/30 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-purple-400 cursor-pointer"
+                    className={`border rounded-xl px-4 py-2.5 text-xs focus:outline-none cursor-pointer transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
                   >
                     <option value="all">All User Roles</option>
                     <option value="viewer">Viewers</option>
@@ -831,7 +1050,7 @@ export default function AdminHubPage() {
 
                   <button
                     onClick={loadUsers}
-                    className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all cursor-pointer shrink-0"
+                    className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all cursor-pointer shrink-0 shadow-sm"
                   >
                     Filter
                   </button>
@@ -840,10 +1059,14 @@ export default function AdminHubPage() {
             </div>
 
             {/* Users Table */}
-            <div className="rounded-3xl bg-[#11082B]/80 border border-purple-500/25 overflow-hidden shadow-xl">
+            <div className={`rounded-3xl border overflow-hidden shadow-sm transition-colors ${
+              isLight ? 'bg-white border-slate-200' : 'bg-[#11082B]/80 border-purple-500/25'
+            }`}>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-[#180C3B] text-purple-300 font-semibold uppercase tracking-wider border-b border-purple-500/20">
+                  <thead className={`font-semibold uppercase tracking-wider border-b transition-colors ${
+                    isLight ? 'bg-slate-100 text-slate-700 border-slate-200' : 'bg-[#180C3B] text-purple-300 border-purple-500/20'
+                  }`}>
                     <tr>
                       <th className="py-3.5 px-4 sm:px-6">User</th>
                       <th className="py-3.5 px-4">Role</th>
@@ -853,10 +1076,12 @@ export default function AdminHubPage() {
                       <th className="py-3.5 px-4 sm:px-6 text-right">Admin Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-purple-500/15 text-purple-100">
+                  <tbody className={`divide-y transition-colors ${
+                    isLight ? 'divide-slate-200 text-slate-800' : 'divide-purple-500/15 text-purple-100'
+                  }`}>
                     {usersList.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-purple-300/70">
+                        <td colSpan={6} className={`py-12 text-center ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
                           {usersLoading ? 'Loading users...' : 'No users found matching query.'}
                         </td>
                       </tr>
@@ -864,18 +1089,18 @@ export default function AdminHubPage() {
                       usersList.map((u) => {
                         const roleColor =
                           u.role === 'creator'
-                            ? 'bg-purple-900/60 text-purple-300 border-purple-500/30'
+                            ? isLight ? 'bg-purple-100 text-purple-800 border-purple-200' : 'bg-purple-900/60 text-purple-300 border-purple-500/30'
                             : u.role === 'advertiser'
-                            ? 'bg-blue-900/60 text-blue-300 border-blue-500/30'
+                            ? isLight ? 'bg-blue-100 text-blue-800 border-blue-200' : 'bg-blue-900/60 text-blue-300 border-blue-500/30'
                             : u.role === 'admin'
-                            ? 'bg-amber-900/60 text-amber-300 border-amber-500/30'
-                            : 'bg-emerald-900/60 text-emerald-300 border-emerald-500/30';
+                            ? isLight ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-amber-900/60 text-amber-300 border-amber-500/30'
+                            : isLight ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-emerald-900/60 text-emerald-300 border-emerald-500/30';
 
                         return (
-                          <tr key={u.id} className="hover:bg-purple-900/20 transition-colors">
+                          <tr key={u.id} className={`transition-colors ${isLight ? 'hover:bg-slate-50' : 'hover:bg-purple-900/20'}`}>
                             <td className="py-3.5 px-4 sm:px-6">
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-purple-700/50 border border-purple-400/40 flex items-center justify-center font-bold text-white uppercase text-xs shrink-0">
+                                <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold uppercase text-xs shrink-0 overflow-hidden">
                                   {u.avatar_url ? (
                                     <img src={u.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
                                   ) : (
@@ -883,8 +1108,8 @@ export default function AdminHubPage() {
                                   )}
                                 </div>
                                 <div className="min-w-0">
-                                  <p className="font-bold text-white truncate">{u.display_name || u.username || 'Unnamed User'}</p>
-                                  <p className="text-[11px] text-purple-300/70 truncate">{u.email || `@${u.username}`}</p>
+                                  <p className={`font-bold truncate ${isLight ? 'text-slate-900' : 'text-white'}`}>{u.display_name || u.username || 'Unnamed User'}</p>
+                                  <p className={`text-[11px] truncate ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>{u.email || `@${u.username}`}</p>
                                 </div>
                               </div>
                             </td>
@@ -893,24 +1118,24 @@ export default function AdminHubPage() {
                               <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${roleColor}`}>
                                 {u.role || 'viewer'}
                               </span>
-                              {u.sub_role && <span className="block text-[10px] text-purple-300/70 mt-0.5">{u.sub_role}</span>}
+                              {u.sub_role && <span className={`block text-[10px] mt-0.5 ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>{u.sub_role}</span>}
                             </td>
 
-                            <td className="py-3.5 px-4 text-purple-300/80">
+                            <td className={`py-3.5 px-4 ${isLight ? 'text-slate-600' : 'text-purple-300/80'}`}>
                               {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}
                             </td>
 
-                            <td className="py-3.5 px-4 font-mono font-bold text-amber-300">
+                            <td className={`py-3.5 px-4 font-mono font-bold ${isLight ? 'text-amber-600' : 'text-amber-300'}`}>
                               🪙 {u.coin_balance ?? u.coins_balance ?? 0}
                             </td>
 
                             <td className="py-3.5 px-4">
                               {u.is_suspended ? (
-                                <span className="inline-flex items-center gap-1 text-red-400 font-semibold text-[11px]">
+                                <span className="inline-flex items-center gap-1 text-red-500 font-semibold text-[11px]">
                                   <XCircle className="w-3.5 h-3.5" /> Suspended
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold text-[11px]">
+                                <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
                                   <CheckCircle className="w-3.5 h-3.5" /> Active
                                 </span>
                               )}
@@ -919,10 +1144,14 @@ export default function AdminHubPage() {
                             <td className="py-3.5 px-4 sm:px-6 text-right">
                               <button
                                 onClick={() => setUserToDelete(u)}
-                                className="px-3 py-1.5 rounded-xl bg-red-950/60 hover:bg-red-800 border border-red-500/40 text-red-200 hover:text-white font-bold text-[11px] inline-flex items-center gap-1.5 transition-all cursor-pointer"
+                                className={`px-3 py-1.5 rounded-xl border font-bold text-[11px] inline-flex items-center gap-1.5 transition-all cursor-pointer ${
+                                  isLight
+                                    ? 'bg-red-50 hover:bg-red-100 border-red-200 text-red-700'
+                                    : 'bg-red-950/60 hover:bg-red-800 border-red-500/40 text-red-200 hover:text-white'
+                                }`}
                                 title="Delete user permanently"
                               >
-                                <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                                <Trash2 className="w-3.5 h-3.5 text-red-500" />
                                 <span>Delete</span>
                               </button>
                             </td>
@@ -935,18 +1164,20 @@ export default function AdminHubPage() {
               </div>
             </div>
 
-            {/* DELETE CONFIRMATION MODAL */}
+            {/* DELETE USER CONFIRMATION MODAL */}
             {userToDelete && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-                <div className="relative w-full max-w-md bg-[#130A2E] border border-red-500/40 rounded-3xl p-6 space-y-4 shadow-2xl">
-                  <div className="w-12 h-12 rounded-2xl bg-red-950/80 border border-red-500/50 flex items-center justify-center text-red-400 mx-auto">
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+                <div className={`relative w-full max-w-md border rounded-3xl p-6 space-y-4 shadow-2xl transition-colors ${
+                  isLight ? 'bg-white border-red-200 text-slate-900' : 'bg-[#130A2E] border-red-500/40 text-white'
+                }`}>
+                  <div className="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-950/80 border border-red-300 dark:border-red-500/50 flex items-center justify-center text-red-600 dark:text-red-400 mx-auto">
                     <Trash2 className="w-6 h-6" />
                   </div>
 
                   <div className="text-center space-y-1">
-                    <h3 className="text-lg font-bold text-white">Permanently Delete User?</h3>
-                    <p className="text-xs text-purple-200/80">
-                      Are you sure you want to delete <strong className="text-white">{userToDelete.display_name || userToDelete.email}</strong>?
+                    <h3 className={`text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Permanently Delete User?</h3>
+                    <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-purple-200/80'}`}>
+                      Are you sure you want to delete <strong className={isLight ? 'text-slate-900' : 'text-white'}>{userToDelete.display_name || userToDelete.email}</strong>?
                       This will revoke their access and remove their profile immediately.
                     </p>
                   </div>
@@ -955,7 +1186,11 @@ export default function AdminHubPage() {
                     <button
                       onClick={() => setUserToDelete(null)}
                       disabled={isDeleting}
-                      className="flex-1 py-2.5 rounded-xl bg-purple-950/60 border border-purple-500/30 text-purple-200 hover:text-white text-xs font-bold transition-all cursor-pointer"
+                      className={`flex-1 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                        isLight
+                          ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                          : 'bg-purple-950/60 border-purple-500/30 text-purple-200 hover:text-white'
+                      }`}
                     >
                       Cancel
                     </button>
@@ -975,130 +1210,626 @@ export default function AdminHubPage() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 3: CONTENT MODERATION QUEUE (Requirement 3c)                           */}
+        {/* TAB 3: CONTENT MODERATION & UPLOADED CONTENT MANAGEMENT (Requirement 3c)   */}
         {/* ========================================================================= */}
         {activeTab === 'moderation' && (
           <div className="space-y-6 animate-fadeIn">
-            {/* Header & Filter tabs */}
-            <div className="p-6 rounded-3xl bg-[#11082B]/80 backdrop-blur-xl border border-purple-500/25 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            {/* Header & Controls */}
+            <div className={`p-6 rounded-3xl border space-y-5 shadow-sm transition-colors ${
+              isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/80 border-purple-500/25 text-white'
+            }`}>
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-black text-white">Content Moderation & Approval</h2>
-                  <p className="text-xs text-purple-300/80 mt-1">
-                    All uploaded videos must first pass this admin checkpoint. Content is only published live when an administrator approves it.
+                  <div className="flex items-center gap-2">
+                    <h2 className={`text-2xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>Content Moderation & Upload Management</h2>
+                    <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-purple-600 text-white shadow-xs">
+                      {moderationContentType === 'videos' ? `${moderationVideos.length} Videos` : `${moderationSeries.length} Series`}
+                    </span>
+                  </div>
+                  <p className={`text-xs mt-1 ${isLight ? 'text-slate-600' : 'text-purple-300/80'}`}>
+                    Review pending uploads, manage live content, delete entire series, or delete all content permanently from Supabase.
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  {(['pending', 'approved', 'rejected'] as const).map((filter) => (
+
+                {/* Top Actions: Content Type Toggle & DELETE ALL OPTION */}
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Toggle Content Type: Videos vs Series */}
+                  <div className={`flex items-center p-1 rounded-2xl border ${
+                    isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#180E38] border-purple-500/30'
+                  }`}>
                     <button
-                      key={filter}
-                      onClick={() => setModerationFilter(filter)}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold capitalize transition-all cursor-pointer ${
-                        moderationFilter === filter
-                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
+                      onClick={() => setModerationContentType('videos')}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                        moderationContentType === 'videos'
+                          ? 'bg-purple-600 text-white shadow-md'
+                          : isLight
+                          ? 'text-slate-700 hover:text-slate-900'
+                          : 'text-purple-300 hover:text-white'
+                      }`}
+                    >
+                      <Film className="w-3.5 h-3.5" />
+                      <span>Videos / Reels ({moderationVideos.length})</span>
+                    </button>
+                    <button
+                      onClick={() => setModerationContentType('series')}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                        moderationContentType === 'series'
+                          ? 'bg-purple-600 text-white shadow-md'
+                          : isLight
+                          ? 'text-slate-700 hover:text-slate-900'
+                          : 'text-purple-300 hover:text-white'
+                      }`}
+                    >
+                      <Layers className="w-3.5 h-3.5" />
+                      <span>Content Series ({moderationSeries.length})</span>
+                    </button>
+                  </div>
+
+                  {/* DELETE ALL OPTION BUTTON */}
+                  <button
+                    onClick={() => setShowDeleteAllModal(true)}
+                    disabled={moderationContentType === 'videos' ? moderationVideos.length === 0 : moderationSeries.length === 0}
+                    className="px-4 py-2 rounded-2xl bg-red-600 hover:bg-red-700 border border-red-500 text-white text-xs font-black flex items-center gap-2 shadow-lg shadow-red-900/30 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                    title={`Delete all ${moderationContentType === 'videos' ? 'videos in current filter' : 'series and episodes'} permanently`}
+                  >
+                    <Trash2 className="w-4 h-4 text-white" />
+                    <span>
+                      Delete All {moderationContentType === 'videos' ? `Videos (${moderationVideos.length})` : `Series (${moderationSeries.length})`}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Sub-toolbar: Filter Pills (for Videos) and Search */}
+              <div className={`flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t ${
+                isLight ? 'border-slate-200' : 'border-purple-500/20'
+              }`}>
+                {moderationContentType === 'videos' ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={() => setModerationFilter('approved')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                        moderationFilter === 'approved'
+                          ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+                          : isLight
+                          ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
                           : 'bg-[#180E38] text-purple-300 hover:text-white border border-purple-500/20'
                       }`}
                     >
-                      {filter} Queue
+                      <CheckCircle className="w-3.5 h-3.5 text-emerald-300" />
+                      <span>Uploaded (Live)</span>
                     </button>
-                  ))}
+
+                    <button
+                      onClick={() => setModerationFilter('pending')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                        moderationFilter === 'pending'
+                          ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md'
+                          : isLight
+                          ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                          : 'bg-[#180E38] text-purple-300 hover:text-white border border-purple-500/20'
+                      }`}
+                    >
+                      <Clock className="w-3.5 h-3.5 text-amber-300" />
+                      <span>Pending Review</span>
+                    </button>
+
+                    <button
+                      onClick={() => setModerationFilter('rejected')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                        moderationFilter === 'rejected'
+                          ? 'bg-gradient-to-r from-red-600 to-pink-600 text-white shadow-md'
+                          : isLight
+                          ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                          : 'bg-[#180E38] text-purple-300 hover:text-white border border-purple-500/20'
+                      }`}
+                    >
+                      <XCircle className="w-3.5 h-3.5 text-red-300" />
+                      <span>Archived / Rejected</span>
+                    </button>
+
+                    <button
+                      onClick={() => setModerationFilter('all')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        moderationFilter === 'all'
+                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
+                          : isLight
+                          ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                          : 'bg-[#180E38] text-purple-300 hover:text-white border border-purple-500/20'
+                      }`}
+                    >
+                      All Videos
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-xs font-bold">
+                    <span className={`px-3 py-1 rounded-xl border ${
+                      isLight ? 'bg-purple-50 border-purple-200 text-purple-800' : 'bg-purple-900/50 border-purple-500/30 text-purple-300'
+                    }`}>
+                      All Content Series in Supabase
+                    </span>
+                    <span className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-purple-400'}`}>
+                      Deleting a series permanently removes all linked episodes and purchases.
+                    </span>
+                  </div>
+                )}
+
+                {/* Search Bar */}
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3.5 top-3 w-3.5 h-3.5 text-purple-500" />
+                  <input
+                    type="text"
+                    value={moderationSearch}
+                    onChange={(e) => setModerationSearch(e.target.value)}
+                    placeholder={
+                      moderationContentType === 'videos'
+                        ? 'Search videos by title, description, category...'
+                        : 'Search series by title, description, category...'
+                    }
+                    className={`w-full border rounded-xl pl-9 pr-4 py-2 text-xs focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white placeholder-purple-300/50 focus:border-purple-400'
+                    }`}
+                  />
                 </div>
               </div>
             </div>
 
             {/* Moderation Items Grid */}
             {moderationLoading ? (
-              <div className="text-center py-16 text-purple-300/70">
-                <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-purple-400" />
-                <p>Loading moderation queue...</p>
+              <div className={`text-center py-16 ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
+                <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-purple-600" />
+                <p>Loading {moderationContentType} from Supabase...</p>
               </div>
-            ) : moderationVideos.length === 0 ? (
-              <div className="p-12 text-center rounded-3xl bg-[#11082B]/60 border border-purple-500/20 space-y-2">
-                <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto" />
-                <h3 className="text-lg font-bold text-white">Queue is Clean!</h3>
-                <p className="text-xs text-purple-300/70">
-                  There are no videos currently in the <strong className="text-purple-200 capitalize">{moderationFilter}</strong> queue.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {moderationVideos.map((vid) => (
-                  <div
-                    key={vid.id}
-                    className="rounded-3xl bg-[#11082B]/90 border border-purple-500/30 overflow-hidden shadow-lg hover:border-purple-400/50 transition-all flex flex-col justify-between"
-                  >
-                    <div>
-                      {/* Thumbnail with duration badge & play button */}
-                      <div className="relative aspect-video w-full bg-black/60 group">
-                        {vid.thumbnail_url ? (
-                          <img src={vid.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-purple-950/40 text-purple-400">
-                            <Film className="w-10 h-10 opacity-50" />
-                          </div>
-                        )}
-                        <button
-                          onClick={() => setActiveVideoModal(vid)}
-                          className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                        >
-                          <div className="w-12 h-12 rounded-full bg-purple-600 text-white flex items-center justify-center shadow-xl">
-                            <Play className="w-5 h-5 ml-0.5 fill-white" />
-                          </div>
-                        </button>
-                        <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/80 text-[10px] font-mono font-bold text-white">
-                          {vid.duration_seconds ? `${Math.round(vid.duration_seconds)}s` : 'Short'}
-                        </span>
-                        <span className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-purple-600/90 text-[10px] font-bold text-white uppercase tracking-wider">
-                          {vid.category || 'General'}
-                        </span>
-                      </div>
+            ) : moderationContentType === 'videos' ? (
+              /* VIDEOS GRID */
+              moderationVideos.length === 0 ? (
+                <div className={`p-12 text-center rounded-3xl border space-y-2 transition-colors ${
+                  isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#11082B]/60 border-purple-500/20'
+                }`}>
+                  <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto" />
+                  <h3 className={`text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>No Videos Found</h3>
+                  <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-purple-300/70'}`}>
+                    There are no videos matching the <strong className="capitalize">{moderationFilter}</strong> filter in Supabase.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {moderationVideos.map((vid) => {
+                    const isPublished = vid.status === 'published';
+                    const isPending = ['processing', 'pending', 'pending_approval', 'draft'].includes(vid.status);
 
-                      {/* Content details */}
-                      <div className="p-4 space-y-2">
-                        <h4 className="font-bold text-white text-sm line-clamp-1">{vid.title}</h4>
-                        <p className="text-xs text-purple-300/80 line-clamp-2 leading-relaxed">
-                          {vid.description || 'No description provided.'}
-                        </p>
+                    return (
+                      <div
+                        key={vid.id}
+                        className={`rounded-3xl border overflow-hidden shadow-sm hover:border-purple-400 transition-all flex flex-col justify-between ${
+                          isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/90 border-purple-500/30 text-purple-100'
+                        }`}
+                      >
+                        <div>
+                          {/* Thumbnail with duration badge & play button */}
+                          <div className="relative aspect-video w-full bg-black/60 group">
+                            {vid.thumbnail_url ? (
+                              <img src={vid.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-purple-950/40 text-purple-400">
+                                <Film className="w-10 h-10 opacity-50" />
+                              </div>
+                            )}
+                            <button
+                              onClick={() => setActiveVideoModal(vid)}
+                              className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                            >
+                              <div className="w-12 h-12 rounded-full bg-purple-600 text-white flex items-center justify-center shadow-xl">
+                                <Play className="w-5 h-5 ml-0.5 fill-white" />
+                              </div>
+                            </button>
+                            <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/80 text-[10px] font-mono font-bold text-white">
+                              {vid.duration_seconds ? `${Math.round(vid.duration_seconds)}s` : 'Short'}
+                            </span>
+                            <span
+                              className={`absolute top-2 left-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                isPublished
+                                  ? 'bg-emerald-600 text-white'
+                                  : isPending
+                                  ? 'bg-amber-500 text-black font-extrabold'
+                                  : 'bg-red-600 text-white'
+                              }`}
+                            >
+                              {isPublished ? 'Uploaded & Live' : isPending ? 'Pending Review' : 'Archived'}
+                            </span>
+                          </div>
 
-                        <div className="pt-2 flex items-center justify-between text-[11px] text-purple-300/70 border-t border-purple-500/15">
-                          <span>Creator: <strong className="text-white">{vid.creator?.display_name || vid.creator?.username || 'Creator'}</strong></span>
-                          <span>{vid.created_at ? new Date(vid.created_at).toLocaleDateString() : 'Recent'}</span>
+                          {/* Content details */}
+                          <div className="p-4 space-y-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <h4 className={`font-bold text-sm line-clamp-1 ${isLight ? 'text-slate-900' : 'text-white'}`}>{vid.title}</h4>
+                              <span className={`text-[10px] px-2 py-0.5 rounded border shrink-0 ${
+                                isLight ? 'bg-purple-50 text-purple-800 border-purple-200' : 'bg-purple-900/60 text-purple-200 border-purple-500/30'
+                              }`}>
+                                {vid.category || 'General'}
+                              </span>
+                            </div>
+                            <p className={`text-xs line-clamp-2 leading-relaxed ${isLight ? 'text-slate-600' : 'text-purple-300/80'}`}>
+                              {vid.description || 'No description provided.'}
+                            </p>
+
+                            <div className={`pt-2 flex items-center justify-between text-[11px] border-t ${
+                              isLight ? 'border-slate-100 text-slate-500' : 'border-purple-500/15 text-purple-300/70'
+                            }`}>
+                              <span>By: <strong className={isLight ? 'text-slate-900 font-bold' : 'text-white'}>{vid.creator?.display_name || vid.creator?.username || 'Creator'}</strong></span>
+                              <span className="flex items-center gap-1 font-mono">
+                                <Eye className="w-3 h-3 text-purple-500" /> {vid.views_count ?? 0} views
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="p-4 pt-0 space-y-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            {isPending ? (
+                              <>
+                                <button
+                                  onClick={() => handleModerateVideo(vid.id, 'approve')}
+                                  className="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                                >
+                                  <Check className="w-3.5 h-3.5" />
+                                  <span>Approve</span>
+                                </button>
+
+                                <button
+                                  onClick={() => setRejectionModalVideo(vid)}
+                                  className={`py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                                    isLight
+                                      ? 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-800'
+                                      : 'bg-amber-950/80 hover:bg-amber-900 border-amber-500/40 text-amber-200 hover:text-white'
+                                  }`}
+                                >
+                                  <XCircle className="w-3.5 h-3.5 text-amber-500" />
+                                  <span>Reject</span>
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => setActiveVideoModal(vid)}
+                                  className={`py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                                    isLight
+                                      ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800'
+                                      : 'bg-purple-950/70 hover:bg-purple-900 border-purple-500/30 text-purple-200'
+                                  }`}
+                                >
+                                  <Play className="w-3.5 h-3.5" />
+                                  <span>Preview</span>
+                                </button>
+
+                                <button
+                                  onClick={() => setRejectionModalVideo(vid)}
+                                  className={`py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                                    isLight
+                                      ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800'
+                                      : 'bg-purple-950/70 hover:bg-purple-900 border-purple-500/30 text-purple-200'
+                                  }`}
+                                >
+                                  <span>{isPublished ? 'Archive' : 'Restore'}</span>
+                                </button>
+                              </>
+                            )}
+                          </div>
+
+                          {/* DELETE UPLOADED CONTENT BUTTON */}
+                          <button
+                            onClick={() => setVideoToDelete(vid)}
+                            className={`w-full py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 ${
+                              isLight
+                                ? 'bg-red-50 hover:bg-red-100 border-red-200 text-red-700'
+                                : 'bg-red-950/60 hover:bg-red-900/90 border-red-500/40 text-red-200 hover:text-white'
+                            }`}
+                            title="Permanently delete this uploaded content from database"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                            <span>Delete Uploaded Video</span>
+                          </button>
                         </div>
                       </div>
+                    );
+                  })}
+                </div>
+              )
+            ) : (
+              /* CONTENT SERIES GRID */
+              moderationSeries.length === 0 ? (
+                <div className={`p-12 text-center rounded-3xl border space-y-2 transition-colors ${
+                  isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#11082B]/60 border-purple-500/20'
+                }`}>
+                  <Layers className="w-12 h-12 text-purple-500 mx-auto opacity-70" />
+                  <h3 className={`text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>No Content Series Found</h3>
+                  <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-purple-300/70'}`}>
+                    There are no content series in Supabase matching your search query.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {moderationSeries.map((series) => (
+                    <div
+                      key={series.id}
+                      className={`rounded-3xl border overflow-hidden shadow-sm hover:border-purple-400 transition-all flex flex-col justify-between ${
+                        isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/90 border-purple-500/30 text-purple-100'
+                      }`}
+                    >
+                      <div>
+                        {/* Cover Image & Badges */}
+                        <div className="relative aspect-[16/10] w-full bg-black/60 group overflow-hidden">
+                          {series.cover_url ? (
+                            <img src={series.cover_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-purple-950/40 text-purple-400">
+                              <Layers className="w-12 h-12 opacity-40" />
+                            </div>
+                          )}
+                          <span className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-purple-600 text-white shadow-md">
+                            Series
+                          </span>
+                          <span className="absolute bottom-2 right-2 px-2.5 py-0.5 rounded-md bg-black/85 text-[10px] font-mono font-bold text-white">
+                            {series.total_episodes || 0} Episodes
+                          </span>
+                        </div>
+
+                        {/* Series Details */}
+                        <div className="p-4 space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className={`font-bold text-base line-clamp-1 ${isLight ? 'text-slate-900' : 'text-white'}`}>{series.title}</h4>
+                            <span className={`text-[10px] px-2 py-0.5 rounded border shrink-0 font-medium ${
+                              isLight ? 'bg-purple-50 text-purple-800 border-purple-200' : 'bg-purple-900/60 text-purple-200 border-purple-500/30'
+                            }`}>
+                              {series.category || 'General'}
+                            </span>
+                          </div>
+                          <p className={`text-xs line-clamp-2 leading-relaxed ${isLight ? 'text-slate-600' : 'text-purple-300/80'}`}>
+                            {series.description || 'No description provided.'}
+                          </p>
+
+                          <div className={`pt-2 flex items-center justify-between text-[11px] border-t ${
+                            isLight ? 'border-slate-100 text-slate-500' : 'border-purple-500/15 text-purple-300/70'
+                          }`}>
+                            <div className="flex items-center gap-2">
+                              <div className="w-5 h-5 rounded-full bg-purple-600 flex items-center justify-center text-[10px] font-bold text-white uppercase overflow-hidden">
+                                {series.creator?.avatar_url ? (
+                                  <img src={series.creator.avatar_url} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                  (series.creator?.display_name || series.creator?.username || 'C')[0]
+                                )}
+                              </div>
+                              <span className={`font-medium truncate max-w-[140px] ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                                {series.creator?.display_name || series.creator?.username || 'Creator'}
+                              </span>
+                            </div>
+                            <span className={`font-mono text-[10px] ${isLight ? 'text-purple-700' : 'text-purple-400'}`}>
+                              {series.created_at ? new Date(series.created_at).toLocaleDateString() : 'N/A'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="p-4 pt-0 space-y-2">
+                        <button
+                          onClick={() => setSeriesToDelete(series)}
+                          className={`w-full py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 ${
+                            isLight
+                              ? 'bg-red-50 hover:bg-red-100 border-red-200 text-red-700'
+                              : 'bg-red-950/70 hover:bg-red-900 border-red-500/50 text-red-200 hover:text-white'
+                          }`}
+                          title="Permanently delete this series and all episodes from Supabase"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                          <span>Delete Series</span>
+                        </button>
+                      </div>
                     </div>
+                  ))}
+                </div>
+              )
+            )}
 
-                    {/* Action buttons */}
-                    <div className="p-4 pt-0 grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => handleModerateVideo(vid.id, 'approve')}
-                        className="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md shadow-emerald-600/30"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        <span>Approve</span>
-                      </button>
+            {/* DELETE UPLOADED VIDEO CONFIRMATION MODAL */}
+            {videoToDelete && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+                <div className={`relative w-full max-w-md border rounded-3xl p-6 space-y-4 shadow-2xl transition-colors ${
+                  isLight ? 'bg-white border-red-200 text-slate-900' : 'bg-[#130A2E] border-red-500/40 text-white'
+                }`}>
+                  <div className="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-950/80 border border-red-300 dark:border-red-500/50 flex items-center justify-center text-red-600 dark:text-red-400 mx-auto">
+                    <Trash2 className="w-6 h-6" />
+                  </div>
 
-                      <button
-                        onClick={() => setRejectionModalVideo(vid)}
-                        className="py-2 px-3 rounded-xl bg-red-950/80 hover:bg-red-800 border border-red-500/40 text-red-200 hover:text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                      >
-                        <XCircle className="w-3.5 h-3.5 text-red-400" />
-                        <span>Reject</span>
-                      </button>
+                  <div className="text-center space-y-2">
+                    <h3 className={`text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Permanently Delete Uploaded Content?</h3>
+                    <p className={`text-xs leading-relaxed ${isLight ? 'text-slate-600' : 'text-purple-200/80'}`}>
+                      Are you sure you want to delete <strong className={isLight ? 'text-slate-900' : 'text-white'}>&ldquo;{videoToDelete.title}&rdquo;</strong> uploaded by <strong className={isLight ? 'text-slate-900' : 'text-white'}>{videoToDelete.creator?.display_name || videoToDelete.creator?.username || 'Creator'}</strong>?
+                    </p>
+                    <div className={`p-3 rounded-xl border text-[11px] text-left space-y-1 ${
+                      isLight ? 'bg-red-50 border-red-200 text-red-800' : 'bg-red-950/50 border-red-500/30 text-red-200'
+                    }`}>
+                      <p className="font-semibold text-red-600">⚠️ Permanent Database Action:</p>
+                      <p>• Video record will be deleted from Supabase <code className="font-mono font-bold">public.videos</code>.</p>
+                      <p>• Associated comments, reactions, and watchlist links will be purged.</p>
+                      <p>• Content will immediately disappear from all viewer feeds.</p>
                     </div>
                   </div>
-                ))}
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <button
+                      onClick={() => setVideoToDelete(null)}
+                      disabled={isDeletingVideo}
+                      className={`flex-1 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                        isLight
+                          ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                          : 'bg-purple-950/60 border-purple-500/30 text-purple-200 hover:text-white'
+                      }`}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleDeleteVideo(videoToDelete)}
+                      disabled={isDeletingVideo}
+                      className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg shadow-red-600/40 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      {isDeletingVideo ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                      <span>Delete Content</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* DELETE SERIES CONFIRMATION MODAL */}
+            {seriesToDelete && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+                <div className={`relative w-full max-w-md border rounded-3xl p-6 space-y-4 shadow-2xl transition-colors ${
+                  isLight ? 'bg-white border-red-200 text-slate-900' : 'bg-[#130A2E] border-red-500/50 text-white'
+                }`}>
+                  <div className="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-950/80 border border-red-300 dark:border-red-500/50 flex items-center justify-center text-red-600 dark:text-red-400 mx-auto">
+                    <Layers className="w-6 h-6" />
+                  </div>
+
+                  <div className="text-center space-y-2">
+                    <h3 className={`text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Permanently Delete Series?</h3>
+                    <p className={`text-xs leading-relaxed ${isLight ? 'text-slate-600' : 'text-purple-200/80'}`}>
+                      Are you sure you want to delete <strong className={isLight ? 'text-slate-900' : 'text-white'}>&ldquo;{seriesToDelete.title}&rdquo;</strong> and all associated episodes?
+                    </p>
+                    <div className={`p-3.5 rounded-xl border text-[11px] text-left space-y-1.5 ${
+                      isLight ? 'bg-red-50 border-red-200 text-red-800' : 'bg-red-950/60 border-red-500/40 text-red-200'
+                    }`}>
+                      <p className="font-bold text-red-600">⚠️ Permanent Series Deletion:</p>
+                      <p>• Series record will be deleted from Supabase <code className="font-mono font-bold">public.content_series</code>.</p>
+                      <p>• All episodes belonging to this series will be purged from <code className="font-mono font-bold">public.videos</code>.</p>
+                      <p>• This action cannot be reversed.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <button
+                      onClick={() => setSeriesToDelete(null)}
+                      disabled={isDeletingSeries}
+                      className={`flex-1 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                        isLight
+                          ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                          : 'bg-purple-950/60 border-purple-500/30 text-purple-200 hover:text-white'
+                      }`}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleDeleteSeries(seriesToDelete)}
+                      disabled={isDeletingSeries}
+                      className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg shadow-red-600/40 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      {isDeletingSeries ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                      <span>Delete Series</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* DELETE ALL CONFIRMATION MODAL */}
+            {showDeleteAllModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                <div className={`relative w-full max-w-lg border-2 rounded-3xl p-6 sm:p-7 space-y-5 shadow-2xl transition-colors ${
+                  isLight ? 'bg-white border-red-400 text-slate-900' : 'bg-[#150A30] border-red-500/60 text-white'
+                }`}>
+                  <div className="w-14 h-14 rounded-2xl bg-red-100 dark:bg-red-950/90 border border-red-400 dark:border-red-500 flex items-center justify-center text-red-600 dark:text-red-400 mx-auto shadow-lg shadow-red-900/30">
+                    <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400 animate-pulse" />
+                  </div>
+
+                  <div className="text-center space-y-2">
+                    <span className="text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-red-100 text-red-800 dark:bg-red-950 dark:border dark:border-red-500 dark:text-red-300 inline-block">
+                      Danger Zone • Bulk Deletion
+                    </span>
+                    <h3 className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                      Delete All {moderationContentType === 'videos' ? `${moderationFilter.toUpperCase()} Videos` : 'Content Series'}?
+                    </h3>
+                    <p className={`text-xs leading-relaxed max-w-md mx-auto ${isLight ? 'text-slate-600' : 'text-purple-200/90'}`}>
+                      You are about to permanently delete{' '}
+                      <strong className="text-red-600 font-bold">
+                        {moderationContentType === 'videos' ? `${moderationVideos.length} videos` : `${moderationSeries.length} series and all their episodes`}
+                      </strong>{' '}
+                      from Supabase.
+                    </p>
+
+                    <div className={`p-4 rounded-2xl border text-xs text-left space-y-2 ${
+                      isLight ? 'bg-red-50 border-red-200 text-red-800' : 'bg-red-950/80 border-red-500/50 text-red-200'
+                    }`}>
+                      <p className="font-bold text-red-600 flex items-center gap-1.5">
+                        <AlertTriangle className="w-4 h-4" /> This action is immediate & permanent:
+                      </p>
+                      <ul className="list-disc pl-5 space-y-1 text-[11px]">
+                        {moderationContentType === 'videos' ? (
+                          <>
+                            <li>All {moderationVideos.length} records matching &ldquo;{moderationFilter}&rdquo; in <code className="font-mono font-bold">public.videos</code> will be wiped.</li>
+                            <li>Associated comments, watch history, and user watchlist links will be removed.</li>
+                            <li>Platform feeds will update instantly to reflect zero remaining items.</li>
+                          </>
+                        ) : (
+                          <>
+                            <li>All {moderationSeries.length} records in <code className="font-mono font-bold">public.content_series</code> will be wiped.</li>
+                            <li>All child episodes and videos associated with these series will be deleted.</li>
+                            <li>Series carousels and playlists will be emptied platform-wide.</li>
+                          </>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <button
+                      onClick={() => setShowDeleteAllModal(false)}
+                      disabled={isDeletingAll}
+                      className={`flex-1 py-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                        isLight
+                          ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                          : 'bg-purple-950/70 border-purple-500/30 text-purple-200 hover:text-white'
+                      }`}
+                    >
+                      Cancel & Keep Data
+                    </button>
+                    <button
+                      onClick={handleDeleteAll}
+                      disabled={isDeletingAll}
+                      className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-black shadow-xl shadow-red-600/50 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95"
+                    >
+                      {isDeletingAll ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <span>Deleting Supabase Data...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 className="w-4 h-4" />
+                          <span>Yes, Delete All</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
             {/* VIDEO PLAYER PREVIEW MODAL */}
             {activeVideoModal && (
               <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-                <div className="relative w-full max-w-2xl bg-[#120A2E] border border-purple-500/40 rounded-3xl p-6 space-y-4 shadow-2xl">
-                  <div className="flex items-center justify-between border-b border-purple-500/20 pb-3">
-                    <h3 className="text-base font-bold text-white line-clamp-1">{activeVideoModal.title}</h3>
+                <div className={`relative w-full max-w-2xl border rounded-3xl p-6 space-y-4 shadow-2xl transition-colors ${
+                  isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#120A2E] border-purple-500/40 text-white'
+                }`}>
+                  <div className={`flex items-center justify-between border-b pb-3 ${
+                    isLight ? 'border-slate-200' : 'border-purple-500/20'
+                  }`}>
+                    <h3 className={`text-base font-bold line-clamp-1 ${isLight ? 'text-slate-900' : 'text-white'}`}>{activeVideoModal.title}</h3>
                     <button
                       onClick={() => setActiveVideoModal(null)}
-                      className="p-1 rounded-full text-purple-300 hover:text-white cursor-pointer"
+                      className={`p-1 rounded-full cursor-pointer ${isLight ? 'text-slate-500 hover:text-slate-800' : 'text-purple-300 hover:text-white'}`}
                     >
                       <XCircle className="w-5 h-5" />
                     </button>
@@ -1118,21 +1849,31 @@ export default function AdminHubPage() {
             {/* REJECTION REASON MODAL */}
             {rejectionModalVideo && (
               <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-                <div className="relative w-full max-w-md bg-[#130A2E] border border-red-500/40 rounded-3xl p-6 space-y-4 shadow-2xl">
-                  <h3 className="text-base font-bold text-white">Reject Video & Set Reason</h3>
-                  <p className="text-xs text-purple-200">
-                    Explain why <strong className="text-white">&ldquo;{rejectionModalVideo.title}&rdquo;</strong> is rejected.
+                <div className={`relative w-full max-w-md border rounded-3xl p-6 space-y-4 shadow-2xl transition-colors ${
+                  isLight ? 'bg-white border-red-200 text-slate-900' : 'bg-[#130A2E] border-red-500/40 text-white'
+                }`}>
+                  <h3 className={`text-base font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Reject Video & Set Reason</h3>
+                  <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-purple-200'}`}>
+                    Explain why <strong className={isLight ? 'text-slate-900' : 'text-white'}>&ldquo;{rejectionModalVideo.title}&rdquo;</strong> is rejected.
                   </p>
                   <textarea
                     value={rejectionReason}
                     onChange={(e) => setRejectionReason(e.target.value)}
                     rows={3}
-                    className="w-full bg-[#180E38] border border-purple-500/30 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-red-400"
+                    className={`w-full border rounded-xl p-3 text-xs focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-red-500'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-red-400'
+                    }`}
                   />
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setRejectionModalVideo(null)}
-                      className="flex-1 py-2 rounded-xl bg-purple-950/60 border border-purple-500/30 text-purple-200 text-xs font-bold"
+                      className={`flex-1 py-2 rounded-xl border text-xs font-bold transition-all ${
+                        isLight
+                          ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                          : 'bg-purple-950/60 border-purple-500/30 text-purple-200'
+                      }`}
                     >
                       Cancel
                     </button>
@@ -1155,10 +1896,12 @@ export default function AdminHubPage() {
         {activeTab === 'text' && (
           <div className="space-y-8 animate-fadeIn">
             {/* Header info */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-[#11082B]/80 backdrop-blur-xl border border-purple-500/25">
+            <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl border shadow-sm transition-colors ${
+              isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/80 border-purple-500/25 text-white'
+            }`}>
               <div>
-                <h2 className="text-2xl font-black text-white">Dynamic Site Text CMS</h2>
-                <p className="text-xs text-purple-300/80 mt-1">
+                <h2 className={`text-2xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>Dynamic Site Text CMS</h2>
+                <p className={`text-xs mt-1 ${isLight ? 'text-slate-600' : 'text-purple-300/80'}`}>
                   Change all headings, subtitles, button texts, stats, and promotional cards across the site in real-time.
                 </p>
               </div>
@@ -1166,7 +1909,11 @@ export default function AdminHubPage() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleResetSiteText}
-                  className="px-4 py-2 rounded-xl bg-purple-950/60 hover:bg-purple-900 border border-purple-500/30 text-xs font-bold text-purple-200 transition-all cursor-pointer"
+                  className={`px-4 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                    isLight
+                      ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                      : 'bg-purple-950/60 hover:bg-purple-900 border-purple-500/30 text-purple-200'
+                  }`}
                 >
                   Reset Defaults
                 </button>
@@ -1182,127 +1929,173 @@ export default function AdminHubPage() {
             </div>
 
             {textSaveSuccess && (
-              <div className="p-4 rounded-2xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 text-xs font-semibold flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-400" />
+              <div className="p-4 rounded-2xl bg-emerald-100 text-emerald-900 dark:bg-emerald-950/80 dark:border dark:border-emerald-500/40 dark:text-emerald-200 text-xs font-semibold flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>Changes saved successfully and broadcast live to all visitors!</span>
               </div>
             )}
 
             {/* SECTION 1: HERO SECTION COPY */}
-            <div className="p-6 rounded-3xl bg-[#11082B]/80 border border-purple-500/25 space-y-6">
-              <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-purple-500/20 pb-3">
-                <Sparkles className="w-4 h-4 text-purple-400" />
+            <div className={`p-6 rounded-3xl border space-y-6 shadow-sm transition-colors ${
+              isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/80 border-purple-500/25 text-white'
+            }`}>
+              <h3 className={`text-base font-bold flex items-center gap-2 border-b pb-3 ${
+                isLight ? 'border-slate-200 text-slate-900' : 'border-purple-500/20 text-white'
+              }`}>
+                <Sparkles className="w-4 h-4 text-purple-500" />
                 <span>Landing Hero Section Texts</span>
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
-                  <label className="block text-purple-300 font-semibold mb-1">Eyebrow Badge Text</label>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Eyebrow Badge Text</label>
                   <input
                     type="text"
                     value={siteText.hero.badgeText}
                     onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, badgeText: e.target.value } })}
-                    className="w-full bg-[#180E38] border border-purple-500/30 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-purple-400"
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-purple-300 font-semibold mb-1">Headline Line 1</label>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Headline Line 1</label>
                   <input
                     type="text"
                     value={siteText.hero.headlineLine1}
                     onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, headlineLine1: e.target.value } })}
-                    className="w-full bg-[#180E38] border border-purple-500/30 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-purple-400"
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-purple-300 font-semibold mb-1">Headline Line 2 (Accent)</label>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Headline Line 2 (Accent)</label>
                   <input
                     type="text"
                     value={siteText.hero.headlineLine2}
                     onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, headlineLine2: e.target.value } })}
-                    className="w-full bg-[#180E38] border border-purple-500/30 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-purple-400"
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-purple-300 font-semibold mb-1">Hero Subtitle</label>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Hero Subtitle</label>
                   <input
                     type="text"
                     value={siteText.hero.subtitle}
                     onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, subtitle: e.target.value } })}
-                    className="w-full bg-[#180E38] border border-purple-500/30 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-purple-400"
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-purple-300 font-semibold mb-1">Primary CTA Button Label</label>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Primary CTA Button Label</label>
                   <input
                     type="text"
                     value={siteText.hero.ctaPrimary}
                     onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, ctaPrimary: e.target.value } })}
-                    className="w-full bg-[#180E38] border border-purple-500/30 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-purple-400"
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-purple-300 font-semibold mb-1">Secondary CTA Button Label</label>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Secondary CTA Button Label</label>
                   <input
                     type="text"
                     value={siteText.hero.ctaSecondary}
                     onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, ctaSecondary: e.target.value } })}
-                    className="w-full bg-[#180E38] border border-purple-500/30 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-purple-400"
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
                   />
                 </div>
               </div>
 
               {/* 3 Feature Pills */}
               <div className="pt-2 space-y-3">
-                <p className="text-xs font-bold text-white">Feature Pills (Row of 3)</p>
+                <p className={`text-xs font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Feature Pills (Row of 3)</p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                  <div className="p-3 rounded-2xl bg-[#160B37] border border-purple-500/20 space-y-2">
+                  <div className={`p-3 rounded-2xl border space-y-2 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'
+                  }`}>
                     <input
                       type="text"
                       value={siteText.hero.feature1Title}
                       onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, feature1Title: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-white font-bold"
+                      className={`w-full border rounded-lg p-2 font-bold ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
+                      }`}
                     />
                     <input
                       type="text"
                       value={siteText.hero.feature1Subtitle}
                       onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, feature1Subtitle: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-purple-300 text-[11px]"
+                      className={`w-full border rounded-lg p-2 text-[11px] ${
+                        isLight ? 'bg-white border-slate-300 text-slate-600' : 'bg-[#1E0F45] border-purple-500/30 text-purple-300'
+                      }`}
                     />
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-[#160B37] border border-purple-500/20 space-y-2">
+                  <div className={`p-3 rounded-2xl border space-y-2 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'
+                  }`}>
                     <input
                       type="text"
                       value={siteText.hero.feature2Title}
                       onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, feature2Title: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-white font-bold"
+                      className={`w-full border rounded-lg p-2 font-bold ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
+                      }`}
                     />
                     <input
                       type="text"
                       value={siteText.hero.feature2Subtitle}
                       onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, feature2Subtitle: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-purple-300 text-[11px]"
+                      className={`w-full border rounded-lg p-2 text-[11px] ${
+                        isLight ? 'bg-white border-slate-300 text-slate-600' : 'bg-[#1E0F45] border-purple-500/30 text-purple-300'
+                      }`}
                     />
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-[#160B37] border border-purple-500/20 space-y-2">
+                  <div className={`p-3 rounded-2xl border space-y-2 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'
+                  }`}>
                     <input
                       type="text"
                       value={siteText.hero.feature3Title}
                       onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, feature3Title: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-white font-bold"
+                      className={`w-full border rounded-lg p-2 font-bold ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
+                      }`}
                     />
                     <input
                       type="text"
                       value={siteText.hero.feature3Subtitle}
                       onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, feature3Subtitle: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-purple-300 text-[11px]"
+                      className={`w-full border rounded-lg p-2 text-[11px] ${
+                        isLight ? 'bg-white border-slate-300 text-slate-600' : 'bg-[#1E0F45] border-purple-500/30 text-purple-300'
+                      }`}
                     />
                   </div>
                 </div>
@@ -1310,65 +2103,89 @@ export default function AdminHubPage() {
 
               {/* 4 Stats */}
               <div className="pt-2 space-y-3">
-                <p className="text-xs font-bold text-white">Hero Bottom Stats Dock</p>
+                <p className={`text-xs font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Hero Bottom Stats Dock</p>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                  <div className="p-3 rounded-2xl bg-[#160B37] border border-purple-500/20 space-y-1.5">
+                  <div className={`p-3 rounded-2xl border space-y-1.5 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'
+                  }`}>
                     <input
                       type="text"
                       value={siteText.hero.stat1Value}
                       onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat1Value: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-white font-black"
+                      className={`w-full border rounded-lg p-2 font-black ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
+                      }`}
                     />
                     <input
                       type="text"
                       value={siteText.hero.stat1Label}
                       onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat1Label: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-purple-300 text-[11px]"
+                      className={`w-full border rounded-lg p-2 text-[11px] ${
+                        isLight ? 'bg-white border-slate-300 text-slate-600' : 'bg-[#1E0F45] border-purple-500/30 text-purple-300'
+                      }`}
                     />
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-[#160B37] border border-purple-500/20 space-y-1.5">
+                  <div className={`p-3 rounded-2xl border space-y-1.5 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'
+                  }`}>
                     <input
                       type="text"
                       value={siteText.hero.stat2Value}
                       onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat2Value: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-white font-black"
+                      className={`w-full border rounded-lg p-2 font-black ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
+                      }`}
                     />
                     <input
                       type="text"
                       value={siteText.hero.stat2Label}
                       onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat2Label: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-purple-300 text-[11px]"
+                      className={`w-full border rounded-lg p-2 text-[11px] ${
+                        isLight ? 'bg-white border-slate-300 text-slate-600' : 'bg-[#1E0F45] border-purple-500/30 text-purple-300'
+                      }`}
                     />
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-[#160B37] border border-purple-500/20 space-y-1.5">
+                  <div className={`p-3 rounded-2xl border space-y-1.5 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'
+                  }`}>
                     <input
                       type="text"
                       value={siteText.hero.stat3Value}
                       onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat3Value: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-white font-black"
+                      className={`w-full border rounded-lg p-2 font-black ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
+                      }`}
                     />
                     <input
                       type="text"
                       value={siteText.hero.stat3Label}
                       onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat3Label: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-purple-300 text-[11px]"
+                      className={`w-full border rounded-lg p-2 text-[11px] ${
+                        isLight ? 'bg-white border-slate-300 text-slate-600' : 'bg-[#1E0F45] border-purple-500/30 text-purple-300'
+                      }`}
                     />
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-[#160B37] border border-purple-500/20 space-y-1.5">
+                  <div className={`p-3 rounded-2xl border space-y-1.5 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'
+                  }`}>
                     <input
                       type="text"
                       value={siteText.hero.stat4Value}
                       onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat4Value: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-white font-black"
+                      className={`w-full border rounded-lg p-2 font-black ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
+                      }`}
                     />
                     <input
                       type="text"
                       value={siteText.hero.stat4Label}
                       onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat4Label: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-purple-300 text-[11px]"
+                      className={`w-full border rounded-lg p-2 text-[11px] ${
+                        isLight ? 'bg-white border-slate-300 text-slate-600' : 'bg-[#1E0F45] border-purple-500/30 text-purple-300'
+                      }`}
                     />
                   </div>
                 </div>
@@ -1376,73 +2193,93 @@ export default function AdminHubPage() {
             </div>
 
             {/* SECTION 2: CREATOR & ADVERTISER PROMO CARDS COPY */}
-            <div className="p-6 rounded-3xl bg-[#11082B]/80 border border-purple-500/25 space-y-6">
-              <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-purple-500/20 pb-3">
-                <Users className="w-4 h-4 text-purple-400" />
+            <div className={`p-6 rounded-3xl border space-y-6 shadow-sm transition-colors ${
+              isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/80 border-purple-500/25 text-white'
+            }`}>
+              <h3 className={`text-base font-bold flex items-center gap-2 border-b pb-3 ${
+                isLight ? 'border-slate-200 text-slate-900' : 'border-purple-500/20 text-white'
+              }`}>
+                <Users className="w-4 h-4 text-purple-500" />
                 <span>Creator & Advertiser Signup Cards Copy</span>
               </h3>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
                 {/* Creator Card */}
-                <div className="p-4 rounded-2xl bg-[#160B37] border border-purple-500/30 space-y-3">
-                  <h4 className="font-bold text-purple-300">Creator Signup Card</h4>
+                <div className={`p-4 rounded-2xl border space-y-3 ${
+                  isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/30'
+                }`}>
+                  <h4 className={`font-bold ${isLight ? 'text-purple-700' : 'text-purple-300'}`}>Creator Signup Card</h4>
                   <div>
-                    <label className="block text-purple-200/80 mb-1">Title</label>
+                    <label className={`block mb-1 ${isLight ? 'text-slate-600 font-medium' : 'text-purple-200/80'}`}>Title</label>
                     <input
                       type="text"
                       value={siteText.creatorCard.title}
                       onChange={(e) => setSiteText({ ...siteText, creatorCard: { ...siteText.creatorCard, title: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-white"
+                      className={`w-full border rounded-lg p-2 ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
+                      }`}
                     />
                   </div>
                   <div>
-                    <label className="block text-purple-200/80 mb-1">Subtitle</label>
+                    <label className={`block mb-1 ${isLight ? 'text-slate-600 font-medium' : 'text-purple-200/80'}`}>Subtitle</label>
                     <textarea
                       value={siteText.creatorCard.subtitle}
                       onChange={(e) => setSiteText({ ...siteText, creatorCard: { ...siteText.creatorCard, subtitle: e.target.value } })}
                       rows={2}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-white"
+                      className={`w-full border rounded-lg p-2 ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
+                      }`}
                     />
                   </div>
                   <div>
-                    <label className="block text-purple-200/80 mb-1">Button CTA Text</label>
+                    <label className={`block mb-1 ${isLight ? 'text-slate-600 font-medium' : 'text-purple-200/80'}`}>Button CTA Text</label>
                     <input
                       type="text"
                       value={siteText.creatorCard.ctaText}
                       onChange={(e) => setSiteText({ ...siteText, creatorCard: { ...siteText.creatorCard, ctaText: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-white"
+                      className={`w-full border rounded-lg p-2 ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
+                      }`}
                     />
                   </div>
                 </div>
 
                 {/* Advertiser Card */}
-                <div className="p-4 rounded-2xl bg-[#160B37] border border-purple-500/30 space-y-3">
-                  <h4 className="font-bold text-purple-300">Advertiser Signup Card</h4>
+                <div className={`p-4 rounded-2xl border space-y-3 ${
+                  isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/30'
+                }`}>
+                  <h4 className={`font-bold ${isLight ? 'text-purple-700' : 'text-purple-300'}`}>Advertiser Signup Card</h4>
                   <div>
-                    <label className="block text-purple-200/80 mb-1">Title</label>
+                    <label className={`block mb-1 ${isLight ? 'text-slate-600 font-medium' : 'text-purple-200/80'}`}>Title</label>
                     <input
                       type="text"
                       value={siteText.advertiserCard.title}
                       onChange={(e) => setSiteText({ ...siteText, advertiserCard: { ...siteText.advertiserCard, title: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-white"
+                      className={`w-full border rounded-lg p-2 ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
+                      }`}
                     />
                   </div>
                   <div>
-                    <label className="block text-purple-200/80 mb-1">Subtitle</label>
+                    <label className={`block mb-1 ${isLight ? 'text-slate-600 font-medium' : 'text-purple-200/80'}`}>Subtitle</label>
                     <textarea
                       value={siteText.advertiserCard.subtitle}
                       onChange={(e) => setSiteText({ ...siteText, advertiserCard: { ...siteText.advertiserCard, subtitle: e.target.value } })}
                       rows={2}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-white"
+                      className={`w-full border rounded-lg p-2 ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
+                      }`}
                     />
                   </div>
                   <div>
-                    <label className="block text-purple-200/80 mb-1">Button CTA Text</label>
+                    <label className={`block mb-1 ${isLight ? 'text-slate-600 font-medium' : 'text-purple-200/80'}`}>Button CTA Text</label>
                     <input
                       type="text"
                       value={siteText.advertiserCard.ctaText}
                       onChange={(e) => setSiteText({ ...siteText, advertiserCard: { ...siteText.advertiserCard, ctaText: e.target.value } })}
-                      className="w-full bg-[#1E0F45] border border-purple-500/30 rounded-lg p-2 text-white"
+                      className={`w-full border rounded-lg p-2 ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
+                      }`}
                     />
                   </div>
                 </div>
@@ -1453,7 +2290,11 @@ export default function AdminHubPage() {
             <div className="flex justify-end gap-3 pt-4">
               <button
                 onClick={handleResetSiteText}
-                className="px-5 py-2.5 rounded-xl bg-purple-950/60 hover:bg-purple-900 border border-purple-500/30 text-xs font-bold text-purple-200 cursor-pointer"
+                className={`px-5 py-2.5 rounded-xl border text-xs font-bold cursor-pointer transition-all ${
+                  isLight
+                    ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                    : 'bg-purple-950/60 hover:bg-purple-900 border-purple-500/30 text-purple-200'
+                }`}
               >
                 Reset Defaults
               </button>

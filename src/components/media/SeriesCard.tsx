@@ -39,7 +39,7 @@ export function SeriesCard({ series, className = '' }: SeriesCardProps) {
       className={`group relative bg-transparent flex flex-col h-full cursor-pointer select-none ${className}`}
     >
       {/* Thumbnail Container */}
-      <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-[#111A22] border border-[#27313A] group-hover:border-[#F4C95D]/30 transition-all duration-300 shadow-sm">
+      <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-[var(--lr-bg-surface)] border border-[var(--lr-border-primary)] group-hover:border-[var(--lr-gold)]/50 transition-all duration-300 shadow-sm">
         {coverUrl ? (
           <Image
             src={coverUrl}
@@ -49,18 +49,18 @@ export function SeriesCard({ series, className = '' }: SeriesCardProps) {
             className="object-cover group-hover:scale-105 group-hover:brightness-95 transition-transform duration-500 ease-out"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-[#111A22] text-[#F4C95D]">
+          <div className="w-full h-full flex items-center justify-center bg-[var(--lr-bg-surface)] text-[var(--lr-gold)]">
             <Film className="w-12 h-12 opacity-80" />
           </div>
         )}
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#070B0F]/85 via-transparent to-transparent opacity-80 group-hover:opacity-95 transition-opacity" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent opacity-80 group-hover:opacity-95 transition-opacity" />
 
         {/* Top Badges */}
         <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
           {/* Series Pill */}
-          <span className="bg-[#070B0F]/85 backdrop-blur-md border border-[#27313A] text-[#F5F1E8] text-[10px] font-bold px-2.5 py-0.5 rounded flex items-center gap-1.5 shadow-sm">
+          <span className="bg-[#070B0F]/85 backdrop-blur-md border border-white/10 text-white text-[10px] font-bold px-2.5 py-0.5 rounded flex items-center gap-1.5 shadow-sm">
             <Layers className="w-3 h-3 text-[#F4C95D]" />
             <span className="tracking-wider uppercase">Series</span>
           </span>
@@ -81,14 +81,14 @@ export function SeriesCard({ series, className = '' }: SeriesCardProps) {
         </div>
 
         {/* Bottom Bar inside Thumbnail for quick metadata */}
-        <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-[11px] text-[#B7BEC6]">
+        <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-[11px] text-white/90">
           {series.category ? (
-            <span className="text-[10px] uppercase font-bold tracking-wider text-[#F4C95D] bg-[#070B0F]/80 backdrop-blur-sm px-2 py-0.5 rounded border border-[#27313A]">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-[#F4C95D] bg-black/75 backdrop-blur-sm px-2 py-0.5 rounded border border-white/10">
               {series.category}
             </span>
           ) : <span />}
 
-          <span className="text-[10px] font-medium text-[#B7BEC6] bg-[#070B0F]/80 backdrop-blur-sm px-1.5 py-0.5 rounded">
+          <span className="text-[10px] font-medium text-white/80 bg-black/75 backdrop-blur-sm px-1.5 py-0.5 rounded">
             Watch Now
           </span>
         </div>
@@ -97,10 +97,10 @@ export function SeriesCard({ series, className = '' }: SeriesCardProps) {
       {/* Info Below Card */}
       <div className="pt-2.5 flex flex-col flex-1 justify-between">
         <div>
-          <h3 className="text-[#F5F1E8] font-bold text-sm line-clamp-1 group-hover:text-[#F4C95D] transition-colors">
+          <h3 className="text-[var(--lr-text-primary)] font-bold text-sm line-clamp-1 group-hover:text-[var(--lr-gold)] transition-colors">
             {series.title}
           </h3>
-          <p className="text-[#7F8993] text-xs line-clamp-1 mt-0.5 font-normal">
+          <p className="text-[var(--lr-text-secondary)] text-xs line-clamp-1 mt-0.5 font-normal">
             {series.creator?.display_name || series.creator?.username || 'Creator'}
             {series.description ? ` · ${series.description}` : ''}
           </p>

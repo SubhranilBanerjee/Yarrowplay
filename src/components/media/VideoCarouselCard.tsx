@@ -20,7 +20,7 @@ export function VideoCarouselCard({ video }: { video: Video }) {
       className="group shrink-0 snap-start w-[210px] sm:w-[250px] md:w-[270px] flex flex-col gap-2 transition-all cursor-pointer"
     >
       {/* Thumbnail with 16:9 aspect ratio */}
-      <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-[#111A22] border border-white/[0.07] group-hover:border-[#F4C95D]/40 transition-all">
+      <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-[var(--lr-bg-surface)] border border-[var(--lr-border-primary)] group-hover:border-[var(--lr-gold)]/40 transition-all">
         {video.thumbnail_url ? (
           <Image
             src={video.thumbnail_url}
@@ -29,14 +29,14 @@ export function VideoCarouselCard({ video }: { video: Video }) {
             className="object-cover group-hover:scale-105 group-hover:brightness-90 transition-all duration-300"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-[#F4C95D] bg-gradient-to-br from-[#111A22] to-[#151F28]">
+          <div className="w-full h-full flex items-center justify-center text-[var(--lr-gold)] bg-[var(--lr-bg-surface)]">
             <Film className="w-8 h-8" />
           </div>
         )}
 
         {/* Duration badge */}
         {video.duration_seconds > 0 && (
-          <div className="absolute top-2 left-2 bg-[#070B0F]/85 backdrop-blur-md text-[#F5F1E8] text-[9px] font-bold px-2 py-0.5 rounded flex items-center gap-1 border border-[#27313A]">
+          <div className="absolute top-2 left-2 bg-[#070B0F]/85 backdrop-blur-md text-white text-[9px] font-bold px-2 py-0.5 rounded flex items-center gap-1 border border-white/10">
             <Clock className="w-2.5 h-2.5 text-[#F4C95D]" />
             {formatDuration(video.duration_seconds)}
           </div>
@@ -51,7 +51,7 @@ export function VideoCarouselCard({ video }: { video: Video }) {
 
         {/* Lock badge */}
         {video.is_locked && (
-          <div className="absolute top-2 right-2 bg-[#070B0F]/85 backdrop-blur-md p-1.5 rounded border border-[#27313A]">
+          <div className="absolute top-2 right-2 bg-[#070B0F]/85 backdrop-blur-md p-1.5 rounded border border-white/10">
             <Lock className="w-3 h-3 text-[#F4C95D]" />
           </div>
         )}
@@ -66,21 +66,21 @@ export function VideoCarouselCard({ video }: { video: Video }) {
 
       {/* Meta details */}
       <div className="pt-1 flex flex-col gap-0.5">
-        <h3 className="text-[#F5F1E8] text-xs sm:text-sm font-semibold line-clamp-1 leading-tight group-hover:text-[#F4C95D] transition-colors">
+        <h3 className="text-[var(--lr-text-primary)] text-xs sm:text-sm font-semibold line-clamp-1 leading-tight group-hover:text-[var(--lr-gold)] transition-colors">
           {video.title}
         </h3>
 
         <div className="flex items-center gap-2 mt-0.5">
-          <div className="relative w-4 h-4 rounded-full overflow-hidden bg-[#151F28] border border-[#27313A] shrink-0 flex items-center justify-center">
+          <div className="relative w-4 h-4 rounded-full overflow-hidden bg-[var(--lr-bg-elevated)] border border-[var(--lr-border-primary)] shrink-0 flex items-center justify-center">
             {video.creator?.avatar_url ? (
               <Image src={video.creator.avatar_url} alt="" fill className="object-cover" />
             ) : (
-              <span className="text-[8px] font-bold text-[#F4C95D]">
+              <span className="text-[8px] font-bold text-[var(--lr-gold)]">
                 {video.creator?.display_name?.[0] || 'C'}
               </span>
             )}
           </div>
-          <span className="text-[#7F8993] text-[11px] truncate font-normal">
+          <span className="text-[var(--lr-text-secondary)] text-[11px] truncate font-normal">
             @{video.creator?.username || video.creator?.display_name || 'creator'}
           </span>
         </div>

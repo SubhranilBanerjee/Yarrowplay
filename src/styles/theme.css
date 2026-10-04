@@ -4,7 +4,9 @@
    ========================================================================== */
 
 :root,
-[data-theme="dark"] {
+[data-theme="dark"],
+html.dark,
+body.dark {
   /* ==========================================================================
      LIGHTHOUSE REELS CANONICAL DESIGN TOKENS (--lr-*) - DARK MODE
      ========================================================================== */
@@ -44,9 +46,12 @@
   --lr-error: #D96868;
   --lr-danger: #C95353;
 
-  /* ==========================================================================
-     SEMANTIC DESIGN TOKENS
-     ========================================================================== */
+  /* Aliases */
+  --lr-bg: var(--lr-bg-primary);
+  --lr-card-bg: var(--lr-bg-surface);
+  --lr-border: var(--lr-border-primary);
+
+  /* Semantic Design Tokens */
   --background: var(--lr-bg-primary);
   --foreground: var(--lr-text-primary);
   --card: var(--lr-bg-surface);
@@ -55,12 +60,13 @@
   --accent: var(--lr-gold);
   --accent-foreground: #0B0F13;
 
-  /* ==========================================================================
-     CORE THEME COMPATIBILITY MAPPINGS
-     ========================================================================== */
+  /* Compatibility Mappings */
   --bg-primary: var(--lr-bg-primary);
   --bg-secondary: var(--lr-bg-secondary);
   --bg-tertiary: var(--lr-bg-tertiary);
+  --bg-surface: var(--lr-bg-surface);
+  --bg-card: var(--lr-bg-surface);
+  --border-subtle: var(--lr-border-primary);
 
   --glass-surface: var(--lr-bg-surface);
   --glass-surface-elevated: var(--lr-bg-elevated);
@@ -118,6 +124,7 @@
   --glow-pink: none;
   --glow-purple: none;
   --neon-purple-glow: rgba(244, 201, 93, 0.12);
+  --neon-purple-border: rgba(244, 201, 93, 0.35);
 
   /* Border Radius */
   --radius-sm: 6px;
@@ -132,13 +139,16 @@
    LIGHT MODE DESIGN TOKENS
    Clean, polished, high-contrast while maintaining warm gold branding
    ========================================================================== */
-[data-theme="light"] {
+[data-theme="light"],
+html.light,
+body.light,
+.light {
   --lr-bg-primary: #F8FAFC;
   --lr-bg-secondary: #FFFFFF;
   --lr-bg-tertiary: #F1F5F9;
 
   --lr-bg-surface: #FFFFFF;
-  --lr-bg-elevated: #F8FAFC;
+  --lr-bg-elevated: #F1F5F9;
   --lr-bg-input: #FFFFFF;
   --lr-bg-sidebar: #FFFFFF;
   --lr-bg-header: rgba(255, 255, 255, 0.95);
@@ -147,7 +157,7 @@
 
   --lr-border-primary: #E2E8F0;
   --lr-border-subtle: #EDF2F7;
-  --lr-border-faint: rgba(0, 0, 0, 0.05);
+  --lr-border-faint: rgba(0, 0, 0, 0.08);
 
   --lr-gold: #C99A32;
   --lr-gold-light: #DDB347;
@@ -157,7 +167,7 @@
   --lr-gold-muted: #805E1A;
 
   --lr-text-primary: #0F172A;
-  --lr-text-secondary: #475569;
+  --lr-text-secondary: #334155;
   --lr-text-muted: #64748B;
   --lr-text-disabled: #94A3B8;
 
@@ -168,6 +178,11 @@
   --lr-warning: #D97706;
   --lr-error: #DC2626;
   --lr-danger: #B91C1C;
+
+  /* Aliases */
+  --lr-bg: var(--lr-bg-primary);
+  --lr-card-bg: var(--lr-bg-surface);
+  --lr-border: var(--lr-border-primary);
 
   /* Semantic Design Tokens */
   --background: var(--lr-bg-primary);
@@ -182,6 +197,9 @@
   --bg-primary: var(--lr-bg-primary);
   --bg-secondary: var(--lr-bg-secondary);
   --bg-tertiary: var(--lr-bg-tertiary);
+  --bg-surface: var(--lr-bg-surface);
+  --bg-card: var(--lr-bg-surface);
+  --border-subtle: var(--lr-border-primary);
 
   --glass-surface: var(--lr-bg-surface);
   --glass-surface-elevated: var(--lr-bg-elevated);
@@ -216,6 +234,96 @@
   --glow-card-featured: 0 6px 20px rgba(0, 0, 0, 0.08);
   --glow-search-focus: 0 0 0 1px var(--lr-gold);
   --glow-form: 0 4px 20px rgba(0, 0, 0, 0.06);
+  --neon-purple-glow: rgba(201, 154, 50, 0.12);
+  --neon-purple-border: rgba(201, 154, 50, 0.35);
+}
+
+/* ==========================================================================
+   GLOBAL HIGH-CONTRAST LIGHT MODE COLOR FIXES
+   Ensures text is never invisible or washed out on light backgrounds
+   ========================================================================== */
+[data-theme="light"],
+html.light,
+body.light {
+  color: #0F172A;
+}
+
+[data-theme="light"] .text-\[\#F5F1E8\],
+[data-theme="light"] .text-\[\#B7BEC6\],
+[data-theme="light"] .text-\[\#C2C9D1\],
+[data-theme="light"] .text-\[\#C6D2DC\],
+[data-theme="light"] .text-\[\#9AA7B4\],
+[data-theme="light"] .text-\[\#8E9AA7\],
+[data-theme="light"] .text-\[\#7F8993\],
+[data-theme="light"] .text-\[\#7E8B99\],
+[data-theme="light"] .text-\[\#76828F\],
+[data-theme="light"] .text-\[\#7A8694\],
+[data-theme="light"] .text-\[\#9EABB8\] {
+  color: #334155 !important;
+}
+
+[data-theme="light"] h1.text-\[\#F5F1E8\],
+[data-theme="light"] h2.text-\[\#F5F1E8\],
+[data-theme="light"] h3.text-\[\#F5F1E8\],
+[data-theme="light"] h4.text-\[\#F5F1E8\],
+[data-theme="light"] strong.text-\[\#F5F1E8\],
+[data-theme="light"] .font-bold.text-\[\#F5F1E8\],
+[data-theme="light"] .font-semibold.text-\[\#F5F1E8\],
+[data-theme="light"] .font-extrabold.text-\[\#F5F1E8\] {
+  color: #0F172A !important;
+}
+
+/* Ensure text on light cards & surfaces is never invisible */
+[data-theme="light"] h1:not([class*="bg-"]):not(.btn-primary):not([class*="btn-"]),
+[data-theme="light"] h2:not([class*="bg-"]):not(.btn-primary):not([class*="btn-"]),
+[data-theme="light"] h3:not([class*="bg-"]):not(.btn-primary):not([class*="btn-"]),
+[data-theme="light"] h4:not([class*="bg-"]):not(.btn-primary):not([class*="btn-"]) {
+  color: #0F172A;
+}
+
+[data-theme="light"] p.text-white,
+[data-theme="light"] span.text-white:not([class*="bg-"]):not([class*="badge"]),
+[data-theme="light"] div.text-white:not([class*="bg-"]):not([class*="badge"]),
+[data-theme="light"] h1.text-white,
+[data-theme="light"] h2.text-white,
+[data-theme="light"] h3.text-white,
+[data-theme="light"] h4.text-white {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .text-white\/80,
+[data-theme="light"] .text-white\/70,
+[data-theme="light"] .text-white\/60,
+[data-theme="light"] .text-white\/50 {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .bg-\[\#111A22\],
+[data-theme="light"] .bg-\[\#090D12\],
+[data-theme="light"] .bg-\[\#070B0F\],
+[data-theme="light"] .bg-\[\#0B1117\],
+[data-theme="light"] .bg-\[\#11171E\],
+[data-theme="light"] .bg-\[\#121820\],
+[data-theme="light"] .bg-\[\#141D26\],
+[data-theme="light"] .bg-\[\#151F28\],
+[data-theme="light"] .bg-\[\#0F151B\],
+[data-theme="light"] .bg-\[\#0D131A\] {
+  background-color: #FFFFFF !important;
+}
+
+[data-theme="light"] .border-\[\#27313A\],
+[data-theme="light"] .border-\[\#1E2732\],
+[data-theme="light"] .border-\[\#212A34\],
+[data-theme="light"] .border-\[\#182029\],
+[data-theme="light"] .border-\[\#1A232D\],
+[data-theme="light"] .border-\[\#1C252D\],
+[data-theme="light"] .border-\[\#26313C\],
+[data-theme="light"] .border-\[\#24303D\] {
+  border-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] .prose-invert {
+  color: #334155 !important;
 }
 
 /* ==========================================================================
@@ -273,7 +381,7 @@
   box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.35) !important;
 }
 
-/* Secondary Button (Dark translucent violet surface) */
+/* Secondary Button */
 .btn-secondary,
 .theme-secondary-button {
   background: rgba(24, 18, 43, 0.8) !important;
@@ -284,11 +392,25 @@
   cursor: pointer;
 }
 
+[data-theme="light"] .btn-secondary,
+[data-theme="light"] .theme-secondary-button {
+  background: #F1F5F9 !important;
+  border: 1px solid #CBD5E1 !important;
+  color: #0F172A !important;
+}
+
 .btn-secondary:hover,
 .theme-secondary-button:hover {
   background: rgba(37, 27, 66, 0.9) !important;
   border-color: rgba(168, 85, 247, 0.6) !important;
   color: #E0D7F5 !important;
+}
+
+[data-theme="light"] .btn-secondary:hover,
+[data-theme="light"] .theme-secondary-button:hover {
+  background: #E2E8F0 !important;
+  border-color: #94A3B8 !important;
+  color: #0F172A !important;
 }
 
 .btn-secondary:active,

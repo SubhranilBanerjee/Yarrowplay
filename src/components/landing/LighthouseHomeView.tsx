@@ -572,7 +572,7 @@ export function LighthouseHomeView() {
   const currentHero = heroSlides[heroIndex] || heroSlides[0];
 
   return (
-    <div className="w-full min-h-screen bg-[#090D12] text-[#F5F1E8] px-3 sm:px-4 md:px-6 lg:px-7 py-4 sm:py-5 pb-24 md:pb-12">
+    <div className="w-full min-h-screen bg-[var(--lr-bg-primary)] text-[var(--lr-text-primary)] px-3 sm:px-4 md:px-6 lg:px-7 py-4 sm:py-5 pb-24 md:pb-12">
       <div className="w-full flex flex-col xl:flex-row gap-5 lg:gap-7 items-start">
         {/* ─── Main Feed (Center Section) ─────────────────────────────────── */}
         <div className="flex-1 min-w-0 w-full space-y-5 sm:space-y-6">

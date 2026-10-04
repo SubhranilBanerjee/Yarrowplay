@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { getStoredSiteContent, SiteContent, DEFAULT_SITE_CONTENT } from '@/lib/siteContent';
+import { useTheme } from '@/context/ThemeContext';
 
 // Category Definitions
 const CATEGORY_TABS = [
@@ -136,9 +137,8 @@ const SAMPLE_REELS = [
 export function LandingHeroView() {
   const router = useRouter();
   const supabase = createClient();
+  const { theme, setTheme } = useTheme();
 
-  // Mode: 'dark' (Image 2) or 'light' (Image 1)
-  const [themeMode, setThemeMode] = useState<'dark' | 'light'>('light');
   const [activeNav, setActiveNav] = useState('Home');
   const [showTrailerModal, setShowTrailerModal] = useState(false);
   const [cardDismissed, setCardDismissed] = useState(false);
@@ -205,7 +205,7 @@ export function LandingHeroView() {
   // Style themes matching the user's images exactly:
   // Light Mode (Image 1): soft lavender aurora twilight sky, frosted lilac glass card, delicate white/purple borders
   // Dark Mode (Image 2): deep midnight starry cosmos, obsidian purple frosted glass, vibrant glowing purple neon rims
-  const isLight = themeMode === 'light';
+  const isLight = theme === 'light';
 
   return (
     <div
@@ -288,7 +288,7 @@ export function LandingHeroView() {
               {/* Theme Mode Toggle (Light Mode / Dark Mode switcher) */}
               <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-black/25 backdrop-blur-md border border-white/20">
                 <button
-                  onClick={() => setThemeMode('light')}
+                  onClick={() => setTheme('light')}
                   className={`px-3 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                     isLight
                       ? 'bg-white text-purple-950 shadow-md'
@@ -299,7 +299,7 @@ export function LandingHeroView() {
                   <span>Light Mode</span>
                 </button>
                 <button
-                  onClick={() => setThemeMode('dark')}
+                  onClick={() => setTheme('dark')}
                   className={`px-3 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                     !isLight
                       ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'

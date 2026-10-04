@@ -117,22 +117,18 @@ export default function HistoryPage() {
   });
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 text-[var(--lr-text-primary)]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[var(--lr-border-primary)]">
         <div className="flex items-center gap-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center border"
-            style={{
-              background: 'var(--neon-purple-glow)',
-              borderColor: 'var(--neon-purple-border)',
-            }}
+            className="w-10 h-10 rounded-xl flex items-center justify-center border bg-[var(--lr-gold)]/15 border-[var(--lr-gold)]/30"
           >
-            <Clock className="w-5 h-5 text-[var(--color-pink-light)]" />
+            <Clock className="w-5 h-5 text-[var(--lr-gold)]" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Watch History</h1>
-            <p className="text-xs text-[var(--text-muted)]">
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--lr-text-primary)] tracking-tight">Watch History</h1>
+            <p className="text-xs text-[var(--lr-text-muted)]">
               {historyItems.length} {historyItems.length === 1 ? 'title' : 'titles'} in your history
             </p>
           </div>
@@ -141,7 +137,7 @@ export default function HistoryPage() {
         {historyItems.length > 0 && (
           <button
             onClick={() => setShowClearConfirm(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-red-400 hover:bg-red-500/15 border border-red-500/20 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-red-500 hover:bg-red-500/15 border border-red-500/20 transition-all cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>Clear History</span>
@@ -152,17 +148,13 @@ export default function HistoryPage() {
       {/* Search Input */}
       {historyItems.length > 0 && (
         <div className="relative max-w-md">
-          <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[var(--lr-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search your watch history..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full text-white text-xs rounded-xl pl-9 pr-4 py-2.5 border focus:outline-none focus:border-[var(--color-pink)] transition-all"
-            style={{
-              background: 'var(--glass-surface-heavy)',
-              borderColor: 'var(--glass-border)',
-            }}
+            className="w-full text-[var(--lr-text-primary)] placeholder-[var(--lr-text-muted)] text-xs rounded-xl pl-9 pr-4 py-2.5 border border-[var(--lr-border-primary)] bg-[var(--lr-bg-surface)] focus:outline-none focus:border-[var(--lr-gold)] transition-all shadow-sm"
           />
         </div>
       )}

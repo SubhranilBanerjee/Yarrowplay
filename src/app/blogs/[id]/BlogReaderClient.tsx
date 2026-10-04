@@ -279,22 +279,18 @@ export default function BlogReaderClient({ initialBlog, blogId }: BlogReaderClie
       <div
         className="max-w-md mx-auto px-6 py-16 text-center my-12 rounded-2xl border"
         style={{
-          background: 'var(--bg-card, #111A22)',
-          borderColor: 'var(--border-subtle, rgba(255, 255, 255, 0.08))',
+          background: 'var(--lr-bg-surface)',
+          borderColor: 'var(--lr-border-primary)',
         }}
       >
-        <BookOpen className="w-12 h-12 text-[#8E9AA7] mx-auto mb-3" />
-        <h2 className="text-xl font-bold text-[#F5F1E8] mb-2">Article Not Found</h2>
-        <p className="text-xs text-[#8E9AA7] mb-6">
+        <BookOpen className="w-12 h-12 text-[var(--lr-text-muted)] mx-auto mb-3" />
+        <h2 className="text-xl font-bold text-[var(--lr-text-primary)] mb-2">Article Not Found</h2>
+        <p className="text-xs text-[var(--lr-text-secondary)] mb-6">
           This article might have been archived or removed by its author.
         </p>
         <Link
           href="/blogs"
-          className="px-5 py-2.5 rounded-xl text-[#070B0F] text-xs font-semibold inline-block transition-all shadow-md hover:brightness-110"
-          style={{
-            background: 'var(--gold-primary, #F4C95D)',
-            boxShadow: '0 4px 14px rgba(244, 201, 93, 0.25)',
-          }}
+          className="px-5 py-2.5 rounded-xl text-[#070B0F] text-xs font-semibold inline-block transition-all shadow-md btn-primary"
         >
           Return to Blogs
         </Link>
@@ -305,57 +301,47 @@ export default function BlogReaderClient({ initialBlog, blogId }: BlogReaderClie
   const readingTime = estimateReadingTime(blog.body);
 
   return (
-    <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+    <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 text-[var(--lr-text-primary)]">
       {/* Category Pill & Reading Time */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         {blog.category && (
           <span
-            className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border"
-            style={{
-              background: 'rgba(244, 201, 93, 0.1)',
-              borderColor: 'rgba(244, 201, 93, 0.25)',
-              color: '#F4C95D',
-            }}
+            className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border bg-[var(--lr-gold)]/15 border-[var(--lr-gold)]/30 text-[var(--lr-gold)]"
           >
             {blog.category}
           </span>
         )}
-        <span className="flex items-center gap-1.5 text-xs text-[#8E9AA7]">
-          <Clock className="w-3.5 h-3.5 text-[#F4C95D]" />
+        <span className="flex items-center gap-1.5 text-xs text-[var(--lr-text-secondary)]">
+          <Clock className="w-3.5 h-3.5 text-[var(--lr-gold)]" />
           {readingTime.label}
         </span>
       </div>
 
       {/* Title */}
-      <h1 className="text-2xl sm:text-4xl font-extrabold text-[#F5F1E8] tracking-tight leading-tight mb-4">
+      <h1 className="text-2xl sm:text-4xl font-extrabold text-[var(--lr-text-primary)] tracking-tight leading-tight mb-4">
         {blog.title}
       </h1>
 
       {/* Author & Meta */}
       <div
-        className="flex items-center justify-between gap-4 py-4 border-y mb-6"
-        style={{ borderColor: 'rgba(255, 255, 255, 0.08)' }}
+        className="flex items-center justify-between gap-4 py-4 border-y mb-6 border-[var(--lr-border-primary)]"
       >
         <div className="flex items-center gap-3">
           <div
-            className="relative w-10 h-10 rounded-full overflow-hidden border shrink-0"
-            style={{
-              background: '#141D26',
-              borderColor: 'rgba(244, 201, 93, 0.3)',
-            }}
+            className="relative w-10 h-10 rounded-full overflow-hidden border shrink-0 bg-[var(--lr-bg-elevated)] border-[var(--lr-gold)]/30"
           >
             {blog.author?.avatar_url ? (
               <Image src={blog.author.avatar_url} alt="Author" fill className="object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-sm font-bold text-[#F4C95D]">
+              <div className="w-full h-full flex items-center justify-center text-sm font-bold text-[var(--lr-gold)]">
                 {blog.author?.display_name?.[0] || 'A'}
               </div>
             )}
           </div>
           <div>
-            <p className="text-sm font-semibold text-[#F5F1E8]">{blog.author?.display_name || 'Lighthouse Creator'}</p>
-            <p className="text-[11px] text-[#8E9AA7] flex items-center gap-1.5">
-              <Calendar className="w-3 h-3 text-[#8E9AA7]" />
+            <p className="text-sm font-semibold text-[var(--lr-text-primary)]">{blog.author?.display_name || 'Lighthouse Creator'}</p>
+            <p className="text-[11px] text-[var(--lr-text-secondary)] flex items-center gap-1.5">
+              <Calendar className="w-3 h-3 text-[var(--lr-text-muted)]" />
               Published {new Date(blog.published_at || blog.created_at).toLocaleDateString(undefined, {
                 year: 'numeric',
                 month: 'short',
@@ -368,30 +354,26 @@ export default function BlogReaderClient({ initialBlog, blogId }: BlogReaderClie
         {/* Action icons */}
         <div className="flex items-center gap-2">
           <div
-            className="flex items-center rounded-xl border overflow-hidden backdrop-blur-md"
-            style={{
-              background: '#111A22',
-              borderColor: 'rgba(255, 255, 255, 0.08)',
-            }}
+            className="flex items-center rounded-xl border overflow-hidden backdrop-blur-md bg-[var(--lr-bg-surface)] border-[var(--lr-border-primary)]"
           >
             <button
               onClick={() => handleReaction('like')}
               title="Like"
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                 userReaction === 'like'
-                  ? 'text-[#F4C95D] bg-[rgba(244,201,93,0.12)]'
-                  : 'text-[#8E9AA7] hover:text-[#F5F1E8]'
+                  ? 'text-[var(--lr-gold)] bg-[var(--lr-gold)]/15'
+                  : 'text-[var(--lr-text-secondary)] hover:text-[var(--lr-text-primary)]'
               }`}
             >
               <ThumbsUp className={`w-4 h-4 ${userReaction === 'like' ? 'fill-current' : ''}`} />
               <span>{likesCount}</span>
             </button>
-            <div className="w-px h-4 bg-white/10" />
+            <div className="w-px h-4 bg-[var(--lr-border-primary)]" />
             <button
               onClick={() => handleReaction('dislike')}
               title="Dislike"
               className={`px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                userReaction === 'dislike' ? 'text-red-400 bg-red-500/20' : 'text-[#8E9AA7] hover:text-[#F5F1E8]'
+                userReaction === 'dislike' ? 'text-red-500 bg-red-500/20' : 'text-[var(--lr-text-secondary)] hover:text-[var(--lr-text-primary)]'
               }`}
             >
               <ThumbsDown className={`w-4 h-4 ${userReaction === 'dislike' ? 'fill-current' : ''}`} />
@@ -403,10 +385,9 @@ export default function BlogReaderClient({ initialBlog, blogId }: BlogReaderClie
             title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
             className="p-2 rounded-xl border transition-all cursor-pointer"
             style={{
-              background: isFavorite ? '#F4C95D' : '#111A22',
-              borderColor: isFavorite ? '#F4C95D' : 'rgba(255, 255, 255, 0.08)',
-              color: isFavorite ? '#070B0F' : '#8E9AA7',
-              boxShadow: isFavorite ? '0 0 16px rgba(244, 201, 93, 0.3)' : 'none',
+              background: isFavorite ? 'var(--lr-gold)' : 'var(--lr-bg-surface)',
+              borderColor: isFavorite ? 'var(--lr-gold)' : 'var(--lr-border-primary)',
+              color: isFavorite ? '#070B0F' : 'var(--lr-text-secondary)',
             }}
           >
             <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
@@ -414,13 +395,9 @@ export default function BlogReaderClient({ initialBlog, blogId }: BlogReaderClie
 
           <button
             onClick={handleShare}
-            className="p-2 rounded-xl border text-[#8E9AA7] hover:text-[#F5F1E8] transition-all cursor-pointer"
-            style={{
-              background: '#111A22',
-              borderColor: 'rgba(255, 255, 255, 0.08)',
-            }}
+            className="p-2 rounded-xl border text-[var(--lr-text-secondary)] hover:text-[var(--lr-text-primary)] transition-all cursor-pointer bg-[var(--lr-bg-surface)] border-[var(--lr-border-primary)]"
           >
-            {copiedLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
+            {copiedLink ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}
           </button>
 
           {/* Author or Admin Delete Button */}
@@ -428,8 +405,7 @@ export default function BlogReaderClient({ initialBlog, blogId }: BlogReaderClie
             <button
               onClick={() => setShowDeleteModal(true)}
               title="Delete article"
-              className="p-2 rounded-xl text-red-400 hover:bg-red-600 hover:text-white border border-red-500/30 transition-colors cursor-pointer"
-              style={{ background: 'rgba(239, 68, 68, 0.12)' }}
+              className="p-2 rounded-xl text-red-500 hover:bg-red-600 hover:text-white border border-red-500/30 transition-colors cursor-pointer bg-red-500/10"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -440,32 +416,26 @@ export default function BlogReaderClient({ initialBlog, blogId }: BlogReaderClie
       {/* Cover Image */}
       {blog.cover_url && (
         <div
-          className="relative aspect-video w-full rounded-2xl overflow-hidden mb-8 border"
-          style={{ borderColor: 'rgba(255, 255, 255, 0.08)' }}
+          className="relative aspect-video w-full rounded-2xl overflow-hidden mb-8 border border-[var(--lr-border-primary)]"
         >
           <Image src={blog.cover_url} alt={blog.title} fill className="object-cover" priority />
         </div>
       )}
 
       {/* Article Body */}
-      <div className="prose prose-invert max-w-none text-sm sm:text-base text-[#C2C9D1] leading-relaxed whitespace-pre-line space-y-4 mb-12">
+      <div className="max-w-none text-sm sm:text-base text-[var(--lr-text-primary)] leading-relaxed whitespace-pre-line space-y-4 mb-12 font-sans font-normal">
         {blog.body}
       </div>
 
       {/* Tags */}
       {blog.tags && blog.tags.length > 0 && (
         <div
-          className="flex flex-wrap gap-2 pb-8 border-b mb-8"
-          style={{ borderColor: 'rgba(255, 255, 255, 0.08)' }}
+          className="flex flex-wrap gap-2 pb-8 border-b mb-8 border-[var(--lr-border-primary)]"
         >
           {blog.tags.map((tag) => (
             <span
               key={tag}
-              className="px-3 py-1 rounded-lg text-xs border font-medium text-[#8E9AA7] hover:text-[#F4C95D] transition-colors"
-              style={{
-                background: '#111A22',
-                borderColor: 'rgba(255, 255, 255, 0.08)',
-              }}
+              className="px-3 py-1 rounded-lg text-xs border font-medium text-[var(--lr-text-secondary)] hover:text-[var(--lr-gold)] transition-colors bg-[var(--lr-bg-surface)] border-[var(--lr-border-primary)]"
             >
               #{tag}
             </span>
@@ -475,14 +445,10 @@ export default function BlogReaderClient({ initialBlog, blogId }: BlogReaderClie
 
       {/* Comments Section */}
       <div
-        className="rounded-2xl p-6 space-y-4 border backdrop-blur-xl"
-        style={{
-          background: 'var(--bg-card, #111A22)',
-          borderColor: 'rgba(255, 255, 255, 0.08)',
-        }}
+        className="rounded-2xl p-6 space-y-4 border backdrop-blur-xl bg-[var(--lr-bg-surface)] border-[var(--lr-border-primary)] shadow-sm"
       >
-        <h3 className="text-base font-bold text-[#F5F1E8] flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-[#F4C95D]" />
+        <h3 className="text-base font-bold text-[var(--lr-text-primary)] flex items-center gap-2">
+          <MessageSquare className="w-4 h-4 text-[var(--lr-gold)]" />
           Discussion ({comments.length})
         </h3>
 
