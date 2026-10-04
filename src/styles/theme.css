@@ -281,14 +281,49 @@ body.light {
   color: #0F172A;
 }
 
-[data-theme="light"] p.text-white,
-[data-theme="light"] span.text-white:not([class*="bg-"]):not([class*="badge"]),
-[data-theme="light"] div.text-white:not([class*="bg-"]):not([class*="badge"]),
-[data-theme="light"] h1.text-white,
-[data-theme="light"] h2.text-white,
-[data-theme="light"] h3.text-white,
-[data-theme="light"] h4.text-white {
+[data-theme="light"] p.text-white:not(.keep-white):not(.keep-white *),
+[data-theme="light"] span.text-white:not([class*="bg-"]):not([class*="badge"]):not(.keep-white):not(.keep-white *),
+[data-theme="light"] div.text-white:not([class*="bg-"]):not([class*="badge"]):not(.keep-white):not(.keep-white *),
+[data-theme="light"] h1.text-white:not(.keep-white):not(.keep-white *),
+[data-theme="light"] h2.text-white:not(.keep-white):not(.keep-white *),
+[data-theme="light"] h3.text-white:not(.keep-white):not(.keep-white *),
+[data-theme="light"] h4.text-white:not(.keep-white):not(.keep-white *) {
   color: #0F172A !important;
+}
+
+/* Explicit class for elements that MUST stay white even in light mode */
+.keep-white,
+.keep-white h1,
+.keep-white h2,
+.keep-white h3,
+.keep-white h4,
+.keep-white p,
+.keep-white span:not([class*="text-purple"]):not([class*="text-pink"]),
+[data-theme="light"] .keep-white,
+[data-theme="light"] .keep-white h1,
+[data-theme="light"] .keep-white h2,
+[data-theme="light"] .keep-white h3,
+[data-theme="light"] .keep-white h4,
+[data-theme="light"] .keep-white p,
+[data-theme="light"] .keep-white span:not([class*="text-purple"]):not([class*="text-pink"]) {
+  color: #FFFFFF !important;
+}
+[data-theme="light"] .keep-white .text-purple-100 {
+  color: #F3E8FF !important;
+}
+[data-theme="light"] .keep-white .text-purple-200 {
+  color: #E9D5FF !important;
+}
+
+.keep-white a,
+.keep-white a *,
+.keep-white .btn-cta,
+.keep-white .btn-cta *,
+[data-theme="light"] .keep-white a,
+[data-theme="light"] .keep-white a *,
+[data-theme="light"] .keep-white .btn-cta,
+[data-theme="light"] .keep-white .btn-cta * {
+  color: #3B0764 !important;
 }
 
 [data-theme="light"] .text-white\/80,
@@ -300,10 +335,7 @@ body.light {
 
 [data-theme="light"] .bg-white,
 html.light .bg-white,
-body.light .bg-white,
-[data-theme="light"] [class*="bg-white"],
-html.light [class*="bg-white"],
-body.light [class*="bg-white"] {
+body.light .bg-white {
   background-color: #FFFFFF !important;
 }
 

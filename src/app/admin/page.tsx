@@ -34,6 +34,7 @@ import {
   LogOut,
   Sliders,
   Layers,
+  Zap,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -1948,11 +1949,19 @@ export default function AdminHubPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
-                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Eyebrow Badge Text</label>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Eyebrow Badge Tags (comma-separated)</label>
                   <input
                     type="text"
-                    value={siteText.hero.badgeText}
-                    onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, badgeText: e.target.value } })}
+                    value={(siteText.hero.badgeTags || []).join(', ')}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      hero: {
+                        ...siteText.hero,
+                        badgeTags: e.target.value.split(',').map(s => s.trim()).filter(Boolean),
+                        badgeText: e.target.value.split(',')[0]?.trim() || siteText.hero.badgeText,
+                      },
+                    })}
+                    placeholder="e.g. BRANDING & IDENTITY, 4K STREAMING, CREATOR MONETIZATION"
                     className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
                       isLight
                         ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
@@ -1962,11 +1971,19 @@ export default function AdminHubPage() {
                 </div>
 
                 <div>
-                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Headline Line 1</label>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Headline Outlined Top Text</label>
                   <input
                     type="text"
-                    value={siteText.hero.headlineLine1}
-                    onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, headlineLine1: e.target.value } })}
+                    value={siteText.hero.headlineOutlined || siteText.hero.headlineLine1}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      hero: {
+                        ...siteText.hero,
+                        headlineOutlined: e.target.value,
+                        headlineLine1: e.target.value,
+                      },
+                    })}
+                    placeholder="e.g. STORIES THAT / DESIGN THAT"
                     className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
                       isLight
                         ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
@@ -1976,11 +1993,19 @@ export default function AdminHubPage() {
                 </div>
 
                 <div>
-                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Headline Line 2 (Accent)</label>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Headline Solid Neon Text</label>
                   <input
                     type="text"
-                    value={siteText.hero.headlineLine2}
-                    onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, headlineLine2: e.target.value } })}
+                    value={siteText.hero.headlineSolid || siteText.hero.headlineLine2}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      hero: {
+                        ...siteText.hero,
+                        headlineSolid: e.target.value,
+                        headlineLine2: e.target.value,
+                      },
+                    })}
+                    placeholder="e.g. IGNITE MINDS / BUILDS BRANDS"
                     className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
                       isLight
                         ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
@@ -2030,169 +2055,110 @@ export default function AdminHubPage() {
                     }`}
                   />
                 </div>
-              </div>
 
-              {/* 3 Feature Pills */}
-              <div className="pt-2 space-y-3">
-                <p className={`text-xs font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Feature Pills (Row of 3)</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                  <div className={`p-3 rounded-2xl border space-y-2 ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'
-                  }`}>
-                    <input
-                      type="text"
-                      value={siteText.hero.feature1Title}
-                      onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, feature1Title: e.target.value } })}
-                      className={`w-full border rounded-lg p-2 font-bold ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
-                      }`}
-                    />
-                    <input
-                      type="text"
-                      value={siteText.hero.feature1Subtitle}
-                      onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, feature1Subtitle: e.target.value } })}
-                      className={`w-full border rounded-lg p-2 text-[11px] ${
-                        isLight ? 'bg-white border-slate-300 text-slate-600' : 'bg-[#1E0F45] border-purple-500/30 text-purple-300'
-                      }`}
-                    />
-                  </div>
-
-                  <div className={`p-3 rounded-2xl border space-y-2 ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'
-                  }`}>
-                    <input
-                      type="text"
-                      value={siteText.hero.feature2Title}
-                      onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, feature2Title: e.target.value } })}
-                      className={`w-full border rounded-lg p-2 font-bold ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
-                      }`}
-                    />
-                    <input
-                      type="text"
-                      value={siteText.hero.feature2Subtitle}
-                      onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, feature2Subtitle: e.target.value } })}
-                      className={`w-full border rounded-lg p-2 text-[11px] ${
-                        isLight ? 'bg-white border-slate-300 text-slate-600' : 'bg-[#1E0F45] border-purple-500/30 text-purple-300'
-                      }`}
-                    />
-                  </div>
-
-                  <div className={`p-3 rounded-2xl border space-y-2 ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'
-                  }`}>
-                    <input
-                      type="text"
-                      value={siteText.hero.feature3Title}
-                      onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, feature3Title: e.target.value } })}
-                      className={`w-full border rounded-lg p-2 font-bold ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
-                      }`}
-                    />
-                    <input
-                      type="text"
-                      value={siteText.hero.feature3Subtitle}
-                      onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, feature3Subtitle: e.target.value } })}
-                      className={`w-full border rounded-lg p-2 text-[11px] ${
-                        isLight ? 'bg-white border-slate-300 text-slate-600' : 'bg-[#1E0F45] border-purple-500/30 text-purple-300'
-                      }`}
-                    />
-                  </div>
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Satisfied Clients / Viewers Banner</label>
+                  <input
+                    type="text"
+                    value={siteText.hero.satisfiedClientsCount || '100+ Satisfied Clients'}
+                    onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, satisfiedClientsCount: e.target.value } })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
                 </div>
-              </div>
 
-              {/* 4 Stats */}
-              <div className="pt-2 space-y-3">
-                <p className={`text-xs font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Hero Bottom Stats Dock</p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                  <div className={`p-3 rounded-2xl border space-y-1.5 ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'
-                  }`}>
-                    <input
-                      type="text"
-                      value={siteText.hero.stat1Value}
-                      onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat1Value: e.target.value } })}
-                      className={`w-full border rounded-lg p-2 font-black ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
-                      }`}
-                    />
-                    <input
-                      type="text"
-                      value={siteText.hero.stat1Label}
-                      onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat1Label: e.target.value } })}
-                      className={`w-full border rounded-lg p-2 text-[11px] ${
-                        isLight ? 'bg-white border-slate-300 text-slate-600' : 'bg-[#1E0F45] border-purple-500/30 text-purple-300'
-                      }`}
-                    />
-                  </div>
-
-                  <div className={`p-3 rounded-2xl border space-y-1.5 ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'
-                  }`}>
-                    <input
-                      type="text"
-                      value={siteText.hero.stat2Value}
-                      onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat2Value: e.target.value } })}
-                      className={`w-full border rounded-lg p-2 font-black ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
-                      }`}
-                    />
-                    <input
-                      type="text"
-                      value={siteText.hero.stat2Label}
-                      onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat2Label: e.target.value } })}
-                      className={`w-full border rounded-lg p-2 text-[11px] ${
-                        isLight ? 'bg-white border-slate-300 text-slate-600' : 'bg-[#1E0F45] border-purple-500/30 text-purple-300'
-                      }`}
-                    />
-                  </div>
-
-                  <div className={`p-3 rounded-2xl border space-y-1.5 ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'
-                  }`}>
-                    <input
-                      type="text"
-                      value={siteText.hero.stat3Value}
-                      onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat3Value: e.target.value } })}
-                      className={`w-full border rounded-lg p-2 font-black ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
-                      }`}
-                    />
-                    <input
-                      type="text"
-                      value={siteText.hero.stat3Label}
-                      onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat3Label: e.target.value } })}
-                      className={`w-full border rounded-lg p-2 text-[11px] ${
-                        isLight ? 'bg-white border-slate-300 text-slate-600' : 'bg-[#1E0F45] border-purple-500/30 text-purple-300'
-                      }`}
-                    />
-                  </div>
-
-                  <div className={`p-3 rounded-2xl border space-y-1.5 ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'
-                  }`}>
-                    <input
-                      type="text"
-                      value={siteText.hero.stat4Value}
-                      onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat4Value: e.target.value } })}
-                      className={`w-full border rounded-lg p-2 font-black ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
-                      }`}
-                    />
-                    <input
-                      type="text"
-                      value={siteText.hero.stat4Label}
-                      onChange={(e) => setSiteText({ ...siteText, hero: { ...siteText.hero, stat4Label: e.target.value } })}
-                      className={`w-full border rounded-lg p-2 text-[11px] ${
-                        isLight ? 'bg-white border-slate-300 text-slate-600' : 'bg-[#1E0F45] border-purple-500/30 text-purple-300'
-                      }`}
-                    />
-                  </div>
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Partner Logos (comma-separated)</label>
+                  <input
+                    type="text"
+                    value={(siteText.hero.clientLogos || []).join(', ')}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      hero: {
+                        ...siteText.hero,
+                        clientLogos: e.target.value.split(',').map(s => s.trim()).filter(Boolean),
+                      },
+                    })}
+                    placeholder="e.g. Catalyx, Propulse, Nova Studios, Vortex Media"
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
                 </div>
               </div>
             </div>
 
-            {/* SECTION 2: CREATOR & ADVERTISER PROMO CARDS COPY */}
+            {/* SECTION 2: ABOUT US / WHO WE ARE SECTION COPY */}
+            <div className={`p-6 rounded-3xl border space-y-6 shadow-sm transition-colors ${
+              isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/80 border-purple-500/25 text-white'
+            }`}>
+              <h3 className={`text-base font-bold flex items-center gap-2 border-b pb-3 ${
+                isLight ? 'border-slate-200 text-slate-900' : 'border-purple-500/20 text-white'
+              }`}>
+                <FileText className="w-4 h-4 text-purple-500" />
+                <span>About Us Section Texts ("Who We Are")</span>
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Badge Pill Text</label>
+                  <input
+                    type="text"
+                    value={siteText.about?.badge || 'ABOUT OUR PLATFORM'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      about: { ...(siteText.about || DEFAULT_SITE_CONTENT.about), badge: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Section Title</label>
+                  <input
+                    type="text"
+                    value={siteText.about?.title || 'WHO WE ARE'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      about: { ...(siteText.about || DEFAULT_SITE_CONTENT.about), title: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>About Us Description Paragraph</label>
+                  <textarea
+                    rows={3}
+                    value={siteText.about?.description || DEFAULT_SITE_CONTENT.about.description}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      about: { ...(siteText.about || DEFAULT_SITE_CONTENT.about), description: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 3: CREATOR & ADVERTISER CARDS COPY */}
             <div className={`p-6 rounded-3xl border space-y-6 shadow-sm transition-colors ${
               isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/80 border-purple-500/25 text-white'
             }`}>
@@ -2200,7 +2166,7 @@ export default function AdminHubPage() {
                 isLight ? 'border-slate-200 text-slate-900' : 'border-purple-500/20 text-white'
               }`}>
                 <Users className="w-4 h-4 text-purple-500" />
-                <span>Creator & Advertiser Signup Cards Copy</span>
+                <span>Join as Creator & Advertiser Cards Copy</span>
               </h3>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
@@ -2221,11 +2187,11 @@ export default function AdminHubPage() {
                     />
                   </div>
                   <div>
-                    <label className={`block mb-1 ${isLight ? 'text-slate-600 font-medium' : 'text-purple-200/80'}`}>Subtitle</label>
+                    <label className={`block mb-1 ${isLight ? 'text-slate-600 font-medium' : 'text-purple-200/80'}`}>Description</label>
                     <textarea
                       value={siteText.creatorCard.subtitle}
                       onChange={(e) => setSiteText({ ...siteText, creatorCard: { ...siteText.creatorCard, subtitle: e.target.value } })}
-                      rows={2}
+                      rows={3}
                       className={`w-full border rounded-lg p-2 ${
                         isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
                       }`}
@@ -2261,11 +2227,11 @@ export default function AdminHubPage() {
                     />
                   </div>
                   <div>
-                    <label className={`block mb-1 ${isLight ? 'text-slate-600 font-medium' : 'text-purple-200/80'}`}>Subtitle</label>
+                    <label className={`block mb-1 ${isLight ? 'text-slate-600 font-medium' : 'text-purple-200/80'}`}>Description</label>
                     <textarea
                       value={siteText.advertiserCard.subtitle}
                       onChange={(e) => setSiteText({ ...siteText, advertiserCard: { ...siteText.advertiserCard, subtitle: e.target.value } })}
-                      rows={2}
+                      rows={3}
                       className={`w-full border rounded-lg p-2 ${
                         isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1E0F45] border-purple-500/30 text-white'
                       }`}
@@ -2282,6 +2248,255 @@ export default function AdminHubPage() {
                       }`}
                     />
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 4: WHY CHOOSE US COPY */}
+            <div className={`p-6 rounded-3xl border space-y-6 shadow-sm transition-colors ${
+              isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/80 border-purple-500/25 text-white'
+            }`}>
+              <h3 className={`text-base font-bold flex items-center gap-2 border-b pb-3 ${
+                isLight ? 'border-slate-200 text-slate-900' : 'border-purple-500/20 text-white'
+              }`}>
+                <CheckCircle className="w-4 h-4 text-purple-500" />
+                <span>Why Choose Us Section Texts</span>
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Section Title</label>
+                  <input
+                    type="text"
+                    value={siteText.whyChooseUs?.title || 'WHY CHOOSE US'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      whyChooseUs: { ...(siteText.whyChooseUs || DEFAULT_SITE_CONTENT.whyChooseUs), title: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Section Subtitle</label>
+                  <input
+                    type="text"
+                    value={siteText.whyChooseUs?.subtitle || DEFAULT_SITE_CONTENT.whyChooseUs.subtitle}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      whyChooseUs: { ...(siteText.whyChooseUs || DEFAULT_SITE_CONTENT.whyChooseUs), subtitle: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Feature 1 Title</label>
+                  <input
+                    type="text"
+                    value={siteText.whyChooseUs?.feature1Title || 'Strategy-Driven Content'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      whyChooseUs: { ...(siteText.whyChooseUs || DEFAULT_SITE_CONTENT.whyChooseUs), feature1Title: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Feature 2 Title</label>
+                  <input
+                    type="text"
+                    value={siteText.whyChooseUs?.feature2Title || 'Clean, Modern Aesthetics'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      whyChooseUs: { ...(siteText.whyChooseUs || DEFAULT_SITE_CONTENT.whyChooseUs), feature2Title: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Feature 3 Title</label>
+                  <input
+                    type="text"
+                    value={siteText.whyChooseUs?.feature3Title || 'Client-Focused Approach'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      whyChooseUs: { ...(siteText.whyChooseUs || DEFAULT_SITE_CONTENT.whyChooseUs), feature3Title: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Feature 4 Title</label>
+                  <input
+                    type="text"
+                    value={siteText.whyChooseUs?.feature4Title || 'Fast Turnaround Time'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      whyChooseUs: { ...(siteText.whyChooseUs || DEFAULT_SITE_CONTENT.whyChooseUs), feature4Title: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Feature 5 Title</label>
+                  <input
+                    type="text"
+                    value={siteText.whyChooseUs?.feature5Title || 'Transparent Communication'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      whyChooseUs: { ...(siteText.whyChooseUs || DEFAULT_SITE_CONTENT.whyChooseUs), feature5Title: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Feature 6 Title</label>
+                  <input
+                    type="text"
+                    value={siteText.whyChooseUs?.feature6Title || 'Scalable Design Solutions'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      whyChooseUs: { ...(siteText.whyChooseUs || DEFAULT_SITE_CONTENT.whyChooseUs), feature6Title: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 5: FOOTER COPY & BRANDING */}
+            <div className={`p-6 rounded-3xl border space-y-6 shadow-sm transition-colors ${
+              isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/80 border-purple-500/25 text-white'
+            }`}>
+              <h3 className={`text-base font-bold flex items-center gap-2 border-b pb-3 ${
+                isLight ? 'border-slate-200 text-slate-900' : 'border-purple-500/20 text-white'
+              }`}>
+                <Zap className="w-4 h-4 text-purple-500" />
+                <span>Footer & Legal Texts</span>
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Brand Tagline</label>
+                  <input
+                    type="text"
+                    value={siteText.footer?.brandTagline || ''}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      footer: { ...(siteText.footer || DEFAULT_SITE_CONTENT.footer), brandTagline: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Contact Email</label>
+                  <input
+                    type="email"
+                    value={siteText.footer?.contactEmail || ''}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      footer: { ...(siteText.footer || DEFAULT_SITE_CONTENT.footer), contactEmail: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Footer Mission / Bio Paragraph</label>
+                  <textarea
+                    rows={2}
+                    value={siteText.footer?.mission || ''}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      footer: { ...(siteText.footer || DEFAULT_SITE_CONTENT.footer), mission: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Copyright Notice</label>
+                  <input
+                    type="text"
+                    value={siteText.footer?.copyright || ''}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      footer: { ...(siteText.footer || DEFAULT_SITE_CONTENT.footer), copyright: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Legal Notice / Disclaimer</label>
+                  <input
+                    type="text"
+                    value={siteText.footer?.legalNotice || ''}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      footer: { ...(siteText.footer || DEFAULT_SITE_CONTENT.footer), legalNotice: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
                 </div>
               </div>
             </div>
