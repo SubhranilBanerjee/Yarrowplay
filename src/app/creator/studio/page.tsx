@@ -604,7 +604,7 @@ export default function CreatorStudioPage() {
       {!user && (
         <div className="mb-6 p-4 rounded-2xl bg-[#101820] border border-[#27313A] rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-[#F4C95D]/15 text-[#F4C95D] shrink-0">
+            <div className="p-2.5 rounded-xl bg-violet-500/15 text-violet-400 shrink-0">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
@@ -614,7 +614,7 @@ export default function CreatorStudioPage() {
           </div>
           <Link
             href="/login?redirect=/creator/studio"
-            className="px-4 py-2 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] text-[#0B0F13] text-xs font-bold shrink-0 shadow-md transition-all cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-md shadow-violet-600/25 text-xs font-bold shrink-0 shadow-md transition-all cursor-pointer"
           >
             Sign In to Publish
           </Link>
@@ -626,7 +626,7 @@ export default function CreatorStudioPage() {
         <button
           onClick={() => setPrimaryTab('video')}
           className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
-            primaryTab === 'video' ? 'bg-[#F4C95D] text-[#0B0F13] shadow' : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
+            primaryTab === 'video' ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30' : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
           }`}
         >
           <Film className="w-4 h-4" />
@@ -636,7 +636,7 @@ export default function CreatorStudioPage() {
         <button
           onClick={() => setPrimaryTab('audio')}
           className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
-            primaryTab === 'audio' ? 'bg-[#F4C95D] text-[#0B0F13] shadow' : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
+            primaryTab === 'audio' ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30' : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
           }`}
         >
           <Music className="w-4 h-4" />
@@ -646,7 +646,7 @@ export default function CreatorStudioPage() {
         <button
           onClick={() => setPrimaryTab('manage')}
           className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
-            primaryTab === 'manage' ? 'bg-[#F4C95D] text-[#0B0F13] shadow' : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
+            primaryTab === 'manage' ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30' : 'text-[#B7BEC6] hover:text-[#F5F1E8]'
           }`}
         >
           <FolderOpen className="w-4 h-4" />
@@ -683,7 +683,7 @@ export default function CreatorStudioPage() {
               onClick={() => setVideoMode('series')}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                 videoMode === 'series'
-                  ? 'bg-[#F4C95D] text-[#0B0F13] font-semibold shadow-md'
+                  ? 'bg-violet-600 text-white font-semibold shadow-md shadow-violet-600/25'
                   : 'bg-[#141D26] text-[#B7BEC6] hover:text-[#F5F1E8] border border-[#27313A]'
               }`}
             >
@@ -693,7 +693,7 @@ export default function CreatorStudioPage() {
               onClick={() => setVideoMode('single')}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                 videoMode === 'single'
-                  ? 'bg-[#F4C95D] text-[#0B0F13] font-semibold shadow-md'
+                  ? 'bg-violet-600 text-white font-semibold shadow-md shadow-violet-600/25'
                   : 'bg-[#141D26] text-[#B7BEC6] hover:text-[#F5F1E8] border border-[#27313A]'
               }`}
             >
@@ -707,7 +707,7 @@ export default function CreatorStudioPage() {
               {/* Create Series Card */}
               <div className="theme-form-card p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 rounded-lg bg-[#F4C95D]/15 text-[#F4C95D]">
+                  <div className="p-2 rounded-lg bg-violet-500/15 text-violet-400">
                     <Layers className="w-5 h-5" />
                   </div>
                   <div>
@@ -729,7 +729,7 @@ export default function CreatorStudioPage() {
                       placeholder="e.g. The Last Kingdom"
                       value={seriesTitle}
                       onChange={(e) => setSeriesTitle(e.target.value)}
-                      className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D] transition-colors"
+                      className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-violet-500 transition-colors"
                     />
                   </div>
 
@@ -743,7 +743,7 @@ export default function CreatorStudioPage() {
                       placeholder="Tell us about your series..."
                       value={seriesDesc}
                       onChange={(e) => setSeriesDesc(e.target.value)}
-                      className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl p-4 border border-[#27313A] focus:outline-none focus:border-[#F4C95D] transition-colors"
+                      className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl p-4 border border-[#27313A] focus:outline-none focus:border-violet-500 transition-colors"
                     />
                   </div>
 
@@ -755,7 +755,7 @@ export default function CreatorStudioPage() {
                       <select
                         value={seriesCategory}
                         onChange={(e) => setSeriesCategory(e.target.value)}
-                        className="w-full bg-[#141D26] text-white text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D] transition-colors"
+                        className="w-full bg-[#141D26] text-white text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-violet-500 transition-colors"
                       >
                         <option value="Drama">Drama</option>
                         <option value="Action">Action</option>
@@ -777,7 +777,7 @@ export default function CreatorStudioPage() {
                         placeholder="e.g. Action, Drama, Thriller"
                         value={seriesTags}
                         onChange={(e) => setSeriesTags(e.target.value)}
-                        className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D] transition-colors"
+                        className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-violet-500 transition-colors"
                       />
                     </div>
                   </div>
@@ -788,8 +788,8 @@ export default function CreatorStudioPage() {
                       Cover Thumbnail (JPG, PNG max 5MB)
                     </label>
                     <div className="flex items-center gap-4">
-                      <label className="flex-1 border-2 border-dashed border-[#27313A] hover:border-[#F4C95D] rounded-2xl p-6 text-center cursor-pointer bg-[#141D26]/50 transition-colors">
-                        <Upload className="w-6 h-6 text-[#F4C95D] mx-auto mb-2" />
+                      <label className="flex-1 border-2 border-dashed border-[#27313A] hover:border-violet-500 rounded-2xl p-6 text-center cursor-pointer bg-[#141D26]/50 transition-colors">
+                        <Upload className="w-6 h-6 text-violet-400 mx-auto mb-2" />
                         <span className="text-xs text-white font-medium block">
                           {seriesCoverUploading ? 'Uploading cover...' : 'Upload Cover Image'}
                         </span>
@@ -829,20 +829,11 @@ export default function CreatorStudioPage() {
                 <div className="flex items-center justify-between pb-2 border-b border-[#27313A]">
                   <div>
                     <h2 className="text-base font-bold text-white flex items-center gap-2">
-                      <Film className="w-4 h-4 text-[#F4C95D]" />
+                      <Film className="w-4 h-4 text-violet-400" />
                       Episodes
                     </h2>
                     <p className="text-xs text-[#7F8993]">Add details for each episode</p>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={addEpisode}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#F4C95D] text-[#F4C95D] hover:bg-[#F4C95D]/15 text-xs font-semibold transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add Episode
-                  </button>
                 </div>
 
                 {/* Episode Cards */}
@@ -889,7 +880,7 @@ export default function CreatorStudioPage() {
                                 prev.map((item) => (item.id === ep.id ? { ...item, title: val } : item))
                               );
                             }}
-                            className="w-full bg-[#141D26] text-white text-xs rounded-xl px-3 py-2.5 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
+                            className="w-full bg-[#141D26] text-white text-xs rounded-xl px-3 py-2.5 border border-[#27313A] focus:outline-none focus:border-violet-500"
                           />
                         </div>
 
@@ -907,7 +898,7 @@ export default function CreatorStudioPage() {
                                 prev.map((item) => (item.id === ep.id ? { ...item, summary: val } : item))
                               );
                             }}
-                            className="w-full bg-[#141D26] text-white text-xs rounded-xl px-3 py-2 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
+                            className="w-full bg-[#141D26] text-white text-xs rounded-xl px-3 py-2 border border-[#27313A] focus:outline-none focus:border-violet-500"
                           />
                         </div>
                       </div>
@@ -940,8 +931,8 @@ export default function CreatorStudioPage() {
                               </button>
                             </div>
                           ) : (
-                            <label className="block border border-dashed border-[#27313A] hover:border-[#F4C95D] rounded-xl p-4 text-center cursor-pointer bg-[#141D26]/40 transition-colors">
-                              <Upload className="w-5 h-5 text-[#F4C95D] mx-auto mb-1" />
+                            <label className="block border border-dashed border-[#27313A] hover:border-violet-500 rounded-xl p-4 text-center cursor-pointer bg-[#141D26]/40 transition-colors">
+                              <Upload className="w-5 h-5 text-violet-400 mx-auto mb-1" />
                               <span className="text-xs text-white block font-medium">
                                 {ep.videoUploading
                                   ? `Uploading (${ep.videoProgress}%)...`
@@ -990,8 +981,8 @@ export default function CreatorStudioPage() {
                               </button>
                             </div>
                           ) : (
-                            <label className="block border border-dashed border-[#27313A] hover:border-[#F4C95D] rounded-xl p-4 text-center cursor-pointer bg-[#141D26]/40 transition-colors">
-                              <Upload className="w-5 h-5 text-[#F4C95D] mx-auto mb-1" />
+                            <label className="block border border-dashed border-[#27313A] hover:border-violet-500 rounded-xl p-4 text-center cursor-pointer bg-[#141D26]/40 transition-colors">
+                              <Upload className="w-5 h-5 text-violet-400 mx-auto mb-1" />
                               <span className="text-xs text-white block font-medium">
                                 {ep.thumbUploading ? 'Uploading...' : 'Upload Thumbnail'}
                               </span>
@@ -1008,19 +999,6 @@ export default function CreatorStudioPage() {
                               />
                             </label>
                           )}
-
-                          {/* Add Episode button placed below the upload thumbnail button */}
-                          <div className="mt-3">
-                            <button
-                              type="button"
-                              onClick={addEpisode}
-                              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-[#F4C95D]/40 hover:border-[#F4C95D] text-white hover:bg-[#F4C95D]/15 text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-98"
-                              style={{ background: 'var(--glass-surface-elevated)' }}
-                            >
-                              <Plus className="w-3.5 h-3.5 text-[#F4C95D]" />
-                              <span>Add Episode</span>
-                            </button>
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -1032,11 +1010,11 @@ export default function CreatorStudioPage() {
                   <button
                     type="button"
                     onClick={addEpisode}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl border border-[#F4C95D] text-white hover:bg-[#F4C95D]/15 text-xs font-semibold transition-all shadow-md active:scale-95 cursor-pointer"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl border border-violet-500 text-white hover:bg-violet-500/15 text-xs font-semibold transition-all shadow-md active:scale-95 cursor-pointer"
                     style={{ background: 'var(--glass-surface-elevated)' }}
                   >
-                    <Plus className="w-4 h-4 text-[#F4C95D]" />
-                    <span>Add Another Episode</span>
+                    <Plus className="w-4 h-4 text-violet-400" />
+                    <span>Add Episode</span>
                   </button>
                 </div>
               </div>
@@ -1066,7 +1044,7 @@ export default function CreatorStudioPage() {
                   placeholder="e.g. Masterclass on Cinematography"
                   value={singleVideoTitle}
                   onChange={(e) => setSingleVideoTitle(e.target.value)}
-                  className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
+                  className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-violet-500"
                 />
               </div>
 
@@ -1080,7 +1058,7 @@ export default function CreatorStudioPage() {
                   placeholder="Detailed description of this video..."
                   value={singleVideoDesc}
                   onChange={(e) => setSingleVideoDesc(e.target.value)}
-                  className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl p-4 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
+                  className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl p-4 border border-[#27313A] focus:outline-none focus:border-violet-500"
                 />
               </div>
 
@@ -1092,7 +1070,7 @@ export default function CreatorStudioPage() {
                   <select
                     value={singleVideoCategory}
                     onChange={(e) => setSingleVideoCategory(e.target.value)}
-                    className="w-full bg-[#141D26] text-white text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
+                    className="w-full bg-[#141D26] text-white text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-violet-500"
                   >
                     <option value="Entertainment">Entertainment</option>
                     <option value="Music">Music</option>
@@ -1112,7 +1090,7 @@ export default function CreatorStudioPage() {
                     placeholder="e.g. Tutorial, Camera, 4K"
                     value={singleVideoTags}
                     onChange={(e) => setSingleVideoTags(e.target.value)}
-                    className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
+                    className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-violet-500"
                   />
                 </div>
               </div>
@@ -1137,8 +1115,8 @@ export default function CreatorStudioPage() {
                       </button>
                     </div>
                   ) : (
-                    <label className="block border-2 border-dashed border-[#27313A] hover:border-[#F4C95D] rounded-2xl p-6 text-center cursor-pointer bg-[#141D26]/50 transition-colors">
-                      <Upload className="w-6 h-6 text-[#F4C95D] mx-auto mb-2" />
+                    <label className="block border-2 border-dashed border-[#27313A] hover:border-violet-500 rounded-2xl p-6 text-center cursor-pointer bg-[#141D26]/50 transition-colors">
+                      <Upload className="w-6 h-6 text-violet-400 mx-auto mb-2" />
                       <span className="text-xs text-white font-medium block">
                         {singleVideoUploading
                           ? `Uploading (${singleVideoProgress}%)...`
@@ -1192,8 +1170,8 @@ export default function CreatorStudioPage() {
                       </button>
                     </div>
                   ) : (
-                    <label className="block border-2 border-dashed border-[#27313A] hover:border-[#F4C95D] rounded-2xl p-6 text-center cursor-pointer bg-[#141D26]/50 transition-colors">
-                      <Upload className="w-6 h-6 text-[#F4C95D] mx-auto mb-2" />
+                    <label className="block border-2 border-dashed border-[#27313A] hover:border-violet-500 rounded-2xl p-6 text-center cursor-pointer bg-[#141D26]/50 transition-colors">
+                      <Upload className="w-6 h-6 text-violet-400 mx-auto mb-2" />
                       <span className="text-xs text-white font-medium block">
                         {singleThumbUploading ? 'Uploading...' : 'Select Thumbnail'}
                       </span>
@@ -1225,7 +1203,7 @@ export default function CreatorStudioPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] active:bg-[#DDB347] text-[#0B0F13] font-bold text-sm tracking-wide transition-all shadow-md active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl bg-violet-600 hover:bg-violet-500 active:bg-violet-700 text-white shadow-lg shadow-violet-600/25 font-bold text-sm tracking-wide transition-all shadow-md active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Upload className="w-4 h-4" />
                 <span>{isSubmitting ? 'Uploading Video...' : 'Upload Video'}</span>
@@ -1246,7 +1224,7 @@ export default function CreatorStudioPage() {
               onClick={() => setAudioMode('album')}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                 audioMode === 'album'
-                  ? 'bg-[#F4C95D] text-[#0B0F13] font-semibold shadow-md'
+                  ? 'bg-violet-600 text-white font-semibold shadow-md shadow-violet-600/25'
                   : 'bg-[#141D26] text-[#B7BEC6] hover:text-[#F5F1E8] border border-[#27313A]'
               }`}
             >
@@ -1256,7 +1234,7 @@ export default function CreatorStudioPage() {
               onClick={() => setAudioMode('single')}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                 audioMode === 'single'
-                  ? 'bg-[#F4C95D] text-[#0B0F13] font-semibold shadow-md'
+                  ? 'bg-violet-600 text-white font-semibold shadow-md shadow-violet-600/25'
                   : 'bg-[#141D26] text-[#B7BEC6] hover:text-[#F5F1E8] border border-[#27313A]'
               }`}
             >
@@ -1280,7 +1258,7 @@ export default function CreatorStudioPage() {
                     placeholder="e.g. Midnight Thoughts"
                     value={albumTitle}
                     onChange={(e) => setAlbumTitle(e.target.value)}
-                    className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
+                    className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-violet-500"
                   />
                 </div>
 
@@ -1294,7 +1272,7 @@ export default function CreatorStudioPage() {
                       placeholder="e.g. Alex Vance"
                       value={albumArtist}
                       onChange={(e) => setAlbumArtist(e.target.value)}
-                      className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
+                      className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-violet-500"
                     />
                   </div>
 
@@ -1305,7 +1283,7 @@ export default function CreatorStudioPage() {
                     <select
                       value={albumGenre}
                       onChange={(e) => setAlbumGenre(e.target.value)}
-                      className="w-full bg-[#141D26] text-white text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
+                      className="w-full bg-[#141D26] text-white text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-violet-500"
                     >
                       <option value="Pop">Pop</option>
                       <option value="Hip-Hop">Hip-Hop</option>
@@ -1327,7 +1305,7 @@ export default function CreatorStudioPage() {
                     placeholder="Album description..."
                     value={albumDesc}
                     onChange={(e) => setAlbumDesc(e.target.value)}
-                    className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl p-4 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
+                    className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl p-4 border border-[#27313A] focus:outline-none focus:border-violet-500"
                   />
                 </div>
 
@@ -1337,8 +1315,8 @@ export default function CreatorStudioPage() {
                     Poster / Cover Art (JPG, PNG max 5MB)
                   </label>
                   <div className="flex items-center gap-4">
-                    <label className="flex-1 border-2 border-dashed border-[#27313A] hover:border-[#F4C95D] rounded-2xl p-6 text-center cursor-pointer bg-[#141D26]/50 transition-colors">
-                      <Upload className="w-6 h-6 text-[#F4C95D] mx-auto mb-2" />
+                    <label className="flex-1 border-2 border-dashed border-[#27313A] hover:border-violet-500 rounded-2xl p-6 text-center cursor-pointer bg-[#141D26]/50 transition-colors">
+                      <Upload className="w-6 h-6 text-violet-400 mx-auto mb-2" />
                       <span className="text-xs text-white font-medium block">
                         {albumCoverUploading ? 'Uploading cover...' : 'Upload Cover Image'}
                       </span>
@@ -1388,13 +1366,13 @@ export default function CreatorStudioPage() {
               <div className="theme-form-card p-6 space-y-4">
                 <div className="flex items-center justify-between pb-2 border-b border-[#27313A]">
                   <h2 className="text-base font-bold text-white flex items-center gap-2">
-                    <Music className="w-4 h-4 text-[#F4C95D]" />
+                    <Music className="w-4 h-4 text-violet-400" />
                     Tracks
                   </h2>
                   <button
                     type="button"
                     onClick={addTrack}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#F4C95D] text-[#F4C95D] hover:bg-[#F4C95D]/15 text-xs font-semibold transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-violet-500 text-violet-400 hover:bg-violet-500/15 text-xs font-semibold transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                     Add Track
@@ -1420,7 +1398,7 @@ export default function CreatorStudioPage() {
                               prev.map((item) => (item.id === trk.id ? { ...item, title: val } : item))
                             );
                           }}
-                          className="flex-1 bg-[#141D26] text-white text-xs rounded-lg px-3 py-2 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
+                          className="flex-1 bg-[#141D26] text-white text-xs rounded-lg px-3 py-2 border border-[#27313A] focus:outline-none focus:border-violet-500"
                         />
                       </div>
 
@@ -1431,7 +1409,7 @@ export default function CreatorStudioPage() {
                           </span>
                         ) : (
                           <label className="px-3 py-1.5 rounded-lg bg-[var(--glass-surface-elevated)] hover:bg-[#404045] text-white text-xs font-medium cursor-pointer transition-colors flex items-center gap-1.5">
-                            <Upload className="w-3.5 h-3.5 text-[#F4C95D]" />
+                            <Upload className="w-3.5 h-3.5 text-violet-400" />
                             <span>{trk.uploading ? `Uploading (${trk.progress}%)...` : 'Upload Audio'}</span>
                             <input
                               type="file"
@@ -1464,7 +1442,7 @@ export default function CreatorStudioPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] active:bg-[#DDB347] text-[#0B0F13] font-bold text-sm tracking-wide transition-all shadow-md active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl bg-violet-600 hover:bg-violet-500 active:bg-violet-700 text-white shadow-lg shadow-violet-600/25 font-bold text-sm tracking-wide transition-all shadow-md active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Upload className="w-4 h-4" />
                 <span>{isSubmitting ? 'Uploading Album...' : 'Upload Album'}</span>
@@ -1485,7 +1463,7 @@ export default function CreatorStudioPage() {
                   placeholder="e.g. Neon Horizon"
                   value={singleAudioTitle}
                   onChange={(e) => setSingleAudioTitle(e.target.value)}
-                  className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
+                  className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-violet-500"
                 />
               </div>
 
@@ -1499,7 +1477,7 @@ export default function CreatorStudioPage() {
                     placeholder="e.g. Alex Vance"
                     value={singleAudioArtist}
                     onChange={(e) => setSingleAudioArtist(e.target.value)}
-                    className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
+                    className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-violet-500"
                   />
                 </div>
 
@@ -1510,7 +1488,7 @@ export default function CreatorStudioPage() {
                   <select
                     value={singleAudioGenre}
                     onChange={(e) => setSingleAudioGenre(e.target.value)}
-                    className="w-full bg-[#141D26] text-white text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
+                    className="w-full bg-[#141D26] text-white text-sm rounded-xl px-4 py-3 border border-[#27313A] focus:outline-none focus:border-violet-500"
                   >
                     <option value="Acoustic">Acoustic</option>
                     <option value="Pop">Pop</option>
@@ -1532,7 +1510,7 @@ export default function CreatorStudioPage() {
                   placeholder="Paste lyrics here..."
                   value={singleAudioLyrics}
                   onChange={(e) => setSingleAudioLyrics(e.target.value)}
-                  className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl p-4 border border-[#27313A] focus:outline-none focus:border-[#F4C95D]"
+                  className="w-full bg-[#141D26] text-white placeholder-[var(--text-muted)] text-sm rounded-xl p-4 border border-[#27313A] focus:outline-none focus:border-violet-500"
                 />
               </div>
 
@@ -1556,8 +1534,8 @@ export default function CreatorStudioPage() {
                       </button>
                     </div>
                   ) : (
-                    <label className="block border-2 border-dashed border-[#27313A] hover:border-[#F4C95D] rounded-2xl p-6 text-center cursor-pointer bg-[#141D26]/50 transition-colors">
-                      <Upload className="w-6 h-6 text-[#F4C95D] mx-auto mb-2" />
+                    <label className="block border-2 border-dashed border-[#27313A] hover:border-violet-500 rounded-2xl p-6 text-center cursor-pointer bg-[#141D26]/50 transition-colors">
+                      <Upload className="w-6 h-6 text-violet-400 mx-auto mb-2" />
                       <span className="text-xs text-white font-medium block">
                         {singleAudioUploading
                           ? `Uploading (${singleAudioProgress}%)...`
@@ -1611,8 +1589,8 @@ export default function CreatorStudioPage() {
                       </button>
                     </div>
                   ) : (
-                    <label className="block border-2 border-dashed border-[#27313A] hover:border-[#F4C95D] rounded-2xl p-6 text-center cursor-pointer bg-[#141D26]/50 transition-colors">
-                      <Upload className="w-6 h-6 text-[#F4C95D] mx-auto mb-2" />
+                    <label className="block border-2 border-dashed border-[#27313A] hover:border-violet-500 rounded-2xl p-6 text-center cursor-pointer bg-[#141D26]/50 transition-colors">
+                      <Upload className="w-6 h-6 text-violet-400 mx-auto mb-2" />
                       <span className="text-xs text-white font-medium block">
                         {singleAudioCoverUploading ? 'Uploading...' : 'Select Cover Art'}
                       </span>
@@ -1644,7 +1622,7 @@ export default function CreatorStudioPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 rounded-xl bg-[#F4C95D] hover:bg-[#FFD978] active:bg-[#DDB347] text-[#0B0F13] font-bold text-sm tracking-wide transition-all shadow-md active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl bg-violet-600 hover:bg-violet-500 active:bg-violet-700 text-white shadow-lg shadow-violet-600/25 font-bold text-sm tracking-wide transition-all shadow-md active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Upload className="w-4 h-4" />
                 <span>{isSubmitting ? 'Uploading Track...' : 'Upload Audio'}</span>
@@ -1665,7 +1643,7 @@ export default function CreatorStudioPage() {
                 onClick={() => setManageSubTab('videos')}
                 className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   manageSubTab === 'videos'
-                    ? 'bg-[#F4C95D] text-[#0B0F13] font-semibold shadow-md'
+                    ? 'bg-violet-600 text-white font-semibold shadow-md shadow-violet-600/25'
                     : 'bg-[#141D26] text-[#B7BEC6] hover:text-[#F5F1E8] border border-[#27313A]'
                 }`}
               >
@@ -1675,7 +1653,7 @@ export default function CreatorStudioPage() {
                 onClick={() => setManageSubTab('audios')}
                 className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   manageSubTab === 'audios'
-                    ? 'bg-[#F4C95D] text-[#0B0F13] font-semibold shadow-md'
+                    ? 'bg-violet-600 text-white font-semibold shadow-md shadow-violet-600/25'
                     : 'bg-[#141D26] text-[#B7BEC6] hover:text-[#F5F1E8] border border-[#27313A]'
                 }`}
               >
@@ -1683,7 +1661,7 @@ export default function CreatorStudioPage() {
               </button>
             </div>
             {isAdmin && (
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#F4C95D]/15 text-[#F4C95D] border border-[#F4C95D]/30">
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-violet-500/15 text-violet-400 border border-violet-500/30">
                 Admin Mode: All Content
               </span>
             )}
@@ -1691,7 +1669,7 @@ export default function CreatorStudioPage() {
 
           {loadingManage ? (
             <div className="p-12 text-center text-[#7F8993] flex flex-col items-center gap-3">
-              <Loader2 className="w-6 h-6 animate-spin text-[#F4C95D]" />
+              <Loader2 className="w-6 h-6 animate-spin text-violet-400" />
               <p className="text-xs">Loading uploaded content...</p>
             </div>
           ) : manageSubTab === 'videos' ? (
@@ -1729,7 +1707,7 @@ export default function CreatorStudioPage() {
                           {isAdmin && v.creator && (
                             <>
                               <span>•</span>
-                              <span className="text-[#F4C95D] truncate">
+                              <span className="text-violet-400 truncate">
                                 By {v.creator.display_name || v.creator.username}
                               </span>
                             </>
@@ -1742,7 +1720,7 @@ export default function CreatorStudioPage() {
                       <button
                         onClick={() => setSelectedSubtitleVideo({ id: v.id, title: v.title })}
                         title="Manage Subtitles"
-                        className="p-2 rounded-xl bg-[#141D26] hover:bg-[var(--glass-surface-elevated)] text-[#F4C95D] hover:text-white transition-colors cursor-pointer border border-white/5"
+                        className="p-2 rounded-xl bg-[#141D26] hover:bg-[var(--glass-surface-elevated)] text-violet-400 hover:text-white transition-colors cursor-pointer border border-white/5"
                       >
                         <Subtitles className="w-4 h-4" />
                       </button>
@@ -1807,7 +1785,7 @@ export default function CreatorStudioPage() {
                         {isAdmin && a.creator && (
                           <>
                             <span>•</span>
-                            <span className="text-[#F4C95D] truncate">
+                            <span className="text-violet-400 truncate">
                               By {a.creator.display_name || a.creator.username}
                             </span>
                           </>

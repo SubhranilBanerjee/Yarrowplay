@@ -183,8 +183,8 @@ export function SubtitleManagerModal({
 
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-100 border border-amber-300 dark:bg-[#F4C95D]/15 dark:border-[#F4C95D]/30">
-            <Subtitles className="w-5 h-5 text-amber-700 dark:text-[#F4C95D]" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-violet-100 border border-violet-300 dark:bg-violet-500/15 dark:border-violet-500/30">
+            <Subtitles className="w-5 h-5 text-violet-700 dark:text-violet-400" />
           </div>
           <div className="min-w-0">
             <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-[#F5F1E8] tracking-tight">
@@ -200,7 +200,7 @@ export function SubtitleManagerModal({
         <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
           {isLoading ? (
             <div className="py-8 flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-[#7F8993]">
-              <Loader2 className="w-4 h-4 animate-spin text-amber-600 dark:text-[#F4C95D]" />
+              <Loader2 className="w-4 h-4 animate-spin text-violet-600 dark:text-violet-400" />
               <span>Loading subtitle tracks...</span>
             </div>
           ) : tracks.length === 0 ? (
@@ -214,13 +214,13 @@ export function SubtitleManagerModal({
                 className="flex items-center justify-between p-3 rounded-xl border bg-slate-50/60 dark:bg-[#141D26] border-slate-200 dark:border-[#27313A] text-xs"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <Globe className="w-4 h-4 text-amber-600 dark:text-[#F4C95D] shrink-0" />
+                  <Globe className="w-4 h-4 text-violet-600 dark:text-violet-400 shrink-0" />
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
                       <span className="font-semibold text-slate-900 dark:text-[#F5F1E8]">{track.label}</span>
                       <span className="text-[10px] text-slate-400 dark:text-[#7F8993] uppercase">({track.language})</span>
                       {track.default_track && (
-                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-300 dark:bg-[#F4C95D]/15 dark:text-[#F4C95D] dark:border-[#F4C95D]/30">
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-violet-100 text-violet-800 border border-violet-300 dark:bg-violet-500/15 dark:text-violet-400 dark:border-violet-500/30">
                           Default
                         </span>
                       )}
@@ -295,7 +295,7 @@ export function SubtitleManagerModal({
                     const matched = COMMON_LANGUAGES.find((l) => l.code === code);
                     if (matched) setNewLabel(matched.label);
                   }}
-                  className="w-full bg-white dark:bg-[#111A22] text-slate-900 dark:text-[#F5F1E8] text-xs rounded-xl p-2 border border-slate-200 dark:border-[#27313A] focus:outline-none focus:border-amber-500 dark:focus:border-[#F4C95D]"
+                  className="w-full bg-white dark:bg-[#111A22] text-slate-900 dark:text-[#F5F1E8] text-xs rounded-xl p-2 border border-slate-200 dark:border-[#27313A] focus:outline-none focus:border-violet-500 dark:focus:border-violet-400"
                 >
                   {COMMON_LANGUAGES.map((lang) => (
                     <option key={lang.code} value={lang.code} className="bg-white dark:bg-[#101820] text-slate-900 dark:text-[#F5F1E8]">
@@ -312,7 +312,7 @@ export function SubtitleManagerModal({
                   value={newLabel}
                   onChange={(e) => setNewLabel(e.target.value)}
                   placeholder="e.g. English, Español"
-                  className="w-full bg-white dark:bg-[#111A22] text-slate-900 dark:text-[#F5F1E8] text-xs rounded-xl p-2 border border-slate-200 dark:border-[#27313A] focus:outline-none focus:border-amber-500 dark:focus:border-[#F4C95D]"
+                  className="w-full bg-white dark:bg-[#111A22] text-slate-900 dark:text-[#F5F1E8] text-xs rounded-xl p-2 border border-slate-200 dark:border-[#27313A] focus:outline-none focus:border-violet-500 dark:focus:border-violet-400"
                 />
               </div>
             </div>
@@ -327,10 +327,10 @@ export function SubtitleManagerModal({
                   value={newSourceUrl}
                   onChange={(e) => setNewSourceUrl(e.target.value)}
                   placeholder="https://.../subtitles.vtt"
-                  className="flex-1 bg-white dark:bg-[#111A22] text-slate-900 dark:text-[#F5F1E8] text-xs rounded-xl p-2 border border-slate-200 dark:border-[#27313A] focus:outline-none focus:border-amber-500 dark:focus:border-[#F4C95D]"
+                  className="flex-1 bg-white dark:bg-[#111A22] text-slate-900 dark:text-[#F5F1E8] text-xs rounded-xl p-2 border border-slate-200 dark:border-[#27313A] focus:outline-none focus:border-violet-500 dark:focus:border-violet-400"
                 />
                 <label className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 dark:bg-[#151F28] dark:hover:bg-[#111A22] border border-slate-200 dark:border-[#27313A] text-slate-800 dark:text-[#F5F1E8] font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors">
-                  {isUploadingFile ? <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600 dark:text-[#F4C95D]" /> : <Upload className="w-3.5 h-3.5 text-amber-600 dark:text-[#F4C95D]" />}
+                  {isUploadingFile ? <Loader2 className="w-3.5 h-3.5 animate-spin text-violet-600 dark:text-violet-400" /> : <Upload className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400" />}
                   <span>{isUploadingFile ? 'Uploading...' : 'Upload'}</span>
                   <input
                     type="file"
@@ -349,7 +349,7 @@ export function SubtitleManagerModal({
                 id="default_track_cb"
                 checked={newIsDefault}
                 onChange={(e) => setNewIsDefault(e.target.checked)}
-                className="rounded accent-amber-500 dark:accent-[#F4C95D] cursor-pointer"
+                className="rounded accent-violet-500 dark:accent-violet-400 cursor-pointer"
               />
               <label htmlFor="default_track_cb" className="text-xs text-slate-800 dark:text-[#F5F1E8] cursor-pointer">
                 Set as default track for viewers
@@ -379,9 +379,9 @@ export function SubtitleManagerModal({
           <button
             type="button"
             onClick={() => setShowAddForm(true)}
-            className="w-full py-2.5 rounded-xl border border-dashed border-slate-300 dark:border-[#27313A] hover:border-amber-500 dark:hover:border-[#F4C95D] text-slate-700 dark:text-[#F5F1E8] text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-slate-50 dark:hover:bg-[#141D26] transition-all cursor-pointer shadow-sm"
+            className="w-full py-2.5 rounded-xl border border-dashed border-slate-300 dark:border-[#27313A] hover:border-violet-500 dark:hover:border-violet-400 text-slate-700 dark:text-[#F5F1E8] text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-slate-50 dark:hover:bg-[#141D26] transition-all cursor-pointer shadow-sm"
           >
-            <Plus className="w-4 h-4 text-amber-600 dark:text-[#F4C95D]" />
+            <Plus className="w-4 h-4 text-violet-600 dark:text-violet-400" />
             <span>Add Subtitle Track</span>
           </button>
         )}
