@@ -572,7 +572,7 @@ export default function AdminHubPage() {
           }`}>
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
             <span className="font-medium">Logged in as:</span>
-            <span className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>admin@admin.com</span>
+            <span className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{user?.email || (localAdminAuth ? 'admin@admin.com' : 'Admin')}</span>
           </div>
 
           <Link
@@ -684,7 +684,7 @@ export default function AdminHubPage() {
                 </div>
                 <h2 className={`text-2xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>Platform Analytics Hub</h2>
                 <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-purple-300/80'}`}>
-                  Dynamic database aggregates: Profiles ({analytics?.signups?.total ?? 0}), Videos ({analytics?.content?.totalVideos ?? 0}), Series ({analytics?.content?.totalSeries ?? 0}), Comments ({analytics?.content?.commentsCount ?? 0}).
+                  Live database aggregates: {analytics?.totalUsers ?? 0} Users, {analytics?.totalSeries ?? 0} Series, {analytics?.totalVideos ?? 0} Videos, {analytics?.totalComments ?? 0} Comments, {analytics?.totalLikes ?? 0} Likes.
                 </p>
               </div>
               <button
@@ -700,155 +700,92 @@ export default function AdminHubPage() {
               </button>
             </div>
 
-            {/* Top Counters Grid */}
+            {/* Top Counters Grid (100% Real Database Metrics) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Logins */}
+              {/* Total Registered Users */}
               <div className={`p-5 rounded-2xl border space-y-2 transition-colors ${
                 isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#140A33]/80 border-purple-500/25'
               }`}>
-                <span className={`text-xs font-semibold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-purple-300/80'}`}>Active Logins</span>
+                <span className={`text-xs font-semibold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-purple-300/80'}`}>Total Registered Users</span>
                 <div className="flex items-baseline justify-between">
                   <span className={`text-3xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    {analytics?.logins?.total ?? 0}
+                    {analytics?.totalUsers ?? 0}
                   </span>
                   <span className="text-xs font-bold text-emerald-600 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-500/30">
-                    {analytics?.logins?.today ?? 0} today
-                  </span>
-                </div>
-                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
-                  Profiles logged in: {analytics?.logins?.total ?? 0} / {analytics?.signups?.total ?? 0}
-                </p>
-              </div>
-
-              {/* Signups */}
-              <div className={`p-5 rounded-2xl border space-y-2 transition-colors ${
-                isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#140A33]/80 border-purple-500/25'
-              }`}>
-                <span className={`text-xs font-semibold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-purple-300/80'}`}>Registered Signups</span>
-                <div className="flex items-baseline justify-between">
-                  <span className={`text-3xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    {analytics?.signups?.total ?? 0}
-                  </span>
-                  <span className="text-xs font-bold text-pink-600 bg-pink-100 dark:text-pink-400 dark:bg-pink-950/50 px-2 py-0.5 rounded-full border border-pink-300 dark:border-pink-500/30">
                     +{analytics?.signups?.today ?? 0} today
                   </span>
                 </div>
-                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
-                  Last 30 days: +{analytics?.signups?.last30Days ?? 0}
-                </p>
+                <div className="flex items-center gap-2 text-[11px] pt-1">
+                  <span className="text-purple-400 font-semibold">{analytics?.content?.creatorsCount ?? 0} Creators</span>
+                  <span>•</span>
+                  <span className="text-blue-400 font-semibold">{analytics?.content?.viewersCount ?? 0} Viewers</span>
+                  <span>•</span>
+                  <span className="text-amber-400 font-semibold">{analytics?.content?.advertisersCount ?? 0} Ads</span>
+                </div>
               </div>
 
-              {/* Page Views */}
+              {/* Total Content Series */}
               <div className={`p-5 rounded-2xl border space-y-2 transition-colors ${
                 isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#140A33]/80 border-purple-500/25'
               }`}>
-                <span className={`text-xs font-semibold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-purple-300/80'}`}>Page Views</span>
+                <span className={`text-xs font-semibold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-purple-300/80'}`}>Content Series</span>
                 <div className="flex items-baseline justify-between">
                   <span className={`text-3xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    {analytics?.pageViews?.total ?? 0}
+                    {analytics?.totalSeries ?? 0}
                   </span>
-                  <span className={`text-xs font-bold ${isLight ? 'text-purple-700' : 'text-purple-300'}`}>
-                    {analytics?.pageViews?.pagesPerSession ?? 1.0} / stream
+                  <span className="text-xs font-bold text-pink-600 bg-pink-100 dark:text-pink-400 dark:bg-pink-950/50 px-2 py-0.5 rounded-full border border-pink-300 dark:border-pink-500/30">
+                    {analytics?.categoriesBreakdown?.length ?? 0} Genres
                   </span>
                 </div>
                 <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
-                  Unique page visitors: {analytics?.pageViews?.unique ?? 0}
+                  Original shows registered in database
                 </p>
               </div>
 
-              {/* Unique Viewers */}
+              {/* Videos & Episodes */}
               <div className={`p-5 rounded-2xl border space-y-2 transition-colors ${
                 isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#140A33]/80 border-purple-500/25'
               }`}>
-                <span className={`text-xs font-semibold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-purple-300/80'}`}>Unique Viewers</span>
+                <span className={`text-xs font-semibold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-purple-300/80'}`}>Videos & Episodes</span>
                 <div className="flex items-baseline justify-between">
                   <span className={`text-3xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    {analytics?.uniqueViewers?.total ?? 0}
+                    {analytics?.totalVideos ?? 0}
+                  </span>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
+                    (analytics?.pendingVideos ?? 0) > 0
+                      ? 'text-amber-400 bg-amber-950/40 border-amber-500/30'
+                      : 'text-emerald-400 bg-emerald-950/40 border-emerald-500/30'
+                  }`}>
+                    {analytics?.publishedVideos ?? 0} Live
+                  </span>
+                </div>
+                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
+                  Pending Review: {analytics?.pendingVideos ?? 0}
+                </p>
+              </div>
+
+              {/* Community & Economy */}
+              <div className={`p-5 rounded-2xl border space-y-2 transition-colors ${
+                isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#140A33]/80 border-purple-500/25'
+              }`}>
+                <span className={`text-xs font-semibold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-purple-300/80'}`}>Economy & Coins</span>
+                <div className="flex items-baseline justify-between">
+                  <span className={`text-3xl font-black font-mono ${isLight ? 'text-amber-600' : 'text-amber-300'}`}>
+                    🪙 {analytics?.totalCoinsInCirculation ?? 0}
                   </span>
                   <span className="text-xs font-bold text-cyan-600 bg-cyan-100 dark:text-cyan-400 dark:bg-cyan-950/50 px-2 py-0.5 rounded-full border border-cyan-300 dark:border-cyan-500/30">
-                    Active
+                    {analytics?.vipSubscribersCount ?? 0} VIP
                   </span>
                 </div>
                 <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
-                  Monthly active: {analytics?.uniqueViewers?.monthlyActive ?? 0}
+                  Total user coin balances in circulation
                 </p>
               </div>
             </div>
 
-            {/* WATCHES WITH SIGN UP vs WITHOUT SIGN UP */}
-            <div className={`p-6 rounded-3xl border space-y-6 shadow-sm transition-colors ${
-              isLight ? 'bg-white border-slate-200' : 'bg-[#11082B]/90 border-purple-500/30'
-            }`}>
-              <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-4 ${
-                isLight ? 'border-slate-200' : 'border-purple-500/20'
-              }`}>
-                <div>
-                  <h3 className={`text-lg font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    <Film className="w-5 h-5 text-purple-500" />
-                    <span>Video Watches: With Sign-Up vs Without Sign-Up</span>
-                  </h3>
-                  <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
-                    Aggregated directly from Supabase videos view counts and watch history records.
-                  </p>
-                </div>
-                <span className={`text-sm font-extrabold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                  Total Views in DB: {analytics?.watches?.total ?? 0}
-                </span>
-              </div>
-
-              {/* Visual Split Bar */}
-              <div className="space-y-2">
-                <div className={`w-full h-5 rounded-full overflow-hidden flex p-0.5 border ${
-                  isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#1F1042] border-purple-500/30'
-                }`}>
-                  <div
-                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-l-full transition-all duration-700"
-                    style={{ width: `${analytics?.watches?.withSignupPct ?? 50}%` }}
-                    title={`Watches with Sign-Up: ${analytics?.watches?.withSignupPct ?? 0}%`}
-                  />
-                  <div
-                    className="h-full bg-gradient-to-r from-cyan-600 to-blue-500 rounded-r-full transition-all duration-700"
-                    style={{ width: `${analytics?.watches?.withoutSignupPct ?? 50}%` }}
-                    title={`Watches without Sign-Up: ${analytics?.watches?.withoutSignupPct ?? 0}%`}
-                  />
-                </div>
-                <div className="flex items-center justify-between text-xs font-semibold px-1">
-                  <div className={`flex items-center gap-2 ${isLight ? 'text-purple-900' : 'text-purple-300'}`}>
-                    <span className="w-3 h-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-500" />
-                    <span>
-                      Watches with Sign-Up (Authenticated): {analytics?.watches?.withSignup ?? 0} ({analytics?.watches?.withSignupPct ?? 0}%)
-                    </span>
-                  </div>
-                  <div className={`flex items-center gap-2 ${isLight ? 'text-cyan-900' : 'text-cyan-300'}`}>
-                    <span className="w-3 h-3 rounded-full bg-gradient-to-r from-cyan-600 to-blue-500" />
-                    <span>
-                      Watches without Sign-Up (Guest): {analytics?.watches?.withoutSignup ?? 0} ({analytics?.watches?.withoutSignupPct ?? 0}%)
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className={`p-4 rounded-2xl border space-y-1 ${
-                  isLight ? 'bg-slate-50 border-slate-200 text-slate-900' : 'bg-[#170C3B] border-purple-500/20 text-white'
-                }`}>
-                  <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-purple-300'}`}>Supabase Content Breakdown</p>
-                  <p className="text-xl font-black">{analytics?.content?.totalVideos ?? 0} Videos across {analytics?.content?.totalSeries ?? 0} Series</p>
-                  <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-purple-400/80'}`}>Approved: {analytics?.content?.approvedVideos ?? 0} • Pending Moderation: {analytics?.content?.pendingModeration ?? 0}</p>
-                </div>
-                <div className={`p-4 rounded-2xl border space-y-1 ${
-                  isLight ? 'bg-cyan-50/60 border-cyan-200 text-slate-900' : 'bg-[#170C3B] border-cyan-500/20 text-white'
-                }`}>
-                  <p className={`text-xs ${isLight ? 'text-cyan-800' : 'text-cyan-300'}`}>Community Engagement</p>
-                  <p className="text-xl font-black">{analytics?.content?.commentsCount ?? 0} Comments & {analytics?.watches?.totalLikes ?? 0} Video Likes</p>
-                  <p className={`text-[11px] ${isLight ? 'text-cyan-700' : 'text-cyan-400/80'}`}>Creators: {analytics?.content?.creatorsCount ?? 0} • Advertisers: {analytics?.content?.advertisersCount ?? 0} • Viewers: {analytics?.content?.viewersCount ?? 0}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* TWO COLUMNS: Session Duration & Device Types */}
+            {/* REAL DATABASE BREAKDOWN: CATEGORIES & ROLES */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Session Duration */}
+              {/* Real Series Categories */}
               <div className={`p-6 rounded-3xl border space-y-5 shadow-sm transition-colors ${
                 isLight ? 'bg-white border-slate-200' : 'bg-[#11082B]/80 border-purple-500/25'
               }`}>
@@ -857,134 +794,209 @@ export default function AdminHubPage() {
                 }`}>
                   <div>
                     <h3 className={`text-base font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                      <Clock className="w-4 h-4 text-purple-500" />
-                      <span>Session Duration</span>
+                      <Film className="w-4 h-4 text-purple-500" />
+                      <span>Series Category Distribution (Real DB Data)</span>
                     </h3>
-                    <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>Average time spent per user session (based on DB videos)</p>
+                    <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
+                      Actual distribution of the {analytics?.totalSeries ?? 0} series across genres
+                    </p>
                   </div>
-                  <span className="text-base font-black text-pink-600 bg-pink-100 dark:text-pink-400 dark:bg-pink-950/40 px-3 py-1 rounded-xl border border-pink-200 dark:border-pink-500/30">
-                    {analytics?.sessionDuration?.formattedAvg ?? '1m 30s'}
+                  <span className="text-xs font-bold text-purple-400 bg-purple-950/40 border border-purple-500/30 px-2.5 py-1 rounded-xl">
+                    {analytics?.totalSeries ?? 0} Series
                   </span>
                 </div>
 
                 <div className="space-y-3">
-                  {(analytics?.sessionDuration?.distribution || []).map((item: any) => (
-                    <div key={item.bracket} className="space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span className={isLight ? 'text-slate-700' : 'text-purple-200'}>{item.bracket}</span>
-                        <span className={`font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{item.percentage}% ({item.count} viewers)</span>
+                  {(analytics?.categoriesBreakdown && analytics.categoriesBreakdown.length > 0) ? (
+                    analytics.categoriesBreakdown.map((item: any) => (
+                      <div key={item.category} className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className={`font-semibold ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>{item.category}</span>
+                          <span className={`font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                            {item.count} series ({item.percentage}%)
+                          </span>
+                        </div>
+                        <div className={`w-full h-2 rounded-full overflow-hidden ${isLight ? 'bg-slate-100' : 'bg-[#1C103F]'}`}>
+                          <div
+                            className="h-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 rounded-full"
+                            style={{ width: `${item.percentage}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className={`w-full h-2 rounded-full overflow-hidden ${isLight ? 'bg-slate-100' : 'bg-[#1C103F]'}`}>
-                        <div
-                          className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
-                          style={{ width: `${item.percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <div className="py-6 text-center text-xs opacity-60">No series categories recorded yet.</div>
+                  )}
                 </div>
               </div>
 
-              {/* Device Type */}
+              {/* Real User Roles Breakdown */}
               <div className={`p-6 rounded-3xl border space-y-5 shadow-sm transition-colors ${
                 isLight ? 'bg-white border-slate-200' : 'bg-[#11082B]/80 border-purple-500/25'
               }`}>
-                <div className={`border-b pb-3 ${isLight ? 'border-slate-200' : 'border-purple-500/20'}`}>
-                  <h3 className={`text-base font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    <Smartphone className="w-4 h-4 text-purple-500" />
-                    <span>Device Type Breakdown</span>
-                  </h3>
-                  <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>Traffic origin across mobile, desktop, and tablet</p>
+                <div className={`flex items-center justify-between border-b pb-3 ${
+                  isLight ? 'border-slate-200' : 'border-purple-500/20'
+                }`}>
+                  <div>
+                    <h3 className={`text-base font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                      <Users className="w-4 h-4 text-purple-500" />
+                      <span>User Roles Breakdown (Real DB Data)</span>
+                    </h3>
+                    <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
+                      Real membership composition of the {analytics?.totalUsers ?? 0} registered profiles
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-2.5 py-1 rounded-xl">
+                    {analytics?.totalUsers ?? 0} Profiles
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {(analytics?.deviceType || []).map((dev: any) => (
-                    <div key={dev.type} className={`p-3.5 rounded-2xl border space-y-1 ${
-                      isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#170C3B] border-purple-500/20'
-                    }`}>
-                      <p className={`text-[11px] font-semibold ${isLight ? 'text-slate-600' : 'text-purple-300'}`}>{dev.type}</p>
-                      <p className={`text-2xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{dev.percentage}%</p>
-                      <span className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-purple-400/80'}`}>{dev.count} users</span>
-                      <div className={`w-full h-1.5 rounded-full overflow-hidden mt-2 ${isLight ? 'bg-slate-200' : 'bg-[#201147]'}`}>
-                        <div
-                          className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
-                          style={{ width: `${dev.percentage}%` }}
-                        />
+                <div className="space-y-3">
+                  {(analytics?.rolesBreakdown && analytics.rolesBreakdown.length > 0) ? (
+                    analytics.rolesBreakdown.map((item: any) => (
+                      <div key={item.role} className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className={`font-semibold ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>{item.role}</span>
+                          <span className={`font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                            {item.count} users ({item.percentage}%)
+                          </span>
+                        </div>
+                        <div className={`w-full h-2 rounded-full overflow-hidden ${isLight ? 'bg-slate-100' : 'bg-[#1C103F]'}`}>
+                          <div
+                            className="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-full"
+                            style={{ width: `${item.percentage}%` }}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <div className="py-6 text-center text-xs opacity-60">No user profiles found.</div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* TWO COLUMNS: App Downloads & Location Breakdown */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* App Downloads */}
-              <div className={`p-6 rounded-3xl border space-y-5 shadow-sm transition-colors ${
-                isLight ? 'bg-white border-slate-200' : 'bg-[#11082B]/80 border-purple-500/25'
-              }`}>
-                <div className={`flex items-center justify-between border-b pb-3 ${isLight ? 'border-slate-200' : 'border-purple-500/20'}`}>
-                  <div>
-                    <h3 className={`text-base font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                      <Download className="w-4 h-4 text-purple-500" />
-                      <span>App Downloads & Installs</span>
-                    </h3>
-                    <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>Native application distribution across stores</p>
-                  </div>
-                  <span className="text-sm font-black text-emerald-600 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-950/50 px-2.5 py-1 rounded-xl border border-emerald-200 dark:border-emerald-500/30">
-                    {(analytics?.appDownloads?.total ?? 0).toLocaleString()} Total
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className={`p-3 rounded-2xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'}`}>
-                    <p className={`text-[11px] font-semibold ${isLight ? 'text-slate-600' : 'text-purple-300'}`}>Google Play (Android)</p>
-                    <p className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{(analytics?.appDownloads?.android ?? 0).toLocaleString()}</p>
-                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{analytics?.appDownloads?.growthRate ?? '+0%'}</span>
-                  </div>
-                  <div className={`p-3 rounded-2xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'}`}>
-                    <p className={`text-[11px] font-semibold ${isLight ? 'text-slate-600' : 'text-purple-300'}`}>Apple App Store (iOS)</p>
-                    <p className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{(analytics?.appDownloads?.ios ?? 0).toLocaleString()}</p>
-                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{analytics?.appDownloads?.growthRate ?? '+0%'}</span>
-                  </div>
-                  <div className={`p-3 rounded-2xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'}`}>
-                    <p className={`text-[11px] font-semibold ${isLight ? 'text-slate-600' : 'text-purple-300'}`}>PWA / Web App</p>
-                    <p className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{(analytics?.appDownloads?.pwa ?? 0).toLocaleString()}</p>
-                    <span className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-purple-400'}`}>Desktop + Mobile</span>
-                  </div>
-                  <div className={`p-3 rounded-2xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/20'}`}>
-                    <p className={`text-[11px] font-semibold ${isLight ? 'text-slate-600' : 'text-purple-300'}`}>Windows Store / App</p>
-                    <p className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{(analytics?.appDownloads?.windows ?? 0).toLocaleString()}</p>
-                    <span className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-purple-400'}`}>Direct install</span>
-                  </div>
-                </div>
+            {/* REAL COMMUNITY & ENGAGEMENT STATS */}
+            <div className={`p-6 rounded-3xl border space-y-4 shadow-sm transition-colors ${
+              isLight ? 'bg-white border-slate-200' : 'bg-[#11082B]/90 border-purple-500/30'
+            }`}>
+              <div className="flex items-center justify-between border-b pb-3 border-purple-500/20">
+                <h3 className={`text-base font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  <TrendingUp className="w-4 h-4 text-purple-400" />
+                  <span>Real Platform Activity & Engagement Counts</span>
+                </h3>
+                <span className="text-xs opacity-60">Direct Table Queries</span>
               </div>
 
-              {/* Geographic / Location Breakdown */}
-              <div className={`p-6 rounded-3xl border space-y-5 shadow-sm transition-colors ${
-                isLight ? 'bg-white border-slate-200' : 'bg-[#11082B]/80 border-purple-500/25'
-              }`}>
-                <div className={`border-b pb-3 ${isLight ? 'border-slate-200' : 'border-purple-500/20'}`}>
-                  <h3 className={`text-base font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    <Globe className="w-4 h-4 text-purple-500" />
-                    <span>Location Breakdown</span>
-                  </h3>
-                  <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>Top countries and audience distribution</p>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div className={`p-3.5 rounded-2xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#170C3B] border-purple-500/20'}`}>
+                  <p className="text-[11px] opacity-70">Video Views</p>
+                  <p className="text-xl font-black mt-1">{analytics?.totalViews ?? 0}</p>
+                  <span className="text-[10px] text-purple-400">Total Playbacks</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                  {(analytics?.locations?.countries || []).map((loc: any) => (
-                    <div key={loc.country} className={`flex items-center justify-between p-2.5 rounded-xl border ${
-                      isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#160B37]/60 border-purple-500/15 text-purple-200'
-                    }`}>
-                      <span className="flex items-center gap-1.5 font-medium">
-                        <span>{loc.flag}</span>
-                        <span>{loc.country}</span>
-                      </span>
-                      <span className={`font-bold ${isLight ? 'text-slate-900 font-mono' : 'text-white font-mono'}`}>{loc.percentage}%</span>
-                    </div>
-                  ))}
+                <div className={`p-3.5 rounded-2xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#170C3B] border-purple-500/20'}`}>
+                  <p className="text-[11px] opacity-70">Video Likes</p>
+                  <p className="text-xl font-black mt-1">{analytics?.totalLikes ?? 0}</p>
+                  <span className="text-[10px] text-pink-400">Reactions</span>
                 </div>
+
+                <div className={`p-3.5 rounded-2xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#170C3B] border-purple-500/20'}`}>
+                  <p className="text-[11px] opacity-70">Comments</p>
+                  <p className="text-xl font-black mt-1">{analytics?.totalComments ?? 0}</p>
+                  <span className="text-[10px] text-cyan-400">Discussion</span>
+                </div>
+
+                <div className={`p-3.5 rounded-2xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#170C3B] border-purple-500/20'}`}>
+                  <p className="text-[11px] opacity-70">Watch History</p>
+                  <p className="text-xl font-black mt-1">{analytics?.watchHistoryCount ?? 0}</p>
+                  <span className="text-[10px] text-emerald-400">Sessions</span>
+                </div>
+
+                <div className={`p-3.5 rounded-2xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#170C3B] border-purple-500/20'}`}>
+                  <p className="text-[11px] opacity-70">Favorites & Saved</p>
+                  <p className="text-xl font-black mt-1">{(analytics?.favoritesCount ?? 0) + (analytics?.watchlistsCount ?? 0)}</p>
+                  <span className="text-[10px] text-amber-400">Bookmarked</span>
+                </div>
+              </div>
+            </div>
+
+            {/* REAL DATABASE SERIES INVENTORY LIST */}
+            <div className={`p-6 rounded-3xl border space-y-4 shadow-sm transition-colors ${
+              isLight ? 'bg-white border-slate-200' : 'bg-[#11082B]/80 border-purple-500/25'
+            }`}>
+              <div className="flex items-center justify-between border-b pb-3 border-purple-500/20">
+                <div>
+                  <h3 className={`text-base font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    <Film className="w-4 h-4 text-purple-500" />
+                    <span>Real Content Series in Database</span>
+                  </h3>
+                  <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
+                    The actual content series rows stored in Supabase content_series table
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setModerationContentType('series');
+                    setActiveTab('moderation');
+                  }}
+                  className="text-xs font-bold text-purple-400 hover:text-purple-300 transition-colors"
+                >
+                  Manage All Series →
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className={`font-semibold uppercase tracking-wider border-b ${
+                    isLight ? 'bg-slate-100 text-slate-700 border-slate-200' : 'bg-[#180C3B] text-purple-300 border-purple-500/20'
+                  }`}>
+                    <tr>
+                      <th className="py-2.5 px-4">Series Title</th>
+                      <th className="py-2.5 px-4">Genre / Category</th>
+                      <th className="py-2.5 px-4">Episodes</th>
+                      <th className="py-2.5 px-4">Created Date</th>
+                      <th className="py-2.5 px-4 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className={`divide-y ${
+                    isLight ? 'divide-slate-200 text-slate-800' : 'divide-purple-500/15 text-purple-100'
+                  }`}>
+                    {(analytics?.recentSeries && analytics.recentSeries.length > 0) ? (
+                      analytics.recentSeries.map((s: any) => (
+                        <tr key={s.id} className={isLight ? 'hover:bg-slate-50' : 'hover:bg-purple-900/20'}>
+                          <td className="py-2.5 px-4 font-bold">{s.title}</td>
+                          <td className="py-2.5 px-4">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-900/50 text-purple-300 border border-purple-500/30">
+                              {s.category || 'Drama'}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-4">{s.total_episodes || 0} eps</td>
+                          <td className="py-2.5 px-4 opacity-70">
+                            {s.created_at ? new Date(s.created_at).toLocaleDateString() : 'N/A'}
+                          </td>
+                          <td className="py-2.5 px-4 text-right">
+                            <button
+                              onClick={() => {
+                                setModerationContentType('series');
+                                setActiveTab('moderation');
+                              }}
+                              className="text-xs font-bold text-purple-400 hover:underline"
+                            >
+                              View / Edit
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="py-8 text-center opacity-60">
+                          No series found in the database.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

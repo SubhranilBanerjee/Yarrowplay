@@ -78,6 +78,22 @@ export function Header() {
   const defaultAvatar =
     'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80';
 
+  const userMeta = user?.user_metadata || {};
+  const displayName =
+    profile?.display_name ||
+    userMeta.full_name ||
+    userMeta.name ||
+    (userMeta.given_name ? `${userMeta.given_name} ${userMeta.family_name || ''}`.trim() : null) ||
+    userMeta.display_name ||
+    user?.email?.split('@')[0] ||
+    'User';
+
+  const avatarUrl =
+    profile?.avatar_url ||
+    userMeta.avatar_url ||
+    userMeta.picture ||
+    defaultAvatar;
+
   return (
     <header className="sticky top-0 z-40 w-full bg-[var(--lr-bg-header,#090D12)]/95 backdrop-blur-md border-b border-[var(--lr-border-primary,#182029)] px-3 sm:px-4 md:px-6 py-2.5 transition-all">
       <div className="w-full flex items-center justify-between gap-2 sm:gap-4">
@@ -188,8 +204,8 @@ export function Header() {
             >
               <div className="relative w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full overflow-hidden bg-[#151D25]">
                 <Image
-                  src={profile?.avatar_url || defaultAvatar}
-                  alt={profile?.display_name || 'User Profile'}
+                  src={avatarUrl}
+                  alt={displayName}
                   fill
                   sizes="36px"
                   className="object-cover"
@@ -204,9 +220,14 @@ export function Header() {
                   <>
                     <div className="px-4 py-2.5 border-b border-[#182029]">
                       <p className="text-sm font-semibold text-[#F5F1E8] truncate">
-                        {profile?.display_name || user.email}
+                        {displayName}
                       </p>
-                      <div className="flex items-center gap-2 mt-1">
+                      {user.email && (
+                        <p className="text-[11px] text-[#7A8794] truncate mt-0.5">
+                          {user.email}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 mt-1.5">
                         <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-[#ECC979]/15 text-[#ECC979] border border-[#ECC979]/30">
                           {profile?.role || 'viewer'}
                         </span>

@@ -28,6 +28,7 @@ import {
 import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/context/ThemeContext';
 import { getStoredSiteContent, SiteContent, DEFAULT_SITE_CONTENT } from '@/lib/siteContent';
+import { BrandLogo } from '@/components/landing/BrandLogo';
 
 // Category Definitions
 const CATEGORY_TABS = [
@@ -282,16 +283,7 @@ export function LandingHeroView() {
       {/* ========================================================================= */}
       <header className="sticky top-4 z-50 px-4 sm:px-8 max-w-7xl mx-auto flex items-center justify-between">
         {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group cursor-pointer">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-fuchsia-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-600/30 group-hover:scale-105 transition-transform">
-            <span className="text-white text-base font-black">✦</span>
-          </div>
-          <span className={`font-black text-sm tracking-widest uppercase transition-colors ${
-            isLight ? 'text-slate-900 group-hover:text-purple-600' : 'text-white group-hover:text-purple-300'
-          }`}>
-            POLARIS <span className="font-light opacity-70">DESIGN CO.</span>
-          </span>
-        </Link>
+        <BrandLogo href="/home" showText={true} />
 
         {/* Center Pill Menu */}
         <nav
@@ -301,9 +293,27 @@ export function LandingHeroView() {
               : 'bg-[#150B2D]/85 border-white/10 text-white/80 shadow-black/40'
           }`}
         >
+          <Link
+            href="/home"
+            className={`px-3.5 py-1 rounded-full text-xs font-medium cursor-pointer transition-all ${
+              isLight
+                ? 'hover:text-slate-950 hover:bg-slate-100 text-slate-700'
+                : 'hover:text-white hover:bg-white/10 text-white/80'
+            }`}
+          >
+            Home
+          </Link>
+          <Link
+            href="/about"
+            className={`px-3.5 py-1 rounded-full text-xs font-medium cursor-pointer transition-all ${
+              isLight
+                ? 'hover:text-slate-950 hover:bg-slate-100 text-slate-700'
+                : 'hover:text-white hover:bg-white/10 text-white/80'
+            }`}
+          >
+            About Us
+          </Link>
           {[
-            { id: 'hero', label: 'Home' },
-            { id: 'about', label: 'About Us' },
             { id: 'services', label: 'Services' },
             { id: 'why-us', label: 'Work Process' },
             { id: 'creators', label: 'Creators' },
@@ -325,16 +335,6 @@ export function LandingHeroView() {
               {item.label}
             </button>
           ))}
-          <Link
-            href="/admin"
-            className={`px-3.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition-all ${
-              isLight
-                ? 'text-purple-700 hover:bg-purple-50'
-                : 'text-purple-300 hover:bg-purple-900/40'
-            }`}
-          >
-            Admin
-          </Link>
         </nav>
 
         {/* Right Actions: Theme Toggle & Contact Pill CTA */}
@@ -411,20 +411,16 @@ export function LandingHeroView() {
 
             {/* Dual CTA Buttons */}
             <div className="flex flex-wrap items-center gap-4 pt-2">
-              <button
-                onClick={() => {
-                  if (reels.length > 0) setActiveVideoModal(reels[0]);
-                }}
+              <Link
+                href="/home"
                 className="px-7 py-3 rounded-full text-xs sm:text-sm font-bold tracking-wide uppercase bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white shadow-xl shadow-purple-600/40 hover:shadow-purple-600/60 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2"
               >
-                <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                  <Play className="w-2.5 h-2.5 fill-current" />
-                </div>
-                <span>{siteText.hero?.ctaPrimary || 'Get A Free Consultation'}</span>
-              </button>
+                <Compass className="w-4 h-4" />
+                <span>Explore</span>
+              </Link>
 
-              <button
-                onClick={() => scrollToSection('services', 'Services')}
+              <Link
+                href="/about"
                 className={`px-7 py-3 rounded-full text-xs sm:text-sm font-bold tracking-wide uppercase border backdrop-blur-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2 ${
                   isLight
                     ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 shadow-sm'
@@ -432,8 +428,8 @@ export function LandingHeroView() {
                 }`}
               >
                 <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-                <span>{siteText.hero?.ctaSecondary || 'View Our Work'}</span>
-              </button>
+                <span>Learn More</span>
+              </Link>
             </div>
           </div>
 
@@ -892,16 +888,7 @@ export function LandingHeroView() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-purple-500/15">
             {/* Left: Brand & Mission */}
             <div className="md:col-span-5 space-y-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-fuchsia-500 to-pink-500 flex items-center justify-center text-white text-base font-black shadow-lg shadow-purple-600/30">
-                  ✦
-                </div>
-                <span className={`font-black text-sm tracking-widest uppercase ${
-                  isLight ? 'text-slate-900' : 'text-white'
-                }`}>
-                  POLARIS DESIGN CO.
-                </span>
-              </div>
+              <BrandLogo href="/home" showText={true} />
 
               <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
                 {siteText.footer?.brandTagline || 'Bite-Sized Stories That Light Up Your World'}
@@ -922,14 +909,14 @@ export function LandingHeroView() {
               </h4>
               <ul className="space-y-2 text-xs">
                 <li>
-                  <button onClick={() => scrollToSection('hero', 'Home')} className="hover:text-purple-500 cursor-pointer">
+                  <Link href="/home" className="hover:text-purple-500 cursor-pointer">
                     Home
-                  </button>
+                  </Link>
                 </li>
                 <li>
-                  <button onClick={() => scrollToSection('about', 'About Us')} className="hover:text-purple-500 cursor-pointer">
+                  <Link href="/about" className="hover:text-purple-500 cursor-pointer">
                     About Us
-                  </button>
+                  </Link>
                 </li>
                 <li>
                   <button onClick={() => scrollToSection('services', 'Services')} className="hover:text-purple-500 cursor-pointer">
@@ -954,7 +941,7 @@ export function LandingHeroView() {
               </ul>
             </div>
 
-            {/* Right: Contact & Admin */}
+            {/* Right: Contact */}
             <div className="md:col-span-4 space-y-3">
               <h4 className={`text-xs font-bold uppercase tracking-wider ${
                 isLight ? 'text-slate-900' : 'text-white'
@@ -976,19 +963,6 @@ export function LandingHeroView() {
                   </a>
                 </div>
               )}
-
-              <div className="pt-2">
-                <Link
-                  href="/admin"
-                  className={`inline-block px-4 py-2 rounded-xl text-xs font-bold border transition-colors ${
-                    isLight
-                      ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-100'
-                      : 'bg-purple-950/50 border-purple-500/30 text-purple-300 hover:bg-purple-900/50'
-                  }`}
-                >
-                  Admin CMS Portal →
-                </Link>
-              </div>
             </div>
           </div>
 

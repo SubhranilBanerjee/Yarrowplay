@@ -15,6 +15,7 @@ export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const isStandalonePage =
     pathname === '/' ||
+    pathname === '/about' ||
     pathname === '/register' ||
     pathname === '/login' ||
     pathname === '/forgot-password';

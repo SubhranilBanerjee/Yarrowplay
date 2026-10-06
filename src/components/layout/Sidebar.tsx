@@ -17,12 +17,15 @@ import {
   ChevronRight,
   X,
   Sparkles,
+  User,
+  Settings,
+  BarChart3,
 } from 'lucide-react';
 import { BrandLogo } from '@/components/landing/BrandLogo';
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { isCollapsed, toggleSidebar, isMobileOpen, closeMobileSidebar } = useSidebar();
   const { openSubscriptionModal } = useWallet();
 
@@ -61,6 +64,40 @@ export function Sidebar() {
       activeCheck: (p: string) => p === '/history',
       icon: Clock,
     },
+  ];
+
+  const isCreator =
+    profile?.role === 'creator' ||
+    user?.user_metadata?.role === 'creator' ||
+    profile?.role === 'admin';
+
+  const accountNav = [
+    {
+      label: 'Profile',
+      href: user
+        ? profile?.username
+          ? `/profile/${profile.username}`
+          : `/profile/${user.id}`
+        : '/login?redirect=/profile',
+      activeCheck: (p: string) => p.startsWith('/profile'),
+      icon: User,
+    },
+    {
+      label: 'Account Settings',
+      href: user ? '/settings' : '/login?redirect=/settings',
+      activeCheck: (p: string) => p.startsWith('/settings'),
+      icon: Settings,
+    },
+    ...(isCreator
+      ? [
+          {
+            label: 'Creator Analytics',
+            href: '/creator/analytics',
+            activeCheck: (p: string) => p.startsWith('/creator/analytics'),
+            icon: BarChart3,
+          },
+        ]
+      : []),
   ];
 
   const renderNavLinks = (collapsed: boolean) => (
@@ -119,6 +156,44 @@ export function Sidebar() {
           )}
           <div className="space-y-1">
             {libraryNav.map((item) => {
+              const isActive = item.activeCheck(pathname);
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  onClick={closeMobileSidebar}
+                  title={collapsed ? item.label : undefined}
+                  className={`flex items-center ${
+                    collapsed ? 'justify-center px-2' : 'gap-3.5 px-3.5'
+                  } py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    isActive
+                      ? 'btn-primary text-white font-bold shadow-md'
+                      : 'text-[var(--lr-text-secondary,#9AA7B4)] hover:text-[var(--lr-text-primary,#F5F1E8)] hover:bg-[var(--lr-bg-elevated,#131920)]'
+                  }`}
+                >
+                  <Icon
+                    className={`w-4 h-4 shrink-0 ${
+                      isActive ? 'text-white' : 'text-[var(--lr-text-muted,#85929F)]'
+                    }`}
+                  />
+                  {!collapsed && <span className="truncate">{item.label}</span>}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Account / Creator Section */}
+        <div>
+          {!collapsed && (
+            <div className="text-[11px] font-medium text-[var(--lr-text-muted,#6B7783)] px-3.5 pb-1.5 uppercase tracking-wider">
+              Account
+            </div>
+          )}
+          <div className="space-y-1">
+            {accountNav.map((item) => {
               const isActive = item.activeCheck(pathname);
               const Icon = item.icon;
 

@@ -30,30 +30,47 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error && data.user) {
-      // Ensure user profile exists in profiles table
-      const { data: profile } = await supabase
+      // Ensure user profile exists in profiles table using admin privileges if available to bypass RLS
+      const { createAdminClient } = await import('@/lib/supabase/admin');
+      const adminClient = await createAdminClient();
+
+      const { data: profile } = await adminClient
         .from('profiles')
-        .select('id, role')
+        .select('id, role, display_name, username')
         .eq('id', data.user.id)
-        .single();
+        .maybeSingle();
+
+      const meta = data.user.user_metadata || {};
+      const metadataName =
+        meta.full_name ||
+        meta.name ||
+        (meta.given_name ? `${meta.given_name} ${meta.family_name || ''}`.trim() : null) ||
+        meta.display_name ||
+        data.user.email?.split('@')[0] ||
+        'User';
+
+      const avatarUrl = meta.avatar_url || meta.picture || null;
+      const baseUsername =
+        metadataName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 15) || 'user';
+      const username = `${baseUsername}_${data.user.id.slice(0, 5)}`;
 
       if (!profile) {
-        const metadataName =
-          data.user.user_metadata?.full_name ||
-          data.user.user_metadata?.name ||
-          data.user.email?.split('@')[0] ||
-          'User';
-        const username =
-          metadataName.toLowerCase().replace(/[^a-z0-9]/g, '') + '_' + data.user.id.slice(0, 5);
-
-        await supabase.from('profiles').upsert({
+        await adminClient.from('profiles').upsert({
           id: data.user.id,
           email: data.user.email,
           username,
           display_name: metadataName,
-          role: 'viewer',
-          avatar_url: data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture || null,
+          role: (meta.role as any) || 'viewer',
+          avatar_url: avatarUrl,
         });
+      } else if (!profile.display_name || profile.display_name === data.user.email || profile.display_name === 'User') {
+        await adminClient
+          .from('profiles')
+          .update({
+            display_name: metadataName,
+            ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
+          })
+          .eq('id', data.user.id);
       }
 
       const redirectPath = profile?.role === 'creator' ? '/creator/studio' : profile?.role === 'advertiser' ? '/advertiser' : next;

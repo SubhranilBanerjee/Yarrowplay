@@ -86,7 +86,60 @@ export default function ProfilePage() {
           prof = profById;
         }
 
+        // If still not found and this is the current logged-in user, auto-sync and heal
+        if (!prof && user && (usernameParam === user.id || usernameParam === 'me' || usernameParam === authProfile?.username)) {
+          try {
+            const syncRes = await fetch('/api/auth/sync-profile', { method: 'POST' });
+            if (syncRes.ok) {
+              const syncJson = await syncRes.json();
+              if (syncJson.profile) {
+                prof = syncJson.profile;
+              }
+            }
+          } catch {
+            // ignore
+          }
+
+          if (!prof && user) {
+            const meta = user.user_metadata || {};
+            const resolvedName =
+              meta.full_name ||
+              meta.name ||
+              (meta.given_name ? `${meta.given_name} ${meta.family_name || ''}`.trim() : null) ||
+              meta.display_name ||
+              user.email?.split('@')[0] ||
+              'User';
+            const baseUsername = resolvedName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 15) || 'user';
+            prof = {
+              id: user.id,
+              email: user.email || null,
+              username: `${baseUsername}_${user.id.slice(0, 5)}`,
+              display_name: resolvedName,
+              role: (meta.role as any) || 'viewer',
+              sub_role: null,
+              company_name: null,
+              avatar_url: meta.avatar_url || meta.picture || null,
+              bio: null,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            } as any;
+          }
+        }
+
         if (prof) {
+          // If display name is still an email or empty, resolve from user metadata if own profile
+          if (user && user.id === prof.id && (!prof.display_name || prof.display_name === user.email || prof.display_name === 'User')) {
+            const meta = user.user_metadata || {};
+            const resolvedName =
+              meta.full_name ||
+              meta.name ||
+              (meta.given_name ? `${meta.given_name} ${meta.family_name || ''}`.trim() : null) ||
+              meta.display_name ||
+              user.email?.split('@')[0];
+            if (resolvedName && resolvedName !== user.email) {
+              prof.display_name = resolvedName;
+            }
+          }
           setProfile(prof as Profile);
           setEditName(prof.display_name || '');
           setEditBio(prof.bio || '');

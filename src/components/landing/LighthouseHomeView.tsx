@@ -599,8 +599,8 @@ export function LighthouseHomeView() {
                   className="object-cover object-center transition-all duration-700 ease-out group-hover:scale-105"
                 />
                 {/* Cinematic Vignette Gradients */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#090D12] via-[#090D12]/50 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#090D12]/95 via-[#090D12]/60 to-transparent w-full sm:w-4/5 md:w-3/4" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#090D12] via-[#090D12]/70 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#090D12]/95 via-[#090D12]/75 to-transparent w-full sm:w-4/5 md:w-3/4" />
               </div>
 
               {/* Left Chevron Button */}
@@ -629,18 +629,21 @@ export function LighthouseHomeView() {
 
               {/* Hero Content Overlay */}
               <div className="absolute inset-0 z-10 flex flex-col justify-end p-4 xs:p-5 sm:p-7 md:p-10 max-w-xl md:max-w-2xl">
-                {/* Eyebrow */}
-                <span className="text-[11px] sm:text-xs md:text-sm font-semibold tracking-wide text-[#ECC979] mb-1 uppercase font-sans">
-                  {currentHero.eyebrow}
-                </span>
+                {/* Eyebrow Badge with Golden Accent */}
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-[#ECC979]/40 text-[#ECC979] w-fit mb-2 shadow-lg">
+                  <Sparkles className="w-3 h-3 fill-[#ECC979]" />
+                  <span className="text-[10px] sm:text-xs font-bold tracking-wider uppercase font-sans">
+                    {currentHero.eyebrow}
+                  </span>
+                </div>
 
-                {/* Title in Elegant Serif Font */}
-                <h1 className="font-serif text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-normal tracking-tight text-[#F5F1E8] leading-[1.08] drop-shadow-sm line-clamp-2 sm:line-clamp-none">
+                {/* Title in Radiant Golden Color with Proper Highlight */}
+                <h1 className="font-serif text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold tracking-tight bg-gradient-to-r from-[#FFF5C0] via-[#ECC979] to-[#D4A346] bg-clip-text text-transparent leading-[1.1] filter drop-shadow-[0_4px_18px_rgba(236,201,121,0.55)] line-clamp-2 sm:line-clamp-none">
                   {currentHero.title}
                 </h1>
 
-                {/* Tagline */}
-                <p className="text-xs sm:text-sm md:text-[15px] text-[#C6D2DC] font-normal mt-1.5 sm:mt-2.5 max-w-lg leading-relaxed drop-shadow line-clamp-2">
+                {/* Tagline in High-Legibility Golden Hue */}
+                <p className="text-xs sm:text-sm md:text-[15px] font-medium text-[#F6DF9C] mt-2 sm:mt-3 max-w-lg leading-relaxed filter drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] line-clamp-2">
                   {currentHero.tagline}
                 </p>
 
@@ -790,14 +793,14 @@ export function LighthouseHomeView() {
             </div>
           )}
 
-          {/* 4. Trending Reels Section */}
+          {/* 4. Trending Series Section */}
           <div className="space-y-3 pt-1">
             <div className="flex items-center justify-between">
               <Link
                 href="/search?type=shorts"
                 className="group flex items-center gap-1.5 text-sm sm:text-base md:text-lg font-bold text-[#F5F1E8] hover:text-[#ECC979] transition-colors"
               >
-                <span>Trending Reels</span>
+                <span>Trending Series</span>
                 <ChevronRight className="w-4 h-4 text-[#8C98A5] group-hover:text-[#ECC979] transition-colors" />
               </Link>
               <Link
