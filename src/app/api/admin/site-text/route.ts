@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { DEFAULT_SITE_CONTENT } from '@/lib/siteContent';
 
@@ -6,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const { data } = await supabase
       .from('site_settings')
       .select('value')
@@ -17,7 +18,20 @@ export async function GET() {
       return NextResponse.json({ content: data.value });
     }
   } catch {
-    // fallback
+    // fallback to standard server client
+    try {
+      const serverSupabase = await createClient();
+      const { data } = await serverSupabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'site_content')
+        .maybeSingle();
+      if (data && data.value) {
+        return NextResponse.json({ content: data.value });
+      }
+    } catch {
+      // ignore
+    }
   }
 
   return NextResponse.json({ content: DEFAULT_SITE_CONTENT });
@@ -33,14 +47,25 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      const supabase = await createClient();
+      const supabase = await createAdminClient();
       await supabase.from('site_settings').upsert({
         key: 'site_content',
         value: content,
         updated_at: new Date().toISOString(),
       });
     } catch {
-      // If table doesn't exist, it's still fine because client stores in localStorage
+      // Fallback to server client
+      try {
+        const serverSupabase = await createClient();
+        await serverSupabase.from('site_settings').upsert({
+          key: 'site_content',
+          value: content,
+          updated_at: new Date().toISOString(),
+        });
+      } catch (err) {
+        // If table doesn't exist, still return success with content so client can store in localStorage
+        console.warn('Could not persist to site_settings table, cached locally:', err);
+      }
     }
 
     return NextResponse.json({ success: true, content });

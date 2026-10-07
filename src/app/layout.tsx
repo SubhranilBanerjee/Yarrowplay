@@ -8,6 +8,7 @@ import { GalaxyBackground } from '@/components/common/GalaxyBackground';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { SidebarProvider } from '@/context/SidebarContext';
 import { WalletProvider } from '@/context/WalletContext';
+import { SiteTextProvider } from '@/context/SiteTextContext';
 import CoinStoreModal from '@/components/wallet/CoinStoreModal';
 import DailyRewardsModal from '@/components/wallet/DailyRewardsModal';
 import RewardedAdModal from '@/components/wallet/RewardedAdModal';
@@ -106,21 +107,23 @@ export default function RootLayout({
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
         <ThemeProvider>
           <AuthProvider>
-            <SidebarProvider>
-              <WalletProvider>
-                <AudioPlayerProvider>
-                  <GalaxyBackground />
-                  <AppShell>{children}</AppShell>
+            <SiteTextProvider>
+              <SidebarProvider>
+                <WalletProvider>
+                  <AudioPlayerProvider>
+                    <GalaxyBackground />
+                    <AppShell>{children}</AppShell>
 
-                  {/* DramaBox Monetization Modals */}
-                  <CoinStoreModal />
-                  <DailyRewardsModal />
-                  <RewardedAdModal />
-                  <EpisodeUnlockModal />
-                  <SubscriptionModalContainer />
-                </AudioPlayerProvider>
-              </WalletProvider>
-            </SidebarProvider>
+                    {/* DramaBox Monetization Modals */}
+                    <CoinStoreModal />
+                    <DailyRewardsModal />
+                    <RewardedAdModal />
+                    <EpisodeUnlockModal />
+                    <SubscriptionModalContainer />
+                  </AudioPlayerProvider>
+                </WalletProvider>
+              </SidebarProvider>
+            </SiteTextProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

@@ -67,6 +67,10 @@ export function Header() {
       user.email === 'admin@dramabox.stream' ||
       profile?.role === 'admin');
 
+  const isCreator =
+    profile?.role === 'creator' ||
+    user?.user_metadata?.role === 'creator';
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -169,14 +173,16 @@ export function Header() {
             )}
           </button>
 
-          {/* + Create Button */}
-          <Link
-            href={user ? '/creator/studio' : '/login?redirect=/creator/studio'}
-            className="btn-primary flex items-center gap-1 sm:gap-1.5 text-white font-bold text-xs sm:text-sm px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 rounded-full shadow-md transition-all cursor-pointer font-sans"
-          >
-            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
-            <span className="inline">Create</span>
-          </Link>
+          {/* + Create Button (Only visible to creators) */}
+          {isCreator && (
+            <Link
+              href="/creator/studio"
+              className="btn-primary flex items-center gap-1 sm:gap-1.5 text-white font-bold text-xs sm:text-sm px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 rounded-full shadow-md transition-all cursor-pointer font-sans"
+            >
+              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
+              <span className="inline">Create</span>
+            </Link>
+          )}
 
           {/* Notifications: Bell with red badge '6' */}
           {user ? (

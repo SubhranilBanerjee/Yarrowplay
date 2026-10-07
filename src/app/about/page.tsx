@@ -18,7 +18,10 @@ import {
 } from 'lucide-react';
 import { BrandLogo } from '@/components/landing/BrandLogo';
 
+import { EditableText, useSiteText } from '@/context/SiteTextContext';
+
 export default function AboutUsPage() {
+  const { t } = useSiteText();
   const stats = [
     { value: '50M+', label: 'Global Video Views', sub: 'Across 120+ countries' },
     { value: '12K+', label: 'Visionary Creators', sub: 'Independent directors & storytellers' },
@@ -89,23 +92,30 @@ export default function AboutUsPage() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#ECC979]/10 border border-[#ECC979]/30 text-[#ECC979] text-xs font-bold uppercase tracking-wider shadow-sm">
             <Sparkles className="w-3.5 h-3.5 fill-[#ECC979]" />
-            <span>About Lighthouse Reels</span>
+            <EditableText
+              id="about.badge"
+              defaultText="About Lighthouse Reels"
+              label="About Us Badge"
+            />
           </div>
 
           {/* Headline */}
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight leading-[1.1]">
-            The Future of{' '}
-            <span className="bg-gradient-to-r from-[#FFE599] via-[#ECC979] to-[#D4A346] bg-clip-text text-transparent">
-              Vertical Cinema
-            </span>
-          </h1>
+          <EditableText
+            id="about.title"
+            defaultText="The Future of Vertical Cinema"
+            as="h1"
+            className="text-3xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight leading-[1.1] text-white"
+            label="About Us Main Title"
+          />
 
           {/* Subtitle */}
-          <p className="text-sm sm:text-base md:text-lg text-[var(--lr-text-secondary,#A0ACB9)] leading-relaxed">
-            Lighthouse Reels is a premier next-generation entertainment destination for bite-sized,
-            high-octane episodic drama and viral vertical stories. We connect visionary directors,
-            screenwriters, and actors directly with millions of passionate viewers worldwide.
-          </p>
+          <EditableText
+            id="about.description"
+            defaultText="Lighthouse Reels is a premier next-generation entertainment destination for bite-sized, high-octane episodic drama and viral vertical stories. We connect visionary directors, screenwriters, and actors directly with millions of passionate viewers worldwide."
+            as="p"
+            className="text-sm sm:text-base md:text-lg text-[var(--lr-text-secondary,#A0ACB9)] leading-relaxed"
+            label="About Us Subtitle"
+          />
 
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center justify-center gap-3.5 pt-3">

@@ -1,16 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { BottomToast } from '@/components/ui/BottomToast';
-import { Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle, User, Video, Megaphone } from 'lucide-react';
 import { AuthCardWrapper } from '@/components/auth/AuthCardWrapper';
+import { useSiteText } from '@/context/SiteTextContext';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedRole = searchParams.get('role');
+  const redirectTarget = searchParams.get('redirect') || searchParams.get('next');
   const supabase = createClient();
+  const { t } = useSiteText();
+
+  const [role, setRole] = useState<'viewer' | 'creator' | 'advertiser'>(
+    requestedRole === 'advertiser' ? 'advertiser' : requestedRole === 'creator' ? 'creator' : 'viewer'
+  );
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,6 +29,14 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (requestedRole === 'advertiser') {
+      setRole('advertiser');
+    } else if (requestedRole === 'creator') {
+      setRole('creator');
+    }
+  }, [requestedRole]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +65,9 @@ export default function LoginPage() {
 
         setSuccessMsg('Signed in successfully! Redirecting...');
         setTimeout(() => {
-          if (profile?.role === 'creator') {
+          if (redirectTarget) {
+            router.push(redirectTarget);
+          } else if (profile?.role === 'creator') {
             router.push('/creator/studio');
           } else if (profile?.role === 'advertiser') {
             router.push('/advertiser');
@@ -65,22 +84,79 @@ export default function LoginPage() {
     }
   };
 
+  const cardTitles: Record<string, string> = {
+    viewer: t('auth.loginTitle', 'Welcome back'),
+    creator: 'Creator Sign In',
+    advertiser: 'Advertiser Sign In',
+  };
+
+  const cardSubtitles: Record<string, string> = {
+    viewer: t('auth.loginSubtitle', 'Login to your Light House Reels account'),
+    creator: 'Access your Creator Studio and series management',
+    advertiser: 'Access your ad campaigns and promotion analytics',
+  };
+
+  // Strictly hide Google Auth for creators and advertisers
+  const isGoogleAuthAllowed = role !== 'creator' && role !== 'advertiser';
+
   return (
     <>
       <AuthCardWrapper
-        heroTitle="Stream, Discover, and Relax"
-        heroSubtitle="Your stories, guided by the light."
-        cardTitle="Welcome back"
-        cardSubtitle="Login to your Light House Reels account"
-        showGoogleAuth={true}
+        heroTitle={t('hero.headlineLine1', 'Stream, Discover, and Relax')}
+        heroSubtitle={t('hero.subtitle', 'Your stories, guided by the light.')}
+        cardTitle={cardTitles[role] || 'Welcome back'}
+        cardSubtitle={cardSubtitles[role] || 'Login to your Light House Reels account'}
+        showGoogleAuth={isGoogleAuthAllowed}
         googleLabel="Sign in with Google"
         onGoogleError={(err) => setErrorMsg(err)}
         footerLink={{
           text: "Don't have an account?",
           linkText: 'Sign up',
-          href: '/register',
+          href: `/register?role=${role}`,
         }}
       >
+        {/* Role Switcher Tabs */}
+        <div className="grid grid-cols-3 gap-1 p-1 bg-[#F0EBFC]/80 border border-purple-200/50 rounded-xl mb-4">
+          <button
+            type="button"
+            onClick={() => setRole('viewer')}
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              role === 'viewer'
+                ? 'bg-gradient-to-r from-[#6355DE] to-[#7563E6] text-white shadow-sm'
+                : 'text-[#6B5E99] hover:text-[#1E144F]'
+            }`}
+          >
+            <User className="w-3.5 h-3.5" />
+            <span>Viewer</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setRole('creator')}
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              role === 'creator'
+                ? 'bg-gradient-to-r from-[#6355DE] to-[#7563E6] text-white shadow-sm'
+                : 'text-[#6B5E99] hover:text-[#1E144F]'
+            }`}
+          >
+            <Video className="w-3.5 h-3.5" />
+            <span>Creator</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setRole('advertiser')}
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              role === 'advertiser'
+                ? 'bg-gradient-to-r from-[#6355DE] to-[#7563E6] text-white shadow-sm'
+                : 'text-[#6B5E99] hover:text-[#1E144F]'
+            }`}
+          >
+            <Megaphone className="w-3.5 h-3.5" />
+            <span>Advertiser</span>
+          </button>
+        </div>
+
         {/* Error / Success Feedback */}
         {errorMsg && (
           <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-center gap-2">
@@ -166,7 +242,13 @@ export default function LoginPage() {
             disabled={isLoading}
             className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#6355DE] via-[#7563E6] to-[#8F66E8] hover:opacity-95 text-white font-bold text-base tracking-wide transition-all shadow-lg shadow-purple-500/25 active:scale-[0.99] disabled:opacity-50 mt-3 cursor-pointer"
           >
-            {isLoading ? 'Logging in...' : 'Sign In'}
+            {isLoading
+              ? 'Logging in...'
+              : role === 'creator'
+              ? 'Sign In to Creator Studio'
+              : role === 'advertiser'
+              ? 'Sign In to Advertiser Portal'
+              : 'Sign In'}
           </button>
         </form>
       </AuthCardWrapper>
@@ -176,5 +258,19 @@ export default function LoginPage() {
         onClose={() => setErrorMsg(null)}
       />
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[#EAE3F7]">
+          <div className="w-10 h-10 rounded-full border-2 border-[#6355DE] border-t-transparent animate-spin" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

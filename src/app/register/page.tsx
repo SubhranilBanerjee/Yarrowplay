@@ -188,13 +188,13 @@ function RegisterForm() {
         heroSubtitle={heroSubtitles[role] || 'Your stories, guided by the light.'}
         cardTitle={cardTitles[role] || 'Create your account'}
         cardSubtitle="Join Light House Reels and start streaming today"
-        showGoogleAuth={true}
+        showGoogleAuth={role !== 'creator' && role !== 'advertiser'}
         googleLabel="Sign up with Google"
         onGoogleError={(err) => setErrorMsg(err)}
         footerLink={{
           text: 'Already have an account?',
           linkText: 'Login',
-          href: '/login',
+          href: `/login?role=${role}`,
         }}
       >
         {/* Role Switcher Tabs (Soft lavender frosted pill) */}

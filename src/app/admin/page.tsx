@@ -91,6 +91,9 @@ export default function AdminHubPage() {
   const [siteText, setSiteText] = useState<SiteContent>(DEFAULT_SITE_CONTENT);
   const [textSaveSuccess, setTextSaveSuccess] = useState(false);
   const [textSaving, setTextSaving] = useState(false);
+  const [customKeyName, setCustomKeyName] = useState('');
+  const [customKeyValue, setCustomKeyValue] = useState('');
+  const [textSearchFilter, setTextSearchFilter] = useState('');
 
   // Notification Banner
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -2511,6 +2514,278 @@ export default function AdminHubPage() {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* SECTION 6: AUTH & ONBOARDING COPY */}
+            <div className={`p-6 rounded-3xl border space-y-6 shadow-sm transition-colors ${
+              isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/80 border-purple-500/25 text-white'
+            }`}>
+              <h3 className={`text-base font-bold flex items-center gap-2 border-b pb-3 ${
+                isLight ? 'border-slate-200 text-slate-900' : 'border-purple-500/20 text-white'
+              }`}>
+                <ShieldCheck className="w-4 h-4 text-purple-500" />
+                <span>Auth & Onboarding Pages Copy (Login & Register)</span>
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Login Page Title</label>
+                  <input
+                    type="text"
+                    value={siteText.auth?.loginTitle || 'Welcome back'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      auth: { ...(siteText.auth || DEFAULT_SITE_CONTENT.auth!), loginTitle: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Login Page Subtitle</label>
+                  <input
+                    type="text"
+                    value={siteText.auth?.loginSubtitle || 'Login to your Light House Reels account'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      auth: { ...(siteText.auth || DEFAULT_SITE_CONTENT.auth!), loginSubtitle: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Register Page Title</label>
+                  <input
+                    type="text"
+                    value={siteText.auth?.registerTitle || 'Create your account'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      auth: { ...(siteText.auth || DEFAULT_SITE_CONTENT.auth!), registerTitle: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Register Page Subtitle</label>
+                  <input
+                    type="text"
+                    value={siteText.auth?.registerSubtitle || 'Join Light House Reels and start streaming today'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      auth: { ...(siteText.auth || DEFAULT_SITE_CONTENT.auth!), registerSubtitle: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 7: NAVIGATION & MOBILE NAV COPY */}
+            <div className={`p-6 rounded-3xl border space-y-6 shadow-sm transition-colors ${
+              isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/80 border-purple-500/25 text-white'
+            }`}>
+              <h3 className={`text-base font-bold flex items-center gap-2 border-b pb-3 ${
+                isLight ? 'border-slate-200 text-slate-900' : 'border-purple-500/20 text-white'
+              }`}>
+                <Layers className="w-4 h-4 text-purple-500" />
+                <span>Navigation & Mobile Navbar Labels</span>
+              </h3>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Home Label</label>
+                  <input
+                    type="text"
+                    value={siteText.nav?.home || 'Home'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      nav: { ...(siteText.nav || DEFAULT_SITE_CONTENT.nav!), home: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Recommendations Label</label>
+                  <input
+                    type="text"
+                    value={siteText.nav?.recommendations || 'Recommendations'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      nav: { ...(siteText.nav || DEFAULT_SITE_CONTENT.nav!), recommendations: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Blogs Label</label>
+                  <input
+                    type="text"
+                    value={siteText.nav?.blogs || 'Blogs'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      nav: { ...(siteText.nav || DEFAULT_SITE_CONTENT.nav!), blogs: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isLight ? 'text-slate-700' : 'text-purple-300'}`}>Profile Label</label>
+                  <input
+                    type="text"
+                    value={siteText.nav?.profile || 'Profile'}
+                    onChange={(e) => setSiteText({
+                      ...siteText,
+                      nav: { ...(siteText.nav || DEFAULT_SITE_CONTENT.nav!), profile: e.target.value },
+                    })}
+                    className={`w-full border rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors ${
+                      isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                        : 'bg-[#180E38] border-purple-500/30 text-white focus:border-purple-400'
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 8: UNIVERSAL CUSTOM KEY OVERRIDES */}
+            <div className={`p-6 rounded-3xl border space-y-6 shadow-sm transition-colors ${
+              isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/80 border-purple-500/25 text-white'
+            }`}>
+              <div className="flex items-center justify-between border-b pb-3">
+                <h3 className={`text-base font-bold flex items-center gap-2 ${
+                  isLight ? 'text-slate-900' : 'text-white'
+                }`}>
+                  <Sliders className="w-4 h-4 text-purple-500" />
+                  <span>Universal Custom Key Overrides (Any Text on Any Page)</span>
+                </h3>
+                <span className="text-[11px] text-[#8E9CA8]">
+                  {Object.keys(siteText.customOverrides || {}).length} custom overrides active
+                </span>
+              </div>
+
+              <p className="text-xs text-[#8E9CA8]">
+                Allows the admin to define or edit custom text overrides across any page (e.g. headers, alerts, badges, buttons, disclaimers).
+              </p>
+
+              {/* Add New Key Form */}
+              <div className={`p-4 rounded-2xl border space-y-3 ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#160B37] border-purple-500/30'
+              }`}>
+                <h4 className={`text-xs font-bold ${isLight ? 'text-purple-700' : 'text-purple-300'}`}>Add or Update Custom Text Key</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div>
+                    <label className="block mb-1 font-semibold text-[#8E9CA8]">Key Identifier</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. about.pillar1.title"
+                      value={customKeyName}
+                      onChange={(e) => setCustomKeyName(e.target.value)}
+                      className={`w-full border rounded-xl px-3 py-2 text-xs font-mono ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1A0E3D] border-purple-500/30 text-white'
+                      }`}
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block mb-1 font-semibold text-[#8E9CA8]">Target Display Text</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Enter the customized text to show on that page"
+                        value={customKeyValue}
+                        onChange={(e) => setCustomKeyValue(e.target.value)}
+                        className={`flex-1 border rounded-xl px-3 py-2 text-xs ${
+                          isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#1A0E3D] border-purple-500/30 text-white'
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (customKeyName.trim() && customKeyValue.trim()) {
+                            setSiteText({
+                              ...siteText,
+                              customOverrides: {
+                                ...(siteText.customOverrides || {}),
+                                [customKeyName.trim()]: customKeyValue.trim(),
+                              },
+                            });
+                            setCustomKeyName('');
+                            setCustomKeyValue('');
+                          }
+                        }}
+                        className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow cursor-pointer whitespace-nowrap"
+                      >
+                        Add / Set
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* List of Custom Overrides */}
+              {Object.keys(siteText.customOverrides || {}).length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-semibold text-[#8E9CA8]">Active Custom Overrides</h4>
+                  <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    {Object.entries(siteText.customOverrides || {}).map(([key, val]) => (
+                      <div
+                        key={key}
+                        className={`flex items-center justify-between p-3 rounded-xl border text-xs ${
+                          isLight ? 'bg-white border-slate-200' : 'bg-[#150B33] border-purple-500/20'
+                        }`}
+                      >
+                        <div className="min-w-0 pr-3">
+                          <span className="font-mono text-purple-400 font-bold block truncate">{key}</span>
+                          <span className="text-[#8E9CA8] truncate block">{val}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const copy = { ...(siteText.customOverrides || {}) };
+                            delete copy[key];
+                            setSiteText({ ...siteText, customOverrides: copy });
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-colors cursor-pointer text-[11px]"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Bottom Save Bar */}

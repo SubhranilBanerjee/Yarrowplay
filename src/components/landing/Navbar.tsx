@@ -23,6 +23,10 @@ export function Navbar() {
   const { user, profile } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const isCreator =
+    profile?.role === 'creator' ||
+    user?.user_metadata?.role === 'creator';
+
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-black/40 border-b border-white/10 px-4 sm:px-6 lg:px-8 py-3.5 transition-all">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
@@ -53,13 +57,15 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           {user ? (
             <div className="flex items-center gap-3">
-              <Link
-                href="/creator/studio"
-                className="hidden sm:flex items-center gap-2 btn-secondary text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-all shadow-sm"
-              >
-                <Film className="w-4 h-4" />
-                <span>Creator Studio</span>
-              </Link>
+              {isCreator && (
+                <Link
+                  href="/creator/studio"
+                  className="hidden sm:flex items-center gap-2 btn-secondary text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-all shadow-sm"
+                >
+                  <Film className="w-4 h-4" />
+                  <span>Creator Studio</span>
+                </Link>
+              )}
 
               <Link
                 href={`/profile/${profile?.username || user.id}`}

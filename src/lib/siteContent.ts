@@ -82,6 +82,23 @@ export interface SiteContent {
     quickLinksTitle: string;
     legalNotice: string;
   };
+  auth?: {
+    loginTitle: string;
+    loginSubtitle: string;
+    registerTitle: string;
+    registerSubtitle: string;
+    viewerTabLabel: string;
+    creatorTabLabel: string;
+    advertiserTabLabel: string;
+  };
+  nav?: {
+    home: string;
+    recommendations: string;
+    following: string;
+    blogs: string;
+    profile: string;
+  };
+  customOverrides?: Record<string, string>;
 }
 
 export const DEFAULT_SITE_CONTENT: SiteContent = {
@@ -166,6 +183,23 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     quickLinksTitle: 'Explore Content',
     legalNotice: 'All video series, trademarks, and logos are property of their respective creators.',
   },
+  auth: {
+    loginTitle: 'Welcome back',
+    loginSubtitle: 'Login to your Light House Reels account',
+    registerTitle: 'Create your account',
+    registerSubtitle: 'Join Light House Reels and start streaming today',
+    viewerTabLabel: 'Viewer',
+    creatorTabLabel: 'Creator',
+    advertiserTabLabel: 'Advertiser',
+  },
+  nav: {
+    home: 'Home',
+    recommendations: 'Recommendations',
+    following: 'Following',
+    blogs: 'Blogs',
+    profile: 'Profile',
+  },
+  customOverrides: {},
 };
 
 const STORAGE_KEY = 'lighthouse_site_content_v2';
@@ -185,6 +219,9 @@ export function getStoredSiteContent(): SiteContent {
       services: { ...DEFAULT_SITE_CONTENT.services, ...(parsed.services || {}) },
       whyChooseUs: { ...DEFAULT_SITE_CONTENT.whyChooseUs, ...(parsed.whyChooseUs || {}) },
       footer: { ...DEFAULT_SITE_CONTENT.footer, ...(parsed.footer || {}) },
+      auth: { ...(DEFAULT_SITE_CONTENT.auth || {}), ...(parsed.auth || {}) },
+      nav: { ...(DEFAULT_SITE_CONTENT.nav || {}), ...(parsed.nav || {}) },
+      customOverrides: { ...(DEFAULT_SITE_CONTENT.customOverrides || {}), ...(parsed.customOverrides || {}) },
     };
   } catch {
     return DEFAULT_SITE_CONTENT;
@@ -207,4 +244,72 @@ export function resetStoredSiteContent(): SiteContent {
     window.dispatchEvent(new Event('lighthouse_site_content_updated'));
   }
   return DEFAULT_SITE_CONTENT;
+}
+
+/**
+ * Resolves a text string by key path (e.g. 'hero.badgeText', 'footer.mission', or custom key like 'about.intro').
+ * Returns the override, nested property, or the given fallback.
+ */
+export function resolveSiteText(
+  content: SiteContent | null | undefined,
+  path: string,
+  fallback = ''
+): string {
+  if (!content) return fallback;
+
+  // 1. Check custom overrides dictionary first
+  if (content.customOverrides && content.customOverrides[path]) {
+    return content.customOverrides[path];
+  }
+
+  // 2. Check nested dot path
+  const parts = path.split('.');
+  let current: any = content;
+  for (const p of parts) {
+    if (current && typeof current === 'object' && p in current) {
+      current = current[p];
+    } else {
+      current = undefined;
+      break;
+    }
+  }
+
+  if (typeof current === 'string' && current.trim().length > 0) {
+    return current;
+  }
+
+  return fallback;
+}
+
+/**
+ * Immutably updates a text property at the given key path.
+ * If the path maps directly into the known schema (e.g. hero.subtitle), it updates that nested field.
+ * Otherwise, it stores it in customOverrides[path].
+ */
+export function updateSiteTextPath(
+  content: SiteContent,
+  path: string,
+  value: string
+): SiteContent {
+  const parts = path.split('.');
+  if (parts.length === 2 && (content as any)[parts[0]] && typeof (content as any)[parts[0]] === 'object') {
+    const section = parts[0] as keyof SiteContent;
+    const key = parts[1];
+    return {
+      ...content,
+      [section]: {
+        ...(content[section] as any),
+        [key]: value,
+      },
+    };
+  }
+
+  // Store in customOverrides
+  return {
+    ...content,
+    customOverrides: {
+      ...(content.customOverrides || {}),
+      [path]: value,
+    },
+  };
 }
