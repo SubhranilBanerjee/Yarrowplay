@@ -194,7 +194,7 @@ function RegisterForm() {
         footerLink={{
           text: 'Already have an account?',
           linkText: 'Login',
-          href: `/login?role=${role}`,
+          href: '/login',
         }}
       >
         {/* Role Switcher Tabs (Soft lavender frosted pill) */}
