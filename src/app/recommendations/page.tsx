@@ -56,18 +56,20 @@ export default function RecommendationsPage() {
           const data = await res.json();
           if (data.recommendations && data.recommendations.length > 0) {
             setItems(
-              data.recommendations.map((r: any) => ({
-                id: r.id,
-                title: r.title || 'Untitled Story',
-                description: r.description,
-                thumbnail_url: r.thumbnail_url || r.cover_url || '/images/lighthouse_bg.jpg',
-                duration: r.duration,
-                total_episodes: r.total_episodes || 1,
-                genre: r.category || r.genre || 'Drama',
-                type: r.total_episodes ? 'series' : 'video',
-                recommendation_reason: r.reason || 'Recommended for you',
-                creator: r.creator,
-              }))
+              data.recommendations
+                .filter((r: any) => Boolean(r.thumbnail_url || r.cover_url))
+                .map((r: any) => ({
+                  id: r.id,
+                  title: r.title || 'Untitled Story',
+                  description: r.description,
+                  thumbnail_url: r.thumbnail_url || r.cover_url,
+                  duration: r.duration,
+                  total_episodes: r.total_episodes || 1,
+                  genre: r.category || r.genre || 'Drama',
+                  type: r.total_episodes ? 'series' : 'video',
+                  recommendation_reason: r.reason || 'Recommended for you',
+                  creator: r.creator,
+                }))
             );
             setIsLoading(false);
             return;
@@ -186,13 +188,17 @@ export default function RecommendationsPage() {
             >
               {/* Poster 9:16 aspect */}
               <div className="relative aspect-[9/13] w-full overflow-hidden bg-[#151E28]">
-                <Image
-                  src={item.thumbnail_url || '/images/lighthouse_bg.jpg'}
-                  alt={item.title}
-                  fill
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                {item.thumbnail_url ? (
+                  <Image
+                    src={item.thumbnail_url}
+                    alt={item.title}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-900/60 to-slate-900" />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#090D12] via-transparent to-transparent opacity-90" />
 
                 {/* Reason tag */}

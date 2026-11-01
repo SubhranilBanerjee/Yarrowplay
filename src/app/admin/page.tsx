@@ -85,7 +85,9 @@ export default function AdminHubPage() {
   const [seriesToDelete, setSeriesToDelete] = useState<any | null>(null);
   const [isDeletingSeries, setIsDeletingSeries] = useState(false);
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
+  const [deleteAllMode, setDeleteAllMode] = useState<'current' | 'all'>('current');
   const [isDeletingAll, setIsDeletingAll] = useState(false);
+  const [isCleaningOrphans, setIsCleaningOrphans] = useState(false);
 
   // Site Text CMS state
   const [siteText, setSiteText] = useState<SiteContent>(DEFAULT_SITE_CONTENT);
@@ -364,14 +366,14 @@ export default function AdminHubPage() {
     }
   };
 
-  // Delete All (Videos or Series) from Supabase
+  // Delete All (Videos, Series, or Everything) from Supabase
   const handleDeleteAll = async () => {
     setIsDeletingAll(true);
     try {
       const params = new URLSearchParams();
       params.set('action', 'delete_all');
-      params.set('targetType', moderationContentType);
-      if (moderationContentType === 'videos') {
+      params.set('targetType', deleteAllMode === 'all' ? 'all' : moderationContentType);
+      if (deleteAllMode !== 'all' && moderationContentType === 'videos') {
         params.set('filter', moderationFilter);
       }
       const res = await fetch(`/api/admin/moderation?${params.toString()}`, {
@@ -379,12 +381,16 @@ export default function AdminHubPage() {
         headers: getHeaders(),
       });
       if (res.ok) {
-        if (moderationContentType === 'series') {
+        if (deleteAllMode === 'all') {
+          setModerationSeries([]);
+          setModerationVideos([]);
+          showNotification('success', 'All platform videos, series, thumbnails, and episodes deleted permanently from Supabase.');
+        } else if (moderationContentType === 'series') {
           setModerationSeries([]);
           showNotification('success', 'All content series and episodes permanently deleted from Supabase.');
         } else {
           setModerationVideos([]);
-          showNotification('success', `All ${moderationFilter === 'all' ? '' : moderationFilter + ' '}videos permanently deleted from Supabase.`);
+          showNotification('success', `All ${moderationFilter === 'all' ? '' : moderationFilter + ' '}videos permanently deleted from Supabase (and orphaned series removed).`);
         }
         setShowDeleteAllModal(false);
         loadAnalytics();
@@ -397,6 +403,29 @@ export default function AdminHubPage() {
       showNotification('error', 'Network error during bulk deletion.');
     } finally {
       setIsDeletingAll(false);
+    }
+  };
+
+  // Clean up series that have 0 remaining episodes
+  const handleCleanupOrphans = async () => {
+    setIsCleaningOrphans(true);
+    try {
+      const res = await fetch('/api/admin/moderation?action=cleanup_orphans', {
+        method: 'DELETE',
+        headers: getHeaders(),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showNotification('success', data.message || 'Cleaned up orphaned series successfully.');
+        loadAnalytics();
+        loadModeration();
+      } else {
+        showNotification('error', data.error || 'Failed to clean up orphaned series.');
+      }
+    } catch {
+      showNotification('error', 'Network error during orphan cleanup.');
+    } finally {
+      setIsCleaningOrphans(false);
     }
   };
 
@@ -1281,9 +1310,27 @@ export default function AdminHubPage() {
                     </button>
                   </div>
 
-                  {/* DELETE ALL OPTION BUTTON */}
+                  {/* CLEANUP ORPHANED SERIES BUTTON */}
                   <button
-                    onClick={() => setShowDeleteAllModal(true)}
+                    onClick={handleCleanupOrphans}
+                    disabled={isCleaningOrphans}
+                    className={`px-3.5 py-2 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95 ${
+                      isLight
+                        ? 'bg-amber-50 hover:bg-amber-100 border-amber-300 text-amber-900'
+                        : 'bg-amber-950/40 hover:bg-amber-900/60 border-amber-500/40 text-amber-200'
+                    }`}
+                    title="Remove series that have 0 episodes from database so ghost thumbnails are gone"
+                  >
+                    {isCleaningOrphans ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-amber-500" />}
+                    <span>Clean Empty Series (0 Ep)</span>
+                  </button>
+
+                  {/* DELETE ALL CURRENT CONTENT BUTTON */}
+                  <button
+                    onClick={() => {
+                      setDeleteAllMode('current');
+                      setShowDeleteAllModal(true);
+                    }}
                     disabled={moderationContentType === 'videos' ? moderationVideos.length === 0 : moderationSeries.length === 0}
                     className="px-4 py-2 rounded-2xl bg-red-600 hover:bg-red-700 border border-red-500 text-white text-xs font-black flex items-center gap-2 shadow-lg shadow-red-900/30 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
                     title={`Delete all ${moderationContentType === 'videos' ? 'videos in current filter' : 'series and episodes'} permanently`}
@@ -1292,6 +1339,20 @@ export default function AdminHubPage() {
                     <span>
                       Delete All {moderationContentType === 'videos' ? `Videos (${moderationVideos.length})` : `Series (${moderationSeries.length})`}
                     </span>
+                  </button>
+
+                  {/* WIPE ALL CONTENT (VIDEOS + SERIES) */}
+                  <button
+                    onClick={() => {
+                      setDeleteAllMode('all');
+                      setShowDeleteAllModal(true);
+                    }}
+                    disabled={moderationVideos.length === 0 && moderationSeries.length === 0}
+                    className="px-4 py-2 rounded-2xl bg-gradient-to-r from-red-800 to-rose-950 hover:from-red-700 hover:to-rose-900 border border-red-600 text-white text-xs font-black flex items-center gap-2 shadow-lg shadow-rose-950/50 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                    title="Permanently wipe ALL platform videos, content series, and thumbnails at once"
+                  >
+                    <Trash2 className="w-4 h-4 text-rose-300" />
+                    <span>Purge All Content</span>
                   </button>
                 </div>
               </div>
@@ -1765,14 +1826,24 @@ export default function AdminHubPage() {
                       Danger Zone • Bulk Deletion
                     </span>
                     <h3 className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                      Delete All {moderationContentType === 'videos' ? `${moderationFilter.toUpperCase()} Videos` : 'Content Series'}?
+                      {deleteAllMode === 'all'
+                        ? 'Permanently Delete ALL Platform Content (Videos + Series)?'
+                        : `Delete All ${moderationContentType === 'videos' ? `${moderationFilter.toUpperCase()} Videos` : 'Content Series'}?`}
                     </h3>
                     <p className={`text-xs leading-relaxed max-w-md mx-auto ${isLight ? 'text-slate-600' : 'text-purple-200/90'}`}>
-                      You are about to permanently delete{' '}
-                      <strong className="text-red-600 font-bold">
-                        {moderationContentType === 'videos' ? `${moderationVideos.length} videos` : `${moderationSeries.length} series and all their episodes`}
-                      </strong>{' '}
-                      from Supabase.
+                      {deleteAllMode === 'all' ? (
+                        <>
+                          You are about to completely wipe <strong className="text-red-600 font-bold">{moderationVideos.length} videos and {moderationSeries.length} content series</strong> from Supabase.
+                        </>
+                      ) : (
+                        <>
+                          You are about to permanently delete{' '}
+                          <strong className="text-red-600 font-bold">
+                            {moderationContentType === 'videos' ? `${moderationVideos.length} videos` : `${moderationSeries.length} series and all their episodes`}
+                          </strong>{' '}
+                          from Supabase.
+                        </>
+                      )}
                     </p>
 
                     <div className={`p-4 rounded-2xl border text-xs text-left space-y-2 ${
@@ -1782,10 +1853,16 @@ export default function AdminHubPage() {
                         <AlertTriangle className="w-4 h-4" /> This action is immediate & permanent:
                       </p>
                       <ul className="list-disc pl-5 space-y-1 text-[11px]">
-                        {moderationContentType === 'videos' ? (
+                        {deleteAllMode === 'all' ? (
+                          <>
+                            <li>All {moderationVideos.length} videos in <code className="font-mono font-bold">public.videos</code> will be wiped.</li>
+                            <li>All {moderationSeries.length} series in <code className="font-mono font-bold">public.content_series</code> will be wiped.</li>
+                            <li>All ghost thumbnails and cover cards will be removed from all platform feeds.</li>
+                          </>
+                        ) : moderationContentType === 'videos' ? (
                           <>
                             <li>All {moderationVideos.length} records matching &ldquo;{moderationFilter}&rdquo; in <code className="font-mono font-bold">public.videos</code> will be wiped.</li>
-                            <li>Associated comments, watch history, and user watchlist links will be removed.</li>
+                            <li>Empty series whose episodes were deleted will automatically be cleaned up.</li>
                             <li>Platform feeds will update instantly to reflect zero remaining items.</li>
                           </>
                         ) : (
@@ -1824,7 +1901,7 @@ export default function AdminHubPage() {
                       ) : (
                         <>
                           <Trash2 className="w-4 h-4" />
-                          <span>Yes, Delete All</span>
+                          <span>{deleteAllMode === 'all' ? 'Yes, Wipe Everything' : 'Yes, Delete All'}</span>
                         </>
                       )}
                     </button>

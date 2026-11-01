@@ -161,23 +161,82 @@ export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const videoId = searchParams.get('videoId');
     const seriesId = searchParams.get('seriesId');
-    const action = searchParams.get('action'); // 'delete_all'
-    const targetType = searchParams.get('targetType') || 'videos'; // 'videos' | 'series'
+    const action = searchParams.get('action'); // 'delete_all' | 'cleanup_orphans'
+    const targetType = searchParams.get('targetType') || 'videos'; // 'videos' | 'series' | 'all'
     const filter = searchParams.get('filter') || 'all';
 
-    // 1. DELETE ALL VIDEOS OR ALL SERIES (Bulk Delete All)
-    if (action === 'delete_all') {
-      if (targetType === 'series') {
-        // Clear dependent foreign key rows
-        try {
-          await supabase.from('comments').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-          await supabase.from('reactions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-          await supabase.from('watch_history').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-          await supabase.from('watchlists').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        } catch {
-          // ignore cascade errors
-        }
+    // 0. CLEANUP ORPHANED SERIES (Series with 0 remaining episodes)
+    if (action === 'cleanup_orphans') {
+      const { data: allSeries } = await supabase.from('content_series').select('id, episodes:videos(id)');
+      const orphanIds: string[] = [];
+      if (allSeries) {
+        allSeries.forEach((s: any) => {
+          if (!s.episodes || s.episodes.length === 0) {
+            orphanIds.push(s.id);
+          }
+        });
+      }
 
+      if (orphanIds.length > 0) {
+        // Clear foreign keys
+        try {
+          await supabase.from('episode_unlocks').delete().in('series_id', orphanIds);
+          await supabase.from('watchlists').delete().in('series_id', orphanIds);
+        } catch {
+          // ignore
+        }
+        const { data: deleted, error } = await supabase
+          .from('content_series')
+          .delete()
+          .in('id', orphanIds)
+          .select('id');
+        if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json({
+          success: true,
+          count: deleted?.length || 0,
+          message: `Cleaned up ${deleted?.length || 0} orphaned series without episodes.`,
+        });
+      }
+
+      return NextResponse.json({
+        success: true,
+        count: 0,
+        message: 'No orphaned series found.',
+      });
+    }
+
+    // 1. DELETE ALL VIDEOS OR ALL SERIES OR EVERYTHING (Bulk Delete All)
+    if (action === 'delete_all') {
+      // Clear dependent foreign key rows
+      try {
+        await supabase.from('comments').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('reactions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('watch_history').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('watchlists').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('episode_unlocks').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      } catch {
+        // ignore cascade errors
+      }
+
+      // Option A: DELETE EVERYTHING (Both Videos AND Content Series)
+      if (targetType === 'all') {
+        await supabase.from('videos').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        const { data: deletedSeries, error: sErr } = await supabase
+          .from('content_series')
+          .delete()
+          .neq('id', '00000000-0000-0000-0000-000000000000')
+          .select('id');
+        if (sErr) return NextResponse.json({ error: sErr.message }, { status: 400 });
+
+        return NextResponse.json({
+          success: true,
+          message: 'All videos, series, thumbnails, and episodes permanently deleted from Supabase',
+          countSeries: deletedSeries?.length || 0,
+        });
+      }
+
+      // Option B: DELETE ALL SERIES
+      if (targetType === 'series') {
         // Delete all child episodes first, then all series
         await supabase.from('videos').delete().not('series_id', 'is', null);
         const { data: deletedSeries, error } = await supabase
@@ -206,20 +265,11 @@ export async function DELETE(req: NextRequest) {
         return NextResponse.json({
           success: true,
           count: deletedSeries?.length || 0,
-          message: 'All content series deleted successfully',
+          message: 'All content series and their episode videos deleted successfully',
         });
       }
 
-      // Delete all videos (or filtered)
-      try {
-        await supabase.from('comments').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        await supabase.from('reactions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        await supabase.from('watch_history').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        await supabase.from('watchlists').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      } catch {
-        // ignore
-      }
-
+      // Option C: DELETE VIDEOS (with auto-cleanup of orphaned series)
       let query = supabase.from('videos').delete();
       if (filter === 'approved') {
         query = query.eq('status', 'published');
@@ -234,31 +284,31 @@ export async function DELETE(req: NextRequest) {
       const { data: deletedVideos, error } = await query.select('id');
       if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-      // Check if RLS blocked the operation
-      if (!deletedVideos || deletedVideos.length === 0) {
-        const { count } = await supabase.from('videos').select('*', { count: 'exact', head: true });
-        if (count && count > 0) {
-          return NextResponse.json(
-            {
-              error:
-                'Deletion blocked by Supabase Row-Level Security (RLS). Please add SUPABASE_SERVICE_ROLE_KEY to .env.local or execute the admin delete policy in Supabase SQL editor.',
-              rlsBlocked: true,
-            },
-            { status: 403 }
-          );
+      // Automatically purge empty series that now have 0 episodes to prevent ghost thumbnails
+      try {
+        const { data: remainingSeries } = await supabase.from('content_series').select('id, episodes:videos(id)');
+        if (remainingSeries) {
+          const emptyIds = remainingSeries.filter((s: any) => !s.episodes || s.episodes.length === 0).map((s: any) => s.id);
+          if (emptyIds.length > 0) {
+            await supabase.from('content_series').delete().in('id', emptyIds);
+          }
         }
+      } catch {
+        // ignore
       }
 
       return NextResponse.json({
         success: true,
         count: deletedVideos?.length || 0,
-        message: `All ${filter} videos deleted successfully`,
+        message: `All ${filter} videos deleted successfully (and orphaned series thumbnails cleaned up)`,
       });
     }
 
     // 2. DELETE SINGLE CONTENT SERIES (and its episodes)
     if (seriesId) {
       try {
+        await supabase.from('episode_unlocks').delete().eq('series_id', seriesId);
+        await supabase.from('watchlists').delete().eq('series_id', seriesId);
         await supabase.from('videos').delete().eq('series_id', seriesId);
       } catch {
         // ignore
@@ -291,13 +341,21 @@ export async function DELETE(req: NextRequest) {
       });
     }
 
-    // 3. DELETE SINGLE VIDEO
+    // 3. DELETE SINGLE VIDEO (and auto-clean parent series if it becomes empty)
     if (videoId) {
+      // Find parent series if any
+      const { data: vRecord } = await supabase
+        .from('videos')
+        .select('series_id')
+        .eq('id', videoId)
+        .maybeSingle();
+
       try {
         await supabase.from('comments').delete().eq('content_id', videoId);
         await supabase.from('reactions').delete().eq('content_id', videoId);
         await supabase.from('watch_history').delete().eq('video_id', videoId);
         await supabase.from('watchlists').delete().eq('video_id', videoId);
+        await supabase.from('episode_unlocks').delete().eq('video_id', videoId);
       } catch {
         // ignore child errors
       }
@@ -321,6 +379,29 @@ export async function DELETE(req: NextRequest) {
           },
           { status: 403 }
         );
+      }
+
+      // If video belonged to a series, check if any videos remain in that series
+      if (vRecord?.series_id) {
+        try {
+          const { count } = await supabase
+            .from('videos')
+            .select('*', { count: 'exact', head: true })
+            .eq('series_id', vRecord.series_id);
+
+          if (!count || count === 0) {
+            // No episodes left in series! Clean up series so thumbnail does not linger
+            await supabase.from('content_series').delete().eq('id', vRecord.series_id);
+          } else {
+            // Update remaining total_episodes
+            await supabase
+              .from('content_series')
+              .update({ total_episodes: count, updated_at: new Date().toISOString() })
+              .eq('id', vRecord.series_id);
+          }
+        } catch {
+          // ignore
+        }
       }
 
       return NextResponse.json({

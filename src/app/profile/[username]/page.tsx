@@ -188,16 +188,18 @@ export default function ProfilePage() {
               .eq('user_id', prof.id),
           ]);
 
-          const mappedSeries: any[] = ((sList || []) as any[]).map((s) => {
-            const episodes = s.episodes || [];
-            const sorted = [...episodes].sort((a: any, b: any) => (a.episode_number || 0) - (b.episode_number || 0));
-            return {
-              ...s,
-              type: 'series' as const,
-              first_episode_id: sorted[0]?.id || s.id,
-              episode_count: episodes.length || s.total_episodes || 1,
-            };
-          });
+          const mappedSeries: any[] = ((sList || []) as any[])
+            .filter((s) => (s.episodes && s.episodes.length > 0) && Boolean(s.cover_url || s.episodes[0]?.thumbnail_url))
+            .map((s) => {
+              const episodes = s.episodes || [];
+              const sorted = [...episodes].sort((a: any, b: any) => (a.episode_number || 0) - (b.episode_number || 0));
+              return {
+                ...s,
+                type: 'series' as const,
+                first_episode_id: sorted[0]?.id || s.id,
+                episode_count: episodes.length || s.total_episodes || 1,
+              };
+            });
 
           // Show series and any standalone videos (videos without series_id)
           const standaloneVids = ((vids as Video[]) || []).filter((v) => !v.series_id).map((v) => ({ ...v, type: 'video' as const }));

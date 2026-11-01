@@ -81,17 +81,19 @@ export default function FollowingPage() {
             .order('created_at', { ascending: false })
             .limit(10);
 
-          const mappedSeries = (seriesData || []).map((s: any) => {
-            const episodes = s.episodes || [];
-            const sorted = [...episodes].sort(
-              (a: any, b: any) => (a.episode_number || 0) - (b.episode_number || 0)
-            );
-            return {
-              ...s,
-              first_episode_id: sorted[0]?.id || s.id,
-              episode_count: episodes.length || s.total_episodes || 1,
-            };
-          });
+          const mappedSeries = (seriesData || [])
+            .filter((s: any) => (s.episodes && s.episodes.length > 0) && (s.cover_url || s.episodes[0]?.thumbnail_url))
+            .map((s: any) => {
+              const episodes = s.episodes || [];
+              const sorted = [...episodes].sort(
+                (a: any, b: any) => (a.episode_number || 0) - (b.episode_number || 0)
+              );
+              return {
+                ...s,
+                first_episode_id: sorted[0]?.id || s.id,
+                episode_count: episodes.length || s.total_episodes || 1,
+              };
+            });
           setCreatorSeries(mappedSeries);
 
           // Fetch recent videos / reels by followed creators
@@ -343,12 +345,16 @@ export default function FollowingPage() {
                     href={`/videos/${v.id}`}
                     className="group relative aspect-[9/15] rounded-xl overflow-hidden bg-[var(--lr-bg-surface,#111A22)] border border-[var(--lr-border-primary,#27313A)] hover:border-[#ECC979]/50 transition-all flex flex-col justify-end p-2.5 shadow-md"
                   >
-                    <Image
-                      src={v.thumbnail_url || '/images/series_city_lights.jpg'}
-                      alt={v.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
+                    {v.thumbnail_url ? (
+                      <Image
+                        src={v.thumbnail_url}
+                        alt={v.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/60 to-slate-900" />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
                     <div className="relative z-10">
                       <span className="text-[10px] text-[#ECC979] font-mono">

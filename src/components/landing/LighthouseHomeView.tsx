@@ -189,10 +189,15 @@ export function LighthouseHomeView() {
             .limit(10),
         ]);
 
-        // 1. Dynamic Hero Slides
+        // 1. Dynamic Hero Slides (strictly requiring at least 1 episode with video)
         if (dbSeries && dbSeries.length > 0) {
           const dynamicHero: HeroSlide[] = dbSeries
-            .filter((s: any) => s.cover_url || (s.episodes && s.episodes.length > 0))
+            .filter((s: any) => {
+              const episodes = s.episodes || [];
+              const firstEp = episodes.find((e: any) => e.episode_number === 1) || episodes[0];
+              const thumb = s.cover_url || firstEp?.thumbnail_url;
+              return episodes.length > 0 && Boolean(firstEp?.id) && Boolean(thumb);
+            })
             .slice(0, 5)
             .map((s: any) => {
               const firstEp =
@@ -204,10 +209,7 @@ export function LighthouseHomeView() {
                 tagline:
                   s.description ||
                   `Experience the best of ${s.category || 'drama'} on Yarrowplay.`,
-                imageUrl:
-                  s.cover_url ||
-                  firstEp?.thumbnail_url ||
-                  '/images/series_city_lights.jpg',
+                imageUrl: s.cover_url || firstEp?.thumbnail_url || '',
                 genre: s.category || 'Drama',
                 seriesId: s.id,
                 firstEpisodeId: firstEp?.id || s.id,
@@ -219,61 +221,67 @@ export function LighthouseHomeView() {
           setHeroSlides([]);
         }
 
-        // 2. Dynamic Trending Reels
+        // 2. Dynamic Trending Reels (strictly requiring valid video_url & thumbnail_url)
         if (dbVideos && dbVideos.length > 0) {
-          const mappedDbReels: ReelItem[] = dbVideos.map((v: any) => {
-            const durSec = v.duration_seconds || 0;
-            const minStr = Math.floor(durSec / 60).toString().padStart(2, '0');
-            const secStr = (durSec % 60).toString().padStart(2, '0');
-            const durationDisplay = durSec > 0 ? `${minStr}:${secStr}` : '00:30';
+          const mappedDbReels: ReelItem[] = dbVideos
+            .filter((v: any) => Boolean(v.video_url) && Boolean(v.thumbnail_url))
+            .map((v: any) => {
+              const durSec = v.duration_seconds || 0;
+              const minStr = Math.floor(durSec / 60).toString().padStart(2, '0');
+              const secStr = (durSec % 60).toString().padStart(2, '0');
+              const durationDisplay = durSec > 0 ? `${minStr}:${secStr}` : '00:30';
 
-            const vc = v.views_count || 0;
-            const viewsDisplay =
-              vc >= 1000000
-                ? `${(vc / 1000000).toFixed(1)}M`
-                : vc >= 1000
-                ? `${(vc / 1000).toFixed(0)}K`
-                : `${vc}`;
+              const vc = v.views_count || 0;
+              const viewsDisplay =
+                vc >= 1000000
+                  ? `${(vc / 1000000).toFixed(1)}M`
+                  : vc >= 1000
+                  ? `${(vc / 1000).toFixed(0)}K`
+                  : `${vc}`;
 
-            return {
-              id: v.id,
-              title: v.title || 'Untitled Reel',
-              creatorName: v.creator?.display_name || v.creator?.username || 'Creator',
-              creatorAvatar: v.creator?.avatar_url || '',
-              creatorHandle: v.creator?.username ? `@${v.creator.username}` : '@creator',
-              thumbnailUrl: v.thumbnail_url || '/images/reel_kolkata.jpg',
-              videoUrl: v.video_url,
-              duration: durationDisplay,
-              views: viewsDisplay,
-              genre: v.category || v.genre || 'Drama',
-            };
-          });
+              return {
+                id: v.id,
+                title: v.title || 'Untitled Reel',
+                creatorName: v.creator?.display_name || v.creator?.username || 'Creator',
+                creatorAvatar: v.creator?.avatar_url || '',
+                creatorHandle: v.creator?.username ? `@${v.creator.username}` : '@creator',
+                thumbnailUrl: v.thumbnail_url,
+                videoUrl: v.video_url,
+                duration: durationDisplay,
+                views: viewsDisplay,
+                genre: v.category || v.genre || 'Drama',
+              };
+            });
 
           setReels(mappedDbReels);
         } else {
           setReels([]);
         }
 
-        // 3. Dynamic Popular Series
+        // 3. Dynamic Popular Series (strictly requiring existing episodes and thumbnail)
         if (dbSeries && dbSeries.length > 0) {
-          const mappedDbSeries: SeriesShowcaseItem[] = dbSeries.map((s: any) => {
-            const epCount = s.episodes?.length || s.total_episodes || 1;
-            const firstEp =
-              s.episodes?.find((e: any) => e.episode_number === 1) || s.episodes?.[0];
-            return {
-              id: s.id,
-              title: s.title || 'Original Series',
-              genre: s.category || 'Drama',
-              seasons: `${epCount} Episode${epCount > 1 ? 's' : ''}`,
-              thumbnailUrl:
-                s.cover_url ||
-                firstEp?.thumbnail_url ||
-                '/images/series_city_lights.jpg',
-              badge: epCount > 1 ? `${epCount} Episodes` : 'Popular',
-              year: new Date(s.created_at || Date.now()).getFullYear().toString(),
-              firstEpisodeId: firstEp?.id || s.id,
-            };
-          });
+          const mappedDbSeries: SeriesShowcaseItem[] = dbSeries
+            .filter((s: any) => {
+              const epCount = s.episodes?.length || 0;
+              const firstEp = s.episodes?.find((e: any) => e.episode_number === 1) || s.episodes?.[0];
+              const thumb = s.cover_url || firstEp?.thumbnail_url;
+              return epCount > 0 && Boolean(thumb);
+            })
+            .map((s: any) => {
+              const epCount = s.episodes?.length || 1;
+              const firstEp =
+                s.episodes?.find((e: any) => e.episode_number === 1) || s.episodes?.[0];
+              return {
+                id: s.id,
+                title: s.title || 'Original Series',
+                genre: s.category || 'Drama',
+                seasons: `${epCount} Episode${epCount > 1 ? 's' : ''}`,
+                thumbnailUrl: s.cover_url || firstEp?.thumbnail_url || '',
+                badge: epCount > 1 ? `${epCount} Episodes` : 'Popular',
+                year: new Date(s.created_at || Date.now()).getFullYear().toString(),
+                firstEpisodeId: firstEp?.id || s.id,
+              };
+            });
 
           setSeriesList(mappedDbSeries);
         } else {
@@ -284,7 +292,12 @@ export function LighthouseHomeView() {
         const mappedRec: RecommendedItem[] = [];
         if (dbSeries && dbSeries.length > 0) {
           const seriesRec = dbSeries
-            .filter((s: any) => s.cover_url || (s.episodes && s.episodes.length > 0))
+            .filter((s: any) => {
+              const epCount = s.episodes?.length || 0;
+              const firstEp = s.episodes?.[0];
+              const thumb = s.cover_url || firstEp?.thumbnail_url;
+              return epCount > 0 && Boolean(thumb);
+            })
             .slice(0, 4)
             .map((s: any) => {
               const firstEp = s.episodes?.[0];
@@ -293,10 +306,7 @@ export function LighthouseHomeView() {
                 title: s.title || 'Recommended',
                 genre: s.category || 'Drama',
                 year: new Date(s.created_at || Date.now()).getFullYear().toString(),
-                thumbnailUrl:
-                  s.cover_url ||
-                  firstEp?.thumbnail_url ||
-                  '/images/series_midnight_drive.jpg',
+                thumbnailUrl: s.cover_url || firstEp?.thumbnail_url || '',
                 href: `/videos/${firstEp?.id || s.id}`,
               };
             });
@@ -305,14 +315,14 @@ export function LighthouseHomeView() {
         if (mappedRec.length < 3 && dbVideos && dbVideos.length > 0) {
           const existingIds = new Set(mappedRec.map((r) => r.id));
           const addl = dbVideos
-            .filter((v: any) => !existingIds.has(v.id))
+            .filter((v: any) => !existingIds.has(v.id) && Boolean(v.thumbnail_url) && Boolean(v.video_url))
             .slice(0, 3 - mappedRec.length)
             .map((v: any) => ({
               id: v.id,
               title: v.title || 'Featured Video',
               genre: v.category || v.genre || 'Drama',
               year: new Date(v.created_at || Date.now()).getFullYear().toString(),
-              thumbnailUrl: v.thumbnail_url || '/images/series_midnight_drive.jpg',
+              thumbnailUrl: v.thumbnail_url,
               href: `/videos/${v.id}`,
             }));
           mappedRec.push(...addl);
@@ -348,18 +358,20 @@ export function LighthouseHomeView() {
 
         // 6. Dynamic Blogs
         if (dbBlogs && dbBlogs.length > 0) {
-          const mappedBlogs: BlogShowcaseItem[] = dbBlogs.map((b: any) => ({
-            id: b.id,
-            title: b.title,
-            date: new Date(b.published_at || b.created_at).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            }),
-            readTime: `${Math.max(1, Math.ceil((b.body?.length || 500) / 500))} min read`,
-            thumbnailUrl: b.cover_url || '/images/series_city_lights.jpg',
-            slug: b.slug || b.id,
-          }));
+          const mappedBlogs: BlogShowcaseItem[] = dbBlogs
+            .filter((b: any) => Boolean(b.cover_url))
+            .map((b: any) => ({
+              id: b.id,
+              title: b.title,
+              date: new Date(b.published_at || b.created_at).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              }),
+              readTime: `${Math.max(1, Math.ceil((b.body?.length || 500) / 500))} min read`,
+              thumbnailUrl: b.cover_url,
+              slug: b.slug || b.id,
+            }));
           setBlogs(mappedBlogs);
         } else {
           setBlogs([]);
@@ -368,7 +380,7 @@ export function LighthouseHomeView() {
         // 7. Dynamic Watch History
         if (dbWatchHistory && dbWatchHistory.length > 0) {
           const mappedHistory: ContinueWatchingItem[] = dbWatchHistory
-            .filter((h: any) => h.video)
+            .filter((h: any) => h.video && Boolean(h.video.thumbnail_url) && Boolean(h.video.video_url))
             .map((h: any) => {
               const v = h.video || {};
               const total = h.total_duration || v.duration_seconds || 600;
@@ -382,7 +394,7 @@ export function LighthouseHomeView() {
                 episode: v.episode_number ? `S1 • E${v.episode_number}` : 'Episode 1',
                 timeLeft: `${minLeft} min left`,
                 progressPercent: percent || 10,
-                thumbnailUrl: v.thumbnail_url || '/images/series_city_lights.jpg',
+                thumbnailUrl: v.thumbnail_url,
                 videoId: v.id,
               };
             });
@@ -395,16 +407,18 @@ export function LighthouseHomeView() {
         const mappedMustSee: any[] = [];
         if (dbMustSeeSeries && dbMustSeeSeries.length > 0) {
           dbMustSeeSeries.forEach((s: any) => {
-            const epCount = s.episodes?.length || s.total_episodes || 1;
+            const epCount = s.episodes?.length || 0;
             const firstEp =
               s.episodes?.find((e: any) => e.episode_number === 1) || s.episodes?.[0];
+            const thumb = s.cover_url || firstEp?.thumbnail_url;
+            if (epCount === 0 || !thumb) return;
+
             mappedMustSee.push({
               id: s.id,
               type: 'series' as const,
               title: s.title || 'Original Series',
               genre: s.category || 'Drama',
-              thumbnailUrl:
-                s.cover_url || firstEp?.thumbnail_url || '/images/series_city_lights.jpg',
+              thumbnailUrl: thumb,
               badge: 'Must See Series',
               href: `/videos/${firstEp?.id || s.id}`,
               description: s.description || 'Critically acclaimed lighthouse original series.',
@@ -414,12 +428,13 @@ export function LighthouseHomeView() {
         }
         if (dbMustSeeVideos && dbMustSeeVideos.length > 0) {
           dbMustSeeVideos.forEach((v: any) => {
+            if (!v.thumbnail_url || !v.video_url) return;
             mappedMustSee.push({
               id: v.id,
               type: 'video' as const,
               title: v.title || 'Must-See Video',
               genre: v.category || v.genre || 'Drama',
-              thumbnailUrl: v.thumbnail_url || '/images/reel_kolkata.jpg',
+              thumbnailUrl: v.thumbnail_url,
               badge: 'Must See',
               href: `/videos/${v.id}`,
               description: v.description || 'Editor-picked must-see reel.',

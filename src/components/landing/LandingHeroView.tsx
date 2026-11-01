@@ -217,11 +217,22 @@ export function LandingHeroView() {
 
         const allDynamicItems: ReelItem[] = [];
 
-        // 1. Dynamic series from Supabase
+        // 1. Dynamic series from Supabase (strictly require at least 1 valid episode video and thumbnail)
         if (dbSeries && dbSeries.length > 0) {
           dbSeries.forEach((s: any) => {
             const firstEp = s.episodes?.find((e: any) => e.episode_number === 1) || s.episodes?.[0];
-            const epCount = s.episodes?.length || s.total_episodes || 0;
+            const epCount = s.episodes?.length || 0;
+
+            // If the series has no playable episodes (e.g. deleted from admin), do not show ghost thumbnails
+            if (!firstEp || !firstEp.video_url || epCount === 0) {
+              return;
+            }
+
+            const thumbnail = s.cover_url || firstEp?.thumbnail_url;
+            if (!thumbnail) {
+              return;
+            }
+
             const rawCat = (s.category && s.category.trim()) ? s.category.trim() : 'Drama';
             const creatorName = s.creator?.display_name || s.creator?.username || 'Studio Creator';
             const creatorHandle = s.creator?.username ? `@${s.creator.username}` : `@${creatorName.toLowerCase().replace(/\s+/g, '')}`;
@@ -235,8 +246,8 @@ export function LandingHeroView() {
               category: rawCat,
               views: epCount > 0 ? `${epCount} Ep` : 'Series',
               duration: epCount > 0 ? `${epCount} Episodes` : 'Original Series',
-              thumbnail: s.cover_url || firstEp?.thumbnail_url || '',
-              videoUrl: firstEp?.video_url || '',
+              thumbnail,
+              videoUrl: firstEp.video_url,
               badge: epCount > 0 ? `${epCount} Episodes` : 'Original',
               accentColor: '#9333EA',
             });
@@ -246,6 +257,8 @@ export function LandingHeroView() {
         // 2. Dynamic published standalone videos from Supabase
         if (dbVideos && dbVideos.length > 0) {
           dbVideos.forEach((v: any) => {
+            if (!v.video_url || !v.thumbnail_url) return;
+
             const rawCat = (v.category && v.category.trim()) ? v.category.trim() : 'General';
             const creatorName = v.creator?.display_name || v.creator?.username || 'Creator';
             const creatorHandle = v.creator?.username ? `@${v.creator.username}` : '@creator';
@@ -263,8 +276,8 @@ export function LandingHeroView() {
               category: rawCat,
               views: viewsDisplay,
               duration: durDisplay,
-              thumbnail: v.thumbnail_url || '',
-              videoUrl: v.video_url || '',
+              thumbnail: v.thumbnail_url,
+              videoUrl: v.video_url,
               badge: vc > 1000 ? 'Trending' : 'New',
               accentColor: '#A855F7',
             });
