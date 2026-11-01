@@ -97,8 +97,209 @@ export function getCategoryTagline(catName: string): string {
   return `Curated ${catName} original productions and short video content from verified creators.`;
 }
 
+// Fallback dynamic curated reels across all major genres
+export const FALLBACK_REELS: ReelItem[] = [
+  {
+    id: 'sample-drama-1',
+    title: 'Catalyx Vision',
+    subtitle: 'Whispers in the Dark',
+    creator: 'Catalyx Studios',
+    handle: '@catalyx',
+    category: 'Drama',
+    views: '1.4M',
+    duration: '1m 24s',
+    thumbnail: '/images/reel_whispers.jpg',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    badge: 'Trending',
+    accentColor: '#9333EA',
+  },
+  {
+    id: 'sample-drama-2',
+    title: 'Distant Shore',
+    subtitle: 'Echoes of the Sea',
+    creator: 'Nova Studios',
+    handle: '@novastudios',
+    category: 'Drama',
+    views: '890K',
+    duration: '2m 10s',
+    thumbnail: '/images/hero_distant_shore.jpg',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    badge: 'Popular',
+    accentColor: '#A855F7',
+  },
+  {
+    id: 'sample-thriller-1',
+    title: 'City Nights',
+    subtitle: 'Propulse Brand Story',
+    creator: 'Propulse Media',
+    handle: '@propulse',
+    category: 'Thriller',
+    views: '980K',
+    duration: '1m 45s',
+    thumbnail: '/images/reel_city_nights.jpg',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+    badge: 'Hot',
+    accentColor: '#EC4899',
+  },
+  {
+    id: 'sample-thriller-2',
+    title: 'Midnight Drive',
+    subtitle: 'The Route 9 Mystery',
+    creator: 'Vortex Digital',
+    handle: '@vortex',
+    category: 'Thriller',
+    views: '720K',
+    duration: '1m 15s',
+    thumbnail: '/images/series_midnight_drive.jpg',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+    badge: 'Viral',
+    accentColor: '#D946EF',
+  },
+  {
+    id: 'sample-romance-1',
+    title: 'Kolkata Mon Amour',
+    subtitle: 'Catalyx Systems',
+    creator: 'Catalyx Studios',
+    handle: '@catalyx',
+    category: 'Romance',
+    views: '2.8M',
+    duration: '1m 58s',
+    thumbnail: '/images/reel_kolkata.jpg',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+    badge: 'Featured',
+    accentColor: '#7E22CE',
+  },
+  {
+    id: 'sample-romance-2',
+    title: 'Parallel Lives',
+    subtitle: 'Two Hearts Across Time',
+    creator: 'Starlight Prod',
+    handle: '@starlight',
+    category: 'Romance',
+    views: '1.6M',
+    duration: '2m 05s',
+    thumbnail: '/images/series_parallel_lives.jpg',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
+    badge: 'Top Rated',
+    accentColor: '#A855F7',
+  },
+  {
+    id: 'sample-action-1',
+    title: 'Parallel Streets',
+    subtitle: 'Nova Motion Beats',
+    creator: 'Nova Studios',
+    handle: '@novastudios',
+    category: 'Action',
+    views: '1.1M',
+    duration: '1m 30s',
+    thumbnail: '/images/reel_parallel_streets.jpg',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+    badge: 'Action Packed',
+    accentColor: '#9333EA',
+  },
+  {
+    id: 'sample-action-2',
+    title: 'The Crew Protocol',
+    subtitle: 'High Velocity Heist',
+    creator: 'Kinetic Reels',
+    handle: '@kinetic',
+    category: 'Action',
+    views: '850K',
+    duration: '1m 50s',
+    thumbnail: '/images/series_the_crew.jpg',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    badge: 'New',
+    accentColor: '#7C3AED',
+  },
+  {
+    id: 'sample-scifi-1',
+    title: 'Hidden Shores',
+    subtitle: 'Aether Evolution',
+    creator: 'Aether Media',
+    handle: '@aether',
+    category: 'Sci-Fi',
+    views: '750K',
+    duration: '1m 12s',
+    thumbnail: '/images/reel_hidden_shores.jpg',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4',
+    badge: 'Sci-Fi Original',
+    accentColor: '#6B21A8',
+  },
+  {
+    id: 'sample-scifi-2',
+    title: 'Neon Metropolis',
+    subtitle: 'City of 2099',
+    creator: 'Cyber Studios',
+    handle: '@cyber',
+    category: 'Sci-Fi',
+    views: '2.1M',
+    duration: '2m 30s',
+    thumbnail: '/images/series_city_lights.jpg',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+    badge: 'Trending',
+    accentColor: '#C084FC',
+  },
+  {
+    id: 'sample-comedy-1',
+    title: 'Last Light',
+    subtitle: 'Kinetic Micro-Series',
+    creator: 'Kinetic Reels',
+    handle: '@kinetic',
+    category: 'Comedy',
+    views: '890K',
+    duration: '1m 08s',
+    thumbnail: '/images/reel_last_light.jpg',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+    badge: 'Viral Hit',
+    accentColor: '#C084FC',
+  },
+  {
+    id: 'sample-comedy-2',
+    title: 'Island Life',
+    subtitle: 'Sun, Sand & Shenanigans',
+    creator: 'Sunny Media',
+    handle: '@sunnymedia',
+    category: 'Comedy',
+    views: '640K',
+    duration: '1m 40s',
+    thumbnail: '/images/series_island_life.jpg',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+    badge: 'Popular',
+    accentColor: '#F472B6',
+  },
+];
+
+// Helper to construct dynamic category groups from reel items
+export function buildCategoryGroups(items: ReelItem[]): CategoryGroup[] {
+  const catMap = new Map<string, ReelItem[]>();
+  items.forEach((item) => {
+    const rawCat = (item.category && item.category.trim()) ? item.category.trim() : 'General';
+    const lower = rawCat.toLowerCase();
+    let formattedCat = lower.charAt(0).toUpperCase() + lower.slice(1);
+    if (lower === 'scifi' || lower === 'sci-fi') formattedCat = 'Sci-Fi';
+
+    if (!catMap.has(formattedCat)) {
+      catMap.set(formattedCat, []);
+    }
+    catMap.get(formattedCat)!.push(item);
+  });
+
+  const groups: CategoryGroup[] = [];
+  catMap.forEach((catItems, cName) => {
+    groups.push({
+      id: cName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      name: cName,
+      emoji: getCategoryEmoji(cName),
+      tagline: getCategoryTagline(cName),
+      badgeColor: 'from-purple-600 to-pink-600',
+      items: catItems,
+    });
+  });
+  return groups;
+}
+
 // Global empty placeholder array for fallback references
-const SAMPLE_REELS: ReelItem[] = [];
+const SAMPLE_REELS: ReelItem[] = FALLBACK_REELS;
 
 // 3D Chrome Star Sparkle Component
 function ChromeStar({ className = 'w-16 h-16', rotation = 0 }: { className?: string; rotation?: number }) {
@@ -146,8 +347,8 @@ export function LandingHeroView() {
   const [activeNav, setActiveNav] = useState('Home');
   const [siteText, setSiteText] = useState<SiteContent>(DEFAULT_SITE_CONTENT);
   const [activeCategoryFilter, setActiveCategoryFilter] = useState('all');
-  const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>([]);
-  const [isLoadingDynamic, setIsLoadingDynamic] = useState(true);
+  const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>(() => buildCategoryGroups(FALLBACK_REELS));
+  const [isLoadingDynamic, setIsLoadingDynamic] = useState(false);
   const [activeVideoModal, setActiveVideoModal] = useState<any | null>(null);
   const [likedVideos, setLikedVideos] = useState<Set<string>>(new Set());
 
@@ -180,7 +381,7 @@ export function LandingHeroView() {
 
   // For Section 6 legacy carousel
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [reels, setReels] = useState<any[]>([]);
+  const [reels, setReels] = useState<ReelItem[]>(FALLBACK_REELS);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   // Load dynamic CMS text and subscribe to live changes
@@ -193,10 +394,9 @@ export function LandingHeroView() {
     return () => window.removeEventListener('lighthouse_site_content_updated', handleUpdate);
   }, []);
 
-  // Fetch Live Approved Dynamic Content EXCLUSIVELY from Supabase
+  // Fetch Live Approved Dynamic Content from Supabase and merge seamlessly
   useEffect(() => {
     async function fetchDynamicContent() {
-      setIsLoadingDynamic(true);
       try {
         const [
           { data: dbVideos },
@@ -223,7 +423,7 @@ export function LandingHeroView() {
             const firstEp = s.episodes?.find((e: any) => e.episode_number === 1) || s.episodes?.[0];
             const epCount = s.episodes?.length || 0;
 
-            // If the series has no playable episodes (e.g. deleted from admin), do not show ghost thumbnails
+            // If the series has no playable episodes, skip
             if (!firstEp || !firstEp.video_url || epCount === 0) {
               return;
             }
@@ -284,35 +484,22 @@ export function LandingHeroView() {
           });
         }
 
-        // 3. Group strictly by category from Supabase
-        const catMap = new Map<string, ReelItem[]>();
-        allDynamicItems.forEach((item) => {
-          const rawCat = item.category || 'General';
-          const formattedCat = rawCat.charAt(0).toUpperCase() + rawCat.slice(1);
-          if (!catMap.has(formattedCat)) {
-            catMap.set(formattedCat, []);
+        // 3. Merge Supabase dynamic items with curated fallback items (Supabase uploads appear first)
+        const seenIds = new Set(allDynamicItems.map((item) => item.id));
+        const combinedItems: ReelItem[] = [...allDynamicItems];
+        FALLBACK_REELS.forEach((fb) => {
+          if (!seenIds.has(fb.id)) {
+            combinedItems.push(fb);
           }
-          catMap.get(formattedCat)!.push(item);
         });
 
-        const dynamicGroups: CategoryGroup[] = [];
-        catMap.forEach((items, cName) => {
-          dynamicGroups.push({
-            id: cName.toLowerCase().replace(/\s+/g, '-'),
-            name: cName,
-            emoji: getCategoryEmoji(cName),
-            tagline: getCategoryTagline(cName),
-            badgeColor: 'from-purple-600 to-pink-600',
-            items,
-          });
-        });
-
+        const dynamicGroups = buildCategoryGroups(combinedItems);
         setCategoryGroups(dynamicGroups);
-        setReels(allDynamicItems);
+        setReels(combinedItems);
       } catch (err) {
         console.error('Failed to load dynamic Supabase content:', err);
-        setCategoryGroups([]);
-        setReels([]);
+        setCategoryGroups(buildCategoryGroups(FALLBACK_REELS));
+        setReels(FALLBACK_REELS);
       } finally {
         setIsLoadingDynamic(false);
       }
@@ -465,125 +652,89 @@ export function LandingHeroView() {
       </header>
 
       {/* ========================================================================= */}
-      {/* 3. HERO SECTION (POLARIS DESIGN CO. LAYOUT)                              */}
+      {/* 3. HERO SECTION                                                          */}
       {/* ========================================================================= */}
-      <section id="hero" className="relative z-10 pt-12 md:pt-20 pb-16 px-4 sm:px-8 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
-          {/* Left Hero Column */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* Pill Category Badges */}
-            <div className="flex flex-wrap items-center gap-2">
-              {(siteText.hero?.badgeTags || ['BRANDING & IDENTITY', 'UI/UX DESIGN', 'WEBSITE DESIGN & DEVELOPMENT', 'MARKETING & CREATIVE DESIGN']).map((tag, idx) => (
-                <span
-                  key={idx}
-                  className={`text-[10px] md:text-xs font-semibold px-3.5 py-1.5 rounded-full border uppercase tracking-wider transition-colors ${
-                    isLight
-                      ? 'bg-purple-50/80 border-purple-200 text-purple-700'
-                      : 'bg-purple-950/40 border-purple-500/30 text-purple-300'
-                  }`}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-
-            {/* Outlined + Solid Neon Headline */}
-            <div className="space-y-1">
-              <h1
-                className="text-4xl sm:text-6xl md:text-7xl lg:text-7xl font-black uppercase tracking-tight"
-                style={{
-                  WebkitTextStroke: isLight ? '1.5px #7C3AED' : '1.5px #C084FC',
-                  color: 'transparent',
-                }}
-              >
-                {siteText.hero?.headlineOutlined || 'DESIGN THAT'}
-              </h1>
-              <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-7xl font-black uppercase tracking-tight bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent filter drop-shadow-[0_4px_24px_rgba(168,85,247,0.35)]">
-                {siteText.hero?.headlineSolid || 'BUILDS BRANDS'}
-              </h1>
-            </div>
-
-            {/* Subtitle */}
-            <p className={`text-sm sm:text-base md:text-lg max-w-xl leading-relaxed ${
-              isLight ? 'text-slate-600' : 'text-slate-300'
-            }`}>
-              {siteText.hero?.subtitle ||
-                'We Craft Bold Visuals, Seamless Digital Experiences, And Strategic Designs That Help Brands Stand Out, Connect, And Grow.'}
-            </p>
-
-            {/* Dual CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
-              <Link
-                href="/home"
-                className="px-7 py-3 rounded-full text-xs sm:text-sm font-bold tracking-wide uppercase bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white shadow-xl shadow-purple-600/40 hover:shadow-purple-600/60 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2"
-              >
-                <Compass className="w-4 h-4" />
-                <span>Explore</span>
-              </Link>
-
-              <Link
-                href="/about"
-                className={`px-7 py-3 rounded-full text-xs sm:text-sm font-bold tracking-wide uppercase border backdrop-blur-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2 ${
+      <section id="hero" className="relative z-10 pt-10 md:pt-16 pb-12 px-4 sm:px-8 max-w-5xl mx-auto">
+        <div className="text-center flex flex-col items-center space-y-5">
+          {/* Pill Category Badges */}
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {(siteText.hero?.badgeTags || ['BRANDING & IDENTITY', 'EXCLUSIVE MICRO-SERIES', '4K VERTICAL REELS', 'CREATOR REWARDS']).map((tag, idx) => (
+              <span
+                key={idx}
+                className={`text-[10px] md:text-xs font-semibold px-3.5 py-1.5 rounded-full border uppercase tracking-wider transition-colors ${
                   isLight
-                    ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 shadow-sm'
-                    : 'bg-[#150B2D]/70 border-white/20 text-white hover:bg-white/10'
+                    ? 'bg-purple-50/80 border-purple-200 text-purple-700'
+                    : 'bg-purple-950/40 border-purple-500/30 text-purple-300'
                 }`}
               >
-                <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-                <span>Learn More</span>
-              </Link>
-            </div>
+                {tag}
+              </span>
+            ))}
           </div>
 
-          {/* Right Hero Visual: 3D Cyber Character with Floating Metallic Chrome Stars */}
-          <div className="lg:col-span-5 relative flex justify-center lg:justify-end">
-            {/* Ambient Purple Rim Glow */}
-            <div className="absolute -inset-4 bg-gradient-to-tr from-purple-600/40 via-fuchsia-600/30 to-transparent rounded-[38px] blur-2xl opacity-70 pointer-events-none" />
+          {/* Outlined + Solid Neon Headline (Smaller & Crisp) */}
+          <div className="space-y-1">
+            <h1
+              className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight"
+              style={{
+                WebkitTextStroke: isLight ? '1.5px #7C3AED' : '1.5px #C084FC',
+                color: 'transparent',
+              }}
+            >
+              {siteText.hero?.headlineOutlined || 'STORIES THAT'}
+            </h1>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent filter drop-shadow-[0_4px_24px_rgba(168,85,247,0.35)]">
+              {siteText.hero?.headlineSolid || 'IGNITE MINDS'}
+            </h1>
+          </div>
 
-            {/* Top-Left Floating Chrome Star */}
-            <div className="absolute -top-8 -left-6 z-20 animate-bounce duration-[4000ms] pointer-events-none">
-              <ChromeStar className="w-16 h-16 md:w-20 md:h-20 drop-shadow-[0_8px_20px_rgba(168,85,247,0.4)]" rotation={-12} />
-            </div>
+          {/* Subtitle (Smaller & Clean) */}
+          <p className={`text-xs sm:text-sm md:text-base max-w-2xl mx-auto leading-relaxed ${
+            isLight ? 'text-slate-600' : 'text-slate-300'
+          }`}>
+            {siteText.hero?.subtitle ||
+              'We Craft Bold Visuals, Seamless Digital Experiences, And Addictive Short-Form Entertainment That Helps Storytellers Stand Out, Connect, And Grow.'}
+          </p>
 
-            {/* Main Cyber Visual Card */}
-            <div
-              className={`relative z-10 w-full max-w-[440px] aspect-[4/5] rounded-[32px] overflow-hidden border shadow-2xl transition-all group ${
-                isLight ? 'bg-slate-100 border-purple-200 shadow-purple-900/10' : 'bg-[#120726] border-purple-500/30 shadow-black/80'
+          {/* Dual CTA Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+            <button
+              onClick={() => scrollToSection('hero-categories', 'Featured Catalog')}
+              className="px-7 py-2.5 rounded-full text-xs sm:text-sm font-bold tracking-wide uppercase bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white shadow-xl shadow-purple-600/40 hover:shadow-purple-600/60 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2"
+            >
+              <Compass className="w-4 h-4" />
+              <span>Explore</span>
+            </button>
+
+            <Link
+              href="/about"
+              className={`px-7 py-2.5 rounded-full text-xs sm:text-sm font-bold tracking-wide uppercase border backdrop-blur-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2 ${
+                isLight
+                  ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 shadow-sm'
+                  : 'bg-[#150B2D]/70 border-white/20 text-white hover:bg-white/10'
               }`}
             >
-              <Image
-                src="/images/cyber_hero_visual.jpg"
-                alt="Futuristic Creative Vision"
-                fill
-                priority
-                className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
-              />
-              {/* Subtle inner gradient shade */}
-              <div className="absolute inset-0 bg-gradient-to-t from-purple-950/60 via-transparent to-black/20 pointer-events-none" />
-            </div>
-
-            {/* Bottom-Right Floating Chrome Star */}
-            <div className="absolute -bottom-8 -right-6 z-20 animate-pulse duration-[3000ms] pointer-events-none">
-              <ChromeStar className="w-14 h-14 md:w-16 md:h-16 drop-shadow-[0_8px_20px_rgba(217,70,239,0.4)]" rotation={18} />
-            </div>
+              <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+              <span>Learn More</span>
+            </Link>
           </div>
         </div>
 
         {/* ========================================================================= */}
         {/* HERO CATEGORIZED CONTENT SHOWCASE (DISPLAYED SEPARATED ACCORDING TO CATEGORIES) */}
         {/* ========================================================================= */}
-        <div id="hero-categories" className="mt-16 md:mt-24 pt-12 border-t border-purple-500/20 space-y-10">
+        <div id="hero-categories" className="mt-12 md:mt-16 pt-10 border-t border-purple-500/20 space-y-8">
           {/* Header & Quick Category Filter Bar */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-2 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase bg-purple-600/15 border border-purple-500/35 text-purple-300 backdrop-blur-md">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
+            <div className="space-y-1.5 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-purple-600/15 border border-purple-500/35 text-purple-300 backdrop-blur-md">
                 <Sparkles className="w-3.5 h-3.5 text-pink-400 animate-pulse" />
                 <span>Featured Catalog</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent filter drop-shadow-[0_2px_16px_rgba(168,85,247,0.3)]">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent filter drop-shadow-[0_2px_16px_rgba(168,85,247,0.3)]">
                 Browse By Category
               </h2>
-              <p className={`text-xs sm:text-sm md:text-base leading-relaxed ${
+              <p className={`text-xs sm:text-sm leading-relaxed ${
                 isLight ? 'text-slate-600' : 'text-slate-300'
               }`}>
                 Explore all bite-sized vertical cinematic reels, episodic micro-dramas, and original series separated by genre.
