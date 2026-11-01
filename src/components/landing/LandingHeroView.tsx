@@ -24,14 +24,40 @@ import {
   Shield,
   Star,
   Compass,
+  Heart,
+  Eye,
+  Flame,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/context/ThemeContext';
 import { getStoredSiteContent, SiteContent, DEFAULT_SITE_CONTENT } from '@/lib/siteContent';
 import { BrandLogo } from '@/components/landing/BrandLogo';
 
-// Category Definitions
-const CATEGORY_TABS = [
+export interface ReelItem {
+  id: string;
+  title: string;
+  subtitle?: string;
+  creator: string;
+  handle: string;
+  category: string;
+  views: string;
+  duration: string;
+  thumbnail: string;
+  videoUrl: string;
+  badge?: string;
+  accentColor?: string;
+}
+
+export interface CategoryGroup {
+  id: string;
+  name: string;
+  emoji: string;
+  tagline: string;
+  badgeColor: string;
+  items: ReelItem[];
+}
+
+export const CATEGORY_TABS = [
   { id: 'all', label: 'All' },
   { id: 'drama', label: 'Drama' },
   { id: 'romance', label: 'Romance' },
@@ -42,93 +68,37 @@ const CATEGORY_TABS = [
   { id: 'scifi', label: 'Sci-Fi' },
 ];
 
-// Fallback dynamic curated reels
-const SAMPLE_REELS = [
-  {
-    id: 'reel-1',
-    title: 'Catalyx Vision',
-    subtitle: 'Logo Design & Identity',
-    creator: 'Catalyx Studios',
-    handle: '@catalyx',
-    category: 'drama',
-    views: '1.4M',
-    duration: '1m 24s',
-    thumbnail: '/images/reel_whispers.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-    badge: 'Popular',
-    accentColor: '#9333EA',
-  },
-  {
-    id: 'reel-2',
-    title: 'Propulse Brand',
-    subtitle: 'Brand Guidelines',
-    creator: 'Propulse Media',
-    handle: '@propulse',
-    category: 'thriller',
-    views: '980K',
-    duration: '1m 45s',
-    thumbnail: '/images/reel_city_nights.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-    badge: 'Trending',
-    accentColor: '#A855F7',
-  },
-  {
-    id: 'reel-3',
-    title: 'Catalyx Systems',
-    subtitle: 'Visual Identity Systems',
-    creator: 'Catalyx Studios',
-    handle: '@catalyx',
-    category: 'romance',
-    views: '2.8M',
-    duration: '1m 58s',
-    thumbnail: '/images/reel_kolkata.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
-    badge: 'Featured',
-    accentColor: '#7E22CE',
-  },
-  {
-    id: 'reel-4',
-    title: 'Aether Evolution',
-    subtitle: 'Rebranding Suite',
-    creator: 'Aether Media',
-    handle: '@aether',
-    category: 'fantasy',
-    views: '750K',
-    duration: '1m 12s',
-    thumbnail: '/images/reel_hidden_shores.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4',
-    badge: 'New',
-    accentColor: '#6B21A8',
-  },
-  {
-    id: 'reel-5',
-    title: 'Nova Motion Beats',
-    subtitle: 'Digital Experience',
-    creator: 'Nova Studios',
-    handle: '@novastudios',
-    category: 'action',
-    views: '1.1M',
-    duration: '1m 30s',
-    thumbnail: '/images/reel_parallel_streets.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
-    badge: 'Hot',
-    accentColor: '#9333EA',
-  },
-  {
-    id: 'reel-6',
-    title: 'Kinetic Micro-Series',
-    subtitle: 'Episodic Production',
-    creator: 'Kinetic Reels',
-    handle: '@kinetic',
-    category: 'comedy',
-    views: '890K',
-    duration: '1m 08s',
-    thumbnail: '/images/reel_last_light.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
-    badge: 'Viral',
-    accentColor: '#C084FC',
-  },
-];
+// Helper to assign a vibrant contextual emoji to dynamic categories from Supabase
+export function getCategoryEmoji(catName: string): string {
+  const c = (catName || '').toLowerCase();
+  if (c.includes('drama')) return '🎭';
+  if (c.includes('romance') || c.includes('love')) return '❤️';
+  if (c.includes('thriller') || c.includes('mystery') || c.includes('suspense')) return '⚡';
+  if (c.includes('action') || c.includes('adventure')) return '🔥';
+  if (c.includes('comedy') || c.includes('humor') || c.includes('funny')) return '😄';
+  if (c.includes('sci-fi') || c.includes('scifi') || c.includes('fantasy')) return '🚀';
+  if (c.includes('doc') || c.includes('documentary')) return '📄';
+  if (c.includes('travel')) return '✈️';
+  if (c.includes('music')) return '🎵';
+  if (c.includes('lifestyle')) return '☕';
+  return '🎬';
+}
+
+// Helper to assign a compelling description to dynamic categories from Supabase
+export function getCategoryTagline(catName: string): string {
+  const c = (catName || '').toLowerCase();
+  if (c.includes('drama')) return 'Deep emotional narratives, complex characters, and cinematic conflict.';
+  if (c.includes('romance')) return 'Heartfelt connections, passionate journeys, and irresistible chemistry.';
+  if (c.includes('thriller')) return 'Edge-of-your-seat suspense, deep conspiracies, and psychological twists.';
+  if (c.includes('action')) return 'High-octane stunts, relentless pacing, and spectacular cinematic sequences.';
+  if (c.includes('comedy')) return 'Witty banter, viral sketches, and laugh-out-loud micro-episodes.';
+  if (c.includes('sci-fi') || c.includes('scifi')) return 'Futuristic cyberpunk realms, mythic lore, and mind-bending concepts.';
+  if (c.includes('doc')) return 'Real stories, investigative journeys, and true-to-life documentaries.';
+  return `Curated ${catName} original productions and short video content from verified creators.`;
+}
+
+// Global empty placeholder array for fallback references
+const SAMPLE_REELS: ReelItem[] = [];
 
 // 3D Chrome Star Sparkle Component
 function ChromeStar({ className = 'w-16 h-16', rotation = 0 }: { className?: string; rotation?: number }) {
@@ -175,11 +145,42 @@ export function LandingHeroView() {
 
   const [activeNav, setActiveNav] = useState('Home');
   const [siteText, setSiteText] = useState<SiteContent>(DEFAULT_SITE_CONTENT);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [reels, setReels] = useState<any[]>(SAMPLE_REELS);
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState('all');
+  const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>([]);
+  const [isLoadingDynamic, setIsLoadingDynamic] = useState(true);
   const [activeVideoModal, setActiveVideoModal] = useState<any | null>(null);
-  const [isMuted, setIsMuted] = useState(true);
+  const [likedVideos, setLikedVideos] = useState<Set<string>>(new Set());
 
+  // Category Row Scroll Containers
+  const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const scrollCategoryRow = (categoryId: string, direction: 'left' | 'right') => {
+    const container = rowRefs.current[categoryId];
+    if (container) {
+      const scrollAmount = direction === 'left' ? -380 : 380;
+      container.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  const toggleLike = (videoId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLikedVideos((prev) => {
+      const next = new Set(prev);
+      if (next.has(videoId)) {
+        next.delete(videoId);
+      } else {
+        next.add(videoId);
+      }
+      return next;
+    });
+  };
+
+  // For Section 6 legacy carousel
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [reels, setReels] = useState<any[]>([]);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   // Load dynamic CMS text and subscribe to live changes
@@ -192,41 +193,129 @@ export function LandingHeroView() {
     return () => window.removeEventListener('lighthouse_site_content_updated', handleUpdate);
   }, []);
 
-  // Fetch Live Approved Content from Supabase
+  // Fetch Live Approved Dynamic Content EXCLUSIVELY from Supabase
   useEffect(() => {
-    async function fetchReels() {
+    async function fetchDynamicContent() {
+      setIsLoadingDynamic(true);
       try {
-        const { data: dbVideos } = await supabase
-          .from('videos')
-          .select('id, title, category, video_url, thumbnail_url, duration_seconds, views_count, likes_count, creator:profiles(display_name, username)')
-          .eq('status', 'published')
-          .limit(12);
+        const [
+          { data: dbVideos },
+          { data: dbSeries },
+        ] = await Promise.all([
+          supabase
+            .from('videos')
+            .select('id, title, category, video_url, thumbnail_url, duration_seconds, views_count, likes_count, creator:profiles(display_name, username)')
+            .eq('status', 'published')
+            .order('created_at', { ascending: false })
+            .limit(60),
+          supabase
+            .from('content_series')
+            .select('id, title, category, description, cover_url, total_episodes, created_at, creator:profiles(display_name, username), episodes:videos(id, episode_number, video_url, thumbnail_url, duration_seconds, views_count)')
+            .order('created_at', { ascending: false })
+            .limit(60),
+        ]);
 
-        if (dbVideos && dbVideos.length > 0) {
-          const mapped = dbVideos.map((v: any, index: number) => ({
-            id: v.id,
-            title: v.title,
-            subtitle: v.category ? `${v.category.toUpperCase()} PRODUCTION` : 'ORIGINAL SERIES',
-            creator: v.creator?.display_name || 'Studio Creator',
-            handle: v.creator?.username ? `@${v.creator?.username}` : '@creator',
-            category: (v.category || 'drama').toLowerCase(),
-            views: v.views_count ? `${v.views_count.toLocaleString()}` : `${(1.2 + (index % 5) * 0.4).toFixed(1)}M`,
-            duration: v.duration_seconds ? `${Math.floor(v.duration_seconds / 60)}m ${Math.round(v.duration_seconds % 60)}s` : '1m 30s',
-            thumbnail: v.thumbnail_url || SAMPLE_REELS[index % SAMPLE_REELS.length].thumbnail,
-            videoUrl: v.video_url || SAMPLE_REELS[index % SAMPLE_REELS.length].videoUrl,
-            badge: index === 0 ? 'Trending #1' : index === 1 ? 'Popular' : 'Featured',
-            accentColor: index % 2 === 0 ? '#9333EA' : '#A855F7',
-          }));
-          setReels(mapped);
+        const allDynamicItems: ReelItem[] = [];
+
+        // 1. Dynamic series from Supabase
+        if (dbSeries && dbSeries.length > 0) {
+          dbSeries.forEach((s: any) => {
+            const firstEp = s.episodes?.find((e: any) => e.episode_number === 1) || s.episodes?.[0];
+            const epCount = s.episodes?.length || s.total_episodes || 0;
+            const rawCat = (s.category && s.category.trim()) ? s.category.trim() : 'Drama';
+            const creatorName = s.creator?.display_name || s.creator?.username || 'Studio Creator';
+            const creatorHandle = s.creator?.username ? `@${s.creator.username}` : `@${creatorName.toLowerCase().replace(/\s+/g, '')}`;
+
+            allDynamicItems.push({
+              id: `series-${s.id}`,
+              title: s.title || 'Untitled Series',
+              subtitle: s.description || `${epCount} Episode${epCount === 1 ? '' : 's'}`,
+              creator: creatorName,
+              handle: creatorHandle,
+              category: rawCat,
+              views: epCount > 0 ? `${epCount} Ep` : 'Series',
+              duration: epCount > 0 ? `${epCount} Episodes` : 'Original Series',
+              thumbnail: s.cover_url || firstEp?.thumbnail_url || '',
+              videoUrl: firstEp?.video_url || '',
+              badge: epCount > 0 ? `${epCount} Episodes` : 'Original',
+              accentColor: '#9333EA',
+            });
+          });
         }
-      } catch {
-        // use fallback sample reels
+
+        // 2. Dynamic published standalone videos from Supabase
+        if (dbVideos && dbVideos.length > 0) {
+          dbVideos.forEach((v: any) => {
+            const rawCat = (v.category && v.category.trim()) ? v.category.trim() : 'General';
+            const creatorName = v.creator?.display_name || v.creator?.username || 'Creator';
+            const creatorHandle = v.creator?.username ? `@${v.creator.username}` : '@creator';
+            const durSec = v.duration_seconds || 0;
+            const durDisplay = durSec > 0 ? `${Math.floor(durSec / 60)}m ${durSec % 60}s` : 'Short Reel';
+            const vc = v.views_count || 0;
+            const viewsDisplay = vc >= 1000000 ? `${(vc / 1000000).toFixed(1)}M` : vc >= 1000 ? `${(vc / 1000).toFixed(0)}K` : `${vc} views`;
+
+            allDynamicItems.push({
+              id: `video-${v.id}`,
+              title: v.title || 'Untitled Reel',
+              subtitle: 'Dynamic Reel',
+              creator: creatorName,
+              handle: creatorHandle,
+              category: rawCat,
+              views: viewsDisplay,
+              duration: durDisplay,
+              thumbnail: v.thumbnail_url || '',
+              videoUrl: v.video_url || '',
+              badge: vc > 1000 ? 'Trending' : 'New',
+              accentColor: '#A855F7',
+            });
+          });
+        }
+
+        // 3. Group strictly by category from Supabase
+        const catMap = new Map<string, ReelItem[]>();
+        allDynamicItems.forEach((item) => {
+          const rawCat = item.category || 'General';
+          const formattedCat = rawCat.charAt(0).toUpperCase() + rawCat.slice(1);
+          if (!catMap.has(formattedCat)) {
+            catMap.set(formattedCat, []);
+          }
+          catMap.get(formattedCat)!.push(item);
+        });
+
+        const dynamicGroups: CategoryGroup[] = [];
+        catMap.forEach((items, cName) => {
+          dynamicGroups.push({
+            id: cName.toLowerCase().replace(/\s+/g, '-'),
+            name: cName,
+            emoji: getCategoryEmoji(cName),
+            tagline: getCategoryTagline(cName),
+            badgeColor: 'from-purple-600 to-pink-600',
+            items,
+          });
+        });
+
+        setCategoryGroups(dynamicGroups);
+        setReels(allDynamicItems);
+      } catch (err) {
+        console.error('Failed to load dynamic Supabase content:', err);
+        setCategoryGroups([]);
+        setReels([]);
+      } finally {
+        setIsLoadingDynamic(false);
       }
     }
-    fetchReels();
+
+    fetchDynamicContent();
   }, []);
 
-  // Filter reels
+  // Filtered categories for hero section strictly from Supabase
+  const displayedCategories = activeCategoryFilter === 'all'
+    ? categoryGroups
+    : categoryGroups.filter((g) => g.id === activeCategoryFilter);
+
+  const totalVideosCount = categoryGroups.reduce((acc, cat) => acc + cat.items.length, 0);
+
+  // Filter reels for legacy section
   const filteredReels = selectedCategory === 'all'
     ? reels
     : reels.filter((r) => (r.category || '').toLowerCase().includes(selectedCategory.toLowerCase()));
@@ -464,6 +553,304 @@ export function LandingHeroView() {
             <div className="absolute -bottom-8 -right-6 z-20 animate-pulse duration-[3000ms] pointer-events-none">
               <ChromeStar className="w-14 h-14 md:w-16 md:h-16 drop-shadow-[0_8px_20px_rgba(217,70,239,0.4)]" rotation={18} />
             </div>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* HERO CATEGORIZED CONTENT SHOWCASE (DISPLAYED SEPARATED ACCORDING TO CATEGORIES) */}
+        {/* ========================================================================= */}
+        <div id="hero-categories" className="mt-16 md:mt-24 pt-12 border-t border-purple-500/20 space-y-10">
+          {/* Header & Quick Category Filter Bar */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase bg-purple-600/15 border border-purple-500/35 text-purple-300 backdrop-blur-md">
+                <Sparkles className="w-3.5 h-3.5 text-pink-400 animate-pulse" />
+                <span>Featured Catalog</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent filter drop-shadow-[0_2px_16px_rgba(168,85,247,0.3)]">
+                Browse By Category
+              </h2>
+              <p className={`text-xs sm:text-sm md:text-base leading-relaxed ${
+                isLight ? 'text-slate-600' : 'text-slate-300'
+              }`}>
+                Explore all bite-sized vertical cinematic reels, episodic micro-dramas, and original series separated by genre.
+              </p>
+            </div>
+
+            {/* Quick Category Filter Pills */}
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => setActiveCategoryFilter('all')}
+                className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeCategoryFilter === 'all'
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-600/35 scale-105'
+                    : isLight
+                    ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+                    : 'bg-white/5 hover:bg-white/10 text-white/80 border border-white/10'
+                }`}
+              >
+                <span>✨ All Categories</span>
+                <span className="text-[10px] opacity-80 px-1.5 py-0.5 rounded-full bg-black/20">
+                  {totalVideosCount}
+                </span>
+              </button>
+
+              {categoryGroups.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategoryFilter(cat.id)}
+                  className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                    activeCategoryFilter === cat.id
+                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-600/35 scale-105'
+                      : isLight
+                      ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+                      : 'bg-white/5 hover:bg-white/10 text-white/80 border border-white/10'
+                  }`}
+                >
+                  <span>{cat.emoji}</span>
+                  <span>{cat.name}</span>
+                  <span className="text-[10px] opacity-80 px-1.5 py-0.5 rounded-full bg-black/20">
+                    {cat.items.length}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Categorized Content Sections (Separated according to categories) */}
+          <div className="space-y-10">
+            {isLoadingDynamic ? (
+              /* Shimmering Loading Skeleton while fetching from Supabase */
+              <div className="space-y-8 animate-pulse">
+                {[1, 2].map((sIdx) => (
+                  <div
+                    key={sIdx}
+                    className={`p-6 sm:p-8 rounded-3xl border ${
+                      isLight ? 'bg-purple-50/40 border-purple-200/60' : 'bg-[#0f0622]/50 border-purple-500/20'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="space-y-2">
+                        <div className="h-6 w-36 rounded-full bg-purple-500/20" />
+                        <div className="h-4 w-64 rounded-full bg-purple-500/10" />
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="w-9 h-9 rounded-full bg-purple-500/20" />
+                        <div className="w-9 h-9 rounded-full bg-purple-500/20" />
+                      </div>
+                    </div>
+                    <div className="flex gap-5 overflow-hidden">
+                      {[1, 2, 3, 4].map((cIdx) => (
+                        <div
+                          key={cIdx}
+                          className="w-[220px] aspect-[9/16] rounded-[24px] bg-purple-500/10 border border-purple-500/20 shrink-0"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : categoryGroups.length === 0 ? (
+              /* Empty state when no dynamic content exists in Supabase */
+              <div
+                className={`p-12 sm:p-16 rounded-3xl border text-center space-y-4 ${
+                  isLight
+                    ? 'bg-purple-50/50 border-purple-200/80 shadow-sm'
+                    : 'bg-[#0f0622]/60 border-purple-500/20 backdrop-blur-xl shadow-2xl'
+                }`}
+              >
+                <div className="w-16 h-16 mx-auto rounded-3xl bg-purple-600/20 border border-purple-500/35 flex items-center justify-center text-purple-300">
+                  <Film className="w-8 h-8" />
+                </div>
+                <h3 className={`text-xl sm:text-2xl font-black uppercase tracking-tight ${
+                  isLight ? 'text-slate-900' : 'text-white'
+                }`}>
+                  No Dynamic Content Uploaded Yet
+                </h3>
+                <p className={`text-xs sm:text-sm max-w-md mx-auto leading-relaxed ${
+                  isLight ? 'text-slate-600' : 'text-slate-400'
+                }`}>
+                  Only live dynamic content fetched from Supabase is displayed here. Head to Creator Studio to upload your first episodic series or video reels!
+                </p>
+                <div className="pt-2">
+                  <Link
+                    href="/creator/studio"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 shadow-lg shadow-purple-600/30 transition-all cursor-pointer"
+                  >
+                    <span>Open Creator Studio →</span>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              /* Dynamic Categories Rendered Separately */
+              displayedCategories.map((cat) => (
+                <div
+                  key={cat.id}
+                  id={`cat-${cat.id}`}
+                  className={`p-6 sm:p-8 rounded-3xl border transition-all ${
+                    isLight
+                      ? 'bg-purple-50/50 border-purple-200/80 shadow-md shadow-purple-900/5'
+                      : 'bg-[#0f0622]/60 border-purple-500/20 backdrop-blur-xl shadow-2xl'
+                  }`}
+                >
+                  {/* Category Header Row */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-2xl">{cat.emoji}</span>
+                        <h3 className={`text-xl sm:text-2xl font-black uppercase tracking-tight ${
+                          isLight ? 'text-slate-900' : 'text-white'
+                        }`}>
+                          {cat.name}
+                        </h3>
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-purple-600/20 text-purple-400 border border-purple-500/30">
+                          {cat.items.length} {cat.items.length === 1 ? 'Title' : 'Titles'}
+                        </span>
+                      </div>
+                      <p className={`text-xs sm:text-sm mt-1 ${isLight ? 'text-slate-600' : 'text-purple-200/70'}`}>
+                        {cat.tagline}
+                      </p>
+                    </div>
+
+                    {/* Category Controls: Left/Right arrows + Explore link */}
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href={`/search?category=${encodeURIComponent(cat.name)}`}
+                        className="text-xs font-bold text-purple-400 hover:text-purple-300 uppercase tracking-wider flex items-center gap-1 group transition-colors"
+                      >
+                        <span>Explore {cat.name}</span>
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+
+                      <div className="flex items-center gap-2 ml-2">
+                        <button
+                          onClick={() => scrollCategoryRow(cat.id, 'left')}
+                          aria-label={`Scroll ${cat.name} Left`}
+                          className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+                            isLight
+                              ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-purple-300 shadow-sm'
+                              : 'bg-[#150B2D] border-white/15 text-white hover:bg-white/10 hover:border-purple-400'
+                          }`}
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => scrollCategoryRow(cat.id, 'right')}
+                          aria-label={`Scroll ${cat.name} Right`}
+                          className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+                            isLight
+                              ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-purple-300 shadow-sm'
+                              : 'bg-[#150B2D] border-white/15 text-white hover:bg-white/10 hover:border-purple-400'
+                          }`}
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Horizontal Scrolling Video Track */}
+                  <div
+                    ref={(el) => {
+                      rowRefs.current[cat.id] = el;
+                    }}
+                    className="flex items-center gap-5 overflow-x-auto no-scrollbar scroll-smooth pb-3 pt-1 -mx-2 px-2"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                  >
+                    {cat.items.map((reel) => (
+                      <div
+                        key={reel.id}
+                        onClick={() => setActiveVideoModal(reel)}
+                        className={`relative w-[210px] sm:w-[230px] md:w-[250px] aspect-[9/16] rounded-[24px] overflow-hidden shrink-0 border group cursor-pointer transition-all duration-300 hover:scale-[1.03] select-none ${
+                          isLight
+                            ? 'bg-white border-purple-200 shadow-lg shadow-purple-900/5 hover:border-purple-400 hover:shadow-purple-900/20'
+                            : 'bg-[#130728] border-purple-500/25 shadow-2xl shadow-black/60 hover:border-purple-400 hover:shadow-purple-600/30'
+                        }`}
+                      >
+                        {/* Video Thumbnail from Supabase or Artistic Fallback Card */}
+                        {reel.thumbnail ? (
+                          <Image
+                            src={reel.thumbnail}
+                            alt={reel.title}
+                            fill
+                            sizes="(max-width: 640px) 210px, 250px"
+                            unoptimized={reel.thumbnail.startsWith('http')}
+                            className="object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-[#1E0E3D] via-[#2A1254] to-[#120626] flex flex-col items-center justify-center p-5 text-center">
+                            <div className="w-12 h-12 rounded-2xl bg-purple-600/25 border border-purple-500/40 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-lg shadow-purple-900/50">
+                              <Film className="w-6 h-6 text-purple-300" />
+                            </div>
+                            <span className="text-xs font-bold text-white line-clamp-2 px-1">
+                              {reel.title}
+                            </span>
+                            <span className="text-[10px] text-purple-300 uppercase tracking-wider mt-1.5 font-semibold">
+                              {reel.category}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Scrim Gradients */}
+                        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none" />
+                        <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/95 via-black/65 to-transparent pointer-events-none" />
+
+                        {/* Top Badges: Badge & Duration */}
+                        <div className="absolute top-3 inset-x-3 flex items-center justify-between z-10">
+                          {reel.badge ? (
+                            <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md">
+                              {reel.badge}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20 text-white backdrop-blur-md">
+                              {reel.category}
+                            </span>
+                          )}
+
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white/90 border border-white/20">
+                            {reel.duration}
+                          </span>
+                        </div>
+
+                        {/* Center Play Button Overlay */}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white group-hover:scale-115 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-pink-600 transition-all duration-300 shadow-xl shadow-purple-900/60">
+                            <Play className="w-5 h-5 fill-white ml-0.5" />
+                          </div>
+                        </div>
+
+                        {/* Like Button */}
+                        <button
+                          onClick={(e) => toggleLike(reel.id, e)}
+                          aria-label="Like video"
+                          className="absolute top-11 right-3 z-20 w-7 h-7 rounded-full bg-black/50 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/80 hover:text-white transition-all opacity-0 group-hover:opacity-100 hover:scale-110 active:scale-95"
+                        >
+                          <Heart
+                            className={`w-3.5 h-3.5 transition-colors ${
+                              likedVideos.has(reel.id)
+                                ? 'fill-[#EC4899] text-[#EC4899]'
+                                : 'hover:text-[#EC4899]'
+                            }`}
+                          />
+                        </button>
+
+                        {/* Bottom Info Scrim */}
+                        <div className="absolute bottom-0 inset-x-0 p-4 z-10 flex flex-col justify-end text-white">
+                          <h4 className="font-bold text-sm sm:text-base leading-snug line-clamp-1 group-hover:text-purple-200 transition-colors drop-shadow">
+                            {reel.title}
+                          </h4>
+
+                          <div className="flex items-center justify-between text-xs text-purple-200/90 mt-1.5">
+                            <span className="truncate max-w-[130px]">{reel.creator}</span>
+                            <span className="text-[11px] opacity-80 shrink-0">{reel.views}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
