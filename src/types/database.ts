@@ -349,3 +349,39 @@ export interface Notification {
   actor?: Profile;
 }
 
+export interface Competition {
+  id: string;
+  title: string;
+  description: string;
+  season_number: number;
+  prize_coins: number;
+  prize_cash_inr?: number;
+  start_date: string;
+  end_date: string;
+  status: 'active' | 'completed' | 'upcoming';
+  winner_video_id?: string | null;
+  total_votes?: number;
+  entries_count?: number;
+  created_at: string;
+}
+
+export interface CompetitionEntry {
+  id: string;
+  competition_id: string;
+  video_id: string;
+  votes_count: number;
+  rank?: number;
+  video?: Video;
+  creator?: Profile;
+  created_at: string;
+}
+
+export interface CompetitionVote {
+  id: string;
+  competition_id: string;
+  video_id: string;
+  user_id: string;
+  created_at: string;
+}
+
+

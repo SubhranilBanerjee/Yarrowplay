@@ -20,6 +20,8 @@ import {
   User,
   Settings,
   BarChart3,
+  Trophy,
+  Film,
 } from 'lucide-react';
 import { BrandLogo } from '@/components/landing/BrandLogo';
 
@@ -48,6 +50,19 @@ export function Sidebar() {
       href: '/blogs',
       activeCheck: (p: string) => p.startsWith('/blog'),
       icon: FileText,
+    },
+    {
+      label: 'Series',
+      href: '/series',
+      activeCheck: (p: string) => p.startsWith('/series'),
+      icon: Film,
+    },
+    {
+      label: 'Competition',
+      href: '/competition',
+      activeCheck: (p: string) => p.startsWith('/competition'),
+      icon: Trophy,
+      badge: 'Vote',
     },
   ];
 
@@ -141,7 +156,16 @@ export function Sidebar() {
                     isActive ? 'fill-white text-white' : 'text-[var(--lr-text-muted,#85929F)]'
                   }`}
                 />
-                {!collapsed && <span className="truncate">{item.label}</span>}
+                {!collapsed && (
+                  <div className="flex-1 flex items-center justify-between min-w-0">
+                    <span className="truncate">{item.label}</span>
+                    {(item as any).badge && (
+                      <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 ml-1.5">
+                        {(item as any).badge}
+                      </span>
+                    )}
+                  </div>
+                )}
               </Link>
             );
           })}
@@ -178,7 +202,16 @@ export function Sidebar() {
                       isActive ? 'text-white' : 'text-[var(--lr-text-muted,#85929F)]'
                     }`}
                   />
-                  {!collapsed && <span className="truncate">{item.label}</span>}
+                  {!collapsed && (
+                  <div className="flex-1 flex items-center justify-between min-w-0">
+                    <span className="truncate">{item.label}</span>
+                    {(item as any).badge && (
+                      <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 ml-1.5">
+                        {(item as any).badge}
+                      </span>
+                    )}
+                  </div>
+                )}
                 </Link>
               );
             })}
@@ -216,7 +249,16 @@ export function Sidebar() {
                       isActive ? 'text-white' : 'text-[var(--lr-text-muted,#85929F)]'
                     }`}
                   />
-                  {!collapsed && <span className="truncate">{item.label}</span>}
+                  {!collapsed && (
+                  <div className="flex-1 flex items-center justify-between min-w-0">
+                    <span className="truncate">{item.label}</span>
+                    {(item as any).badge && (
+                      <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 ml-1.5">
+                        {(item as any).badge}
+                      </span>
+                    )}
+                  </div>
+                )}
                 </Link>
               );
             })}

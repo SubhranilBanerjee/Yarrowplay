@@ -27,6 +27,9 @@ import {
   Heart,
   Eye,
   Flame,
+  Trophy,
+  Crown,
+  Award,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/context/ThemeContext';
@@ -35,6 +38,8 @@ import { BrandLogo } from '@/components/landing/BrandLogo';
 
 export interface ReelItem {
   id: string;
+  seriesId?: string;
+  isSeries?: boolean;
   title: string;
   subtitle?: string;
   creator: string;
@@ -98,176 +103,8 @@ export function getCategoryTagline(catName: string): string {
 }
 
 // Fallback dynamic curated reels across all major genres
-export const FALLBACK_REELS: ReelItem[] = [
-  {
-    id: 'sample-drama-1',
-    title: 'Catalyx Vision',
-    subtitle: 'Whispers in the Dark',
-    creator: 'Catalyx Studios',
-    handle: '@catalyx',
-    category: 'Drama',
-    views: '1.4M',
-    duration: '1m 24s',
-    thumbnail: '/images/reel_whispers.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-    badge: 'Trending',
-    accentColor: '#9333EA',
-  },
-  {
-    id: 'sample-drama-2',
-    title: 'Distant Shore',
-    subtitle: 'Echoes of the Sea',
-    creator: 'Nova Studios',
-    handle: '@novastudios',
-    category: 'Drama',
-    views: '890K',
-    duration: '2m 10s',
-    thumbnail: '/images/hero_distant_shore.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    badge: 'Popular',
-    accentColor: '#A855F7',
-  },
-  {
-    id: 'sample-thriller-1',
-    title: 'City Nights',
-    subtitle: 'Propulse Brand Story',
-    creator: 'Propulse Media',
-    handle: '@propulse',
-    category: 'Thriller',
-    views: '980K',
-    duration: '1m 45s',
-    thumbnail: '/images/reel_city_nights.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-    badge: 'Hot',
-    accentColor: '#EC4899',
-  },
-  {
-    id: 'sample-thriller-2',
-    title: 'Midnight Drive',
-    subtitle: 'The Route 9 Mystery',
-    creator: 'Vortex Digital',
-    handle: '@vortex',
-    category: 'Thriller',
-    views: '720K',
-    duration: '1m 15s',
-    thumbnail: '/images/series_midnight_drive.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
-    badge: 'Viral',
-    accentColor: '#D946EF',
-  },
-  {
-    id: 'sample-romance-1',
-    title: 'Kolkata Mon Amour',
-    subtitle: 'Catalyx Systems',
-    creator: 'Catalyx Studios',
-    handle: '@catalyx',
-    category: 'Romance',
-    views: '2.8M',
-    duration: '1m 58s',
-    thumbnail: '/images/reel_kolkata.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
-    badge: 'Featured',
-    accentColor: '#7E22CE',
-  },
-  {
-    id: 'sample-romance-2',
-    title: 'Parallel Lives',
-    subtitle: 'Two Hearts Across Time',
-    creator: 'Starlight Prod',
-    handle: '@starlight',
-    category: 'Romance',
-    views: '1.6M',
-    duration: '2m 05s',
-    thumbnail: '/images/series_parallel_lives.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
-    badge: 'Top Rated',
-    accentColor: '#A855F7',
-  },
-  {
-    id: 'sample-action-1',
-    title: 'Parallel Streets',
-    subtitle: 'Nova Motion Beats',
-    creator: 'Nova Studios',
-    handle: '@novastudios',
-    category: 'Action',
-    views: '1.1M',
-    duration: '1m 30s',
-    thumbnail: '/images/reel_parallel_streets.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
-    badge: 'Action Packed',
-    accentColor: '#9333EA',
-  },
-  {
-    id: 'sample-action-2',
-    title: 'The Crew Protocol',
-    subtitle: 'High Velocity Heist',
-    creator: 'Kinetic Reels',
-    handle: '@kinetic',
-    category: 'Action',
-    views: '850K',
-    duration: '1m 50s',
-    thumbnail: '/images/series_the_crew.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-    badge: 'New',
-    accentColor: '#7C3AED',
-  },
-  {
-    id: 'sample-scifi-1',
-    title: 'Hidden Shores',
-    subtitle: 'Aether Evolution',
-    creator: 'Aether Media',
-    handle: '@aether',
-    category: 'Sci-Fi',
-    views: '750K',
-    duration: '1m 12s',
-    thumbnail: '/images/reel_hidden_shores.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4',
-    badge: 'Sci-Fi Original',
-    accentColor: '#6B21A8',
-  },
-  {
-    id: 'sample-scifi-2',
-    title: 'Neon Metropolis',
-    subtitle: 'City of 2099',
-    creator: 'Cyber Studios',
-    handle: '@cyber',
-    category: 'Sci-Fi',
-    views: '2.1M',
-    duration: '2m 30s',
-    thumbnail: '/images/series_city_lights.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-    badge: 'Trending',
-    accentColor: '#C084FC',
-  },
-  {
-    id: 'sample-comedy-1',
-    title: 'Last Light',
-    subtitle: 'Kinetic Micro-Series',
-    creator: 'Kinetic Reels',
-    handle: '@kinetic',
-    category: 'Comedy',
-    views: '890K',
-    duration: '1m 08s',
-    thumbnail: '/images/reel_last_light.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
-    badge: 'Viral Hit',
-    accentColor: '#C084FC',
-  },
-  {
-    id: 'sample-comedy-2',
-    title: 'Island Life',
-    subtitle: 'Sun, Sand & Shenanigans',
-    creator: 'Sunny Media',
-    handle: '@sunnymedia',
-    category: 'Comedy',
-    views: '640K',
-    duration: '1m 40s',
-    thumbnail: '/images/series_island_life.jpg',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
-    badge: 'Popular',
-    accentColor: '#F472B6',
-  },
-];
+// Fallback dynamic items (strictly empty: landing page is 100% dynamic)
+export const FALLBACK_REELS: ReelItem[] = [];
 
 // Helper to construct dynamic category groups from reel items
 export function buildCategoryGroups(items: ReelItem[]): CategoryGroup[] {
@@ -299,7 +136,7 @@ export function buildCategoryGroups(items: ReelItem[]): CategoryGroup[] {
 }
 
 // Global empty placeholder array for fallback references
-const SAMPLE_REELS: ReelItem[] = FALLBACK_REELS;
+const SAMPLE_REELS: ReelItem[] = [];
 
 // 3D Chrome Star Sparkle Component
 function ChromeStar({ className = 'w-16 h-16', rotation = 0 }: { className?: string; rotation?: number }) {
@@ -347,10 +184,24 @@ export function LandingHeroView() {
   const [activeNav, setActiveNav] = useState('Home');
   const [siteText, setSiteText] = useState<SiteContent>(DEFAULT_SITE_CONTENT);
   const [activeCategoryFilter, setActiveCategoryFilter] = useState('all');
-  const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>(() => buildCategoryGroups(FALLBACK_REELS));
+  const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>([]);
   const [isLoadingDynamic, setIsLoadingDynamic] = useState(false);
   const [activeVideoModal, setActiveVideoModal] = useState<any | null>(null);
   const [likedVideos, setLikedVideos] = useState<Set<string>>(new Set());
+
+  // Quick voting for Competition Arena preview
+  const [landingVotes, setLandingVotes] = useState<Record<string, number>>({});
+  const [votedLandingSet, setVotedLandingSet] = useState<Set<string>>(new Set());
+
+  const handleLandingVote = (videoId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (votedLandingSet.has(videoId)) return;
+    setLandingVotes((prev) => ({
+      ...prev,
+      [videoId]: (prev[videoId] || 1000) + 1,
+    }));
+    setVotedLandingSet((prev) => new Set([...prev, videoId]));
+  };
 
   // Category Row Scroll Containers
   const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -381,7 +232,7 @@ export function LandingHeroView() {
 
   // For Section 6 legacy carousel
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [reels, setReels] = useState<ReelItem[]>(FALLBACK_REELS);
+  const [reels, setReels] = useState<ReelItem[]>([]);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   // Load dynamic CMS text and subscribe to live changes
@@ -439,6 +290,8 @@ export function LandingHeroView() {
 
             allDynamicItems.push({
               id: `series-${s.id}`,
+              seriesId: s.id,
+              isSeries: true,
               title: s.title || 'Untitled Series',
               subtitle: s.description || `${epCount} Episode${epCount === 1 ? '' : 's'}`,
               creator: creatorName,
@@ -484,22 +337,14 @@ export function LandingHeroView() {
           });
         }
 
-        // 3. Merge Supabase dynamic items with curated fallback items (Supabase uploads appear first)
-        const seenIds = new Set(allDynamicItems.map((item) => item.id));
-        const combinedItems: ReelItem[] = [...allDynamicItems];
-        FALLBACK_REELS.forEach((fb) => {
-          if (!seenIds.has(fb.id)) {
-            combinedItems.push(fb);
-          }
-        });
-
-        const dynamicGroups = buildCategoryGroups(combinedItems);
+        // 3. Strictly set dynamic items from Supabase (No static fallbacks)
+        const dynamicGroups = buildCategoryGroups(allDynamicItems);
         setCategoryGroups(dynamicGroups);
-        setReels(combinedItems);
+        setReels(allDynamicItems);
       } catch (err) {
         console.error('Failed to load dynamic Supabase content:', err);
-        setCategoryGroups(buildCategoryGroups(FALLBACK_REELS));
-        setReels(FALLBACK_REELS);
+        setCategoryGroups([]);
+        setReels([]);
       } finally {
         setIsLoadingDynamic(false);
       }
@@ -601,6 +446,17 @@ export function LandingHeroView() {
             }`}
           >
             About Us
+          </Link>
+          <Link
+            href="/competition"
+            className={`px-3.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
+              isLight
+                ? 'text-purple-700 hover:bg-purple-50'
+                : 'text-amber-300 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+            <span>Contest</span>
           </Link>
           {[
             { id: 'services', label: 'Services' },
@@ -1008,6 +864,19 @@ export function LandingHeroView() {
                             <span className="truncate max-w-[130px]">{reel.creator}</span>
                             <span className="text-[11px] opacity-80 shrink-0">{reel.views}</span>
                           </div>
+
+                          {reel.seriesId && (
+                            <div className="pt-2">
+                              <Link
+                                href={`/series/${reel.seriesId}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-600/80 hover:bg-purple-500 text-white backdrop-blur-md transition-colors"
+                              >
+                                <span>Series Info</span>
+                                <ArrowRight className="w-2.5 h-2.5" />
+                              </Link>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -1020,6 +889,174 @@ export function LandingHeroView() {
       </section>
 
       {/* ========================================================================= */}
+      {/* 3.5. COMPETITION ARENA / VOTE & WIN REWARD SHOWCASE                       */}
+      {/* ========================================================================= */}
+      <section id="competition" className="relative z-10 py-16 px-4 sm:px-8 max-w-7xl mx-auto">
+        <div className="relative overflow-hidden rounded-3xl border border-purple-500/30 p-6 sm:p-10 bg-gradient-to-br from-[#1C0B36] via-[#120726] to-[#080214] text-white shadow-2xl shadow-purple-950/40">
+          {/* Subtle Ambient Orbs */}
+          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-purple-600/25 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-pink-600/20 rounded-full blur-3xl pointer-events-none" />
+
+          {/* Section Header */}
+          <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 to-purple-500/20 border border-amber-400/40 text-amber-300 text-xs font-black tracking-wider uppercase backdrop-blur-md">
+                <Trophy className="w-4 h-4 text-amber-400 animate-pulse" />
+                <span>Monthly Championship • Season 4</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight bg-gradient-to-r from-white via-purple-100 to-amber-200 bg-clip-text text-transparent">
+                Vote For Your Favorite & Win
+              </h2>
+              <p className="text-xs sm:text-sm md:text-base text-purple-200/90 leading-relaxed">
+                Viewers decide who wins! Cast your vote for the most captivating vertical reels. The #1 creator takes home the{' '}
+                <span className="text-amber-300 font-bold">50,000 Coins + ₹50,000 Cash</span> Grand Prize, and active voters receive lucky-draw coin bonuses!
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 shrink-0">
+              <div className="p-3 rounded-2xl bg-white/5 border border-amber-400/30 text-left">
+                <span className="text-[10px] uppercase font-bold text-purple-300 block">Season Bounty Pool</span>
+                <span className="text-base font-black text-amber-300">50,000 Coins + ₹50,000</span>
+              </div>
+
+              <Link
+                href="/competition"
+                className="px-6 py-3 rounded-full text-xs font-bold tracking-wide uppercase bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white shadow-xl shadow-purple-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2"
+              >
+                <span>Enter Arena & Vote</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Dynamic Competing Leaders from Supabase */}
+          {reels.length > 0 ? (
+            <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {reels.slice(0, 3).map((entry, idx) => {
+                const currentVotes = landingVotes[entry.id] || (1480 - idx * 260);
+                const hasVoted = votedLandingSet.has(entry.id);
+                const rankText = idx === 0 ? '🥇 1st Place (Leader)' : idx === 1 ? '🥈 2nd Place' : '🥉 3rd Place';
+                const borderClass = idx === 0 ? 'border-amber-400/80' : idx === 1 ? 'border-slate-400/60' : 'border-amber-700/60';
+                const badgeBg = idx === 0 ? 'bg-amber-400 text-black' : idx === 1 ? 'bg-slate-300 text-slate-900' : 'bg-amber-800 text-amber-100';
+
+                return (
+                  <div
+                    key={entry.id}
+                    onClick={() => setActiveVideoModal({
+                      id: entry.id,
+                      seriesId: entry.seriesId,
+                      title: entry.title,
+                      subtitle: entry.subtitle,
+                      creator: entry.creator,
+                      category: entry.category,
+                      thumbnail: entry.thumbnail,
+                      videoUrl: entry.videoUrl,
+                      duration: entry.duration,
+                      views: `${currentVotes} votes`,
+                    })}
+                    className={`relative rounded-2xl overflow-hidden border ${borderClass} bg-[#100624] p-4 flex flex-col justify-between group cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-xl`}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full ${badgeBg} shadow-sm`}>
+                        {rankText}
+                      </span>
+                      <span className="text-[11px] font-bold text-amber-300">
+                        {currentVotes.toLocaleString()} votes
+                      </span>
+                    </div>
+
+                    <div className="relative aspect-[9/12] w-full rounded-xl overflow-hidden mb-3 bg-black/50">
+                      {entry.thumbnail ? (
+                        <Image
+                          src={entry.thumbnail}
+                          alt={entry.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-purple-950 flex items-center justify-center">
+                          <Film className="w-8 h-8 text-purple-400" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+                      
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white group-hover:scale-110 group-hover:bg-purple-600 transition-all">
+                          <Play className="w-4 h-4 fill-white ml-0.5" />
+                        </div>
+                      </div>
+
+                      <div className="absolute bottom-2.5 left-2.5 right-2.5 text-white">
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-md uppercase">
+                          {entry.category}
+                        </span>
+                        <h4 className="font-bold text-sm line-clamp-1 mt-1">{entry.title}</h4>
+                        <p className="text-[11px] text-purple-200">{entry.creator}</p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={(e) => handleLandingVote(entry.id, e)}
+                      className={`w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md ${
+                        hasVoted
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-400 text-white shadow-purple-600/30'
+                      }`}
+                    >
+                      {hasVoted ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          <span>Voted</span>
+                        </>
+                      ) : (
+                        <>
+                          <Heart className="w-3.5 h-3.5 fill-white stroke-none" />
+                          <span>Vote For Reel</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="relative z-10 p-8 sm:p-12 rounded-2xl bg-white/5 border border-purple-500/30 text-center space-y-4">
+              <Trophy className="w-12 h-12 text-amber-400 mx-auto" />
+              <h3 className="text-xl sm:text-2xl font-black uppercase text-white">
+                Monthly Championship Arena
+              </h3>
+              <p className="text-xs sm:text-sm text-purple-200/80 max-w-lg mx-auto">
+                No competing reels uploaded yet. Creators: upload your video or series in Creator Studio to compete for the 50,000 Coins Season Reward!
+              </p>
+              <div className="pt-2 flex flex-wrap justify-center gap-3">
+                <Link
+                  href="/creator/studio"
+                  className="px-6 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all"
+                >
+                  Upload Reel to Compete
+                </Link>
+                <Link
+                  href="/competition"
+                  className="px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider transition-all"
+                >
+                  View Arena Details
+                </Link>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-8 text-center">
+            <Link
+              href="/competition"
+              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-300 hover:text-white transition-colors"
+            >
+              <span>View All Competing Reels & Leaderboard Standings</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* 4. SOCIAL PROOF / SATISFIED CLIENTS LOGOS BAR                             */}
       {/* ========================================================================= */}
       <section className="relative z-10 py-12 px-4 sm:px-8 max-w-7xl mx-auto border-t border-b border-purple-500/15">
@@ -1309,7 +1346,17 @@ export function LandingHeroView() {
               ref={carouselRef}
               className="flex items-center gap-5 overflow-x-auto no-scrollbar scroll-smooth pb-4 pt-1"
             >
-              {filteredReels.map((reel) => (
+              {filteredReels.length === 0 ? (
+                <div className="w-full p-8 rounded-2xl bg-white/5 border border-white/10 text-center space-y-2">
+                  <p className="text-sm font-semibold text-purple-200">
+                    No dynamic reels published in this category yet.
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    New series and reels uploaded via Creator Studio will be showcased here automatically.
+                  </p>
+                </div>
+              ) : (
+                filteredReels.map((reel) => (
                 <div
                   key={reel.id}
                   onClick={() => setActiveVideoModal(reel)}
@@ -1360,7 +1407,7 @@ export function LandingHeroView() {
                     </div>
                   </div>
                 </div>
-              ))}
+              )))}
             </div>
           </div>
         </div>
@@ -1470,6 +1517,11 @@ export function LandingHeroView() {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/competition" className="hover:text-purple-500 cursor-pointer">
+                    Competition & Rewards
+                  </Link>
+                </li>
+                <li>
                   <button onClick={() => scrollToSection('services', 'Services')} className="hover:text-purple-500 cursor-pointer">
                     Showcase & Services
                   </button>
@@ -1566,12 +1618,21 @@ export function LandingHeroView() {
                 <span className="text-xs text-purple-300 font-semibold">{activeVideoModal.creator}</span>
                 <p className="text-xs text-slate-400">{activeVideoModal.views} views • {activeVideoModal.duration}</p>
               </div>
-              <Link
-                href="/series"
-                className="px-5 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity cursor-pointer"
-              >
-                Watch Full Series →
-              </Link>
+              {activeVideoModal.seriesId ? (
+                <Link
+                  href={`/series/${activeVideoModal.seriesId}`}
+                  className="px-5 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>View Series Info & Episodes →</span>
+                </Link>
+              ) : (
+                <Link
+                  href={`/videos/${(activeVideoModal.id || '').replace('video-', '')}`}
+                  className="px-5 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity cursor-pointer"
+                >
+                  Watch Full Reel →
+                </Link>
+              )}
             </div>
           </div>
         </div>

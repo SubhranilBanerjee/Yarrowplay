@@ -76,27 +76,58 @@ export default function RecommendationsPage() {
           }
         }
 
-        // 2. Fallback to Supabase series and videos
-        const { data: seriesData } = await supabase
-          .from('series')
-          .select('id, title, description, cover_url, genre, total_episodes, profiles:creator_id(display_name, username, avatar_url)')
-          .limit(16);
+        // 2. Fallback to Supabase content_series and videos
+        const [
+          { data: seriesData },
+          { data: videoData },
+        ] = await Promise.all([
+          supabase
+            .from('content_series')
+            .select('id, title, description, cover_url, category, total_episodes, creator:profiles(display_name, username, avatar_url)')
+            .limit(16),
+          supabase
+            .from('videos')
+            .select('id, title, description, thumbnail_url, category, duration_seconds, views_count, creator:profiles(display_name, username, avatar_url)')
+            .eq('status', 'published')
+            .limit(16),
+        ]);
+
+        const fallbackItems: Recommendation[] = [];
 
         if (seriesData && seriesData.length > 0) {
-          setItems(
-            seriesData.map((s: any) => ({
+          seriesData.forEach((s: any) => {
+            fallbackItems.push({
               id: s.id,
               title: s.title,
               description: s.description,
-              thumbnail_url: s.cover_url || '/images/lighthouse_bg.jpg',
-              total_episodes: s.total_episodes || 12,
-              genre: s.genre || 'Drama',
+              thumbnail_url: s.cover_url || '/images/series_city_lights.jpg',
+              total_episodes: s.total_episodes || 1,
+              genre: s.category || 'Drama',
               type: 'series',
-              recommendation_reason: 'Top Pick for You',
-              creator: s.profiles,
-            }))
-          );
+              recommendation_reason: 'Top Original Series Pick',
+              creator: s.creator,
+            });
+          });
         }
+
+        if (videoData && videoData.length > 0) {
+          videoData.forEach((v: any) => {
+            fallbackItems.push({
+              id: v.id,
+              title: v.title,
+              description: v.description,
+              thumbnail_url: v.thumbnail_url,
+              duration: v.duration_seconds || undefined,
+              total_episodes: 1,
+              genre: v.category || 'Reels',
+              type: 'video',
+              recommendation_reason: 'Trending Reel',
+              creator: v.creator,
+            });
+          });
+        }
+
+        setItems(fallbackItems);
       } catch (err) {
         console.error('Failed to load recommendations:', err);
       } finally {
