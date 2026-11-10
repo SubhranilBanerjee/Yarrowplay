@@ -27,13 +27,13 @@ export async function GET(req: NextRequest) {
 
     if (!competition) {
       competition = {
-        id: 'comp-season-4',
-        title: 'Lighthouse Creator Championship • Season 4',
-        description: 'Viewers choose the champion! Vote for your favorite short reel or episodic drama. The highest voted creator wins ₹50,000 INR Cash + 50,000 Coins!',
-        season_number: 4,
+        id: 'comp-season-1',
+        title: 'Creator Championship',
+        description: 'Viewers choose the champion! Vote for your favorite short reel or episodic drama. Highest voted creator takes the seasonal prize pool.',
+        season_number: 1,
         prize_coins: 50000,
         prize_cash_inr: 50000,
-        start_date: new Date(Date.now() - 7 * 86400000).toISOString(),
+        start_date: new Date().toISOString(),
         end_date: new Date(Date.now() + 18 * 86400000).toISOString(),
         status: 'active',
       };
@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
           .select('id, title, category, video_url, thumbnail_url, duration_seconds, views_count, likes_count, creator:profiles(display_name, username, avatar_url)')
           .eq('status', 'published')
           .order('likes_count', { ascending: false })
-          .limit(12);
+          .limit(50);
 
         if (dbVideos && dbVideos.length > 0) {
           items = dbVideos
@@ -152,13 +152,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       {
         competition: {
-          id: 'comp-season-4',
-          title: 'Lighthouse Creator Championship • Season 4',
-          description: 'Viewers choose the champion! Vote for your favorite short reel or episodic drama. The highest voted creator wins ₹50,000 INR Cash + 50,000 Coins!',
-          season_number: 4,
+          id: 'comp-season-1',
+          title: 'Creator Championship',
+          description: 'Viewers choose the champion! Vote for your favorite short reel or episodic drama. Highest voted creator takes the seasonal prize pool.',
+          season_number: 1,
           prize_coins: 50000,
           prize_cash_inr: 50000,
-          start_date: new Date(Date.now() - 7 * 86400000).toISOString(),
+          start_date: new Date().toISOString(),
           end_date: new Date(Date.now() + 18 * 86400000).toISOString(),
           status: 'active',
           total_votes: 0,
@@ -230,6 +230,24 @@ export async function POST(req: NextRequest) {
       } catch (dbErr) {
         console.warn('Database vote recording notice:', dbErr);
       }
+    }
+
+    // Persist vote counter on video record in Supabase
+    try {
+      const { data: vRecord } = await supabase
+        .from('videos')
+        .select('likes_count')
+        .eq('id', videoId)
+        .maybeSingle();
+
+      if (vRecord) {
+        await supabase
+          .from('videos')
+          .update({ likes_count: (vRecord.likes_count || 0) + 1 })
+          .eq('id', videoId);
+      }
+    } catch (vErr) {
+      console.warn('Video likes count update notice:', vErr);
     }
 
     return NextResponse.json({

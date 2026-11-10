@@ -49,6 +49,7 @@ export interface ReelItem {
   duration: string;
   thumbnail: string;
   videoUrl: string;
+  votes?: number;
   badge?: string;
   accentColor?: string;
 }
@@ -331,6 +332,7 @@ export function LandingHeroView() {
               duration: durDisplay,
               thumbnail: v.thumbnail_url,
               videoUrl: v.video_url,
+              votes: v.likes_count || 0,
               badge: vc > 1000 ? 'Trending' : 'New',
               accentColor: '#A855F7',
             });
@@ -902,14 +904,14 @@ export function LandingHeroView() {
             <div className="space-y-2 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 to-purple-500/20 border border-amber-400/40 text-amber-300 text-xs font-black tracking-wider uppercase backdrop-blur-md">
                 <Trophy className="w-4 h-4 text-amber-400 animate-pulse" />
-                <span>Monthly Championship • Season 4</span>
+                <span>Monthly Championship • Live Season</span>
               </div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight bg-gradient-to-r from-white via-purple-100 to-amber-200 bg-clip-text text-transparent">
                 Vote For Your Favorite & Win
               </h2>
               <p className="text-xs sm:text-sm md:text-base text-purple-200/90 leading-relaxed">
                 Viewers decide who wins! Cast your vote for the most captivating vertical reels. The #1 creator takes home the{' '}
-                <span className="text-amber-300 font-bold">50,000 Coins + ₹50,000 Cash</span> Grand Prize, and active voters receive lucky-draw coin bonuses!
+                <span className="text-amber-300 font-bold">Cash + Coins Bounty</span> Grand Prize, and active voters receive lucky-draw coin bonuses!
               </p>
             </div>
 
@@ -933,7 +935,7 @@ export function LandingHeroView() {
           {reels.length > 0 ? (
             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {reels.slice(0, 3).map((entry, idx) => {
-                const currentVotes = landingVotes[entry.id] || (1480 - idx * 260);
+                const currentVotes = landingVotes[entry.id] !== undefined ? landingVotes[entry.id] : (entry.votes || 0);
                 const hasVoted = votedLandingSet.has(entry.id);
                 const rankText = idx === 0 ? '🥇 1st Place (Leader)' : idx === 1 ? '🥈 2nd Place' : '🥉 3rd Place';
                 const borderClass = idx === 0 ? 'border-amber-400/80' : idx === 1 ? 'border-slate-400/60' : 'border-amber-700/60';

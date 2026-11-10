@@ -26,14 +26,13 @@ import {
   TrendingUp,
   UserCheck,
   Zap,
+  Film,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useWallet } from '@/context/WalletContext';
 import { CoinIcon } from '@/components/ui/CoinIcon';
-import { CompetingReel, DEFAULT_COMPETITION_ITEMS } from '@/data/competition';
-
-const CATEGORIES = ['All', 'Drama', 'Thriller', 'Romance', 'Action', 'Sci-Fi', 'Comedy'];
+import { CompetingReel } from '@/data/competition';
 
 export default function CompetitionPage() {
   const { user } = useAuth();
@@ -41,25 +40,18 @@ export default function CompetitionPage() {
   const isLight = theme === 'light';
   const { openCoinStore } = useWallet();
 
-  const [competition, setCompetition] = useState<any>({
-    id: 'comp-season-4',
-    title: 'Lighthouse Creator Championship • Season 4',
-    description: 'Viewers choose the champion! Vote for your favorite short reel or episodic drama. The highest voted creator wins ₹50,000 INR Cash + 50,000 Coins!',
-    season_number: 4,
-    prize_coins: 50000,
-    prize_cash_inr: 50000,
-    end_date: new Date(Date.now() + 18 * 86400000).toISOString(),
-    total_votes: 0,
-    entries_count: 0,
-  });
+  // Dynamic Competition & Reel State from Supabase
+  const [competition, setCompetition] = useState<any>(null);
+  const [reels, setReels] = useState<CompetingReel[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [reels, setReels] = useState<CompetingReel[]>(DEFAULT_COMPETITION_ITEMS);
+  // Filters & Modal State
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'votes' | 'views'>('votes');
   const [activeVideoModal, setActiveVideoModal] = useState<CompetingReel | null>(null);
 
-  // Voting State: set of videoIds user has voted for
+  // Voting State
   const [votedVideoIds, setVotedVideoIds] = useState<Set<string>>(new Set());
   const [voteToast, setVoteToast] = useState<{ show: boolean; title: string; remaining: number } | null>(null);
   const [nominateModalOpen, setNominateModalOpen] = useState(false);
@@ -70,26 +62,25 @@ export default function CompetitionPage() {
   const votesCastToday = votedVideoIds.size;
   const votesRemaining = Math.max(0, DAILY_VOTE_LIMIT - votesCastToday);
 
-  // Countdown timer state
-  const [timeLeft, setTimeLeft] = useState({
-    days: 18,
-    hours: 14,
-    minutes: 32,
-    seconds: 45,
-  });
+  // Dynamic countdown timer state
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  } | null>(null);
 
-  // Load live competition data & user votes
+  // Load live dynamic competition data & user votes from Supabase
   useEffect(() => {
-    // 1. Load local votes from localStorage
     try {
-      const savedVotes = localStorage.getItem('lr_competition_votes_s4');
+      const savedVotes = localStorage.getItem('lr_competition_votes');
       if (savedVotes) {
         setVotedVideoIds(new Set(JSON.parse(savedVotes)));
       }
     } catch {}
 
-    // 2. Fetch from API
     async function loadData() {
+      setIsLoading(true);
       try {
         const res = await fetch('/api/competition');
         if (res.ok) {
@@ -97,32 +88,34 @@ export default function CompetitionPage() {
           if (data.competition) {
             setCompetition(data.competition);
           }
-          if (data.items && data.items.length > 0) {
+          if (Array.isArray(data.items)) {
             setReels(data.items);
           }
-          if (data.userVotedIds && data.userVotedIds.length > 0) {
+          if (Array.isArray(data.userVotedIds) && data.userVotedIds.length > 0) {
             setVotedVideoIds((prev) => new Set([...prev, ...data.userVotedIds]));
           }
         }
       } catch (err) {
-        console.warn('Using default competition data:', err);
+        console.warn('Failed to load dynamic competition data:', err);
+      } finally {
+        setIsLoading(false);
       }
     }
 
     loadData();
   }, []);
 
-  // Live countdown timer calculation
+  // Live countdown timer calculation derived dynamically from competition end date
   useEffect(() => {
-    const targetDate = new Date(competition.end_date || Date.now() + 18 * 86400000).getTime();
+    if (!competition?.end_date) return;
+    const targetDate = new Date(competition.end_date).getTime();
 
-    const interval = setInterval(() => {
+    const updateCountdown = () => {
       const now = Date.now();
       const difference = targetDate - now;
 
       if (difference <= 0) {
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-        clearInterval(interval);
       } else {
         const days = Math.floor(difference / (1000 * 60 * 60 * 24));
         const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
@@ -130,10 +123,12 @@ export default function CompetitionPage() {
         const seconds = Math.floor((difference / 1000) % 60);
         setTimeLeft({ days, hours, minutes, seconds });
       }
-    }, 1000);
+    };
 
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
-  }, [competition.end_date]);
+  }, [competition?.end_date]);
 
   // Handle Casting a Vote
   const handleVote = async (reel: CompetingReel, e?: React.MouseEvent) => {
@@ -170,7 +165,7 @@ export default function CompetitionPage() {
     setVotedVideoIds(newVotedSet);
 
     try {
-      localStorage.setItem('lr_competition_votes_s4', JSON.stringify(Array.from(newVotedSet)));
+      localStorage.setItem('lr_competition_votes', JSON.stringify(Array.from(newVotedSet)));
     } catch {}
 
     const newRemaining = Math.max(0, DAILY_VOTE_LIMIT - newVotedSet.size);
@@ -182,20 +177,46 @@ export default function CompetitionPage() {
     });
     setTimeout(() => setVoteToast(null), 3500);
 
-    // Call API in background
+    // Call API in background to persist in Supabase
     try {
       await fetch('/api/competition', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          competitionId: competition.id,
+          competitionId: competition?.id || 'active',
           videoId: reel.videoId,
         }),
       });
     } catch (err) {
-      console.warn('Vote synced locally');
+      console.warn('Vote recorded locally');
     }
   };
+
+  // Dynamically extract categories from currently loaded items
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    reels.forEach((r) => {
+      if (r.category && r.category.trim()) {
+        cats.add(r.category.trim());
+      }
+    });
+    return ['All', ...Array.from(cats).sort()];
+  }, [reels]);
+
+  // Dynamically compute prize breakdown from active competition bounty
+  const prizeCash = competition?.prize_cash_inr || 0;
+  const prizeCoins = competition?.prize_coins || 0;
+
+  const firstPlaceCash = Math.round(prizeCash * 0.6);
+  const firstPlaceCoins = Math.round(prizeCoins * 0.6);
+
+  const secondPlaceCash = Math.round(prizeCash * 0.25);
+  const secondPlaceCoins = Math.round(prizeCoins * 0.25);
+
+  const thirdPlaceCash = Math.round(prizeCash * 0.15);
+  const thirdPlaceCoins = Math.round(prizeCoins * 0.15);
+
+  const voterCoins = Math.round(prizeCoins * 0.1);
 
   // Filter & sort entries
   const filteredReels = useMemo(() => {
@@ -217,7 +238,7 @@ export default function CompetitionPage() {
       });
   }, [reels, selectedCategory, searchQuery, sortBy]);
 
-  // Leaderboard Podium Top 3 (sorted by votes)
+  // Dynamic Leaderboard Podium Top 3 (sorted strictly by votes)
   const topThree = useMemo(() => {
     const sorted = [...reels].sort((a, b) => b.votes - a.votes);
     return {
@@ -238,123 +259,143 @@ export default function CompetitionPage() {
       }`}
     >
       {/* ========================================================================= */}
-      {/* 1. HERO & COMPETITION SEASON BANNER                                       */}
+      {/* 1. DYNAMIC HERO & COMPETITION SEASON BANNER                                */}
       {/* ========================================================================= */}
-      <section className="relative overflow-hidden rounded-3xl border border-purple-500/30 p-6 sm:p-10 md:p-12 mb-12 bg-gradient-to-br from-[#1A0B36] via-[#120726] to-[#080214] text-white shadow-2xl shadow-purple-950/40">
-        {/* Ambient Glow Orbs */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-purple-600/25 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/3 -mb-20 w-80 h-80 bg-fuchsia-600/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 left-0 -ml-16 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-12">
-          {/* Left Column: Title, Season & Description */}
-          <div className="space-y-4 max-w-2xl text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-purple-500/20 to-pink-500/20 border border-amber-400/40 text-amber-300 text-xs font-black tracking-wider uppercase backdrop-blur-md shadow-sm">
-              <Trophy className="w-4 h-4 text-amber-400 animate-pulse" />
-              <span>Season 4 Live Championship</span>
+      {isLoading ? (
+        <section className="relative overflow-hidden rounded-3xl border border-purple-500/20 p-8 sm:p-12 mb-12 bg-[#120726]/60 animate-pulse">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+            <div className="space-y-4 max-w-2xl w-full">
+              <div className="h-6 w-48 rounded-full bg-purple-500/20" />
+              <div className="h-10 w-3/4 rounded-2xl bg-purple-500/20" />
+              <div className="h-4 w-full rounded-full bg-purple-500/10" />
+              <div className="h-4 w-2/3 rounded-full bg-purple-500/10" />
             </div>
-
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight leading-none bg-gradient-to-r from-white via-purple-100 to-amber-200 bg-clip-text text-transparent filter drop-shadow">
-              Community Choice Awards
-            </h1>
-
-            <p className="text-xs sm:text-sm md:text-base text-purple-200/90 leading-relaxed max-w-xl">
-              Viewers decide who wins! Vote for your favorite vertical reels and micro-series. The #1 creator takes home the{' '}
-              <span className="text-amber-300 font-bold">50,000 Coins + ₹50,000 INR</span> Grand Prize, and voters can win bonus rewards!
-            </p>
-
-            {/* Quick Rules & Voter Allowance Badges */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2">
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs text-white backdrop-blur-md">
-                <Zap className="w-3.5 h-3.5 text-amber-400" />
-                <span>
-                  Your Votes Today:{' '}
-                  <strong className="text-amber-300 font-bold">
-                    {votesRemaining} of {DAILY_VOTE_LIMIT} left
-                  </strong>
-                </span>
-              </div>
-
-              <button
-                onClick={() => setShowRulesModal(true)}
-                className="text-xs font-semibold text-purple-300 hover:text-white underline underline-offset-4 cursor-pointer transition-colors"
-              >
-                View Reward & Voting Rules
-              </button>
-            </div>
+            <div className="w-full sm:w-[340px] h-60 rounded-2xl bg-purple-500/10" />
           </div>
+        </section>
+      ) : (
+        <section className="relative overflow-hidden rounded-3xl border border-purple-500/30 p-6 sm:p-10 md:p-12 mb-12 bg-gradient-to-br from-[#1A0B36] via-[#120726] to-[#080214] text-white shadow-2xl shadow-purple-950/40">
+          {/* Ambient Glow Orbs */}
+          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-purple-600/25 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-1/3 -mb-20 w-80 h-80 bg-fuchsia-600/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-1/2 left-0 -ml-16 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Right Column: Live Countdown Clock & Grand Prize Showcase */}
-          <div className="w-full lg:w-auto shrink-0 flex flex-col items-center">
-            <div className="w-full sm:w-[340px] rounded-2xl border border-amber-400/30 p-5 bg-gradient-to-b from-[#2B1254]/90 to-[#180A30]/95 backdrop-blur-xl shadow-xl text-center space-y-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-purple-200 flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-amber-400" />
-                  <span>Voting Closes In</span>
-                </span>
-                <span className="inline-block px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/30">
-                  Live
-                </span>
+          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-12">
+            {/* Left Column: Title, Season & Description */}
+            <div className="space-y-4 max-w-2xl text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-purple-500/20 to-pink-500/20 border border-amber-400/40 text-amber-300 text-xs font-black tracking-wider uppercase backdrop-blur-md shadow-sm">
+                <Trophy className="w-4 h-4 text-amber-400 animate-pulse" />
+                <span>Season {competition?.season_number || 1} Live Championship</span>
               </div>
 
-              {/* Countdown Digits */}
-              <div className="grid grid-cols-4 gap-2">
-                {[
-                  { label: 'DAYS', val: timeLeft.days },
-                  { label: 'HOURS', val: timeLeft.hours },
-                  { label: 'MINS', val: timeLeft.minutes },
-                  { label: 'SECS', val: timeLeft.seconds },
-                ].map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="p-2 rounded-xl bg-black/40 border border-purple-500/30 flex flex-col items-center justify-center"
-                  >
-                    <span className="font-mono text-xl sm:text-2xl font-black text-amber-300">
-                      {item.val.toString().padStart(2, '0')}
-                    </span>
-                    <span className="text-[9px] font-bold tracking-wider text-purple-300/80">
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight leading-none bg-gradient-to-r from-white via-purple-100 to-amber-200 bg-clip-text text-transparent filter drop-shadow">
+                {competition?.title || 'Community Choice Awards'}
+              </h1>
 
-              {/* Prize Pool Display */}
-              <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/20 to-purple-600/20 border border-amber-400/40 text-left flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-purple-200 block">
-                    Total Season Bounty
-                  </span>
-                  <div className="text-lg font-black text-amber-300 flex items-center gap-1.5">
-                    <Trophy className="w-4 h-4 text-amber-400" />
-                    <span>50,000 Coins + ₹50,000</span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="text-[10px] uppercase font-bold text-purple-300 block">
-                    Total Votes
-                  </span>
-                  <span className="text-sm font-extrabold text-white">
-                    {totalVotesAcrossAll.toLocaleString()}
+              <p className="text-xs sm:text-sm md:text-base text-purple-200/90 leading-relaxed max-w-xl">
+                {competition?.description ||
+                  'Viewers choose the champion! Vote for your favorite vertical reels and micro-series. The #1 creator takes home the Grand Prize, and voters can win bonus rewards!'}
+              </p>
+
+              {/* Quick Rules & Voter Allowance Badges */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2">
+                <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs text-white backdrop-blur-md">
+                  <Zap className="w-3.5 h-3.5 text-amber-400" />
+                  <span>
+                    Your Votes Today:{' '}
+                    <strong className="text-amber-300 font-bold">
+                      {votesRemaining} of {DAILY_VOTE_LIMIT} left
+                    </strong>
                   </span>
                 </div>
-              </div>
 
-              {/* Submit Reel CTA for Creators */}
-              <button
-                onClick={() => setNominateModalOpen(true)}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-purple-600/30 cursor-pointer flex items-center justify-center gap-2"
-              >
-                <span>Nominate / Enter Your Reel</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+                <button
+                  onClick={() => setShowRulesModal(true)}
+                  className="text-xs font-semibold text-purple-300 hover:text-white underline underline-offset-4 cursor-pointer transition-colors"
+                >
+                  View Reward & Voting Rules
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column: Live Countdown Clock & Grand Prize Showcase */}
+            <div className="w-full lg:w-auto shrink-0 flex flex-col items-center">
+              <div className="w-full sm:w-[340px] rounded-2xl border border-amber-400/30 p-5 bg-gradient-to-b from-[#2B1254]/90 to-[#180A30]/95 backdrop-blur-xl shadow-xl text-center space-y-4">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-purple-200 flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-amber-400" />
+                    <span>Voting Closes In</span>
+                  </span>
+                  <span className="inline-block px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/30">
+                    Live
+                  </span>
+                </div>
+
+                {/* Dynamic Countdown Digits */}
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { label: 'DAYS', val: timeLeft ? timeLeft.days : 0 },
+                    { label: 'HOURS', val: timeLeft ? timeLeft.hours : 0 },
+                    { label: 'MINS', val: timeLeft ? timeLeft.minutes : 0 },
+                    { label: 'SECS', val: timeLeft ? timeLeft.seconds : 0 },
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="p-2 rounded-xl bg-black/40 border border-purple-500/30 flex flex-col items-center justify-center"
+                    >
+                      <span className="font-mono text-xl sm:text-2xl font-black text-amber-300">
+                        {item.val.toString().padStart(2, '0')}
+                      </span>
+                      <span className="text-[9px] font-bold tracking-wider text-purple-300/80">
+                        {item.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Dynamic Prize Pool Display */}
+                <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/20 to-purple-600/20 border border-amber-400/40 text-left flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-purple-200 block">
+                      Total Season Bounty
+                    </span>
+                    <div className="text-lg font-black text-amber-300 flex items-center gap-1.5">
+                      <Trophy className="w-4 h-4 text-amber-400" />
+                      <span>
+                        {prizeCash > 0 && prizeCoins > 0
+                          ? `${prizeCoins.toLocaleString()} Coins + ₹${prizeCash.toLocaleString()}`
+                          : prizeCash > 0
+                          ? `₹${prizeCash.toLocaleString()}`
+                          : `${prizeCoins.toLocaleString()} Coins`}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] uppercase font-bold text-purple-300 block">
+                      Total Votes
+                    </span>
+                    <span className="text-sm font-extrabold text-white">
+                      {totalVotesAcrossAll.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Submit Reel CTA for Creators */}
+                <button
+                  onClick={() => setNominateModalOpen(true)}
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-purple-600/30 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <span>Nominate / Enter Your Reel</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ========================================================================= */}
-      {/* 2. LIVE LEADERBOARD PODIUM (TOP 3 CONTENDERS)                              */}
+      {/* 2. DYNAMIC LIVE LEADERBOARD PODIUM (TOP 3 CONTENDERS)                     */}
       {/* ========================================================================= */}
       <section className="mb-14 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -372,186 +413,213 @@ export default function CompetitionPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-          {/* Rank 2 (Silver) */}
-          {topThree.second && (
-            <div
-              onClick={() => setActiveVideoModal(topThree.second)}
-              className="order-2 md:order-1 relative rounded-3xl p-5 border border-slate-300/40 dark:border-slate-500/30 bg-gradient-to-b from-slate-200/50 to-slate-100/30 dark:from-[#1A1828] dark:to-[#0F0D1A] group cursor-pointer hover:scale-[1.02] transition-all shadow-xl"
-            >
-              <div className="absolute -top-3.5 left-6 px-3 py-0.5 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-900 dark:text-slate-100 font-black text-xs uppercase tracking-wider border border-white/20 flex items-center gap-1 shadow-md">
-                <span>🥈 2nd Place</span>
-              </div>
-
-              <div className="relative aspect-[9/12] w-full rounded-2xl overflow-hidden mb-4 bg-black/40">
-                <Image
-                  src={topThree.second.thumbnail}
-                  alt={topThree.second.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
-                <div className="absolute bottom-3 left-3 right-3 text-white">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-md uppercase">
-                    {topThree.second.category}
-                  </span>
-                  <h3 className="font-bold text-sm sm:text-base mt-1 line-clamp-1">
-                    {topThree.second.title}
-                  </h3>
-                  <p className="text-xs text-purple-200">{topThree.second.creator}</p>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-80 rounded-3xl bg-purple-500/10 border border-purple-500/20" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+            {/* Rank 2 (Silver) */}
+            {topThree.second && (
+              <div
+                onClick={() => setActiveVideoModal(topThree.second)}
+                className="order-2 md:order-1 relative rounded-3xl p-5 border border-slate-300/40 dark:border-slate-500/30 bg-gradient-to-b from-slate-200/50 to-slate-100/30 dark:from-[#1A1828] dark:to-[#0F0D1A] group cursor-pointer hover:scale-[1.02] transition-all shadow-xl"
+              >
+                <div className="absolute -top-3.5 left-6 px-3 py-0.5 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-900 dark:text-slate-100 font-black text-xs uppercase tracking-wider border border-white/20 flex items-center gap-1 shadow-md">
+                  <span>🥈 2nd Place</span>
                 </div>
-              </div>
 
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block">
-                    Votes Tally
-                  </span>
-                  <span className="text-lg font-black text-slate-800 dark:text-slate-200">
-                    {topThree.second.votes.toLocaleString()}
-                  </span>
-                </div>
-                <button
-                  onClick={(e) => handleVote(topThree.second!, e)}
-                  className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
-                    votedVideoIds.has(topThree.second.videoId)
-                      ? 'bg-purple-600 text-white shadow-md'
-                      : 'bg-white dark:bg-white/10 hover:bg-purple-600 hover:text-white border border-purple-500/30'
-                  }`}
-                >
-                  {votedVideoIds.has(topThree.second.videoId) ? <Check className="w-3.5 h-3.5" /> : <Heart className="w-3.5 h-3.5 fill-pink-500 text-pink-500" />}
-                  <span>{votedVideoIds.has(topThree.second.videoId) ? 'Voted' : 'Vote'}</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Rank 1 (Gold - Center & Elevated) */}
-          {topThree.first && (
-            <div
-              onClick={() => setActiveVideoModal(topThree.first)}
-              className="order-1 md:order-2 relative rounded-3xl p-6 border-2 border-amber-400/80 bg-gradient-to-b from-amber-500/15 via-[#231242] to-[#120824] group cursor-pointer hover:scale-[1.03] transition-all shadow-2xl shadow-amber-500/20 md:-translate-y-3"
-            >
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-black font-black text-xs uppercase tracking-wider border border-amber-200 flex items-center gap-1.5 shadow-lg">
-                <Crown className="w-4 h-4 fill-black" />
-                <span>🥇 1st Place (Leader)</span>
-              </div>
-
-              <div className="relative aspect-[9/13] w-full rounded-2xl overflow-hidden mb-4 bg-black/40">
-                <Image
-                  src={topThree.first.thumbnail}
-                  alt={topThree.first.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/30" />
-                
-                {/* Play Button Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-12 h-12 rounded-full bg-amber-400 text-black flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                    <Play className="w-5 h-5 fill-current ml-0.5" />
+                <div className="relative aspect-[9/12] w-full rounded-2xl overflow-hidden mb-4 bg-black/40">
+                  <Image
+                    src={topThree.second.thumbnail}
+                    alt={topThree.second.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+                  <div className="absolute bottom-3 left-3 right-3 text-white">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-md uppercase">
+                      {topThree.second.category}
+                    </span>
+                    <h3 className="font-bold text-sm sm:text-base mt-1 line-clamp-1">
+                      {topThree.second.title}
+                    </h3>
+                    <p className="text-xs text-purple-200">{topThree.second.creator}</p>
                   </div>
                 </div>
 
-                <div className="absolute bottom-3 left-3 right-3 text-white">
-                  <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-400 text-black uppercase tracking-wider">
-                    {topThree.first.category}
-                  </span>
-                  <h3 className="font-extrabold text-base sm:text-lg mt-1 line-clamp-1 drop-shadow">
-                    {topThree.first.title}
-                  </h3>
-                  <p className="text-xs text-amber-200 font-semibold">{topThree.first.creator}</p>
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block">
+                      Votes Tally
+                    </span>
+                    <span className="text-lg font-black text-slate-800 dark:text-slate-200">
+                      {topThree.second.votes.toLocaleString()}
+                    </span>
+                  </div>
+                  <button
+                    onClick={(e) => handleVote(topThree.second!, e)}
+                    className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
+                      votedVideoIds.has(topThree.second.videoId)
+                        ? 'bg-purple-600 text-white shadow-md'
+                        : 'bg-white dark:bg-white/10 hover:bg-purple-600 hover:text-white border border-purple-500/30'
+                    }`}
+                  >
+                    {votedVideoIds.has(topThree.second.videoId) ? (
+                      <Check className="w-3.5 h-3.5" />
+                    ) : (
+                      <Heart className="w-3.5 h-3.5 fill-pink-500 text-pink-500" />
+                    )}
+                    <span>{votedVideoIds.has(topThree.second.videoId) ? 'Voted' : 'Vote'}</span>
+                  </button>
                 </div>
               </div>
+            )}
 
-              <div className="flex items-center justify-between gap-2 pt-1 border-t border-amber-400/20">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-amber-200/80 block">
-                    Leading Votes
-                  </span>
-                  <span className="text-xl font-black text-amber-300">
-                    {topThree.first.votes.toLocaleString()}
-                  </span>
+            {/* Rank 1 (Gold - Center & Elevated) */}
+            {topThree.first && (
+              <div
+                onClick={() => setActiveVideoModal(topThree.first)}
+                className="order-1 md:order-2 relative rounded-3xl p-6 border-2 border-amber-400/80 bg-gradient-to-b from-amber-500/15 via-[#231242] to-[#120824] group cursor-pointer hover:scale-[1.03] transition-all shadow-2xl shadow-amber-500/20 md:-translate-y-3"
+              >
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-black font-black text-xs uppercase tracking-wider border border-amber-200 flex items-center gap-1.5 shadow-lg">
+                  <Crown className="w-4 h-4 fill-black" />
+                  <span>🥇 1st Place (Leader)</span>
                 </div>
-                <button
-                  onClick={(e) => handleVote(topThree.first!, e)}
-                  className={`px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-lg ${
-                    votedVideoIds.has(topThree.first.videoId)
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black shadow-amber-500/40'
-                  }`}
-                >
-                  {votedVideoIds.has(topThree.first.videoId) ? <Check className="w-4 h-4" /> : <Heart className="w-4 h-4 fill-black" />}
-                  <span>{votedVideoIds.has(topThree.first.videoId) ? 'Voted' : 'Vote Leader'}</span>
-                </button>
+
+                <div className="relative aspect-[9/13] w-full rounded-2xl overflow-hidden mb-4 bg-black/40">
+                  <Image
+                    src={topThree.first.thumbnail}
+                    alt={topThree.first.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/30" />
+
+                  {/* Play Button Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-12 h-12 rounded-full bg-amber-400 text-black flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                      <Play className="w-5 h-5 fill-current ml-0.5" />
+                    </div>
+                  </div>
+
+                  <div className="absolute bottom-3 left-3 right-3 text-white">
+                    <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-400 text-black uppercase tracking-wider">
+                      {topThree.first.category}
+                    </span>
+                    <h3 className="font-extrabold text-base sm:text-lg mt-1 line-clamp-1 drop-shadow">
+                      {topThree.first.title}
+                    </h3>
+                    <p className="text-xs text-amber-200 font-semibold">{topThree.first.creator}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-2 pt-1 border-t border-amber-400/20">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-amber-200/80 block">
+                      Leading Votes
+                    </span>
+                    <span className="text-xl font-black text-amber-300">
+                      {topThree.first.votes.toLocaleString()}
+                    </span>
+                  </div>
+                  <button
+                    onClick={(e) => handleVote(topThree.first!, e)}
+                    className={`px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-lg ${
+                      votedVideoIds.has(topThree.first.videoId)
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black shadow-amber-500/40'
+                    }`}
+                  >
+                    {votedVideoIds.has(topThree.first.videoId) ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <Heart className="w-4 h-4 fill-black" />
+                    )}
+                    <span>{votedVideoIds.has(topThree.first.videoId) ? 'Voted' : 'Vote Leader'}</span>
+                  </button>
+                </div>
               </div>
+            )}
+
+            {/* Rank 3 (Bronze) */}
+            {topThree.third && (
+              <div
+                onClick={() => setActiveVideoModal(topThree.third)}
+                className="order-3 relative rounded-3xl p-5 border border-amber-700/40 dark:border-amber-700/30 bg-gradient-to-b from-amber-900/10 to-amber-950/20 dark:from-[#1D1216] dark:to-[#12080D] group cursor-pointer hover:scale-[1.02] transition-all shadow-xl"
+              >
+                <div className="absolute -top-3.5 left-6 px-3 py-0.5 rounded-full bg-amber-800 text-amber-100 font-black text-xs uppercase tracking-wider border border-white/20 flex items-center gap-1 shadow-md">
+                  <span>🥉 3rd Place</span>
+                </div>
+
+                <div className="relative aspect-[9/12] w-full rounded-2xl overflow-hidden mb-4 bg-black/40">
+                  <Image
+                    src={topThree.third.thumbnail}
+                    alt={topThree.third.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+                  <div className="absolute bottom-3 left-3 right-3 text-white">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-md uppercase">
+                      {topThree.third.category}
+                    </span>
+                    <h3 className="font-bold text-sm sm:text-base mt-1 line-clamp-1">
+                      {topThree.third.title}
+                    </h3>
+                    <p className="text-xs text-purple-200">{topThree.third.creator}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-amber-500/80 block">
+                      Votes Tally
+                    </span>
+                    <span className="text-lg font-black text-amber-600 dark:text-amber-400">
+                      {topThree.third.votes.toLocaleString()}
+                    </span>
+                  </div>
+                  <button
+                    onClick={(e) => handleVote(topThree.third!, e)}
+                    className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
+                      votedVideoIds.has(topThree.third.videoId)
+                        ? 'bg-purple-600 text-white shadow-md'
+                        : 'bg-white dark:bg-white/10 hover:bg-purple-600 hover:text-white border border-purple-500/30'
+                    }`}
+                  >
+                    {votedVideoIds.has(topThree.third.videoId) ? (
+                      <Check className="w-3.5 h-3.5" />
+                    ) : (
+                      <Heart className="w-3.5 h-3.5 fill-pink-500 text-pink-500" />
+                    )}
+                    <span>{votedVideoIds.has(topThree.third.videoId) ? 'Voted' : 'Vote'}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Dynamic Empty State if no entries exist yet */}
+        {!isLoading && reels.length === 0 && (
+          <div className="p-10 sm:p-14 rounded-3xl bg-white/5 border border-purple-500/20 text-center space-y-4 max-w-xl mx-auto backdrop-blur-xl">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300">
+              <Trophy className="w-7 h-7" />
             </div>
-          )}
-
-          {/* Rank 3 (Bronze) */}
-          {topThree.third && (
-            <div
-              onClick={() => setActiveVideoModal(topThree.third)}
-              className="order-3 relative rounded-3xl p-5 border border-amber-700/40 dark:border-amber-700/30 bg-gradient-to-b from-amber-900/10 to-amber-950/20 dark:from-[#1D1216] dark:to-[#12080D] group cursor-pointer hover:scale-[1.02] transition-all shadow-xl"
-            >
-              <div className="absolute -top-3.5 left-6 px-3 py-0.5 rounded-full bg-amber-800 text-amber-100 font-black text-xs uppercase tracking-wider border border-white/20 flex items-center gap-1 shadow-md">
-                <span>🥉 3rd Place</span>
-              </div>
-
-              <div className="relative aspect-[9/12] w-full rounded-2xl overflow-hidden mb-4 bg-black/40">
-                <Image
-                  src={topThree.third.thumbnail}
-                  alt={topThree.third.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
-                <div className="absolute bottom-3 left-3 right-3 text-white">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-md uppercase">
-                    {topThree.third.category}
-                  </span>
-                  <h3 className="font-bold text-sm sm:text-base mt-1 line-clamp-1">
-                    {topThree.third.title}
-                  </h3>
-                  <p className="text-xs text-purple-200">{topThree.third.creator}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-amber-500/80 block">
-                    Votes Tally
-                  </span>
-                  <span className="text-lg font-black text-amber-600 dark:text-amber-400">
-                    {topThree.third.votes.toLocaleString()}
-                  </span>
-                </div>
-                <button
-                  onClick={(e) => handleVote(topThree.third!, e)}
-                  className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
-                    votedVideoIds.has(topThree.third.videoId)
-                      ? 'bg-purple-600 text-white shadow-md'
-                      : 'bg-white dark:bg-white/10 hover:bg-purple-600 hover:text-white border border-purple-500/30'
-                  }`}
-                >
-                  {votedVideoIds.has(topThree.third.videoId) ? <Check className="w-3.5 h-3.5" /> : <Heart className="w-3.5 h-3.5 fill-pink-500 text-pink-500" />}
-                  <span>{votedVideoIds.has(topThree.third.videoId) ? 'Voted' : 'Vote'}</span>
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {!topThree.first && (
-          <div className="p-8 rounded-3xl bg-white/5 border border-white/10 text-center space-y-3 max-w-xl mx-auto">
-            <Trophy className="w-10 h-10 text-amber-400 mx-auto" />
-            <h3 className="text-base font-bold text-white">No active competition entries right now</h3>
-            <p className="text-xs text-[var(--lr-text-muted,#9AA7B4)]">
-              Nominate your published reels or series to enter the live championship and compete for ₹50,000 INR Cash + 50,000 Coins!
+            <h3 className="text-lg font-bold text-white">No active competition entries right now</h3>
+            <p className="text-xs sm:text-sm text-[var(--lr-text-muted,#9AA7B4)] leading-relaxed">
+              Nominate your published reels or series to enter the live championship and compete for{' '}
+              {prizeCash > 0 && prizeCoins > 0
+                ? `${prizeCoins.toLocaleString()} Coins + ₹${prizeCash.toLocaleString()} INR`
+                : `${prizeCoins.toLocaleString()} Coins`}
+              !
             </p>
             <button
               onClick={() => setNominateModalOpen(true)}
-              className="px-5 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer"
+              className="px-6 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-purple-600/30"
             >
               Nominate Reel Now
             </button>
@@ -560,13 +628,13 @@ export default function CompetitionPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 3. SEARCH, CATEGORY FILTERS & SORT BAR                                    */}
+      {/* 3. DYNAMIC SEARCH, CATEGORY FILTERS & SORT BAR                            */}
       {/* ========================================================================= */}
       <section className="mb-8 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* Category Filter Pills */}
+          {/* Dynamic Category Filter Pills */}
           <div className="flex flex-wrap items-center gap-2">
-            {CATEGORIES.map((cat) => (
+            {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
@@ -617,110 +685,135 @@ export default function CompetitionPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 4. ALL COMPETING REELS GRID                                               */}
+      {/* 4. DYNAMIC COMPETING REELS GRID                                          */}
       {/* ========================================================================= */}
       <section className="mb-16">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
-          {filteredReels.map((reel, index) => {
-            const hasVoted = votedVideoIds.has(reel.videoId);
-            const rank = index + 1;
+        {isLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 animate-pulse">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+              <div key={n} className="aspect-[9/16] rounded-2xl bg-purple-500/10 border border-purple-500/20" />
+            ))}
+          </div>
+        ) : filteredReels.length === 0 ? (
+          <div className="p-12 rounded-3xl bg-white/5 border border-purple-500/20 text-center space-y-3">
+            <Film className="w-8 h-8 text-purple-400 mx-auto" />
+            <h4 className="text-base font-bold text-white">No matching competition reels</h4>
+            <p className="text-xs text-slate-400">
+              No entries found matching &quot;{searchQuery || selectedCategory}&quot;.
+            </p>
+            <button
+              onClick={() => {
+                setSelectedCategory('All');
+                setSearchQuery('');
+              }}
+              className="px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition-colors"
+            >
+              Reset Filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+            {filteredReels.map((reel, index) => {
+              const hasVoted = votedVideoIds.has(reel.videoId);
+              const rank = index + 1;
 
-            return (
-              <div
-                key={reel.id}
-                onClick={() => setActiveVideoModal(reel)}
-                className={`relative aspect-[9/16] rounded-2xl overflow-hidden border group cursor-pointer select-none transition-all duration-300 hover:scale-[1.02] ${
-                  hasVoted
-                    ? 'border-purple-500 shadow-lg shadow-purple-600/25 ring-2 ring-purple-500/50'
-                    : isLight
-                    ? 'bg-slate-100 border-purple-200 shadow-md hover:border-purple-400'
-                    : 'bg-[#120726] border-purple-500/20 shadow-xl hover:border-purple-400 hover:shadow-purple-900/30'
-                }`}
-              >
-                {/* Thumbnail Image */}
-                <Image
-                  src={reel.thumbnail}
-                  alt={reel.title}
-                  fill
-                  sizes="(max-width: 640px) 180px, 240px"
-                  className="object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
-                />
+              return (
+                <div
+                  key={reel.id}
+                  onClick={() => setActiveVideoModal(reel)}
+                  className={`relative aspect-[9/16] rounded-2xl overflow-hidden border group cursor-pointer select-none transition-all duration-300 hover:scale-[1.02] ${
+                    hasVoted
+                      ? 'border-purple-500 shadow-lg shadow-purple-600/25 ring-2 ring-purple-500/50'
+                      : isLight
+                      ? 'bg-slate-100 border-purple-200 shadow-md hover:border-purple-400'
+                      : 'bg-[#120726] border-purple-500/20 shadow-xl hover:border-purple-400 hover:shadow-purple-900/30'
+                  }`}
+                >
+                  {/* Thumbnail Image */}
+                  <Image
+                    src={reel.thumbnail}
+                    alt={reel.title}
+                    fill
+                    sizes="(max-width: 640px) 180px, 240px"
+                    className="object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                  />
 
-                {/* Scrim Gradients */}
-                <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none" />
-                <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/95 via-black/70 to-transparent pointer-events-none" />
+                  {/* Scrim Gradients */}
+                  <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none" />
+                  <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/95 via-black/70 to-transparent pointer-events-none" />
 
-                {/* Top Badges: Rank & Category */}
-                <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between z-10">
-                  <span
-                    className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-md ${
-                      rank === 1
-                        ? 'bg-amber-400 text-black font-extrabold'
-                        : rank === 2
-                        ? 'bg-slate-200 text-slate-900'
-                        : rank === 3
-                        ? 'bg-amber-700 text-white'
-                        : 'bg-black/60 backdrop-blur-md text-white border border-white/20'
-                    }`}
-                  >
-                    #{rank}
-                  </span>
+                  {/* Top Badges: Rank & Category */}
+                  <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between z-10">
+                    <span
+                      className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-md ${
+                        rank === 1
+                          ? 'bg-amber-400 text-black font-extrabold'
+                          : rank === 2
+                          ? 'bg-slate-200 text-slate-900'
+                          : rank === 3
+                          ? 'bg-amber-700 text-white'
+                          : 'bg-black/60 backdrop-blur-md text-white border border-white/20'
+                      }`}
+                    >
+                      #{rank}
+                    </span>
 
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white/90 border border-white/20">
-                    {reel.duration}
-                  </span>
-                </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white/90 border border-white/20">
+                      {reel.duration}
+                    </span>
+                  </div>
 
-                {/* Play Button Icon on Hover */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                  <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white group-hover:scale-110 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-pink-600 transition-all duration-300 shadow-xl">
-                    <Play className="w-4 h-4 fill-white ml-0.5" />
+                  {/* Play Button Icon on Hover */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white group-hover:scale-110 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-pink-600 transition-all duration-300 shadow-xl">
+                      <Play className="w-4 h-4 fill-white ml-0.5" />
+                    </div>
+                  </div>
+
+                  {/* Bottom Details & Vote Button */}
+                  <div className="absolute bottom-0 inset-x-0 p-3 z-10 flex flex-col justify-end text-white">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-purple-300">
+                      {reel.category}
+                    </span>
+                    <h4 className="font-bold text-xs sm:text-sm line-clamp-1 group-hover:text-purple-200 transition-colors drop-shadow">
+                      {reel.title}
+                    </h4>
+                    <div className="flex items-center justify-between text-[11px] text-purple-200/90 mt-0.5 mb-2.5">
+                      <span className="truncate max-w-[100px]">{reel.creator}</span>
+                      <span className="text-amber-300 font-bold">{reel.votes.toLocaleString()} votes</span>
+                    </div>
+
+                    {/* High Contrast Vote Action Button */}
+                    <button
+                      onClick={(e) => handleVote(reel, e)}
+                      className={`w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md ${
+                        hasVoted
+                          ? 'bg-emerald-500 text-white shadow-emerald-500/30'
+                          : 'bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white shadow-purple-600/40 hover:scale-[1.02] active:scale-[0.98]'
+                      }`}
+                    >
+                      {hasVoted ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          <span>Voted</span>
+                        </>
+                      ) : (
+                        <>
+                          <Heart className="w-3.5 h-3.5 fill-white stroke-none" />
+                          <span>Vote ({reel.votes})</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
-
-                {/* Bottom Details & Vote Button */}
-                <div className="absolute bottom-0 inset-x-0 p-3 z-10 flex flex-col justify-end text-white">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-purple-300">
-                    {reel.category}
-                  </span>
-                  <h4 className="font-bold text-xs sm:text-sm line-clamp-1 group-hover:text-purple-200 transition-colors drop-shadow">
-                    {reel.title}
-                  </h4>
-                  <div className="flex items-center justify-between text-[11px] text-purple-200/90 mt-0.5 mb-2.5">
-                    <span className="truncate max-w-[100px]">{reel.creator}</span>
-                    <span className="text-amber-300 font-bold">{reel.votes.toLocaleString()} votes</span>
-                  </div>
-
-                  {/* High Contrast Vote Action Button */}
-                  <button
-                    onClick={(e) => handleVote(reel, e)}
-                    className={`w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md ${
-                      hasVoted
-                        ? 'bg-emerald-500 text-white shadow-emerald-500/30'
-                        : 'bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white shadow-purple-600/40 hover:scale-[1.02] active:scale-[0.98]'
-                    }`}
-                  >
-                    {hasVoted ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 stroke-[3]" />
-                        <span>Voted</span>
-                      </>
-                    ) : (
-                      <>
-                        <Heart className="w-3.5 h-3.5 fill-white stroke-none" />
-                        <span>Vote ({reel.votes})</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* ========================================================================= */}
-      {/* 5. PRIZE BREAKDOWN & REWARD DISTRIBUTION                                  */}
+      {/* 5. DYNAMIC PRIZE BREAKDOWN & REWARD DISTRIBUTION                          */}
       {/* ========================================================================= */}
       <section className="mb-14 rounded-3xl border border-purple-500/20 p-6 sm:p-8 bg-gradient-to-br from-[#120726] to-[#0A0318] text-white">
         <div className="flex items-center gap-2 mb-4">
@@ -731,7 +824,8 @@ export default function CompetitionPage() {
         </div>
 
         <p className="text-xs sm:text-sm text-purple-200/80 mb-6 max-w-2xl leading-relaxed">
-          The competition rewards both top creators and active viewers. At the conclusion of Season 4, rewards are distributed automatically to winners' wallets.
+          The competition rewards both top creators and active viewers. At the conclusion of Season{' '}
+          {competition?.season_number || 1}, rewards are distributed automatically to winners&apos; wallets.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -740,7 +834,8 @@ export default function CompetitionPage() {
             <span className="text-xl">🥇</span>
             <h4 className="font-bold text-sm text-amber-300">1st Place Champion</h4>
             <p className="text-xs text-slate-300 leading-relaxed">
-              <strong>₹50,000 Cash</strong> + <strong>50,000 Coins</strong> + 30 Days Homepage Spotlight + Golden Verified Creator Badge.
+              <strong>₹{firstPlaceCash.toLocaleString()} Cash</strong> +{' '}
+              <strong>{firstPlaceCoins.toLocaleString()} Coins</strong> + 30 Days Homepage Spotlight + Golden Verified Creator Badge.
             </p>
           </div>
 
@@ -749,7 +844,8 @@ export default function CompetitionPage() {
             <span className="text-xl">🥈</span>
             <h4 className="font-bold text-sm text-slate-200">2nd Place Contender</h4>
             <p className="text-xs text-slate-300 leading-relaxed">
-              <strong>₹20,000 Cash</strong> + <strong>20,000 Coins</strong> + 14 Days Category Feature + Silver Creator Badge.
+              <strong>₹{secondPlaceCash.toLocaleString()} Cash</strong> +{' '}
+              <strong>{secondPlaceCoins.toLocaleString()} Coins</strong> + 14 Days Category Feature + Silver Creator Badge.
             </p>
           </div>
 
@@ -758,7 +854,8 @@ export default function CompetitionPage() {
             <span className="text-xl">🥉</span>
             <h4 className="font-bold text-sm text-amber-400">3rd Place Contender</h4>
             <p className="text-xs text-slate-300 leading-relaxed">
-              <strong>₹10,000 Cash</strong> + <strong>10,000 Coins</strong> + Platform Feature + Bronze Creator Badge.
+              <strong>₹{thirdPlaceCash.toLocaleString()} Cash</strong> +{' '}
+              <strong>{thirdPlaceCoins.toLocaleString()} Coins</strong> + Platform Feature + Bronze Creator Badge.
             </p>
           </div>
 
@@ -767,7 +864,7 @@ export default function CompetitionPage() {
             <span className="text-xl">🎁</span>
             <h4 className="font-bold text-sm text-pink-300">Active Voter Lucky Draw</h4>
             <p className="text-xs text-slate-300 leading-relaxed">
-              <strong>5,000 Coins</strong> shared among 10 lucky viewers who voted for the winning reel!
+              <strong>{voterCoins.toLocaleString()} Coins</strong> shared among lucky viewers who voted for the winning reel!
             </p>
           </div>
         </div>
@@ -899,7 +996,7 @@ export default function CompetitionPage() {
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-amber-400" />
-                <h3 className="font-bold text-lg">Championship Rules & Guidelines</h3>
+                <h3 className="font-bold text-lg">Championship Rules &amp; Guidelines</h3>
               </div>
               <button
                 onClick={() => setShowRulesModal(false)}
@@ -915,24 +1012,24 @@ export default function CompetitionPage() {
                 Every verified viewer receives 3 free votes every 24 hours. You can vote for 3 different reels or concentrate your votes.
               </div>
               <div>
-                <strong className="text-white block mb-1">2. Fair Play & Anti-Bot Protection</strong>
+                <strong className="text-white block mb-1">2. Fair Play &amp; Anti-Bot Protection</strong>
                 All votes are verified. Duplicate accounts or artificial bot manipulation are automatically disqualified by platform moderation.
               </div>
               <div>
                 <strong className="text-white block mb-1">3. Creator Payout Schedule</strong>
-                Winners are locked in at the expiration of the timer. Coin and cash prizes are credited within 48 hours to the creator's wallet.
+                Winners are locked in at the expiration of the timer. Coin and cash prizes are credited within 48 hours to the creator&apos;s wallet.
               </div>
               <div>
                 <strong className="text-white block mb-1">4. Voter Community Pool</strong>
-                10 random lucky viewers who voted for the 1st place winner are rewarded 500 bonus coins each!
+                Active viewers who vote for the champion share the community bonus coins pool!
               </div>
             </div>
 
             <button
               onClick={() => setShowRulesModal(false)}
-              className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase tracking-wider"
+              className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase tracking-wider cursor-pointer"
             >
-              Got It, Let's Vote!
+              Got It, Let&apos;s Vote!
             </button>
           </div>
         </div>
@@ -953,7 +1050,7 @@ export default function CompetitionPage() {
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
                 <Crown className="w-5 h-5 text-amber-400" />
-                <h3 className="font-bold text-base">Enter Reel into Season 4</h3>
+                <h3 className="font-bold text-base">Enter Reel into Season {competition?.season_number || 1}</h3>
               </div>
               <button
                 onClick={() => setNominateModalOpen(false)}
@@ -988,7 +1085,7 @@ export default function CompetitionPage() {
               </Link>
               <button
                 onClick={() => setNominateModalOpen(false)}
-                className="px-4 py-2.5 rounded-xl border border-white/20 text-xs font-semibold text-slate-300 hover:text-white"
+                className="px-4 py-2.5 rounded-xl border border-white/20 text-xs font-semibold text-slate-300 hover:text-white cursor-pointer"
               >
                 Cancel
               </button>
@@ -999,4 +1096,3 @@ export default function CompetitionPage() {
     </div>
   );
 }
-
