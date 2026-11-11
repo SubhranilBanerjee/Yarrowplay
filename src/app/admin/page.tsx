@@ -35,12 +35,15 @@ import {
   Sliders,
   Layers,
   Zap,
+  Trophy,
+  Palette,
+  Plus,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { getStoredSiteContent, saveStoredSiteContent, resetStoredSiteContent, SiteContent, DEFAULT_SITE_CONTENT } from '@/lib/siteContent';
 
-type AdminTab = 'analytics' | 'users' | 'moderation' | 'text';
+type AdminTab = 'analytics' | 'users' | 'moderation' | 'text' | 'competitions';
 
 export default function AdminHubPage() {
   const router = useRouter();
@@ -97,6 +100,31 @@ export default function AdminHubPage() {
   const [customKeyValue, setCustomKeyValue] = useState('');
   const [textSearchFilter, setTextSearchFilter] = useState('');
 
+  // Competitions & Themes Admin State
+  const [adminActiveComp, setAdminActiveComp] = useState<any>(null);
+  const [adminThemesList, setAdminThemesList] = useState<any[]>([]);
+  const [adminCompsList, setAdminCompsList] = useState<any[]>([]);
+  const [compLoading, setCompLoading] = useState(false);
+  const [compNotice, setCompNotice] = useState<string | null>(null);
+
+  // Launch Form State
+  const [compThemeId, setCompThemeId] = useState('');
+  const [compTitle, setCompTitle] = useState('');
+  const [compSeason, setCompSeason] = useState(2);
+  const [compCash, setCompCash] = useState(50000);
+  const [compCoins, setCompCoins] = useState(50000);
+  const [compDays, setCompDays] = useState(14);
+  const [compDesc, setCompDesc] = useState('');
+
+  // Create Theme Form State
+  const [admThemeName, setAdmThemeName] = useState('');
+  const [admThemeCategory, setAdmThemeCategory] = useState('Sci-Fi');
+  const [admThemeEmoji, setAdmThemeEmoji] = useState('🚀');
+  const [admThemeTagline, setAdmThemeTagline] = useState('');
+  const [admThemeDesc, setAdmThemeDesc] = useState('');
+  const [admThemeRules, setAdmThemeRules] = useState('');
+  const [admThemeGradient, setAdmThemeGradient] = useState('from-[#2A0845] via-[#1B053A] to-[#0A0216]');
+
   // Notification Banner
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -119,6 +147,108 @@ export default function AdminHubPage() {
     user?.email === 'admin@dramabox.stream' ||
     user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
     profile?.role === 'admin';
+
+  // Load Competitions & Themes for Admin
+  const loadAdminCompetitions = async () => {
+    try {
+      const res = await fetch('/api/admin/competitions');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.activeCompetition) {
+          setAdminActiveComp(data.activeCompetition);
+          setCompSeason((data.activeCompetition.season_number || 1) + 1);
+          setCompTitle(`${data.activeCompetition.theme_name || 'Creator'} Championship`);
+          setCompDesc(data.activeCompetition.description || '');
+        }
+        if (Array.isArray(data.themes)) {
+          setAdminThemesList(data.themes);
+          if (data.themes[0] && !compThemeId) setCompThemeId(data.themes[0].id);
+        }
+        if (Array.isArray(data.competitions)) {
+          setAdminCompsList(data.competitions);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to load admin competitions:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadAdminCompetitions();
+    }
+  }, [isAdmin]);
+
+  const handleAdminCreateTheme = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!admThemeName.trim()) return;
+    setCompLoading(true);
+    try {
+      const rules = admThemeRules.split('\n').map((r) => r.trim()).filter(Boolean);
+      const res = await fetch('/api/admin/competitions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_theme',
+          name: admThemeName,
+          category: admThemeCategory,
+          badgeEmoji: admThemeEmoji,
+          tagline: admThemeTagline,
+          description: admThemeDesc,
+          bannerGradient: admThemeGradient,
+          rules,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showNotification('success', data.message || 'Theme created successfully!');
+        setAdmThemeName('');
+        setAdmThemeTagline('');
+        setAdmThemeDesc('');
+        setAdmThemeRules('');
+        await loadAdminCompetitions();
+      } else {
+        showNotification('error', data.error || 'Failed to create theme');
+      }
+    } catch {
+      showNotification('error', 'Network error creating theme');
+    } finally {
+      setCompLoading(false);
+    }
+  };
+
+  const handleAdminLaunchCompetition = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCompLoading(true);
+    try {
+      const selectedT = adminThemesList.find((t) => t.id === compThemeId);
+      const res = await fetch('/api/admin/competitions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'launch_competition',
+          themeId: compThemeId,
+          title: compTitle || `${selectedT?.name || 'Creator'} Championship`,
+          seasonNumber: compSeason,
+          prizeCashInr: compCash,
+          prizeCoins: compCoins,
+          durationDays: compDays,
+          description: compDesc,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showNotification('success', data.message || 'Championship launched successfully!');
+        await loadAdminCompetitions();
+      } else {
+        showNotification('error', data.error || 'Failed to launch competition');
+      }
+    } catch {
+      showNotification('error', 'Network error launching competition');
+    } finally {
+      setCompLoading(false);
+    }
+  };
 
   // Handle Admin Direct Sign In
   const handleAdminLogin = async (e?: React.FormEvent) => {
@@ -692,6 +822,20 @@ export default function AdminHubPage() {
           >
             <FileText className="w-4 h-4" />
             <span>3d. Site Text</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('competitions')}
+            className={`flex-1 min-w-[120px] py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              activeTab === 'competitions'
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-600/30'
+                : isLight
+                ? 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
+                : 'text-purple-200/70 hover:text-white hover:bg-purple-900/30'
+            }`}
+          >
+            <Trophy className="w-4 h-4 text-amber-400" />
+            <span>3e. Competitions</span>
           </button>
         </div>
 
@@ -2885,6 +3029,706 @@ export default function AdminHubPage() {
                 {textSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                 <span>Save All Changes</span>
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 5: COMPETITIONS & THEMES (Requirement: Create Themes & Launch)       */}
+        {/* ========================================================================= */}
+        {activeTab === 'competitions' && (
+          <div className="space-y-8 animate-fadeIn">
+            {/* Header info & Live Arena Link */}
+            <div
+              className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl backdrop-blur-xl border transition-colors ${
+                isLight ? 'bg-white border-slate-200 shadow-sm text-slate-900' : 'bg-[#11082B]/80 border-purple-500/25 text-white'
+              }`}
+            >
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span className={`text-[11px] font-extrabold uppercase tracking-wider ${isLight ? 'text-amber-700' : 'text-amber-400'}`}>
+                    Competition Arena Management
+                  </span>
+                </div>
+                <h2 className={`text-2xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>Competitions & Themes Command Center</h2>
+                <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-purple-300/80'}`}>
+                  Create new competition themes, launch new seasons with bounties, and manage creator contest parameters.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={loadAdminCompetitions}
+                  className={`px-4 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-xs ${
+                    isLight
+                      ? 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700'
+                      : 'bg-purple-900/50 hover:bg-purple-800/60 border-purple-500/40 text-white'
+                  }`}
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${compLoading ? 'animate-spin' : ''}`} />
+                  <span>Refresh</span>
+                </button>
+
+                <Link
+                  href="/competition"
+                  target="_blank"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-purple-600/30 transition-all cursor-pointer"
+                >
+                  <Trophy className="w-4 h-4 text-amber-300" />
+                  <span>View Live Contest Arena</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Currently Active Competition Showcase */}
+            {adminActiveComp ? (
+              <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-purple-500/40 bg-gradient-to-br from-[#1C0A35] via-[#120624] to-[#0A0314] text-white shadow-2xl">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="space-y-3 max-w-2xl">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        ACTIVE CHAMPIONSHIP
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-purple-500/20 text-purple-200 border border-purple-500/30">
+                        <span>{adminActiveComp.theme_badge_emoji || '🎬'}</span>
+                        <span>{adminActiveComp.theme_category || 'Theme'}</span>
+                      </span>
+                      <span className="text-xs text-purple-300/70 font-mono">
+                        Season #{adminActiveComp.season_number || 1}
+                      </span>
+                    </div>
+
+                    <h3 className="text-2xl sm:text-3xl font-black text-white">
+                      {adminActiveComp.title || `${adminActiveComp.theme_name} Championship`}
+                    </h3>
+                    <p className="text-sm text-purple-200/80 leading-relaxed">
+                      {adminActiveComp.description || adminActiveComp.theme_description}
+                    </p>
+
+                    {adminActiveComp.theme_rules && adminActiveComp.theme_rules.length > 0 && (
+                      <div className="pt-2">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-purple-300/60 block mb-1.5">
+                          Theme Submission Criteria:
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {adminActiveComp.theme_rules.map((rule: string, idx: number) => (
+                            <span
+                              key={idx}
+                              className="text-xs px-2.5 py-1 rounded-lg bg-white/5 border border-purple-400/20 text-purple-200 flex items-center gap-1.5"
+                            >
+                              <CheckCircle className="w-3 h-3 text-emerald-400 shrink-0" />
+                              {rule}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bounty Box */}
+                  <div className="shrink-0 p-5 rounded-2xl bg-gradient-to-br from-purple-900/60 to-pink-900/40 border border-purple-400/30 backdrop-blur-xl text-center space-y-3 min-w-[240px]">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-300 block">
+                      Total Prize Bounty
+                    </span>
+                    <div className="text-3xl font-black text-amber-400">
+                      ₹{(adminActiveComp.prize_cash_inr || 50000).toLocaleString('en-IN')}
+                    </div>
+                    <div className="text-xs font-bold text-purple-200 flex items-center justify-center gap-1">
+                      <span>+ {(adminActiveComp.prize_coins || 50000).toLocaleString('en-IN')}</span>
+                      <span>Coins</span>
+                    </div>
+                    <div className="pt-2 border-t border-purple-400/20 text-[11px] text-purple-300/80 flex items-center justify-center gap-1">
+                      <Clock className="w-3.5 h-3.5 text-purple-400" />
+                      <span>
+                        Ends:{' '}
+                        {adminActiveComp.end_date
+                          ? new Date(adminActiveComp.end_date).toLocaleDateString()
+                          : 'In 14 days'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div
+                className={`p-6 rounded-3xl border text-center space-y-2 ${
+                  isLight ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-amber-950/30 border-amber-500/30 text-amber-200'
+                }`}
+              >
+                <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto" />
+                <h3 className="font-bold">No Active Competition Running</h3>
+                <p className="text-xs opacity-80">Use the form below to launch a new competition with your preferred theme.</p>
+              </div>
+            )}
+
+            {/* Forms Grid: Launch Competition & Create Theme */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Form 1: Launch New Competition */}
+              <div
+                className={`p-6 sm:p-7 rounded-3xl border backdrop-blur-xl shadow-lg space-y-5 transition-colors ${
+                  isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/80 border-purple-500/30 text-white'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-pink-500 p-0.5 flex items-center justify-center text-white shadow-md shadow-amber-500/20">
+                    <Trophy className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-lg">Launch New Competition</h3>
+                    <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
+                      Select an existing theme and activate a fresh competition season.
+                    </p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleAdminLaunchCompetition} className="space-y-4">
+                  {/* Select Theme */}
+                  <div>
+                    <label className={`block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>
+                      Select Competition Theme *
+                    </label>
+                    <select
+                      value={compThemeId}
+                      onChange={(e) => {
+                        const tid = e.target.value;
+                        setCompThemeId(tid);
+                        const found = adminThemesList.find((t) => t.id === tid);
+                        if (found) {
+                          setCompTitle(`${found.name} Championship`);
+                          setCompDesc(found.description || '');
+                        }
+                      }}
+                      className={`w-full border rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none transition-colors ${
+                        isLight
+                          ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                          : 'bg-[#180C34] border-purple-500/30 text-white focus:border-purple-400'
+                      }`}
+                      required
+                    >
+                      <option value="" disabled>
+                        -- Choose a Theme --
+                      </option>
+                      {adminThemesList.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.badgeEmoji || '🎬'} {t.name} ({t.category})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Title & Season # */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="sm:col-span-2">
+                      <label className={`block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>
+                        Championship Title
+                      </label>
+                      <input
+                        type="text"
+                        value={compTitle}
+                        onChange={(e) => setCompTitle(e.target.value)}
+                        placeholder="e.g. Cyberpunk 2099 Championship"
+                        className={`w-full border rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition-colors ${
+                          isLight
+                            ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                            : 'bg-[#180C34] border-purple-500/30 text-white focus:border-purple-400'
+                        }`}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className={`block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>
+                        Season #
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={compSeason}
+                        onChange={(e) => setCompSeason(parseInt(e.target.value) || 1)}
+                        className={`w-full border rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition-colors ${
+                          isLight
+                            ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                            : 'bg-[#180C34] border-purple-500/30 text-white focus:border-purple-400'
+                        }`}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Prizes: Cash, Coins, Duration */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className={`block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>
+                        Cash Prize (₹ INR)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1000"
+                        value={compCash}
+                        onChange={(e) => setCompCash(parseInt(e.target.value) || 0)}
+                        className={`w-full border rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition-colors ${
+                          isLight
+                            ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                            : 'bg-[#180C34] border-purple-500/30 text-white focus:border-purple-400'
+                        }`}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className={`block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>
+                        Coin Prize
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1000"
+                        value={compCoins}
+                        onChange={(e) => setCompCoins(parseInt(e.target.value) || 0)}
+                        className={`w-full border rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition-colors ${
+                          isLight
+                            ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                            : 'bg-[#180C34] border-purple-500/30 text-white focus:border-purple-400'
+                        }`}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className={`block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>
+                        Duration (Days)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="90"
+                        value={compDays}
+                        onChange={(e) => setCompDays(parseInt(e.target.value) || 14)}
+                        className={`w-full border rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition-colors ${
+                          isLight
+                            ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                            : 'bg-[#180C34] border-purple-500/30 text-white focus:border-purple-400'
+                        }`}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Description / Creative Brief */}
+                  <div>
+                    <label className={`block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>
+                      Competition Brief / Description
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={compDesc}
+                      onChange={(e) => setCompDesc(e.target.value)}
+                      placeholder="Explain the contest requirements, vision, and creator brief..."
+                      className={`w-full border rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition-colors ${
+                        isLight
+                          ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                          : 'bg-[#180C34] border-purple-500/30 text-white focus:border-purple-400'
+                      }`}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={compLoading || !compThemeId}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:from-purple-500 hover:to-amber-400 text-white font-extrabold text-xs shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+                  >
+                    {compLoading ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4 text-amber-300" />
+                    )}
+                    <span>Launch Competition Season</span>
+                  </button>
+                </form>
+              </div>
+
+              {/* Form 2: Create New Creative Theme */}
+              <div
+                className={`p-6 sm:p-7 rounded-3xl border backdrop-blur-xl shadow-lg space-y-5 transition-colors ${
+                  isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11082B]/80 border-purple-500/30 text-white'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-500 p-0.5 flex items-center justify-center text-white shadow-md shadow-purple-600/20">
+                    <Palette className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-lg">Create New Creative Theme</h3>
+                    <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
+                      Define visual atmospheres, genres, and creative criteria for future contests.
+                    </p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleAdminCreateTheme} className="space-y-4">
+                  {/* Theme Name, Emoji, Genre */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="sm:col-span-2">
+                      <label className={`block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>
+                        Theme Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={admThemeName}
+                        onChange={(e) => setAdmThemeName(e.target.value)}
+                        placeholder="e.g. Monsoon Whispers"
+                        className={`w-full border rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition-colors ${
+                          isLight
+                            ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                            : 'bg-[#180C34] border-purple-500/30 text-white focus:border-purple-400'
+                        }`}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className={`block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>
+                        Emoji Icon
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={4}
+                        value={admThemeEmoji}
+                        onChange={(e) => setAdmThemeEmoji(e.target.value)}
+                        placeholder="🌧️"
+                        className={`w-full border rounded-xl px-3.5 py-2.5 text-xs text-center font-bold focus:outline-none transition-colors ${
+                          isLight
+                            ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                            : 'bg-[#180C34] border-purple-500/30 text-white focus:border-purple-400'
+                        }`}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Genre Category & Tagline */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className={`block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>
+                        Genre Category
+                      </label>
+                      <select
+                        value={admThemeCategory}
+                        onChange={(e) => setAdmThemeCategory(e.target.value)}
+                        className={`w-full border rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none transition-colors ${
+                          isLight
+                            ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                            : 'bg-[#180C34] border-purple-500/30 text-white focus:border-purple-400'
+                        }`}
+                      >
+                        <option value="Sci-Fi">Sci-Fi & Cyberpunk</option>
+                        <option value="Romance">Romance & Drama</option>
+                        <option value="Thriller">Thriller & Micro-Suspense</option>
+                        <option value="Comedy">Comedy & Satire</option>
+                        <option value="Action">Action & Stunts</option>
+                        <option value="Horror">Horror & Supernatural</option>
+                        <option value="Fantasy">Mythology & Fantasy</option>
+                        <option value="Documentary">Documentary & Real Life</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className={`block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>
+                        Tagline
+                      </label>
+                      <input
+                        type="text"
+                        value={admThemeTagline}
+                        onChange={(e) => setAdmThemeTagline(e.target.value)}
+                        placeholder="e.g. Love, rain, and unspoken truths"
+                        className={`w-full border rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition-colors ${
+                          isLight
+                            ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                            : 'bg-[#180C34] border-purple-500/30 text-white focus:border-purple-400'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Atmosphere Gradient Preset */}
+                  <div>
+                    <label className={`block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>
+                      Atmosphere Banner Theme
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {[
+                        { label: 'Cyber Violet', gradient: 'from-[#2A0845] via-[#1B053A] to-[#0A0216]' },
+                        { label: 'Deep Abyss', gradient: 'from-[#031B4D] via-[#080E28] to-[#040614]' },
+                        { label: 'Crimson Noir', gradient: 'from-[#4A0D1E] via-[#24060F] to-[#0B0205]' },
+                        { label: 'Emerald Matrix', gradient: 'from-[#063826] via-[#031B13] to-[#010805]' },
+                        { label: 'Sunset Amber', gradient: 'from-[#4D2305] via-[#2A1102] to-[#0E0601]' },
+                        { label: 'Neon Rose', gradient: 'from-[#50083B] via-[#290520] to-[#0D020B]' },
+                      ].map((item) => (
+                        <button
+                          key={item.label}
+                          type="button"
+                          onClick={() => setAdmThemeGradient(item.gradient)}
+                          className={`p-2 rounded-xl text-left border text-[11px] font-bold flex items-center gap-2 cursor-pointer transition-all ${
+                            admThemeGradient === item.gradient
+                              ? 'border-purple-500 bg-purple-500/20 text-white ring-1 ring-purple-500'
+                              : isLight
+                              ? 'border-slate-300 hover:border-slate-400 text-slate-700 bg-slate-50'
+                              : 'border-purple-500/20 hover:border-purple-500/40 text-purple-200 bg-[#160B30]'
+                          }`}
+                        >
+                          <span className={`w-3.5 h-3.5 rounded-full bg-gradient-to-tr ${item.gradient} shrink-0 border border-white/20`} />
+                          <span className="truncate">{item.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Theme Description */}
+                  <div>
+                    <label className={`block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>
+                      Creative Brief / Concept
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={admThemeDesc}
+                      onChange={(e) => setAdmThemeDesc(e.target.value)}
+                      placeholder="Describe the world, aesthetic, and creative mandate for creators..."
+                      className={`w-full border rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition-colors ${
+                        isLight
+                          ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                          : 'bg-[#180C34] border-purple-500/30 text-white focus:border-purple-400'
+                      }`}
+                    />
+                  </div>
+
+                  {/* Rules (one per line) */}
+                  <div>
+                    <label className={`block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-700' : 'text-purple-200'}`}>
+                      Submission Criteria / Rules (one per line)
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={admThemeRules}
+                      onChange={(e) => setAdmThemeRules(e.target.value)}
+                      placeholder={'e.g.\nVertical 9:16 format required\nOriginal music or platform audio library only\nDuration 30-90 seconds'}
+                      className={`w-full border rounded-xl px-3.5 py-2.5 text-xs focus:outline-none transition-colors ${
+                        isLight
+                          ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-purple-600'
+                          : 'bg-[#180C34] border-purple-500/30 text-white focus:border-purple-400'
+                      }`}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={compLoading || !admThemeName.trim()}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-purple-500 hover:from-purple-500 hover:to-pink-500 text-white font-extrabold text-xs shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+                  >
+                    {compLoading ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Plus className="w-4 h-4 text-purple-200" />
+                    )}
+                    <span>Save & Register New Theme</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {/* Themes Library Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className={`text-lg font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    Theme Library ({adminThemesList.length})
+                  </h3>
+                  <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
+                    Available creative themes that can be selected when launching future competition seasons.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {adminThemesList.map((theme) => {
+                  const isActive = adminActiveComp?.theme_id === theme.id;
+                  return (
+                    <div
+                      key={theme.id}
+                      className={`relative p-5 rounded-2xl border transition-all flex flex-col justify-between ${
+                        isActive
+                          ? 'bg-gradient-to-br from-purple-900/40 to-pink-900/20 border-purple-400 shadow-lg shadow-purple-600/10'
+                          : isLight
+                          ? 'bg-white border-slate-200 hover:border-purple-300'
+                          : 'bg-[#11082B]/60 border-purple-500/20 hover:border-purple-500/40'
+                      }`}
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-3xl p-2 rounded-xl bg-purple-500/10 border border-purple-400/20">
+                            {theme.badgeEmoji || '🎬'}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            {isActive && (
+                              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                Live Now
+                              </span>
+                            )}
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                              {theme.category}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-extrabold text-base text-white">{theme.name}</h4>
+                          {theme.tagline && (
+                            <p className="text-xs text-purple-300/70 italic mt-0.5">{theme.tagline}</p>
+                          )}
+                        </div>
+
+                        <p className={`text-xs line-clamp-3 leading-relaxed ${isLight ? 'text-slate-600' : 'text-purple-200/80'}`}>
+                          {theme.description}
+                        </p>
+
+                        {theme.rules && theme.rules.length > 0 && (
+                          <div className="pt-2 border-t border-purple-500/10">
+                            <span className="text-[10px] font-bold text-purple-300/60 uppercase tracking-wider block mb-1">
+                              Guidelines ({theme.rules.length}):
+                            </span>
+                            <ul className="text-[11px] text-purple-300/70 space-y-0.5 list-disc list-inside">
+                              {theme.rules.slice(0, 3).map((r: string, idx: number) => (
+                                <li key={idx} className="truncate">{r}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="pt-4 mt-3 border-t border-purple-500/10 flex items-center justify-between gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCompThemeId(theme.id);
+                            setCompTitle(`${theme.name} Championship`);
+                            setCompDesc(theme.description || '');
+                            window.scrollTo({ top: 300, behavior: 'smooth' });
+                          }}
+                          className={`w-full py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                            compThemeId === theme.id
+                              ? 'bg-purple-600 text-white border-purple-500'
+                              : isLight
+                              ? 'bg-slate-100 hover:bg-purple-50 text-slate-700 hover:text-purple-700 border-slate-300'
+                              : 'bg-purple-900/30 hover:bg-purple-900/60 text-purple-200 border-purple-500/30'
+                          }`}
+                        >
+                          <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                          <span>{compThemeId === theme.id ? 'Theme Selected' : 'Use for Launch'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Competition History Table */}
+            <div className="space-y-4">
+              <div>
+                <h3 className={`text-lg font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  Championship Seasons History ({adminCompsList.length})
+                </h3>
+                <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-purple-300/70'}`}>
+                  Record of all current and past community competitions hosted on Lighthouse Reels.
+                </p>
+              </div>
+
+              <div
+                className={`rounded-2xl border overflow-hidden backdrop-blur-xl ${
+                  isLight ? 'bg-white border-slate-200' : 'bg-[#11082B]/80 border-purple-500/20'
+                }`}
+              >
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr
+                        className={`border-b uppercase tracking-wider text-[10px] font-extrabold ${
+                          isLight ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-[#1A0E38] text-purple-300/80 border-purple-500/20'
+                        }`}
+                      >
+                        <th className="px-4 py-3">Season</th>
+                        <th className="px-4 py-3">Title & Theme</th>
+                        <th className="px-4 py-3">Prizes</th>
+                        <th className="px-4 py-3">Start Date</th>
+                        <th className="px-4 py-3">End Date</th>
+                        <th className="px-4 py-3">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-purple-500/10">
+                      {adminCompsList.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-4 py-8 text-center text-purple-300/60">
+                            No competition records found. Launch your first competition above!
+                          </td>
+                        </tr>
+                      ) : (
+                        adminCompsList.map((comp) => {
+                          const isActive = comp.status === 'active';
+                          return (
+                            <tr
+                              key={comp.id}
+                              className={`transition-colors ${
+                                isLight ? 'hover:bg-slate-50' : 'hover:bg-purple-900/20'
+                              }`}
+                            >
+                              <td className="px-4 py-3.5 font-bold font-mono text-purple-400">
+                                S{comp.season_number || 1}
+                              </td>
+                              <td className="px-4 py-3.5">
+                                <div className="font-extrabold text-white flex items-center gap-1.5">
+                                  <span>{comp.theme_badge_emoji || '🎬'}</span>
+                                  <span>{comp.title || comp.theme_name}</span>
+                                </div>
+                                <div className="text-[11px] text-purple-300/70">{comp.theme_name} • {comp.theme_category}</div>
+                              </td>
+                              <td className="px-4 py-3.5">
+                                <span className="font-bold text-amber-400">
+                                  ₹{(comp.prize_cash_inr || 0).toLocaleString('en-IN')}
+                                </span>
+                                <span className="text-[11px] text-purple-300/60 block">
+                                  + {(comp.prize_coins || 0).toLocaleString('en-IN')} Coins
+                                </span>
+                              </td>
+                              <td className="px-4 py-3.5 font-mono text-purple-300/80">
+                                {comp.start_date ? new Date(comp.start_date).toLocaleDateString() : '—'}
+                              </td>
+                              <td className="px-4 py-3.5 font-mono text-purple-300/80">
+                                {comp.end_date ? new Date(comp.end_date).toLocaleDateString() : '—'}
+                              </td>
+                              <td className="px-4 py-3.5">
+                                <span
+                                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase ${
+                                    isActive
+                                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                      : 'bg-slate-500/20 text-slate-300 border border-slate-500/30'
+                                  }`}
+                                >
+                                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                                  {comp.status}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         )}

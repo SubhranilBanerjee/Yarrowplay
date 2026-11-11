@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { CompetingReel, DEFAULT_COMPETITION_ITEMS } from '@/data/competition';
+import {
+  getActiveCompetition,
+  getAllCompetitions,
+  getAllThemes,
+  createNewTheme,
+  launchNewCompetition,
+} from '@/data/competitionsStore';
 
 export { type CompetingReel, DEFAULT_COMPETITION_ITEMS };
 
@@ -9,8 +16,11 @@ export async function GET(req: NextRequest) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // 1. Fetch active competition
-    let competition: any = null;
+    // 1. Fetch active competition from store or Supabase
+    let competition = getActiveCompetition();
+    const allThemes = getAllThemes();
+    const allCompetitions = getAllCompetitions();
+
     try {
       const { data: compData } = await supabase
         .from('competitions')
@@ -20,23 +30,14 @@ export async function GET(req: NextRequest) {
         .limit(1)
         .maybeSingle();
 
-      competition = compData;
+      if (compData) {
+        competition = {
+          ...competition,
+          ...compData,
+        };
+      }
     } catch {
-      // Table may not exist yet
-    }
-
-    if (!competition) {
-      competition = {
-        id: 'comp-season-1',
-        title: 'Creator Championship',
-        description: 'Viewers choose the champion! Vote for your favorite short reel or episodic drama. Highest voted creator takes the seasonal prize pool.',
-        season_number: 1,
-        prize_coins: 50000,
-        prize_cash_inr: 50000,
-        start_date: new Date().toISOString(),
-        end_date: new Date(Date.now() + 18 * 86400000).toISOString(),
-        status: 'active',
-      };
+      // Table may not exist yet, fallback to store
     }
 
     // 2. Fetch live entries from Supabase (strictly dynamic)
@@ -115,7 +116,6 @@ export async function GET(req: NextRequest) {
         }
       }
     } catch {
-      // Return empty items if query fails
       items = [];
     }
 
@@ -146,25 +146,22 @@ export async function GET(req: NextRequest) {
         entries_count: items.length,
       },
       items,
+      themes: allThemes,
+      competitions: allCompetitions,
       userVotedIds,
     });
   } catch (error: any) {
+    const active = getActiveCompetition();
     return NextResponse.json(
       {
         competition: {
-          id: 'comp-season-1',
-          title: 'Creator Championship',
-          description: 'Viewers choose the champion! Vote for your favorite short reel or episodic drama. Highest voted creator takes the seasonal prize pool.',
-          season_number: 1,
-          prize_coins: 50000,
-          prize_cash_inr: 50000,
-          start_date: new Date().toISOString(),
-          end_date: new Date(Date.now() + 18 * 86400000).toISOString(),
-          status: 'active',
+          ...active,
           total_votes: 0,
           entries_count: 0,
         },
         items: [],
+        themes: getAllThemes(),
+        competitions: getAllCompetitions(),
         userVotedIds: [],
       },
       { status: 200 }
@@ -178,18 +175,71 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
 
     const body = await req.json();
+    const { action } = body;
+
+    // 1. ADMIN ACTION: Create a New Theme
+    if (action === 'create_theme') {
+      const { name, tagline, description, category, bannerGradient, accentColor, badgeEmoji, rules } = body;
+      if (!name || !name.trim()) {
+        return NextResponse.json({ error: 'Theme name is required' }, { status: 400 });
+      }
+
+      const newTheme = createNewTheme({
+        name,
+        tagline,
+        description: description || `Original ${category || 'Creative'} stories and reels`,
+        category: category || 'General',
+        bannerGradient,
+        accentColor,
+        badgeEmoji,
+        rules,
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `Theme "${newTheme.name}" created successfully!`,
+        theme: newTheme,
+        themes: getAllThemes(),
+      });
+    }
+
+    // 2. ADMIN ACTION: Launch New Competition with Theme
+    if (action === 'launch_competition') {
+      const { title, themeId, customThemeName, description, seasonNumber, prizeCoins, prizeCashInr, endDate, durationDays } = body;
+
+      const newComp = launchNewCompetition({
+        title,
+        themeId,
+        customThemeName,
+        description,
+        seasonNumber,
+        prizeCoins: Number(prizeCoins) || 50000,
+        prizeCashInr: Number(prizeCashInr) || 50000,
+        endDate,
+        durationDays: Number(durationDays) || 14,
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `Season ${newComp.season_number} ("${newComp.title}") launched successfully!`,
+        competition: newComp,
+        activeCompetition: newComp,
+        competitions: getAllCompetitions(),
+      });
+    }
+
+    // 3. VOTER ACTION: Vote for a Reel
     const { competitionId, videoId } = body;
 
     if (!videoId) {
       return NextResponse.json({ error: 'videoId is required' }, { status: 400 });
     }
 
-    const activeCompId = competitionId || 'comp-season-4';
+    const activeCompId = competitionId || getActiveCompetition().id;
 
     // If authenticated, attempt database recording
     if (user) {
       try {
-        // Check if user already voted for this video
         const { data: existingVote } = await supabase
           .from('competition_votes')
           .select('id')
@@ -205,14 +255,12 @@ export async function POST(req: NextRequest) {
           }, { status: 400 });
         }
 
-        // Record vote
         await supabase.from('competition_votes').insert({
           user_id: user.id,
           competition_id: activeCompId,
           video_id: videoId,
         });
 
-        // Trigger or manually increment entry vote count
         const { data: entry } = await supabase
           .from('competition_entries')
           .select('votes_count')
