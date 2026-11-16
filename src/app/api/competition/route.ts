@@ -11,6 +11,9 @@ import {
   submitVideoToCompetitionInDb,
   getUserVotesTodayFromDb,
   castVoteInDb,
+  deleteCompetitionInDb,
+  deleteThemeInDb,
+  getCompetitionVotesAuditFromDb,
 } from '@/lib/supabase/competitionService';
 import { verifyAdminSession } from '@/lib/auth/serverAuth';
 
@@ -22,6 +25,29 @@ export async function GET(req: NextRequest) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+
+    const { searchParams } = new URL(req.url);
+
+    // Admin Vote Audit Request
+    if (searchParams.get('audit_votes') === 'true') {
+      const adminAuth = await verifyAdminSession(req);
+      if (!adminAuth.isAdmin) {
+        return NextResponse.json({ error: 'Admin access required to view vote audit' }, { status: 403 });
+      }
+
+      const compId = searchParams.get('competitionId') || undefined;
+      const vidId = searchParams.get('videoId') || undefined;
+      const audit = await getCompetitionVotesAuditFromDb({
+        competitionId: compId,
+        videoId: vidId,
+      });
+
+      return NextResponse.json({
+        success: true,
+        votes: audit.votes,
+        stats: audit.stats,
+      });
+    }
 
     // 1. Fetch active competition directly from Supabase
     const activeCompetition = await getActiveCompetitionFromDb();
@@ -228,11 +254,77 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // ─── 5. ADMIN ACTION: Delete Competition Season ───────────────────────────
+    if (action === 'delete_competition') {
+      const adminAuth = await verifyAdminSession(req);
+      if (!adminAuth.isAdmin) {
+        return NextResponse.json({ error: adminAuth.error || 'Admin privileges required' }, { status: adminAuth.status || 403 });
+      }
+
+      const { competitionId } = body;
+      if (!competitionId) {
+        return NextResponse.json({ error: 'competitionId is required' }, { status: 400 });
+      }
+
+      const res = await deleteCompetitionInDb(competitionId);
+      if (!res.success) {
+        return NextResponse.json({ error: res.error || 'Failed to delete competition' }, { status: 500 });
+      }
+
+      const allCompetitions = await getAllCompetitionsFromDb();
+      const activeCompetition = await getActiveCompetitionFromDb();
+      return NextResponse.json({
+        success: true,
+        message: 'Competition season and its votes deleted successfully.',
+        activeCompetition,
+        competitions: allCompetitions,
+      });
+    }
+
     return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
   } catch (error: any) {
     console.error('POST /api/competition error:', error);
     return NextResponse.json(
       { error: error?.message || 'Failed to process competition request' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const adminAuth = await verifyAdminSession(req);
+    if (!adminAuth.isAdmin) {
+      return NextResponse.json(
+        { error: adminAuth.error || 'Admin privileges required' },
+        { status: adminAuth.status || 403 }
+      );
+    }
+
+    const { searchParams } = new URL(req.url);
+    const competitionId = searchParams.get('id') || searchParams.get('competitionId');
+
+    if (!competitionId) {
+      return NextResponse.json({ error: 'competitionId is required' }, { status: 400 });
+    }
+
+    const res = await deleteCompetitionInDb(competitionId);
+    if (!res.success) {
+      return NextResponse.json({ error: res.error || 'Failed to delete competition' }, { status: 500 });
+    }
+
+    const allCompetitions = await getAllCompetitionsFromDb();
+    const active = await getActiveCompetitionFromDb();
+
+    return NextResponse.json({
+      success: true,
+      message: 'Competition season permanently deleted.',
+      competitions: allCompetitions,
+      activeCompetition: active,
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error?.message || 'Failed to delete competition' },
       { status: 500 }
     );
   }

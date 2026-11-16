@@ -523,3 +523,182 @@ export async function castVoteInDb({
   }
 }
 
+// ─── 5. ADMIN AUDIT & MANAGEMENT ──────────────────────────────────────────
+
+/**
+ * Delete a competition season and cascade delete all its entries and votes.
+ */
+export async function deleteCompetitionInDb(competitionId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const adminSupabase = await createAdminClient();
+    const { error } = await adminSupabase
+      .from('competitions')
+      .delete()
+      .eq('id', competitionId);
+
+    if (error) {
+      console.error('deleteCompetitionInDb error:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('deleteCompetitionInDb catch:', err);
+    return { success: false, error: err?.message || 'Failed to delete competition' };
+  }
+}
+
+/**
+ * Delete a competition theme from the database.
+ */
+export async function deleteThemeInDb(themeId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const adminSupabase = await createAdminClient();
+    const { error } = await adminSupabase
+      .from('competition_themes')
+      .delete()
+      .eq('id', themeId);
+
+    if (error) {
+      console.error('deleteThemeInDb error:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('deleteThemeInDb catch:', err);
+    return { success: false, error: err?.message || 'Failed to delete theme' };
+  }
+}
+
+export interface VoteAuditRecord {
+  id: string;
+  competition_id: string;
+  video_id: string;
+  user_id: string;
+  created_at: string;
+  voter: {
+    id: string;
+    email?: string;
+    username?: string;
+    display_name?: string;
+    avatar_url?: string;
+    role?: string;
+  };
+  video: {
+    id: string;
+    title: string;
+    thumbnail_url?: string;
+    category?: string;
+    creator?: {
+      display_name?: string;
+      username?: string;
+    };
+  };
+  competition?: {
+    id: string;
+    title: string;
+    season_number?: number;
+  };
+}
+
+/**
+ * Audit votes for a competition: see all cast votes, voted by whom, timestamps, and target reels.
+ */
+export async function getCompetitionVotesAuditFromDb(params: {
+  competitionId?: string;
+  videoId?: string;
+  limit?: number;
+}): Promise<{
+  votes: VoteAuditRecord[];
+  stats: { totalVotes: number; uniqueVoters: number };
+}> {
+  try {
+    const adminSupabase = await createAdminClient();
+    let query = adminSupabase
+      .from('competition_votes')
+      .select(`
+        id,
+        competition_id,
+        video_id,
+        user_id,
+        created_at,
+        voter:profiles(
+          id,
+          email,
+          username,
+          display_name,
+          avatar_url,
+          role
+        ),
+        video:videos(
+          id,
+          title,
+          thumbnail_url,
+          category,
+          creator:profiles(
+            display_name,
+            username
+          )
+        ),
+        competition:competitions(
+          id,
+          title,
+          season_number
+        )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(params.limit || 500);
+
+    if (params.competitionId) {
+      query = query.eq('competition_id', params.competitionId);
+    }
+    if (params.videoId) {
+      query = query.eq('video_id', params.videoId);
+    }
+
+    const { data, error } = await query;
+    if (error || !data) {
+      console.warn('getCompetitionVotesAuditFromDb warning:', error?.message);
+      return { votes: [], stats: { totalVotes: 0, uniqueVoters: 0 } };
+    }
+
+    const votes: VoteAuditRecord[] = data.map((row: any) => ({
+      id: row.id,
+      competition_id: row.competition_id,
+      video_id: row.video_id,
+      user_id: row.user_id,
+      created_at: row.created_at,
+      voter: {
+        id: row.voter?.id || row.user_id,
+        email: row.voter?.email || '',
+        username: row.voter?.username || '',
+        display_name: row.voter?.display_name || row.voter?.username || 'Viewer',
+        avatar_url: row.voter?.avatar_url || '',
+        role: row.voter?.role || 'viewer',
+      },
+      video: {
+        id: row.video?.id || row.video_id,
+        title: row.video?.title || 'Unknown Video',
+        thumbnail_url: row.video?.thumbnail_url || '',
+        category: row.video?.category || 'General',
+        creator: row.video?.creator || {},
+      },
+      competition: row.competition || undefined,
+    }));
+
+    const uniqueVoterIds = new Set(votes.map((v) => v.user_id));
+
+    return {
+      votes,
+      stats: {
+        totalVotes: votes.length,
+        uniqueVoters: uniqueVoterIds.size,
+      },
+    };
+  } catch (err) {
+    console.warn('getCompetitionVotesAuditFromDb catch:', err);
+    return { votes: [], stats: { totalVotes: 0, uniqueVoters: 0 } };
+  }
+}
+

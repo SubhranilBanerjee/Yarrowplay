@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -17,6 +17,7 @@ import {
   Play,
   CheckCircle,
   XCircle,
+  X,
   AlertTriangle,
   Search,
   Filter,
@@ -106,6 +107,16 @@ export default function AdminHubPage() {
   const [adminCompsList, setAdminCompsList] = useState<any[]>([]);
   const [compLoading, setCompLoading] = useState(false);
   const [compNotice, setCompNotice] = useState<string | null>(null);
+
+  // Competition Vote Audit & Deletion State
+  const [showVotesAuditModal, setShowVotesAuditModal] = useState(false);
+  const [selectedCompForAudit, setSelectedCompForAudit] = useState<any | null>(null);
+  const [auditVotesList, setAuditVotesList] = useState<any[]>([]);
+  const [auditStats, setAuditStats] = useState<{ totalVotes: number; uniqueVoters: number }>({ totalVotes: 0, uniqueVoters: 0 });
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [auditSearchQuery, setAuditSearchQuery] = useState('');
+  const [competitionToDelete, setCompetitionToDelete] = useState<any | null>(null);
+  const [isDeletingCompetition, setIsDeletingCompetition] = useState(false);
 
   // Launch Form State
   const [compThemeId, setCompThemeId] = useState('');
@@ -247,6 +258,89 @@ export default function AdminHubPage() {
       setCompLoading(false);
     }
   };
+
+  // Open Vote Audit Modal for a competition
+  const handleOpenVotesAudit = async (comp: any) => {
+    setSelectedCompForAudit(comp);
+    setShowVotesAuditModal(true);
+    setAuditLoading(true);
+    setAuditSearchQuery('');
+    try {
+      const res = await fetch(`/api/admin/competitions?action=votes&competitionId=${comp.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setAuditVotesList(data.votes || []);
+        setAuditStats(data.stats || { totalVotes: 0, uniqueVoters: 0 });
+      } else {
+        showNotification('error', 'Failed to load vote audit logs.');
+      }
+    } catch {
+      showNotification('error', 'Network error loading vote logs.');
+    } finally {
+      setAuditLoading(false);
+    }
+  };
+
+  // Delete Competition Season
+  const handleDeleteCompetition = async (targetComp: any) => {
+    setIsDeletingCompetition(true);
+    try {
+      const res = await fetch(`/api/admin/competitions?id=${targetComp.id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showNotification('success', data.message || `Season ${targetComp.season_number} deleted successfully.`);
+        setCompetitionToDelete(null);
+        await loadAdminCompetitions();
+      } else {
+        showNotification('error', data.error || 'Failed to delete competition.');
+      }
+    } catch {
+      showNotification('error', 'Network error deleting competition.');
+    } finally {
+      setIsDeletingCompetition(false);
+    }
+  };
+
+  // Delete Theme
+  const handleDeleteTheme = async (themeId: string, themeName: string) => {
+    if (!confirm(`Are you sure you want to delete the theme "${themeName}"?`)) return;
+    try {
+      const res = await fetch(`/api/admin/competitions?themeId=${themeId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showNotification('success', data.message || `Theme "${themeName}" deleted.`);
+        await loadAdminCompetitions();
+      } else {
+        showNotification('error', data.error || 'Failed to delete theme.');
+      }
+    } catch {
+      showNotification('error', 'Network error deleting theme.');
+    }
+  };
+
+  // Filtered audit votes
+  const filteredAuditVotes = useMemo(() => {
+    if (!auditSearchQuery.trim()) return auditVotesList;
+    const q = auditSearchQuery.toLowerCase();
+    return auditVotesList.filter((v) => {
+      const voterName = (v.voter?.display_name || '').toLowerCase();
+      const voterEmail = (v.voter?.email || '').toLowerCase();
+      const voterUsername = (v.voter?.username || '').toLowerCase();
+      const vidTitle = (v.video?.title || '').toLowerCase();
+      const vidCreator = (v.video?.creator?.display_name || '').toLowerCase();
+      return (
+        voterName.includes(q) ||
+        voterEmail.includes(q) ||
+        voterUsername.includes(q) ||
+        vidTitle.includes(q) ||
+        vidCreator.includes(q)
+      );
+    });
+  }, [auditVotesList, auditSearchQuery]);
 
   // Handle Admin Direct Sign In
   const handleAdminLogin = async (e?: React.FormEvent) => {
@@ -3607,7 +3701,7 @@ export default function AdminHubPage() {
                             setCompDesc(theme.description || '');
                             window.scrollTo({ top: 300, behavior: 'smooth' });
                           }}
-                          className={`w-full py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                          className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                             compThemeId === theme.id
                               ? 'bg-purple-600 text-white border-purple-500'
                               : isLight
@@ -3617,6 +3711,15 @@ export default function AdminHubPage() {
                         >
                           <Trophy className="w-3.5 h-3.5 text-amber-400" />
                           <span>{compThemeId === theme.id ? 'Theme Selected' : 'Use for Launch'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTheme(theme.id, theme.name)}
+                          className="p-2 rounded-xl text-xs font-bold bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/30 transition-all cursor-pointer"
+                          title="Delete theme"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
@@ -3655,12 +3758,13 @@ export default function AdminHubPage() {
                         <th className="px-4 py-3">Start Date</th>
                         <th className="px-4 py-3">End Date</th>
                         <th className="px-4 py-3">Status</th>
+                        <th className="px-4 py-3 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-purple-500/10">
                       {adminCompsList.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="px-4 py-8 text-center text-purple-300/60">
+                          <td colSpan={7} className="px-4 py-8 text-center text-purple-300/60">
                             No competition records found. Launch your first competition above!
                           </td>
                         </tr>
@@ -3710,6 +3814,28 @@ export default function AdminHubPage() {
                                   {comp.status}
                                 </span>
                               </td>
+                              <td className="px-4 py-3.5 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenVotesAudit(comp)}
+                                    className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-purple-600/20 hover:bg-purple-600/40 text-purple-200 border border-purple-500/30 flex items-center gap-1 transition-all cursor-pointer"
+                                    title="Audit votes and check who voted"
+                                  >
+                                    <Eye className="w-3.5 h-3.5 text-purple-300" />
+                                    <span className="hidden sm:inline">Inspect Votes</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => setCompetitionToDelete(comp)}
+                                    className="p-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/30 transition-all cursor-pointer"
+                                    title="Delete competition season"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </td>
                             </tr>
                           );
                         })
@@ -3722,6 +3848,221 @@ export default function AdminHubPage() {
           </div>
         )}
       </div>
+
+      {/* ========================================================================= */}
+      {/* DELETE COMPETITION SEASON MODAL                                           */}
+      {/* ========================================================================= */}
+      {competitionToDelete && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setCompetitionToDelete(null)}
+        >
+          <div
+            className="relative w-full max-w-md bg-slate-950 border border-red-500/40 rounded-3xl p-6 text-white space-y-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-red-500/20 border border-red-400/40 flex items-center justify-center text-red-400">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base">Delete Competition Season?</h3>
+                <p className="text-xs text-red-300/80">Season {competitionToDelete.season_number}: &quot;{competitionToDelete.title}&quot;</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Are you sure you want to delete this competition? All associated entries, leaderboard positions, and user vote records will be permanently removed from Supabase.
+            </p>
+
+            <div className="pt-2 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => handleDeleteCompetition(competitionToDelete)}
+                disabled={isDeletingCompetition}
+                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                {isDeletingCompetition ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Permanently Delete Season</span>
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setCompetitionToDelete(null)}
+                className="px-4 py-2.5 rounded-xl border border-white/20 text-xs font-semibold text-slate-300 hover:text-white cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* VOTE AUDIT & INSPECTION MODAL                                             */}
+      {/* ========================================================================= */}
+      {showVotesAuditModal && selectedCompForAudit && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setShowVotesAuditModal(false)}
+        >
+          <div
+            className="relative w-full max-w-4xl bg-[#0f0720] border border-purple-500/40 rounded-3xl p-6 sm:p-8 text-white space-y-5 shadow-2xl max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center text-purple-300">
+                  <Eye className="w-5 h-5 text-purple-300" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-black text-lg sm:text-xl">
+                      Vote Audit &amp; Inspection
+                    </h3>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      Season {selectedCompForAudit.season_number || 1}
+                    </span>
+                  </div>
+                  <p className="text-xs text-purple-300/80">
+                    &quot;{selectedCompForAudit.title}&quot; • Real-time vote audit logs from Supabase
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowVotesAuditModal(false)}
+                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Stats Summary Bento */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                <span className="text-[10px] font-bold uppercase text-purple-300/70 block">Total Votes Cast</span>
+                <span className="text-xl font-black text-amber-400">{auditStats.totalVotes}</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                <span className="text-[10px] font-bold uppercase text-purple-300/70 block">Unique Verified Voters</span>
+                <span className="text-xl font-black text-emerald-400">{auditStats.uniqueVoters}</span>
+              </div>
+              <div className="col-span-2 sm:col-span-1 p-3.5 rounded-2xl bg-white/5 border border-white/10 flex flex-col justify-between">
+                <span className="text-[10px] font-bold uppercase text-purple-300/70 block">Competition Status</span>
+                <span className="text-xs font-bold uppercase text-purple-200">{selectedCompForAudit.status}</span>
+              </div>
+            </div>
+
+            {/* Search Input Filter */}
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
+              <input
+                type="text"
+                value={auditSearchQuery}
+                onChange={(e) => setAuditSearchQuery(e.target.value)}
+                placeholder="Search by voter name, email, or video title..."
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-purple-400"
+              />
+            </div>
+
+            {/* Vote Log List */}
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[200px]">
+              {auditLoading ? (
+                <div className="py-16 flex flex-col items-center justify-center gap-3">
+                  <RefreshCw className="w-6 h-6 animate-spin text-purple-400" />
+                  <p className="text-xs text-purple-300">Loading verified vote records from Supabase...</p>
+                </div>
+              ) : filteredAuditVotes.length === 0 ? (
+                <div className="py-16 text-center text-slate-400 text-xs">
+                  {auditVotesList.length === 0
+                    ? 'No votes have been cast for this championship yet.'
+                    : 'No vote records match your search criteria.'}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {filteredAuditVotes.map((v) => (
+                    <div
+                      key={v.id}
+                      className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-purple-400/30 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs"
+                    >
+                      {/* Voter Information */}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-purple-600/30 border border-purple-400/40 flex items-center justify-center shrink-0 overflow-hidden">
+                          {v.voter.avatar_url ? (
+                            <img src={v.voter.avatar_url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <Users className="w-4 h-4 text-purple-300" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-white truncate">{v.voter.display_name}</span>
+                            {v.voter.role === 'admin' && (
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                Admin
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[11px] text-purple-300/70 truncate block">{v.voter.email || (v.voter.username ? `@${v.voter.username}` : v.user_id)}</span>
+                        </div>
+                      </div>
+
+                      {/* Arrow / Vote badge */}
+                      <div className="hidden sm:flex items-center gap-1 text-[11px] font-bold text-pink-400 px-2.5 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 shrink-0">
+                        <span>Voted for</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </div>
+
+                      {/* Target Video Information */}
+                      <div className="flex items-center gap-2.5 min-w-0 max-w-xs">
+                        {v.video.thumbnail_url ? (
+                          <img src={v.video.thumbnail_url} alt="" className="w-9 h-12 object-cover rounded-lg shrink-0 border border-white/10" />
+                        ) : (
+                          <div className="w-9 h-12 bg-purple-900/40 rounded-lg shrink-0 flex items-center justify-center">
+                            <Film className="w-4 h-4 text-purple-300" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-bold text-white truncate text-xs">{v.video.title}</p>
+                          <p className="text-[10px] text-purple-300/70 truncate">
+                            {v.video.creator?.display_name || 'Creator'} • {v.video.category}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Timestamp */}
+                      <div className="text-[10px] text-slate-400 shrink-0 sm:text-right font-mono">
+                        <div>{new Date(v.created_at).toLocaleDateString()}</div>
+                        <div className="text-slate-500">{new Date(v.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+              <span>Showing {filteredAuditVotes.length} of {auditVotesList.length} votes</span>
+              <button
+                onClick={() => setShowVotesAuditModal(false)}
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold cursor-pointer"
+              >
+                Close Inspector
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

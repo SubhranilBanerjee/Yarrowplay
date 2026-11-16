@@ -5,6 +5,9 @@ import {
   getAllThemesFromDb,
   createThemeInDb,
   launchCompetitionInDb,
+  deleteCompetitionInDb,
+  deleteThemeInDb,
+  getCompetitionVotesAuditFromDb,
 } from '@/lib/supabase/competitionService';
 import { verifyAdminSession } from '@/lib/auth/serverAuth';
 
@@ -20,6 +23,29 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const { searchParams } = new URL(req.url);
+    const action = searchParams.get('action');
+
+    // ─── 1. AUDIT VOTES: Who voted, when, for which video ────────────────────
+    if (action === 'votes' || searchParams.get('votes') === 'true') {
+      const competitionId = searchParams.get('competitionId') || undefined;
+      const videoId = searchParams.get('videoId') || undefined;
+      const limit = parseInt(searchParams.get('limit') || '500', 10);
+
+      const auditData = await getCompetitionVotesAuditFromDb({
+        competitionId,
+        videoId,
+        limit,
+      });
+
+      return NextResponse.json({
+        success: true,
+        votes: auditData.votes,
+        stats: auditData.stats,
+      });
+    }
+
+    // ─── 2. DEFAULT: Load all competitions, active season, and themes ────────
     const active = await getActiveCompetitionFromDb();
     const competitions = await getAllCompetitionsFromDb();
     const themes = await getAllThemesFromDb();
@@ -116,6 +142,62 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     return NextResponse.json(
       { error: error?.message || 'Failed to process admin competition request' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const adminAuth = await verifyAdminSession(req);
+    if (!adminAuth.isAdmin) {
+      return NextResponse.json(
+        { error: adminAuth.error || 'Admin privileges required' },
+        { status: adminAuth.status || 403 }
+      );
+    }
+
+    const { searchParams } = new URL(req.url);
+    const competitionId = searchParams.get('id') || searchParams.get('competitionId');
+    const themeId = searchParams.get('themeId');
+
+    if (competitionId) {
+      const res = await deleteCompetitionInDb(competitionId);
+      if (!res.success) {
+        return NextResponse.json({ error: res.error || 'Failed to delete competition' }, { status: 500 });
+      }
+
+      const competitions = await getAllCompetitionsFromDb();
+      const active = await getActiveCompetitionFromDb();
+      return NextResponse.json({
+        success: true,
+        message: 'Competition season and all associated entries and votes permanently deleted.',
+        competitions,
+        activeCompetition: active,
+      });
+    }
+
+    if (themeId) {
+      const res = await deleteThemeInDb(themeId);
+      if (!res.success) {
+        return NextResponse.json({ error: res.error || 'Failed to delete theme' }, { status: 500 });
+      }
+
+      const themes = await getAllThemesFromDb();
+      return NextResponse.json({
+        success: true,
+        message: 'Theme deleted from Supabase successfully.',
+        themes,
+      });
+    }
+
+    return NextResponse.json(
+      { error: 'id (competitionId) or themeId query parameter is required for DELETE' },
+      { status: 400 }
+    );
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error?.message || 'Failed to delete competition resource' },
       { status: 500 }
     );
   }

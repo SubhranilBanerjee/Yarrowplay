@@ -38,6 +38,10 @@ import {
   Unlock,
   AlertCircle,
   HelpCircle,
+  Eye,
+  Trash2,
+  Users,
+  RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -92,6 +96,15 @@ export default function CompetitionPage() {
   const [showLaunchModal, setShowLaunchModal] = useState(false);
   const [showCreateThemeModal, setShowCreateThemeModal] = useState(false);
   const [showThemeCatalogModal, setShowThemeCatalogModal] = useState(false);
+  const [showVotesAuditModal, setShowVotesAuditModal] = useState(false);
+  const [showSeasonsHistoryModal, setShowSeasonsHistoryModal] = useState(false);
+  const [selectedAuditTitle, setSelectedAuditTitle] = useState('');
+  const [auditVotesList, setAuditVotesList] = useState<any[]>([]);
+  const [auditStats, setAuditStats] = useState<{ totalVotes: number; uniqueVoters: number }>({ totalVotes: 0, uniqueVoters: 0 });
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [auditSearchQuery, setAuditSearchQuery] = useState('');
+  const [competitionToDelete, setCompetitionToDelete] = useState<any | null>(null);
+  const [isDeletingCompetition, setIsDeletingCompetition] = useState(false);
   const [adminActionLoading, setAdminActionLoading] = useState(false);
   const [adminNotice, setAdminNotice] = useState<string | null>(null);
 
@@ -254,6 +267,80 @@ export default function CompetitionPage() {
       setSubmittingEntry(false);
     }
   };
+
+  // Open Vote Audit Modal (for active season or specific reel)
+  const handleOpenVotesAudit = async (compId?: string, videoId?: string, reelTitle?: string) => {
+    const targetCompId = compId || competition?.id;
+    if (!targetCompId) return;
+
+    setSelectedAuditTitle(reelTitle ? `Votes for "${reelTitle}"` : `Season ${competition?.season_number || 1} Audit`);
+    setShowVotesAuditModal(true);
+    setAuditLoading(true);
+    setAuditSearchQuery('');
+
+    try {
+      const params = new URLSearchParams();
+      params.set('audit_votes', 'true');
+      if (targetCompId) params.set('competitionId', targetCompId);
+      if (videoId) params.set('videoId', videoId);
+
+      const res = await fetch(`/api/competition?${params.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        setAuditVotesList(data.votes || []);
+        setAuditStats(data.stats || { totalVotes: 0, uniqueVoters: 0 });
+      } else {
+        setAdminNotice('Failed to load vote audit logs from database.');
+      }
+    } catch {
+      setAdminNotice('Network error loading vote logs.');
+    } finally {
+      setAuditLoading(false);
+    }
+  };
+
+  // Admin: Delete Competition Season
+  const handleDeleteCompetition = async (targetComp: any) => {
+    setIsDeletingCompetition(true);
+    try {
+      const res = await fetch(`/api/competition?id=${targetComp.id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAdminNotice(data.message || `Season ${targetComp.season_number} deleted successfully.`);
+        setTimeout(() => setAdminNotice(null), 4000);
+        setCompetitionToDelete(null);
+        await loadData();
+      } else {
+        setAdminNotice(data.error || 'Failed to delete competition.');
+      }
+    } catch {
+      setAdminNotice('Network error deleting competition.');
+    } finally {
+      setIsDeletingCompetition(false);
+    }
+  };
+
+  // Filtered audit votes
+  const filteredAuditVotes = useMemo(() => {
+    if (!auditSearchQuery.trim()) return auditVotesList;
+    const q = auditSearchQuery.toLowerCase();
+    return auditVotesList.filter((v) => {
+      const voterName = (v.voter?.display_name || '').toLowerCase();
+      const voterEmail = (v.voter?.email || '').toLowerCase();
+      const voterUsername = (v.voter?.username || '').toLowerCase();
+      const vidTitle = (v.video?.title || '').toLowerCase();
+      const vidCreator = (v.video?.creator?.display_name || '').toLowerCase();
+      return (
+        voterName.includes(q) ||
+        voterEmail.includes(q) ||
+        voterUsername.includes(q) ||
+        vidTitle.includes(q) ||
+        vidCreator.includes(q)
+      );
+    });
+  }, [auditVotesList, auditSearchQuery]);
 
   // Handle Admin: Create New Theme
   const handleCreateTheme = async (e: React.FormEvent) => {
@@ -539,6 +626,22 @@ export default function CompetitionPage() {
             >
               <Palette className="w-3.5 h-3.5 text-purple-300" />
               <span className="hidden sm:inline">Theme Catalog ({themesList.length})</span>
+            </button>
+
+            <button
+              onClick={() => handleOpenVotesAudit(competition?.id)}
+              className="px-3 py-2 rounded-xl text-xs font-semibold bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Eye className="w-3.5 h-3.5 text-purple-300" />
+              <span>Audit Votes</span>
+            </button>
+
+            <button
+              onClick={() => setShowSeasonsHistoryModal(true)}
+              className="px-3 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Clock className="w-3.5 h-3.5 text-amber-300" />
+              <span className="hidden sm:inline">Seasons ({competitionsHistory.length})</span>
             </button>
           </div>
         </div>
@@ -1087,9 +1190,24 @@ export default function CompetitionPage() {
                       #{rank}
                     </span>
 
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white/90 border border-white/20">
-                      {reel.duration}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {isAdmin && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenVotesAudit(competition?.id, reel.videoId, reel.title);
+                          }}
+                          className="p-1 rounded-full bg-purple-950/80 border border-purple-400/50 text-purple-200 hover:text-white hover:bg-purple-800 transition-all cursor-pointer shadow-lg"
+                          title="Inspect who voted for this reel"
+                        >
+                          <Eye className="w-3 h-3 text-purple-300" />
+                        </button>
+                      )}
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white/90 border border-white/20">
+                        {reel.duration}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Play Button Icon on Hover */}
@@ -1986,6 +2104,325 @@ export default function CompetitionPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 14. SEASONS HISTORY & MANAGEMENT MODAL                                    */}
+      {/* ========================================================================= */}
+      {showSeasonsHistoryModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setShowSeasonsHistoryModal(false)}
+        >
+          <div
+            className="relative w-full max-w-3xl bg-[#0f0720] border border-purple-500/40 rounded-3xl p-6 sm:p-8 text-white space-y-5 shadow-2xl max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-lg sm:text-xl">Championship Seasons History</h3>
+                  <p className="text-xs text-purple-300/80">Manage past competitions, inspect vote logs, or delete older seasons</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowSeasonsHistoryModal(false)}
+                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+              {competitionsHistory.length === 0 ? (
+                <div className="py-12 text-center text-slate-400 text-xs">
+                  No competition records found in database.
+                </div>
+              ) : (
+                competitionsHistory.map((comp) => {
+                  const isActive = comp.status === 'active';
+                  return (
+                    <div
+                      key={comp.id}
+                      className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-purple-400/40 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs"
+                    >
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-purple-400">S{comp.season_number || 1}</span>
+                          <span className="font-extrabold text-white truncate">{comp.title}</span>
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${
+                              isActive
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                : 'bg-slate-500/20 text-slate-300 border border-slate-500/30'
+                            }`}
+                          >
+                            {comp.status}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-purple-300/70 flex items-center gap-2">
+                          <span>Theme: &quot;{comp.theme_name || 'Creative'}&quot;</span>
+                          <span>•</span>
+                          <span className="text-amber-400 font-semibold">
+                            ₹{(comp.prize_cash_inr || 0).toLocaleString()} + {(comp.prize_coins || 0).toLocaleString()} Coins
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleOpenVotesAudit(comp.id, undefined, comp.title);
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 flex items-center gap-1.5 text-xs font-bold transition-all cursor-pointer"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Audit Votes</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setCompetitionToDelete(comp)}
+                          className="p-1.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/30 transition-all cursor-pointer"
+                          title="Delete season"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-white/10 flex justify-end">
+              <button
+                onClick={() => setShowSeasonsHistoryModal(false)}
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 15. DELETE COMPETITION SEASON MODAL                                       */}
+      {/* ========================================================================= */}
+      {competitionToDelete && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setCompetitionToDelete(null)}
+        >
+          <div
+            className="relative w-full max-w-md bg-slate-950 border border-red-500/40 rounded-3xl p-6 text-white space-y-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-red-500/20 border border-red-400/40 flex items-center justify-center text-red-400">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base">Delete Competition Season?</h3>
+                <p className="text-xs text-red-300/80">Season {competitionToDelete.season_number}: &quot;{competitionToDelete.title}&quot;</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Are you sure you want to delete this competition? All associated entries, leaderboard positions, and user vote records will be permanently removed from Supabase.
+            </p>
+
+            <div className="pt-2 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => handleDeleteCompetition(competitionToDelete)}
+                disabled={isDeletingCompetition}
+                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                {isDeletingCompetition ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Permanently Delete Season</span>
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setCompetitionToDelete(null)}
+                className="px-4 py-2.5 rounded-xl border border-white/20 text-xs font-semibold text-slate-300 hover:text-white cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 16. VOTE AUDIT & INSPECTION MODAL                                         */}
+      {/* ========================================================================= */}
+      {showVotesAuditModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setShowVotesAuditModal(false)}
+        >
+          <div
+            className="relative w-full max-w-4xl bg-[#0f0720] border border-purple-500/40 rounded-3xl p-6 sm:p-8 text-white space-y-5 shadow-2xl max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center text-purple-300">
+                  <Eye className="w-5 h-5 text-purple-300" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-black text-lg sm:text-xl">
+                      Vote Audit &amp; Inspection
+                    </h3>
+                  </div>
+                  <p className="text-xs text-purple-300/80">
+                    {selectedAuditTitle} • Real-time vote audit logs from Supabase
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowVotesAuditModal(false)}
+                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Stats Summary Bento */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                <span className="text-[10px] font-bold uppercase text-purple-300/70 block">Total Votes Cast</span>
+                <span className="text-xl font-black text-amber-400">{auditStats.totalVotes}</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                <span className="text-[10px] font-bold uppercase text-purple-300/70 block">Unique Verified Voters</span>
+                <span className="text-xl font-black text-emerald-400">{auditStats.uniqueVoters}</span>
+              </div>
+              <div className="col-span-2 sm:col-span-1 p-3.5 rounded-2xl bg-white/5 border border-white/10 flex flex-col justify-between">
+                <span className="text-[10px] font-bold uppercase text-purple-300/70 block">Active Status</span>
+                <span className="text-xs font-bold uppercase text-emerald-300">Live In Database</span>
+              </div>
+            </div>
+
+            {/* Search Input Filter */}
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
+              <input
+                type="text"
+                value={auditSearchQuery}
+                onChange={(e) => setAuditSearchQuery(e.target.value)}
+                placeholder="Search by voter name, email, or video title..."
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-purple-400"
+              />
+            </div>
+
+            {/* Vote Log List */}
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[200px]">
+              {auditLoading ? (
+                <div className="py-16 flex flex-col items-center justify-center gap-3">
+                  <RefreshCw className="w-6 h-6 animate-spin text-purple-400" />
+                  <p className="text-xs text-purple-300">Loading verified vote records from Supabase...</p>
+                </div>
+              ) : filteredAuditVotes.length === 0 ? (
+                <div className="py-16 text-center text-slate-400 text-xs">
+                  {auditVotesList.length === 0
+                    ? 'No votes have been cast for this championship yet.'
+                    : 'No vote records match your search criteria.'}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {filteredAuditVotes.map((v) => (
+                    <div
+                      key={v.id}
+                      className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-purple-400/30 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs"
+                    >
+                      {/* Voter Information */}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-purple-600/30 border border-purple-400/40 flex items-center justify-center shrink-0 overflow-hidden">
+                          {v.voter.avatar_url ? (
+                            <img src={v.voter.avatar_url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <Users className="w-4 h-4 text-purple-300" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-white truncate">{v.voter.display_name}</span>
+                            {v.voter.role === 'admin' && (
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                Admin
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[11px] text-purple-300/70 truncate block">
+                            {v.voter.email || (v.voter.username ? `@${v.voter.username}` : v.user_id)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Arrow / Vote badge */}
+                      <div className="hidden sm:flex items-center gap-1 text-[11px] font-bold text-pink-400 px-2.5 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 shrink-0">
+                        <span>Voted for</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </div>
+
+                      {/* Target Video Information */}
+                      <div className="flex items-center gap-2.5 min-w-0 max-w-xs">
+                        {v.video.thumbnail_url ? (
+                          <img src={v.video.thumbnail_url} alt="" className="w-9 h-12 object-cover rounded-lg shrink-0 border border-white/10" />
+                        ) : (
+                          <div className="w-9 h-12 bg-purple-900/40 rounded-lg shrink-0 flex items-center justify-center">
+                            <Film className="w-4 h-4 text-purple-300" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-bold text-white truncate text-xs">{v.video.title}</p>
+                          <p className="text-[10px] text-purple-300/70 truncate">
+                            {v.video.creator?.display_name || 'Creator'} • {v.video.category}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Timestamp */}
+                      <div className="text-[10px] text-slate-400 shrink-0 sm:text-right font-mono">
+                        <div>{new Date(v.created_at).toLocaleDateString()}</div>
+                        <div className="text-slate-500">{new Date(v.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+              <span>Showing {filteredAuditVotes.length} of {auditVotesList.length} votes</span>
+              <button
+                onClick={() => setShowVotesAuditModal(false)}
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold cursor-pointer"
+              >
+                Close Inspector
+              </button>
             </div>
           </div>
         </div>
