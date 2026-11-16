@@ -42,8 +42,9 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useWallet } from '@/context/WalletContext';
+import { createClient } from '@/lib/supabase/client';
 import { CoinIcon } from '@/components/ui/CoinIcon';
-import { CompetingReel, Competition, CompetitionTheme, DEFAULT_THEMES } from '@/data/competition';
+import { CompetingReel, Competition, CompetitionTheme } from '@/data/competition';
 
 // Preset theme gradients for quick design
 const GRADIENT_PRESETS = [
@@ -62,9 +63,9 @@ export default function CompetitionPage() {
   const { openCoinStore } = useWallet();
 
   // Dynamic Competition & Reel State from Supabase
-  const [competition, setCompetition] = useState<Competition | any>(null);
+  const [competition, setCompetition] = useState<Competition | null>(null);
   const [reels, setReels] = useState<CompetingReel[]>([]);
-  const [themesList, setThemesList] = useState<CompetitionTheme[]>(DEFAULT_THEMES);
+  const [themesList, setThemesList] = useState<CompetitionTheme[]>([]);
   const [competitionsHistory, setCompetitionsHistory] = useState<Competition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -80,13 +81,12 @@ export default function CompetitionPage() {
   const [nominateModalOpen, setNominateModalOpen] = useState(false);
   const [showRulesModal, setShowRulesModal] = useState(false);
 
-  // =========================================================================
-  // ADMIN CONTROLS STATE: CREATE THEMES & LAUNCH COMPETITIONS
-  // =========================================================================
-  const [adminUnlocked, setAdminUnlocked] = useState(false);
-  const [showAdminUnlockModal, setShowAdminUnlockModal] = useState(false);
-  const [adminPassInput, setAdminPassInput] = useState('');
-  const [adminPassError, setAdminPassError] = useState('');
+  // Creator Video Submission Modal State
+  const [creatorPublishedVideos, setCreatorPublishedVideos] = useState<any[]>([]);
+  const [loadingCreatorVideos, setLoadingCreatorVideos] = useState(false);
+  const [selectedVideoToSubmit, setSelectedVideoToSubmit] = useState('');
+  const [submittingEntry, setSubmittingEntry] = useState(false);
+  const [submitEntryMsg, setSubmitEntryMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Modals for Admin Actions
   const [showLaunchModal, setShowLaunchModal] = useState(false);
@@ -114,17 +114,13 @@ export default function CompetitionPage() {
   const [newThemeAccent, setNewThemeAccent] = useState(GRADIENT_PRESETS[0].accent);
   const [newThemeRules, setNewThemeRules] = useState('');
 
-  // Check admin authorization
+  // Check admin authorization strictly from verified server-backed profile
   const isAdmin = useMemo(() => {
-    if (adminUnlocked) return true;
     if (profile?.role === 'admin') return true;
-    if (user?.email === 'admin@admin.com') return true;
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('lighthouse_admin_secret_token');
-      if (token === 'lighthouse_admin_secret_token_2026') return true;
-    }
+    const envAdmin = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || '').trim().toLowerCase();
+    if (user?.email && envAdmin && user.email.trim().toLowerCase() === envAdmin) return true;
     return false;
-  }, [adminUnlocked, profile, user]);
+  }, [profile, user]);
 
   // Daily vote budget (3 votes per day)
   const DAILY_VOTE_LIMIT = 3;
@@ -140,97 +136,122 @@ export default function CompetitionPage() {
   } | null>(null);
 
   // Load live dynamic competition data & user votes from Supabase
-  useEffect(() => {
+  const loadData = async () => {
+    setIsLoading(true);
     try {
-      const savedVotes = localStorage.getItem('lr_competition_votes');
-      if (savedVotes) {
-        setVotedVideoIds(new Set(JSON.parse(savedVotes)));
-      }
-    } catch {}
-
-    async function loadData() {
-      setIsLoading(true);
-      try {
-        const res = await fetch('/api/competition');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.competition) {
-            setCompetition(data.competition);
-            setLaunchSeasonNumber((data.competition.season_number || 1) + 1);
-            if (data.competition.theme_id) {
-              setLaunchThemeId(data.competition.theme_id);
-            }
+      const res = await fetch('/api/competition');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.competition) {
+          setCompetition(data.competition);
+          setLaunchSeasonNumber((data.competition.season_number || 1) + 1);
+          if (data.competition.theme_id) {
+            setLaunchThemeId(data.competition.theme_id);
           }
-          if (Array.isArray(data.items)) {
-            setReels(data.items);
-          }
-          if (Array.isArray(data.themes) && data.themes.length > 0) {
-            setThemesList(data.themes);
-            if (!launchThemeId && data.themes[0]) {
-              setLaunchThemeId(data.themes[0].id);
-            }
-          }
-          if (Array.isArray(data.competitions)) {
-            setCompetitionsHistory(data.competitions);
-          }
-          if (Array.isArray(data.userVotedIds) && data.userVotedIds.length > 0) {
-            setVotedVideoIds((prev) => new Set([...prev, ...data.userVotedIds]));
+        } else {
+          setCompetition(null);
+        }
+        if (Array.isArray(data.items)) {
+          setReels(data.items);
+        } else {
+          setReels([]);
+        }
+        if (Array.isArray(data.themes)) {
+          setThemesList(data.themes);
+          if (!launchThemeId && data.themes[0]) {
+            setLaunchThemeId(data.themes[0].id);
           }
         }
-      } catch (err) {
-        console.warn('Failed to load dynamic competition data:', err);
-      } finally {
-        setIsLoading(false);
+        if (Array.isArray(data.competitions)) {
+          setCompetitionsHistory(data.competitions);
+        }
+        if (Array.isArray(data.userVotedIds)) {
+          setVotedVideoIds(new Set(data.userVotedIds));
+        }
       }
+    } catch (err) {
+      console.warn('Failed to load dynamic competition data:', err);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
+  useEffect(() => {
     loadData();
   }, []);
 
-  // Live countdown timer calculation derived dynamically from competition end date
+  // Fetch creator's published videos when nomination modal opens
   useEffect(() => {
-    if (!competition?.end_date) return;
-    const targetDate = new Date(competition.end_date).getTime();
+    if (nominateModalOpen && user) {
+      const currentUserId = user.id;
+      async function loadPublishedVideos() {
+        setLoadingCreatorVideos(true);
+        setSubmitEntryMsg(null);
+        try {
+          const supabase = createClient();
+          const { data, error } = await supabase
+            .from('videos')
+            .select('id, title, thumbnail_url, category, duration_seconds, views_count, status')
+            .eq('creator_id', currentUserId)
+            .eq('status', 'published')
+            .order('created_at', { ascending: false });
 
-    const updateCountdown = () => {
-      const now = Date.now();
-      const difference = targetDate - now;
-
-      if (difference <= 0) {
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-      } else {
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((difference / (1000 * 60)) % 60);
-        const seconds = Math.floor((difference / 1000) % 60);
-        setTimeLeft({ days, hours, minutes, seconds });
+          if (data && data.length > 0) {
+            setCreatorPublishedVideos(data);
+            if (!selectedVideoToSubmit) {
+              setSelectedVideoToSubmit(data[0].id);
+            }
+          } else {
+            setCreatorPublishedVideos([]);
+          }
+        } catch {
+          setCreatorPublishedVideos([]);
+        } finally {
+          setLoadingCreatorVideos(false);
+        }
       }
-    };
 
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
-    return () => clearInterval(interval);
-  }, [competition?.end_date]);
+      loadPublishedVideos();
+    }
+  }, [nominateModalOpen, user]);
 
-  // Handle Quick Admin Authentication
-  const handleAdminUnlock = (e: React.FormEvent) => {
+  // Handle explicit submission of video into championship
+  const handleSubmitVideoEntry = async (e: React.FormEvent) => {
     e.preventDefault();
-    const pass = adminPassInput.trim();
-    if (pass === '123456' || pass === 'Admin@DramaBox2026!') {
-      setAdminUnlocked(true);
-      setShowAdminUnlockModal(false);
-      setAdminPassError('');
-      try {
-        localStorage.setItem('lighthouse_admin_secret_token', 'lighthouse_admin_secret_token_2026');
-      } catch {}
-      setVoteToast({
-        show: true,
-        title: '🛡️ Admin Mode Unlocked! You can now create themes and launch competitions.',
-        remaining: votesRemaining,
+    if (!selectedVideoToSubmit || !competition?.id) return;
+    setSubmittingEntry(true);
+    setSubmitEntryMsg(null);
+
+    try {
+      const res = await fetch('/api/competition', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'submit_entry',
+          competitionId: competition.id,
+          videoId: selectedVideoToSubmit,
+        }),
       });
-      setTimeout(() => setVoteToast(null), 4000);
-    } else {
-      setAdminPassError('Invalid admin password. Default is 123456');
+
+      const data = await res.json();
+      if (res.ok) {
+        setSubmitEntryMsg({ type: 'success', text: data.message || 'Video entered successfully!' });
+        if (data.items) {
+          setReels(data.items);
+        } else {
+          await loadData();
+        }
+        setTimeout(() => {
+          setNominateModalOpen(false);
+          setSubmitEntryMsg(null);
+        }, 1800);
+      } else {
+        setSubmitEntryMsg({ type: 'error', text: data.error || 'Failed to submit entry.' });
+      }
+    } catch {
+      setSubmitEntryMsg({ type: 'error', text: 'Network error submitting entry.' });
+    } finally {
+      setSubmittingEntry(false);
     }
   };
 
@@ -408,7 +429,7 @@ export default function CompetitionPage() {
     if (competition?.theme_id) {
       return themesList.find((t) => t.id === competition.theme_id);
     }
-    return themesList[0] || DEFAULT_THEMES[0];
+    return themesList[0] || undefined;
   }, [competition, themesList]);
 
   // Dynamically compute prize breakdown from active competition bounty
@@ -469,73 +490,59 @@ export default function CompetitionPage() {
       {/* ========================================================================= */}
       {/* ADMIN CONTROLS TOOLBAR & NOTIFICATION                                     */}
       {/* ========================================================================= */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-purple-900/20 border border-purple-500/30 backdrop-blur-xl shadow-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center text-purple-300">
-            {isAdmin ? <ShieldCheck className="w-5 h-5 text-emerald-400" /> : <Lock className="w-5 h-5 text-purple-400" />}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-wider text-purple-200">
-                {isAdmin ? 'Admin Mode: Active' : 'Contest Command Center'}
-              </span>
-              {isAdmin && (
+      {isAdmin && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-purple-900/20 border border-purple-500/30 backdrop-blur-xl shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center text-purple-300">
+              <ShieldCheck className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black uppercase tracking-wider text-purple-200">
+                  Admin Mode: Active
+                </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   Super Admin
                 </span>
-              )}
+              </div>
+              <p className="text-[11px] text-purple-300/80">
+                Active Theme: &quot;{activeTheme?.name || 'Default'}&quot; • {themesList.length} Themes Available
+              </p>
             </div>
-            <p className="text-[11px] text-purple-300/80">
-              {isAdmin
-                ? `Active Theme: "${activeTheme?.name || 'Default'}" • ${themesList.length} Themes Available`
-                : 'Admins can create custom themes and launch new competition seasons.'}
-            </p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setLaunchTitle(`${activeTheme?.name || 'Creator'} Championship`);
+                setLaunchDescription(activeTheme?.description || '');
+                setShowLaunchModal(true);
+              }}
+              className="px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black shadow-md shadow-amber-500/30 flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <Trophy className="w-3.5 h-3.5 fill-black" />
+              <span>Launch Competition</span>
+            </button>
+
+            <button
+              onClick={() => setShowCreateThemeModal(true)}
+              className="px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-md shadow-purple-600/30 flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Create Theme</span>
+            </button>
+
+            <button
+              onClick={() => setShowThemeCatalogModal(true)}
+              className="px-3 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Palette className="w-3.5 h-3.5 text-purple-300" />
+              <span className="hidden sm:inline">Theme Catalog ({themesList.length})</span>
+            </button>
           </div>
         </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2">
-          {isAdmin ? (
-            <>
-              <button
-                onClick={() => {
-                  setLaunchTitle(`${activeTheme?.name || 'Creator'} Championship`);
-                  setLaunchDescription(activeTheme?.description || '');
-                  setShowLaunchModal(true);
-                }}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black shadow-md shadow-amber-500/30 flex items-center gap-1.5 transition-all cursor-pointer"
-              >
-                <Trophy className="w-3.5 h-3.5 fill-black" />
-                <span>Launch Competition</span>
-              </button>
-
-              <button
-                onClick={() => setShowCreateThemeModal(true)}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-md shadow-purple-600/30 flex items-center gap-1.5 transition-all cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Create Theme</span>
-              </button>
-
-              <button
-                onClick={() => setShowThemeCatalogModal(true)}
-                className="px-3 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <Palette className="w-3.5 h-3.5 text-purple-300" />
-                <span className="hidden sm:inline">Theme Catalog ({themesList.length})</span>
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => setShowAdminUnlockModal(true)}
-              className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-purple-600/20 hover:bg-purple-600/40 text-purple-200 border border-purple-500/40 flex items-center gap-1.5 transition-all cursor-pointer"
-            >
-              <Unlock className="w-3.5 h-3.5 text-purple-300" />
-              <span>Admin Access</span>
-            </button>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* Admin Notice Banner */}
       {adminNotice && (
@@ -1376,7 +1383,7 @@ export default function CompetitionPage() {
           onClick={() => setNominateModalOpen(false)}
         >
           <div
-            className="relative w-full max-w-md bg-slate-950 border border-purple-500/40 rounded-3xl p-6 text-white space-y-4 shadow-2xl"
+            className="relative w-full max-w-lg bg-slate-950 border border-purple-500/40 rounded-3xl p-6 text-white space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
@@ -1392,36 +1399,146 @@ export default function CompetitionPage() {
               </button>
             </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Published your vertical reel or micro-series? Head to Creator Studio to upload or nominate an existing published reel into the active championship round!
-            </p>
-
-            <div className="p-3.5 rounded-2xl bg-purple-950/40 border border-purple-500/30 text-xs space-y-1.5">
-              <div className="flex items-center gap-1.5 text-amber-300 font-bold">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Theme Criteria: &quot;{activeTheme?.name}&quot;</span>
+            {!user ? (
+              <div className="text-center py-6 space-y-3">
+                <AlertCircle className="w-10 h-10 text-amber-400 mx-auto" />
+                <p className="text-sm font-semibold">Creator Account Required</p>
+                <p className="text-xs text-slate-300">
+                  Please sign in or create an account to enter your published reels into this competition.
+                </p>
+                <Link
+                  href="/login"
+                  className="inline-block px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase tracking-wider"
+                >
+                  Sign In to Enter
+                </Link>
               </div>
-              <ul className="list-disc list-inside text-slate-300 space-y-1 pl-1">
-                <li>Fits category: <strong>{activeTheme?.category || 'Creative'}</strong></li>
-                <li>Vertical format (9:16 aspect ratio)</li>
-                <li>Original creator-owned content with moderation approval</li>
-              </ul>
-            </div>
+            ) : loadingCreatorVideos ? (
+              <div className="py-12 flex flex-col items-center justify-center gap-3">
+                <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                <p className="text-xs text-purple-300">Loading your published reels...</p>
+              </div>
+            ) : creatorPublishedVideos.length === 0 ? (
+              <div className="text-center py-6 space-y-3">
+                <Film className="w-10 h-10 text-purple-400 mx-auto" />
+                <p className="text-sm font-semibold">No Published Videos Found</p>
+                <p className="text-xs text-slate-300">
+                  You don&apos;t have any published vertical reels yet. Publish a reel in Creator Studio to submit it to the competition!
+                </p>
+                <Link
+                  href="/creator/studio"
+                  className="inline-block px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs uppercase tracking-wider"
+                >
+                  Go to Creator Studio →
+                </Link>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmitVideoEntry} className="space-y-4">
+                <div className="p-3 rounded-2xl bg-purple-950/40 border border-purple-500/30 text-xs space-y-1">
+                  <div className="flex items-center gap-1.5 text-amber-300 font-bold">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Active Theme: &quot;{activeTheme?.name || 'Open Championship'}&quot;</span>
+                  </div>
+                  <p className="text-slate-300 text-[11px]">
+                    Category: <strong>{activeTheme?.category || 'All Categories'}</strong>. Selected video will be displayed in the competition and compete for real cash &amp; coin rewards.
+                  </p>
+                </div>
 
-            <div className="pt-2 flex items-center gap-3">
-              <Link
-                href="/creator/studio"
-                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-center font-bold text-xs uppercase tracking-wider text-white shadow-md hover:opacity-90"
-              >
-                Open Creator Studio →
-              </Link>
-              <button
-                onClick={() => setNominateModalOpen(false)}
-                className="px-4 py-2.5 rounded-xl border border-white/20 text-xs font-semibold text-slate-300 hover:text-white cursor-pointer"
-              >
-                Cancel
-              </button>
-            </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-purple-200">Select Reel to Submit:</label>
+                  <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
+                    {creatorPublishedVideos.map((vid) => (
+                      <label
+                        key={vid.id}
+                        onClick={() => setSelectedVideoToSubmit(vid.id)}
+                        className={`flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-all ${
+                          selectedVideoToSubmit === vid.id
+                            ? 'bg-purple-600/20 border-purple-400 shadow-md'
+                            : 'bg-white/5 border-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="selectedReel"
+                          checked={selectedVideoToSubmit === vid.id}
+                          onChange={() => setSelectedVideoToSubmit(vid.id)}
+                          className="accent-purple-500"
+                        />
+                        {vid.thumbnail_url ? (
+                          <img
+                            src={vid.thumbnail_url}
+                            alt={vid.title}
+                            className="w-12 h-16 object-cover rounded-lg shrink-0 border border-white/10"
+                          />
+                        ) : (
+                          <div className="w-12 h-16 bg-purple-900/50 rounded-lg shrink-0 flex items-center justify-center">
+                            <Film className="w-5 h-5 text-purple-300" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-white truncate">{vid.title}</p>
+                          <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-1">
+                            <span className="capitalize">{vid.category || 'General'}</span>
+                            <span>•</span>
+                            <span>{vid.views_count || 0} views</span>
+                            {vid.duration_seconds && (
+                              <>
+                                <span>•</span>
+                                <span>{Math.round(vid.duration_seconds)}s</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {submitEntryMsg && (
+                  <div
+                    className={`p-3 rounded-xl text-xs font-semibold flex items-center gap-2 ${
+                      submitEntryMsg.type === 'success'
+                        ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-300'
+                        : 'bg-rose-950/60 border border-rose-500/40 text-rose-300'
+                    }`}
+                  >
+                    {submitEntryMsg.type === 'success' ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                    )}
+                    <span>{submitEntryMsg.text}</span>
+                  </div>
+                )}
+
+                <div className="pt-2 flex items-center gap-3">
+                  <button
+                    type="submit"
+                    disabled={submittingEntry || !selectedVideoToSubmit}
+                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider shadow-md cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    {submittingEntry ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Submitting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Crown className="w-3.5 h-3.5 text-amber-300" />
+                        <span>Enter Competition</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNominateModalOpen(false)}
+                    className="px-4 py-2.5 rounded-xl border border-white/20 text-xs font-semibold text-slate-300 hover:text-white cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
@@ -1870,64 +1987,6 @@ export default function CompetitionPage() {
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* 13. QUICK ADMIN UNLOCK MODAL                                              */}
-      {/* ========================================================================= */}
-      {showAdminUnlockModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
-          onClick={() => setShowAdminUnlockModal(false)}
-        >
-          <div
-            className="relative w-full max-w-sm bg-slate-950 border border-purple-500/40 rounded-3xl p-6 text-white space-y-4 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-amber-400" />
-                <h3 className="font-bold text-base">Unlock Admin Mode</h3>
-              </div>
-              <button
-                onClick={() => setShowAdminUnlockModal(false)}
-                className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-300">
-              Enter the administrator credentials to manage themes and launch competition seasons directly.
-            </p>
-
-            <form onSubmit={handleAdminUnlock} className="space-y-3">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-purple-200">Admin Password</label>
-                <input
-                  type="password"
-                  required
-                  autoFocus
-                  placeholder="Enter admin password (123456)"
-                  value={adminPassInput}
-                  onChange={(e) => setAdminPassInput(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-white/5 border border-white/20 text-xs text-white focus:outline-none focus:border-purple-400"
-                />
-              </div>
-
-              {adminPassError && (
-                <p className="text-xs text-rose-400">{adminPassError}</p>
-              )}
-
-              <button
-                type="submit"
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs uppercase tracking-wider shadow-md hover:opacity-90 cursor-pointer"
-              >
-                Authenticate &amp; Unlock
-              </button>
-            </form>
           </div>
         </div>
       )}

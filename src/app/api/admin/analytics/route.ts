@@ -1,40 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { verifyAdminSession } from '@/lib/auth/serverAuth';
 
 export const dynamic = 'force-dynamic';
 
-async function checkIsAdmin(req: NextRequest, supabase: any) {
-  const headerToken = req.headers.get('x-admin-auth');
-  if (headerToken === 'lighthouse_admin_secret_token_2026') return true;
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return false;
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .maybeSingle();
-
-  return (
-    user.email === 'admin@admin.com' ||
-    user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
-    user.email === 'admin@dramabox.stream' ||
-    profile?.role === 'admin'
-  );
-}
-
 export async function GET(req: NextRequest) {
   try {
-    const supabase = await createAdminClient();
-    const isAdmin = await checkIsAdmin(req, supabase);
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+    const adminAuth = await verifyAdminSession(req);
+    if (!adminAuth.isAdmin) {
+      return NextResponse.json(
+        { error: adminAuth.error || 'Forbidden: Admin access required' },
+        { status: adminAuth.status || 403 }
+      );
     }
+
+    const supabase = await createAdminClient();
 
     // Time boundaries
     const now = Date.now();

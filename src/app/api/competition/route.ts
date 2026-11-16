@@ -1,190 +1,177 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { CompetingReel, DEFAULT_COMPETITION_ITEMS } from '@/data/competition';
+import { createClient as createServerClient } from '@/lib/supabase/server';
+import { CompetingReel } from '@/data/competition';
 import {
-  getActiveCompetition,
-  getAllCompetitions,
-  getAllThemes,
-  createNewTheme,
-  launchNewCompetition,
-} from '@/data/competitionsStore';
+  getActiveCompetitionFromDb,
+  getAllCompetitionsFromDb,
+  getAllThemesFromDb,
+  createThemeInDb,
+  launchCompetitionInDb,
+  getCompetitionEntriesFromDb,
+  submitVideoToCompetitionInDb,
+  getUserVotesTodayFromDb,
+  castVoteInDb,
+} from '@/lib/supabase/competitionService';
+import { verifyAdminSession } from '@/lib/auth/serverAuth';
 
-export { type CompetingReel, DEFAULT_COMPETITION_ITEMS };
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const supabase = await createServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    // 1. Fetch active competition from store or Supabase
-    let competition = getActiveCompetition();
-    const allThemes = getAllThemes();
-    const allCompetitions = getAllCompetitions();
+    // 1. Fetch active competition directly from Supabase
+    const activeCompetition = await getActiveCompetitionFromDb();
+    const allThemes = await getAllThemesFromDb();
+    const allCompetitions = await getAllCompetitionsFromDb();
 
-    try {
-      const { data: compData } = await supabase
-        .from('competitions')
-        .select('*')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (compData) {
-        competition = {
-          ...competition,
-          ...compData,
-        };
-      }
-    } catch {
-      // Table may not exist yet, fallback to store
-    }
-
-    // 2. Fetch live entries from Supabase (strictly dynamic)
     let items: CompetingReel[] = [];
-    try {
-      const { data: dbEntries } = await supabase
-        .from('competition_entries')
-        .select('*, video:videos(id, title, category, video_url, thumbnail_url, duration_seconds, views_count, creator:profiles(display_name, username, avatar_url))')
-        .eq('competition_id', competition.id)
-        .order('votes_count', { ascending: false });
-
-      if (dbEntries && dbEntries.length > 0) {
-        items = dbEntries
-          .filter((e: any) => e.video && e.video.video_url && e.video.thumbnail_url)
-          .map((e: any, idx: number) => {
-            const v = e.video;
-            const creator = v.creator || {};
-            const creatorName = creator.display_name || creator.username || 'Studio Creator';
-            const handle = creator.username ? `@${creator.username}` : `@${creatorName.toLowerCase().replace(/\s+/g, '')}`;
-            const dur = v.duration_seconds || 60;
-            const durDisplay = `${Math.floor(dur / 60)}m ${dur % 60}s`;
-
-            return {
-              id: e.id,
-              videoId: v.id,
-              title: v.title || 'Untitled Reel',
-              subtitle: 'Competing Original',
-              creator: creatorName,
-              handle,
-              avatarUrl: creator.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-              category: v.category || 'Drama',
-              thumbnail: v.thumbnail_url,
-              videoUrl: v.video_url,
-              duration: durDisplay,
-              views: `${v.views_count || 100} views`,
-              votes: e.votes_count || 0,
-              badge: idx === 0 ? '🥇 Leader' : idx === 1 ? '🥈 2nd Place' : idx === 2 ? '🥉 3rd Place' : undefined,
-            };
-          });
-      } else {
-        // Fall back to live published videos from Supabase (strictly dynamic)
-        const { data: dbVideos } = await supabase
-          .from('videos')
-          .select('id, title, category, video_url, thumbnail_url, duration_seconds, views_count, likes_count, creator:profiles(display_name, username, avatar_url)')
-          .eq('status', 'published')
-          .order('likes_count', { ascending: false })
-          .limit(50);
-
-        if (dbVideos && dbVideos.length > 0) {
-          items = dbVideos
-            .filter((v: any) => v.video_url && v.thumbnail_url)
-            .map((v: any, idx: number) => {
-              const creator = v.creator || {};
-              const creatorName = creator.display_name || creator.username || 'Creator';
-              const handle = creator.username ? `@${creator.username}` : `@${creatorName.toLowerCase().replace(/\s+/g, '')}`;
-              const dur = v.duration_seconds || 60;
-              const durDisplay = `${Math.floor(dur / 60)}m ${dur % 60}s`;
-
-              return {
-                id: `entry-${v.id}`,
-                videoId: v.id,
-                title: v.title || 'Untitled Reel',
-                subtitle: 'Contest Entry',
-                creator: creatorName,
-                handle,
-                avatarUrl: creator.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-                category: v.category || 'Drama',
-                thumbnail: v.thumbnail_url,
-                videoUrl: v.video_url,
-                duration: durDisplay,
-                views: `${v.views_count || 0} views`,
-                votes: v.likes_count || 0,
-                badge: idx === 0 ? '🥇 Leader' : idx === 1 ? '🥈 2nd Place' : idx === 2 ? '🥉 3rd Place' : undefined,
-              };
-            });
-        }
-      }
-    } catch {
-      items = [];
-    }
-
-    // 3. User's voted videos
     let userVotedIds: string[] = [];
-    if (user) {
-      try {
-        const { data: userVotes } = await supabase
-          .from('competition_votes')
-          .select('video_id')
-          .eq('user_id', user.id)
-          .eq('competition_id', competition.id);
 
-        if (userVotes) {
-          userVotedIds = userVotes.map((v: any) => v.video_id);
-        }
-      } catch {
-        // Table may not exist yet
+    if (activeCompetition) {
+      // 2. Fetch live entries strictly from competition_entries (no catalog substitutions)
+      items = await getCompetitionEntriesFromDb(activeCompetition.id);
+
+      // 3. User's voted videos today
+      if (user) {
+        userVotedIds = await getUserVotesTodayFromDb(user.id, activeCompetition.id);
       }
     }
 
     const totalVotes = items.reduce((sum, item) => sum + item.votes, 0);
 
     return NextResponse.json({
-      competition: {
-        ...competition,
-        total_votes: totalVotes,
-        entries_count: items.length,
-      },
+      competition: activeCompetition
+        ? {
+            ...activeCompetition,
+            total_votes: totalVotes,
+            entries_count: items.length,
+          }
+        : null,
       items,
       themes: allThemes,
       competitions: allCompetitions,
       userVotedIds,
     });
   } catch (error: any) {
-    const active = getActiveCompetition();
+    console.error('GET /api/competition error:', error);
     return NextResponse.json(
       {
-        competition: {
-          ...active,
-          total_votes: 0,
-          entries_count: 0,
-        },
+        competition: null,
         items: [],
-        themes: getAllThemes(),
-        competitions: getAllCompetitions(),
+        themes: [],
+        competitions: [],
         userVotedIds: [],
+        error: error?.message || 'Failed to load competition data from database',
       },
-      { status: 200 }
+      { status: 500 }
     );
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const supabase = await createServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     const body = await req.json();
     const { action } = body;
 
-    // 1. ADMIN ACTION: Create a New Theme
+    // ─── 1. CREATOR ACTION: Explicitly Submit a Video to the Active Competition ───
+    if (action === 'submit_entry') {
+      if (!user) {
+        return NextResponse.json({ error: 'You must be signed in to submit a video.' }, { status: 401 });
+      }
+
+      const { competitionId, videoId } = body;
+      if (!competitionId || !videoId) {
+        return NextResponse.json({ error: 'competitionId and videoId are required.' }, { status: 400 });
+      }
+
+      const adminAuth = await verifyAdminSession(req);
+      const res = await submitVideoToCompetitionInDb({
+        competitionId,
+        videoId,
+        userId: user.id,
+        isAdmin: adminAuth.isAdmin,
+      });
+
+      if (!res.success) {
+        return NextResponse.json({ error: res.error }, { status: 400 });
+      }
+
+      const updatedEntries = await getCompetitionEntriesFromDb(competitionId);
+      return NextResponse.json({
+        success: true,
+        message: 'Video successfully entered into the championship arena!',
+        entryId: res.entryId,
+        items: updatedEntries,
+      });
+    }
+
+    // ─── 2. VOTER ACTION: Vote for a Competing Reel ───────────────────────────
+    if (action === 'vote' || !action) {
+      if (!user) {
+        return NextResponse.json(
+          { error: 'You must be signed in to cast a vote for your favorite reel.' },
+          { status: 401 }
+        );
+      }
+
+      const { competitionId, videoId } = body;
+      if (!videoId) {
+        return NextResponse.json({ error: 'videoId is required' }, { status: 400 });
+      }
+
+      let activeCompId = competitionId;
+      if (!activeCompId) {
+        const activeComp = await getActiveCompetitionFromDb();
+        if (!activeComp) {
+          return NextResponse.json({ error: 'No active championship season found.' }, { status: 400 });
+        }
+        activeCompId = activeComp.id;
+      }
+
+      const voteResult = await castVoteInDb({
+        competitionId: activeCompId,
+        videoId,
+        userId: user.id,
+      });
+
+      if (!voteResult.success) {
+        return NextResponse.json(
+          { error: voteResult.error || 'Failed to register vote.' },
+          { status: 400 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Vote successfully registered in the database! Thank you for supporting the creator.',
+        videoId,
+        remainingVotes: voteResult.remainingVotes,
+        totalVotes: voteResult.totalVotes,
+      });
+    }
+
+    // ─── 3. ADMIN ACTION: Create a New Creative Theme ─────────────────────────
     if (action === 'create_theme') {
+      const adminAuth = await verifyAdminSession(req);
+      if (!adminAuth.isAdmin) {
+        return NextResponse.json({ error: adminAuth.error || 'Admin privileges required' }, { status: adminAuth.status || 403 });
+      }
+
       const { name, tagline, description, category, bannerGradient, accentColor, badgeEmoji, rules } = body;
       if (!name || !name.trim()) {
         return NextResponse.json({ error: 'Theme name is required' }, { status: 400 });
       }
 
-      const newTheme = createNewTheme({
+      const newTheme = await createThemeInDb({
         name,
         tagline,
         description: description || `Original ${category || 'Creative'} stories and reels`,
@@ -195,117 +182,57 @@ export async function POST(req: NextRequest) {
         rules,
       });
 
+      if (!newTheme) {
+        return NextResponse.json({ error: 'Failed to create theme in database.' }, { status: 500 });
+      }
+
+      const themes = await getAllThemesFromDb();
       return NextResponse.json({
         success: true,
-        message: `Theme "${newTheme.name}" created successfully!`,
+        message: `Theme "${newTheme.name}" created and stored in Supabase successfully!`,
         theme: newTheme,
-        themes: getAllThemes(),
+        themes,
       });
     }
 
-    // 2. ADMIN ACTION: Launch New Competition with Theme
+    // ─── 4. ADMIN ACTION: Launch New Competition Season ───────────────────────
     if (action === 'launch_competition') {
-      const { title, themeId, customThemeName, description, seasonNumber, prizeCoins, prizeCashInr, endDate, durationDays } = body;
+      const adminAuth = await verifyAdminSession(req);
+      if (!adminAuth.isAdmin) {
+        return NextResponse.json({ error: adminAuth.error || 'Admin privileges required' }, { status: adminAuth.status || 403 });
+      }
 
-      const newComp = launchNewCompetition({
+      const { title, themeId, description, seasonNumber, prizeCoins, prizeCashInr, durationDays } = body;
+
+      const newComp = await launchCompetitionInDb({
         title,
         themeId,
-        customThemeName,
         description,
-        seasonNumber,
+        seasonNumber: Number(seasonNumber) || 1,
         prizeCoins: Number(prizeCoins) || 50000,
         prizeCashInr: Number(prizeCashInr) || 50000,
-        endDate,
         durationDays: Number(durationDays) || 14,
       });
 
+      if (!newComp) {
+        return NextResponse.json({ error: 'Failed to launch competition in database.' }, { status: 500 });
+      }
+
+      const allCompetitions = await getAllCompetitionsFromDb();
       return NextResponse.json({
         success: true,
-        message: `Season ${newComp.season_number} ("${newComp.title}") launched successfully!`,
+        message: `Season ${newComp.season_number} ("${newComp.title}") launched in Supabase!`,
         competition: newComp,
         activeCompetition: newComp,
-        competitions: getAllCompetitions(),
+        competitions: allCompetitions,
       });
     }
 
-    // 3. VOTER ACTION: Vote for a Reel
-    const { competitionId, videoId } = body;
-
-    if (!videoId) {
-      return NextResponse.json({ error: 'videoId is required' }, { status: 400 });
-    }
-
-    const activeCompId = competitionId || getActiveCompetition().id;
-
-    // If authenticated, attempt database recording
-    if (user) {
-      try {
-        const { data: existingVote } = await supabase
-          .from('competition_votes')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('competition_id', activeCompId)
-          .eq('video_id', videoId)
-          .maybeSingle();
-
-        if (existingVote) {
-          return NextResponse.json({
-            success: false,
-            error: 'You have already voted for this video in this season!',
-          }, { status: 400 });
-        }
-
-        await supabase.from('competition_votes').insert({
-          user_id: user.id,
-          competition_id: activeCompId,
-          video_id: videoId,
-        });
-
-        const { data: entry } = await supabase
-          .from('competition_entries')
-          .select('votes_count')
-          .eq('competition_id', activeCompId)
-          .eq('video_id', videoId)
-          .maybeSingle();
-
-        if (entry) {
-          await supabase
-            .from('competition_entries')
-            .update({ votes_count: (entry.votes_count || 0) + 1 })
-            .eq('competition_id', activeCompId)
-            .eq('video_id', videoId);
-        }
-      } catch (dbErr) {
-        console.warn('Database vote recording notice:', dbErr);
-      }
-    }
-
-    // Persist vote counter on video record in Supabase
-    try {
-      const { data: vRecord } = await supabase
-        .from('videos')
-        .select('likes_count')
-        .eq('id', videoId)
-        .maybeSingle();
-
-      if (vRecord) {
-        await supabase
-          .from('videos')
-          .update({ likes_count: (vRecord.likes_count || 0) + 1 })
-          .eq('id', videoId);
-      }
-    } catch (vErr) {
-      console.warn('Video likes count update notice:', vErr);
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: 'Vote successfully registered! Thank you for supporting the creator.',
-      videoId,
-    });
+    return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
   } catch (error: any) {
+    console.error('POST /api/competition error:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to submit vote' },
+      { error: error?.message || 'Failed to process competition request' },
       { status: 500 }
     );
   }

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -17,16 +17,60 @@ import {
   HeartHandshake,
 } from 'lucide-react';
 import { BrandLogo } from '@/components/landing/BrandLogo';
+import { createClient } from '@/lib/supabase/client';
 
 import { EditableText, useSiteText } from '@/context/SiteTextContext';
 
 export default function AboutUsPage() {
   const { t } = useSiteText();
+  const [liveStats, setLiveStats] = useState({
+    views: '0',
+    creators: '0',
+    reels: '0',
+    series: '0',
+  });
+
+  useEffect(() => {
+    async function fetchPlatformStats() {
+      try {
+        const supabase = createClient();
+        const [{ count: videosCount, data: videosData }, { count: profilesCount }, { count: seriesCount }] =
+          await Promise.all([
+            supabase.from('videos').select('views_count', { count: 'exact' }),
+            supabase.from('profiles').select('*', { count: 'exact', head: true }),
+            supabase.from('content_series').select('*', { count: 'exact', head: true }),
+          ]);
+
+        const totalViews = (videosData || []).reduce(
+          (acc: number, curr: { views_count?: number | null }) => acc + (curr.views_count || 0),
+          0
+        );
+
+        const formatNumber = (num: number) => {
+          if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M+`;
+          if (num >= 1000) return `${(num / 1000).toFixed(1)}K+`;
+          return `${num}`;
+        };
+
+        setLiveStats({
+          views: formatNumber(totalViews),
+          creators: formatNumber(profilesCount || 0),
+          reels: formatNumber(videosCount || 0),
+          series: formatNumber(seriesCount || 0),
+        });
+      } catch (err) {
+        console.warn('Failed to load platform stats:', err);
+      }
+    }
+
+    fetchPlatformStats();
+  }, []);
+
   const stats = [
-    { value: '50M+', label: 'Global Video Views', sub: 'Across 120+ countries' },
-    { value: '12K+', label: 'Visionary Creators', sub: 'Independent directors & storytellers' },
-    { value: '45K+', label: 'Episodic Reels', sub: 'Spanning 8+ cinematic genres' },
-    { value: '98%', label: 'Viewer Retention', sub: 'Binge-worthy vertical drama' },
+    { value: liveStats.views, label: 'Platform Reel Views', sub: 'Engaged streaming audience' },
+    { value: liveStats.creators, label: 'Visionary Creators', sub: 'Independent directors & storytellers' },
+    { value: liveStats.reels, label: 'Episodic Reels', sub: 'Dynamic vertical micro-episodes' },
+    { value: liveStats.series, label: 'Original Series', sub: 'Original multi-part narratives' },
   ];
 
   const pillars = [

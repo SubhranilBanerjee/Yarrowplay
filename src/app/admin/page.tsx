@@ -56,8 +56,8 @@ export default function AdminHubPage() {
   const [activeTab, setActiveTab] = useState<AdminTab>('analytics');
 
   // Login form state
-  const [loginEmail, setLoginEmail] = useState('admin@admin.com');
-  const [loginPassword, setLoginPassword] = useState('123456');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loginLoading, setLoginLoading] = useState(false);
 
@@ -136,17 +136,15 @@ export default function AdminHubPage() {
   // Check auth
   useEffect(() => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('lighthouse_admin_token') : null;
-    if (token === 'lighthouse_admin_secret_token_2026') {
+    if (token) {
       setLocalAdminAuth(true);
     }
   }, []);
 
   const isAdmin =
-    localAdminAuth ||
-    user?.email === 'admin@admin.com' ||
-    user?.email === 'admin@dramabox.stream' ||
-    user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
-    profile?.role === 'admin';
+    profile?.role === 'admin' ||
+    Boolean(user?.email && process.env.NEXT_PUBLIC_ADMIN_EMAIL && user.email.toLowerCase() === process.env.NEXT_PUBLIC_ADMIN_EMAIL.toLowerCase()) ||
+    localAdminAuth;
 
   // Load Competitions & Themes for Admin
   const loadAdminCompetitions = async () => {
@@ -271,14 +269,7 @@ export default function AdminHubPage() {
         setLoginError(data.error || 'Authentication failed. Please check credentials.');
       }
     } catch {
-      // Fallback local check
-      if (loginEmail.trim() === 'admin@admin.com' && loginPassword.trim() === '123456') {
-        localStorage.setItem('lighthouse_admin_token', 'lighthouse_admin_secret_token_2026');
-        setLocalAdminAuth(true);
-        showNotification('success', 'Logged in as Admin');
-      } else {
-        setLoginError('Invalid admin email or password.');
-      }
+      setLoginError('Authentication service unreachable or network error.');
     } finally {
       setLoginLoading(false);
     }
@@ -308,7 +299,6 @@ export default function AdminHubPage() {
   const getHeaders = () => {
     return {
       'Content-Type': 'application/json',
-      'x-admin-auth': 'lighthouse_admin_secret_token_2026',
     };
   };
 
@@ -663,9 +653,8 @@ export default function AdminHubPage() {
                 ? 'bg-purple-50 border-purple-200 text-purple-900'
                 : 'bg-purple-900/30 border-purple-400/20 text-purple-200/80'
             }`}>
-              <p className="font-semibold text-purple-600">Authorized Admin Credentials:</p>
-              <p>Email: <code className="font-mono font-bold">admin@admin.com</code></p>
-              <p>Password: <code className="font-mono font-bold">123456</code></p>
+              <p className="font-semibold text-purple-600">Secure Database Authentication</p>
+              <p>Platform management requires an authorized administrator account verified against Supabase.</p>
             </div>
 
             <button
@@ -734,7 +723,7 @@ export default function AdminHubPage() {
           }`}>
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
             <span className="font-medium">Logged in as:</span>
-            <span className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{user?.email || (localAdminAuth ? 'admin@admin.com' : 'Admin')}</span>
+            <span className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{user?.email || 'Super Admin'}</span>
           </div>
 
           <Link
