@@ -71,11 +71,29 @@ function LoginForm() {
           .eq('id', data.user.id)
           .single();
 
+        const envAdminEmail = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || '').trim().toLowerCase();
+        const isEnvAdmin = Boolean(envAdminEmail && email.trim().toLowerCase() === envAdminEmail);
+        const isAdminUser = profile?.role === 'admin' || isEnvAdmin;
+
+        if (isAdminUser) {
+          try {
+            const adminRes = await fetch('/api/admin/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: email.trim(), password }),
+            });
+            const adminData = await adminRes.json();
+            if (adminRes.ok && adminData.token) {
+              localStorage.setItem('lighthouse_admin_token', adminData.token);
+            }
+          } catch {}
+        }
+
         setSuccessMsg('Signed in successfully! Redirecting...');
         setTimeout(() => {
           if (redirectTarget) {
             router.push(redirectTarget);
-          } else if (profile?.role === 'admin') {
+          } else if (isAdminUser) {
             router.push('/admin');
           } else if (profile?.role === 'creator') {
             router.push('/creator/studio');

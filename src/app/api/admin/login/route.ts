@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       res.cookies.set(ADMIN_SESSION_COOKIE, token, {
         httpOnly: true,
         sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
+        secure: req.nextUrl.protocol === 'https:',
         path: '/',
         maxAge: 7 * 24 * 60 * 60, // 7 days
       });
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
     res.cookies.set(ADMIN_SESSION_COOKIE, token, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
+      secure: req.nextUrl.protocol === 'https:',
       path: '/',
       maxAge: 7 * 24 * 60 * 60,
     });
