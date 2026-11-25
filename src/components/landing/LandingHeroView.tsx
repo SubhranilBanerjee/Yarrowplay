@@ -35,6 +35,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/context/ThemeContext';
 import { getStoredSiteContent, SiteContent, DEFAULT_SITE_CONTENT } from '@/lib/siteContent';
 import { BrandLogo } from '@/components/landing/BrandLogo';
+import { HeroLighthouseBackground } from '@/components/landing/HeroLighthouseBackground';
 
 export interface ReelItem {
   id: string;
@@ -62,17 +63,6 @@ export interface CategoryGroup {
   badgeColor: string;
   items: ReelItem[];
 }
-
-export const CATEGORY_TABS = [
-  { id: 'all', label: 'All' },
-  { id: 'drama', label: 'Drama' },
-  { id: 'romance', label: 'Romance' },
-  { id: 'thriller', label: 'Thriller' },
-  { id: 'action', label: 'Action' },
-  { id: 'fantasy', label: 'Fantasy' },
-  { id: 'comedy', label: 'Comedy' },
-  { id: 'scifi', label: 'Sci-Fi' },
-];
 
 // Helper to assign a vibrant contextual emoji to dynamic categories from Supabase
 export function getCategoryEmoji(catName: string): string {
@@ -103,10 +93,6 @@ export function getCategoryTagline(catName: string): string {
   return `Curated ${catName} original productions and short video content from verified creators.`;
 }
 
-// Fallback dynamic curated reels across all major genres
-// Fallback dynamic items (strictly empty: landing page is 100% dynamic)
-export const FALLBACK_REELS: ReelItem[] = [];
-
 // Helper to construct dynamic category groups from reel items
 export function buildCategoryGroups(items: ReelItem[]): CategoryGroup[] {
   const catMap = new Map<string, ReelItem[]>();
@@ -135,9 +121,6 @@ export function buildCategoryGroups(items: ReelItem[]): CategoryGroup[] {
   });
   return groups;
 }
-
-// Global empty placeholder array for fallback references
-const SAMPLE_REELS: ReelItem[] = [];
 
 // 3D Chrome Star Sparkle Component
 function ChromeStar({ className = 'w-16 h-16', rotation = 0 }: { className?: string; rotation?: number }) {
@@ -190,18 +173,45 @@ export function LandingHeroView() {
   const [activeVideoModal, setActiveVideoModal] = useState<any | null>(null);
   const [likedVideos, setLikedVideos] = useState<Set<string>>(new Set());
 
-  // Quick voting for Competition Arena preview
-  const [landingVotes, setLandingVotes] = useState<Record<string, number>>({});
+  // Live Competition Arena preview from Supabase
+  const [activeCompetition, setActiveCompetition] = useState<any | null>(null);
+  const [compEntries, setCompEntries] = useState<any[]>([]);
   const [votedLandingSet, setVotedLandingSet] = useState<Set<string>>(new Set());
 
-  const handleLandingVote = (videoId: string, e: React.MouseEvent) => {
+  const handleLandingVote = async (videoId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (votedLandingSet.has(videoId)) return;
-    setLandingVotes((prev) => ({
-      ...prev,
-      [videoId]: (prev[videoId] || 1000) + 1,
-    }));
-    setVotedLandingSet((prev) => new Set([...prev, videoId]));
+
+    try {
+      const res = await fetch('/api/competition', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'vote',
+          competitionId: activeCompetition?.id,
+          videoId,
+        }),
+      });
+
+      if (res.status === 401) {
+        router.push('/login?redirect=/#competition');
+        return;
+      }
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setVotedLandingSet((prev) => new Set([...prev, videoId]));
+        setCompEntries((prev) =>
+          prev.map((item) =>
+            item.videoId === videoId
+              ? { ...item, votes: data.totalVotes ?? (item.votes || 0) + 1 }
+              : item
+          )
+        );
+      }
+    } catch (err) {
+      console.error('Failed to cast competition vote:', err);
+    }
   };
 
   // Category Row Scroll Containers
@@ -253,6 +263,7 @@ export function LandingHeroView() {
         const [
           { data: dbVideos },
           { data: dbSeries },
+          compRes,
         ] = await Promise.all([
           supabase
             .from('videos')
@@ -265,7 +276,16 @@ export function LandingHeroView() {
             .select('id, title, category, description, cover_url, total_episodes, created_at, creator:profiles(display_name, username), episodes:videos(id, episode_number, video_url, thumbnail_url, duration_seconds, views_count)')
             .order('created_at', { ascending: false })
             .limit(60),
+          fetch('/api/competition').then((r) => (r.ok ? r.json() : null)).catch(() => null),
         ]);
+
+        if (compRes) {
+          setActiveCompetition(compRes.competition || null);
+          setCompEntries(Array.isArray(compRes.items) ? compRes.items : []);
+          if (Array.isArray(compRes.userVotedIds)) {
+            setVotedLandingSet(new Set(compRes.userVotedIds));
+          }
+        }
 
         const allDynamicItems: ReelItem[] = [];
 
@@ -393,26 +413,9 @@ export function LandingHeroView() {
       }`}
     >
       {/* ========================================================================= */}
-      {/* 1. BACKGROUND GLOW & AMBIENCE                                             */}
+      {/* 1. PAGE-WIDE LIGHTHOUSE BACKGROUND & AMBIENCE                             */}
       {/* ========================================================================= */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {isLight ? (
-          // Crisp, pristine white with subtle lavender radial aura
-          <>
-            <div className="absolute top-0 right-0 w-[800px] h-[700px] bg-purple-100/40 rounded-full blur-[140px]" />
-            <div className="absolute top-[40%] left-[-200px] w-[600px] h-[600px] bg-fuchsia-50/60 rounded-full blur-[150px]" />
-            <div className="absolute bottom-0 right-[-100px] w-[700px] h-[700px] bg-indigo-50/50 rounded-full blur-[160px]" />
-          </>
-        ) : (
-          // Deep cosmic obsidian with neon magenta/violet aurora
-          <>
-            <div className="absolute inset-0 bg-gradient-to-b from-[#09031B] via-[#070314] to-[#04010B]" />
-            <div className="absolute top-[-100px] right-[-50px] w-[650px] h-[650px] bg-purple-600/15 rounded-full blur-[160px]" />
-            <div className="absolute top-[25%] left-[-150px] w-[500px] h-[500px] bg-fuchsia-700/10 rounded-full blur-[140px]" />
-            <div className="absolute bottom-1/4 right-[10%] w-[550px] h-[550px] bg-purple-900/20 rounded-full blur-[180px]" />
-          </>
-        )}
-      </div>
+      <HeroLighthouseBackground isLight={isLight} />
 
       {/* ========================================================================= */}
       {/* 2. FLOATING PILL NAVBAR                                                   */}
@@ -461,8 +464,7 @@ export function LandingHeroView() {
             <span>Contest</span>
           </Link>
           {[
-            { id: 'services', label: 'Services' },
-            { id: 'why-us', label: 'Work Process' },
+            { id: 'services', label: 'Showcase' },
             { id: 'creators', label: 'Creators' },
             { id: 'advertisers', label: 'Advertisers' },
           ].map((item) => (
@@ -512,11 +514,12 @@ export function LandingHeroView() {
       {/* ========================================================================= */}
       {/* 3. HERO SECTION                                                          */}
       {/* ========================================================================= */}
-      <section id="hero" className="relative z-10 pt-10 md:pt-16 pb-12 px-4 sm:px-8 max-w-5xl mx-auto">
+      <section id="hero" className="relative z-10 overflow-hidden pt-10 md:pt-16 pb-12">
+        <div className="relative z-10 px-4 sm:px-8 max-w-5xl mx-auto">
         <div className="text-center flex flex-col items-center space-y-5">
           {/* Pill Category Badges */}
           <div className="flex flex-wrap items-center justify-center gap-2">
-            {(siteText.hero?.badgeTags || ['BRANDING & IDENTITY', 'EXCLUSIVE MICRO-SERIES', '4K VERTICAL REELS', 'CREATOR REWARDS']).map((tag, idx) => (
+            {(siteText.hero?.badgeTags || ['EXCLUSIVE MICRO-SERIES', '4K VERTICAL REELS', 'CREATOR REWARDS']).map((tag, idx) => (
               <span
                 key={idx}
                 className={`text-[10px] md:text-xs font-semibold px-3.5 py-1.5 rounded-full border uppercase tracking-wider transition-colors ${
@@ -888,6 +891,7 @@ export function LandingHeroView() {
             )}
           </div>
         </div>
+        </div>
       </section>
 
       {/* ========================================================================= */}
@@ -916,10 +920,19 @@ export function LandingHeroView() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 shrink-0">
-              <div className="p-3 rounded-2xl bg-white/5 border border-amber-400/30 text-left">
-                <span className="text-[10px] uppercase font-bold text-purple-300 block">Season Bounty Pool</span>
-                <span className="text-base font-black text-amber-300">50,000 Coins + ₹50,000</span>
-              </div>
+              {activeCompetition && (
+                <div className="p-3 rounded-2xl bg-white/5 border border-amber-400/30 text-left">
+                  <span className="text-[10px] uppercase font-bold text-purple-300 block">
+                    Season {activeCompetition.season_number || 1} Bounty Pool
+                  </span>
+                  <span className="text-base font-black text-amber-300">
+                    {(activeCompetition.prize_coins || 0).toLocaleString()} Coins
+                    {activeCompetition.prize_cash_inr > 0
+                      ? ` + ₹${Number(activeCompetition.prize_cash_inr).toLocaleString()}`
+                      : ''}
+                  </span>
+                </div>
+              )}
 
               <Link
                 href="/competition"
@@ -931,12 +944,12 @@ export function LandingHeroView() {
             </div>
           </div>
 
-          {/* Dynamic Competing Leaders from Supabase */}
-          {reels.length > 0 ? (
+          {/* Dynamic Competing Leaders strictly from Supabase competition_entries */}
+          {compEntries.length > 0 ? (
             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {reels.slice(0, 3).map((entry, idx) => {
-                const currentVotes = landingVotes[entry.id] !== undefined ? landingVotes[entry.id] : (entry.votes || 0);
-                const hasVoted = votedLandingSet.has(entry.id);
+              {compEntries.slice(0, 3).map((entry, idx) => {
+                const currentVotes = entry.votes || 0;
+                const hasVoted = votedLandingSet.has(entry.videoId);
                 const rankText = idx === 0 ? '🥇 1st Place (Leader)' : idx === 1 ? '🥈 2nd Place' : '🥉 3rd Place';
                 const borderClass = idx === 0 ? 'border-amber-400/80' : idx === 1 ? 'border-slate-400/60' : 'border-amber-700/60';
                 const badgeBg = idx === 0 ? 'bg-amber-400 text-black' : idx === 1 ? 'bg-slate-300 text-slate-900' : 'bg-amber-800 text-amber-100';
@@ -945,8 +958,7 @@ export function LandingHeroView() {
                   <div
                     key={entry.id}
                     onClick={() => setActiveVideoModal({
-                      id: entry.id,
-                      seriesId: entry.seriesId,
+                      id: entry.videoId,
                       title: entry.title,
                       subtitle: entry.subtitle,
                       creator: entry.creator,
@@ -956,7 +968,7 @@ export function LandingHeroView() {
                       duration: entry.duration,
                       views: `${currentVotes} votes`,
                     })}
-                    className={`relative rounded-2xl overflow-hidden border ${borderClass} bg-[#100624] p-4 flex flex-col justify-between group cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-xl`}
+                    className={`relative rounded-2xl overflow-hidden border ${borderClass} bg-[#100624]/90 backdrop-blur-md p-4 flex flex-col justify-between group cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-xl`}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full ${badgeBg} shadow-sm`}>
@@ -998,7 +1010,7 @@ export function LandingHeroView() {
                     </div>
 
                     <button
-                      onClick={(e) => handleLandingVote(entry.id, e)}
+                      onClick={(e) => handleLandingVote(entry.videoId, e)}
                       className={`w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md ${
                         hasVoted
                           ? 'bg-emerald-500 text-white'
@@ -1025,17 +1037,19 @@ export function LandingHeroView() {
             <div className="relative z-10 p-8 sm:p-12 rounded-2xl bg-white/5 border border-purple-500/30 text-center space-y-4">
               <Trophy className="w-12 h-12 text-amber-400 mx-auto" />
               <h3 className="text-xl sm:text-2xl font-black uppercase text-white">
-                Monthly Championship Arena
+                {activeCompetition ? activeCompetition.title : 'Monthly Championship Arena'}
               </h3>
               <p className="text-xs sm:text-sm text-purple-200/80 max-w-lg mx-auto">
-                No competing reels uploaded yet. Creators: upload your video or series in Creator Studio to compete for the 50,000 Coins Season Reward!
+                {activeCompetition
+                  ? 'No entries submitted to this season yet. Creators can submit their published reels in the Competition Arena.'
+                  : 'No active competition season right now. Visit the Competition Arena for past seasons and upcoming announcements.'}
               </p>
               <div className="pt-2 flex flex-wrap justify-center gap-3">
                 <Link
                   href="/creator/studio"
                   className="px-6 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all"
                 >
-                  Upload Reel to Compete
+                  Open Creator Studio
                 </Link>
                 <Link
                   href="/competition"
@@ -1059,33 +1073,8 @@ export function LandingHeroView() {
         </div>
       </section>
 
-      {/* 4. SOCIAL PROOF / SATISFIED CLIENTS LOGOS BAR                             */}
       {/* ========================================================================= */}
-      <section className="relative z-10 py-12 px-4 sm:px-8 max-w-7xl mx-auto border-t border-b border-purple-500/15">
-        <h3 className={`text-center font-bold text-lg md:text-xl tracking-tight mb-8 ${
-          isLight ? 'text-slate-900' : 'text-white'
-        }`}>
-          {siteText.hero?.satisfiedClientsCount || '100+ Satisfied Clients'}
-        </h3>
-
-        <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 md:gap-14 max-w-5xl mx-auto opacity-80">
-          {(siteText.hero?.clientLogos || ['Catalyx', 'Propulse', 'Aether Media', 'Nova Studios', 'Kinetic Reels', 'Vortex Digital', 'Starlight Prod']).map((logo, idx) => (
-            <div
-              key={idx}
-              className={`font-black text-sm md:text-base tracking-widest uppercase transition-all duration-300 hover:scale-110 cursor-default ${
-                isLight
-                  ? 'text-slate-400 hover:text-purple-600'
-                  : 'text-slate-400 hover:text-purple-300 drop-shadow-[0_2px_10px_rgba(168,85,247,0.2)]'
-              }`}
-            >
-              {logo}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 5. WHO WE ARE / ABOUT US & 4-CARD BENTO GRID                             */}
+      {/* 4. ABOUT THE PLATFORM & CREATOR / ADVERTISER BENTO GRID                   */}
       {/* ========================================================================= */}
       <section id="about" className="relative z-10 py-20 px-4 sm:px-8 max-w-7xl mx-auto">
         {/* Header Row: Title on Left, Description on Right */}
@@ -1094,7 +1083,7 @@ export function LandingHeroView() {
             <span className={`text-[11px] font-bold tracking-widest uppercase block mb-1 ${
               isLight ? 'text-purple-600' : 'text-purple-400'
             }`}>
-              {siteText.about?.badge || 'ABOUT OUR PLATFORM'}
+              {siteText.about?.badge || 'ABOUT LIGHTHOUSE REELS'}
             </span>
             <h2 className={`text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight ${
               isLight ? 'text-slate-900' : 'text-white'
@@ -1108,7 +1097,7 @@ export function LandingHeroView() {
               isLight ? 'text-slate-600' : 'text-slate-300'
             }`}>
               {siteText.about?.description ||
-                'We Are A Creative Design Agency Focused On Turning Ideas Into Impactful Visual Experiences. From Brand Identity To Digital Design, We Help Businesses Communicate Clearly And Look Unforgettable.'}
+                'Lighthouse Reels is a vertical cinema and micro-series streaming platform built for independent creators, storytellers, and engaged audiences.'}
             </p>
           </div>
         </div>
@@ -1178,7 +1167,7 @@ export function LandingHeroView() {
 
             <div className="pt-2">
               <Link
-                href="/studio"
+                href="/creator/studio"
                 className="btn-cta inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-purple-950 font-bold text-xs uppercase tracking-wider hover:bg-purple-100 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md cursor-pointer"
               >
                 <span className="text-purple-950 font-bold">{siteText.creatorCard?.ctaText || 'Creator Studio →'}</span>
@@ -1260,7 +1249,7 @@ export function LandingHeroView() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 6. OUR SERVICES / CONTENT SHOWCASE CAROUSEL                              */}
+      {/* 5. CONTENT SHOWCASE CAROUSEL (DYNAMIC FROM SUPABASE)                      */}
       {/* ========================================================================= */}
       <section id="services" className="relative z-10 py-20 px-4 sm:px-8 max-w-7xl mx-auto">
         {/* Section Header */}
@@ -1269,18 +1258,21 @@ export function LandingHeroView() {
             <span className={`text-[11px] font-bold tracking-widest uppercase block mb-1 ${
               isLight ? 'text-purple-600' : 'text-purple-400'
             }`}>
-              {siteText.services?.badge || 'OUR SERVICES'}
+              {siteText.services?.badge || 'FEATURED ORIGINALS'}
             </span>
             <h2 className={`text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight ${
               isLight ? 'text-slate-900' : 'text-white'
             }`}>
-              {siteText.services?.title || 'OUR SERVICES'}
+              {siteText.services?.title || 'ORIGINAL SHOWCASE'}
             </h2>
           </div>
 
-          {/* Category Filter Pills */}
+          {/* Dynamic Category Filter Pills from Supabase */}
           <div className="flex flex-wrap items-center gap-1.5">
-            {CATEGORY_TABS.map((tab) => (
+            {[
+              { id: 'all', label: 'All' },
+              ...categoryGroups.map((g) => ({ id: g.id, label: g.name })),
+            ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setSelectedCategory(tab.id)}
@@ -1304,7 +1296,7 @@ export function LandingHeroView() {
           <div className="lg:col-span-4 space-y-5">
             <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">
               {selectedCategory === 'all'
-                ? 'BRANDING & IDENTITY'
+                ? 'STREAM ORIGINALS'
                 : `${selectedCategory.toUpperCase()} SHOWCASE`}
             </h3>
 
@@ -1312,7 +1304,7 @@ export function LandingHeroView() {
               isLight ? 'text-slate-600' : 'text-slate-300'
             }`}>
               {siteText.services?.description ||
-                'We Build Strong Brand Identities That Tell Your Story And Leave A Lasting Impression.'}
+                'Watch original vertical reels and micro-series published by creators on Lighthouse Reels.'}
             </p>
 
             {/* Navigation Buttons (←) (→) */}
@@ -1416,65 +1408,7 @@ export function LandingHeroView() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 7. WHY CHOOSE US (6-CARD GRID)                                           */}
-      {/* ========================================================================= */}
-      <section id="why-us" className="relative z-10 py-20 px-4 sm:px-8 max-w-7xl mx-auto">
-        {/* Header Row */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start mb-12">
-          <div className="md:col-span-5">
-            <h2 className={`text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight ${
-              isLight ? 'text-slate-900' : 'text-white'
-            }`}>
-              {siteText.whyChooseUs?.title || 'WHY CHOOSE US'}
-            </h2>
-          </div>
-
-          <div className="md:col-span-7">
-            <p className={`text-sm sm:text-base md:text-lg leading-relaxed ${
-              isLight ? 'text-slate-600' : 'text-slate-300'
-            }`}>
-              {siteText.whyChooseUs?.subtitle ||
-                "We Don't Just Design, We Solve Problems Through Creativity."}
-            </p>
-          </div>
-        </div>
-
-        {/* 6-Card Grid: 3 columns, 2 rows */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {[
-            { title: siteText.whyChooseUs?.feature1Title || 'Strategy-Driven Content' },
-            { title: siteText.whyChooseUs?.feature2Title || 'Clean, Modern Aesthetics' },
-            { title: siteText.whyChooseUs?.feature3Title || 'Client-Focused Approach' },
-            { title: siteText.whyChooseUs?.feature4Title || 'Fast Turnaround Time' },
-            { title: siteText.whyChooseUs?.feature5Title || 'Transparent Communication' },
-            { title: siteText.whyChooseUs?.feature6Title || 'Scalable Design Solutions' },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className={`p-6 rounded-2xl border transition-all duration-300 group hover:-translate-y-1 ${
-                isLight
-                  ? 'bg-slate-50 border-slate-200 hover:border-purple-300 hover:bg-white hover:shadow-lg hover:shadow-purple-900/5'
-                  : 'bg-[#120826]/70 border-white/10 hover:border-purple-500/40 hover:bg-[#180B33]'
-              }`}
-            >
-              {/* Purple Square Icon with White Checkmark */}
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-600/30 mb-5 group-hover:scale-105 transition-transform">
-                <Check className="w-5 h-5 text-white stroke-[2.5]" />
-              </div>
-
-              {/* Feature Title */}
-              <h3 className={`font-bold text-base sm:text-lg tracking-tight ${
-                isLight ? 'text-slate-900' : 'text-white'
-              }`}>
-                {item.title}
-              </h3>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 8. FOOTER (EDITABLE FROM ADMIN CMS)                                       */}
+      {/* 6. FOOTER (EDITABLE FROM ADMIN CMS)                                       */}
       {/* ========================================================================= */}
       <footer
         id="footer"

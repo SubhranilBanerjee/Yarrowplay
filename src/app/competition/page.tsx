@@ -127,13 +127,25 @@ export default function CompetitionPage() {
   const [newThemeAccent, setNewThemeAccent] = useState(GRADIENT_PRESETS[0].accent);
   const [newThemeRules, setNewThemeRules] = useState('');
 
-  // Check admin authorization strictly from verified server-backed profile
+  // Check admin authorization from verified server session or Supabase profile
+  const [serverAdminVerified, setServerAdminVerified] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/login')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.isAdmin) setServerAdminVerified(true);
+      })
+      .catch(() => {});
+  }, []);
+
   const isAdmin = useMemo(() => {
+    if (serverAdminVerified) return true;
     if (profile?.role === 'admin') return true;
     const envAdmin = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || '').trim().toLowerCase();
     if (user?.email && envAdmin && user.email.trim().toLowerCase() === envAdmin) return true;
     return false;
-  }, [profile, user]);
+  }, [serverAdminVerified, profile, user]);
 
   // Daily vote budget (3 votes per day)
   const DAILY_VOTE_LIMIT = 3;

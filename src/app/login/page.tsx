@@ -38,6 +38,27 @@ function LoginForm() {
       });
 
       if (error) {
+        // Check if credentials match .env.local admin credentials
+        try {
+          const adminRes = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email.trim(), password }),
+          });
+          const adminData = await adminRes.json();
+          if (adminRes.ok && adminData.success) {
+            if (adminData.token) {
+              localStorage.setItem('lighthouse_admin_token', adminData.token);
+            }
+            setSuccessMsg('Signed in as Super Admin! Redirecting...');
+            setTimeout(() => {
+              router.push(redirectTarget || '/admin');
+              router.refresh();
+            }, 600);
+            return;
+          }
+        } catch {}
+
         setErrorMsg(error.message);
         setIsLoading(false);
         return;
@@ -54,6 +75,8 @@ function LoginForm() {
         setTimeout(() => {
           if (redirectTarget) {
             router.push(redirectTarget);
+          } else if (profile?.role === 'admin') {
+            router.push('/admin');
           } else if (profile?.role === 'creator') {
             router.push('/creator/studio');
           } else if (profile?.role === 'advertiser') {

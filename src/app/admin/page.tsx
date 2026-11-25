@@ -144,12 +144,16 @@ export default function AdminHubPage() {
     setTimeout(() => setNotification(null), 4000);
   };
 
-  // Check auth
+  // Check server-side HttpOnly admin session cookie
   useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('lighthouse_admin_token') : null;
-    if (token) {
-      setLocalAdminAuth(true);
-    }
+    fetch('/api/admin/login')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.isAdmin) {
+          setLocalAdminAuth(true);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const isAdmin =
@@ -369,8 +373,11 @@ export default function AdminHubPage() {
     }
   };
 
-  const handleAdminLogout = () => {
+  const handleAdminLogout = async () => {
     localStorage.removeItem('lighthouse_admin_token');
+    try {
+      await fetch('/api/admin/login', { method: 'DELETE' });
+    } catch {}
     setLocalAdminAuth(false);
     showNotification('success', 'Admin session terminated.');
   };
