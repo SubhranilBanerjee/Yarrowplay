@@ -105,6 +105,9 @@ export default function CompetitionPage() {
   const [auditSearchQuery, setAuditSearchQuery] = useState('');
   const [competitionToDelete, setCompetitionToDelete] = useState<any | null>(null);
   const [isDeletingCompetition, setIsDeletingCompetition] = useState(false);
+  const [showDeclareResultsModal, setShowDeclareResultsModal] = useState(false);
+  const [selectedWinnerVideoId, setSelectedWinnerVideoId] = useState('');
+  const [declaringResults, setDeclaringResults] = useState(false);
   const [adminActionLoading, setAdminActionLoading] = useState(false);
   const [adminNotice, setAdminNotice] = useState<string | null>(null);
 
@@ -136,7 +139,7 @@ export default function CompetitionPage() {
       .then((data) => {
         if (data?.isAdmin) setServerAdminVerified(true);
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const isAdmin = useMemo(() => {
@@ -334,6 +337,38 @@ export default function CompetitionPage() {
     }
   };
 
+  // Admin: Declare Official Competition Winner & Publish Results
+  const handleDeclareResults = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!competition?.id || !selectedWinnerVideoId) return;
+
+    setDeclaringResults(true);
+    try {
+      const res = await fetch('/api/competition', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'declare_results',
+          competitionId: competition.id,
+          winnerVideoId: selectedWinnerVideoId,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setShowDeclareResultsModal(false);
+        setAdminNotice(data.message || 'Official competition results published!');
+        setTimeout(() => setAdminNotice(null), 5000);
+        await loadData();
+      } else {
+        setAdminNotice(data.error || 'Failed to publish results.');
+      }
+    } catch {
+      setAdminNotice('Network error publishing results.');
+    } finally {
+      setDeclaringResults(false);
+    }
+  };
+
   // Filtered audit votes
   const filteredAuditVotes = useMemo(() => {
     if (!auditSearchQuery.trim()) return auditVotesList;
@@ -485,7 +520,7 @@ export default function CompetitionPage() {
 
     try {
       localStorage.setItem('lr_competition_votes', JSON.stringify(Array.from(newVotedSet)));
-    } catch {}
+    } catch { }
 
     const newRemaining = Math.max(0, DAILY_VOTE_LIMIT - newVotedSet.size);
 
@@ -582,9 +617,8 @@ export default function CompetitionPage() {
 
   return (
     <div
-      className={`min-h-screen py-8 px-3 sm:px-6 md:px-8 max-w-7xl mx-auto transition-colors duration-300 font-sans selection:bg-purple-600 selection:text-white ${
-        isLight ? 'text-slate-900' : 'text-white'
-      }`}
+      className={`min-h-screen py-8 px-3 sm:px-6 md:px-8 max-w-7xl mx-auto transition-colors duration-300 font-sans selection:bg-purple-600 selection:text-white ${isLight ? 'text-slate-900' : 'text-white'
+        }`}
     >
       {/* ========================================================================= */}
       {/* ADMIN CONTROLS TOOLBAR & NOTIFICATION                                     */}
@@ -648,6 +682,19 @@ export default function CompetitionPage() {
               <span>Audit Votes</span>
             </button>
 
+            {competition && reels.length > 0 && (
+              <button
+                onClick={() => {
+                  setSelectedWinnerVideoId(reels[0]?.videoId || '');
+                  setShowDeclareResultsModal(true);
+                }}
+                className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-200 border border-emerald-500/40 flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Award className="w-3.5 h-3.5 text-emerald-300" />
+                <span>Publish Results</span>
+              </button>
+            )}
+
             <button
               onClick={() => setShowSeasonsHistoryModal(true)}
               className="px-3 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white flex items-center gap-1.5 transition-colors cursor-pointer"
@@ -682,11 +729,49 @@ export default function CompetitionPage() {
             <div className="w-full sm:w-[340px] h-60 rounded-2xl bg-purple-500/10" />
           </div>
         </section>
+      ) : !competition ? (
+        <section className="relative overflow-hidden rounded-3xl border border-purple-500/25 p-8 sm:p-14 mb-12 bg-gradient-to-br from-[#1A0B36] via-[#120726] to-[#080214] text-white text-center space-y-5 shadow-2xl">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-amber-300">
+            <Trophy className="w-8 h-8" />
+          </div>
+          <div className="space-y-2 max-w-xl mx-auto">
+            <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight bg-gradient-to-r from-white via-purple-100 to-amber-200 bg-clip-text text-transparent">
+              No Active Competition Right Now
+            </h1>
+            <p className="text-xs sm:text-sm text-purple-200/80 leading-relaxed">
+              {isAdmin
+                ? 'Create a creative theme and launch a new competition season from your admin toolbar to open creator submissions and voting.'
+                : 'New competitions, themes, and official results are created and published exclusively by platform administrators. Check back soon!'}
+            </p>
+          </div>
+          {isAdmin && (
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <button
+                onClick={() => setShowCreateThemeModal(true)}
+                className="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg cursor-pointer flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Create Theme</span>
+              </button>
+              <button
+                onClick={() => {
+                  setLaunchTitle(`${activeTheme?.name || 'Creator'} Championship`);
+                  setLaunchDescription(activeTheme?.description || '');
+                  setShowLaunchModal(true);
+                }}
+                className="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-amber-500 to-yellow-500 text-black shadow-lg cursor-pointer flex items-center gap-2"
+              >
+                <Trophy className="w-4 h-4 fill-black" />
+                <span>Launch Competition</span>
+              </button>
+            </div>
+          )}
+        </section>
       ) : (
+        <>
         <section
-          className={`relative overflow-hidden rounded-3xl border border-purple-500/30 p-6 sm:p-10 md:p-12 mb-12 bg-gradient-to-br ${
-            activeTheme?.bannerGradient || 'from-[#1A0B36] via-[#120726] to-[#080214]'
-          } text-white shadow-2xl shadow-purple-950/40`}
+          className={`relative overflow-hidden rounded-3xl border border-purple-500/30 p-6 sm:p-10 md:p-12 mb-12 bg-gradient-to-br ${activeTheme?.bannerGradient || 'from-[#1A0B36] via-[#120726] to-[#080214]'
+            } text-white shadow-2xl shadow-purple-950/40`}
         >
           {/* Ambient Glow Orbs */}
           <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-purple-600/25 rounded-full blur-3xl pointer-events-none" />
@@ -809,8 +894,8 @@ export default function CompetitionPage() {
                         {prizeCash > 0 && prizeCoins > 0
                           ? `${prizeCoins.toLocaleString()} Coins + ₹${prizeCash.toLocaleString()}`
                           : prizeCash > 0
-                          ? `₹${prizeCash.toLocaleString()}`
-                          : `${prizeCoins.toLocaleString()} Coins`}
+                            ? `₹${prizeCash.toLocaleString()}`
+                            : `${prizeCoins.toLocaleString()} Coins`}
                       </span>
                     </div>
                   </div>
@@ -905,11 +990,10 @@ export default function CompetitionPage() {
                   </div>
                   <button
                     onClick={(e) => handleVote(topThree.second!, e)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
-                      votedVideoIds.has(topThree.second.videoId)
-                        ? 'bg-purple-600 text-white shadow-md'
-                        : 'bg-white dark:bg-white/10 hover:bg-purple-600 hover:text-white border border-purple-500/30'
-                    }`}
+                    className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${votedVideoIds.has(topThree.second.videoId)
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'bg-white dark:bg-white/10 hover:bg-purple-600 hover:text-white border border-purple-500/30'
+                      }`}
                   >
                     {votedVideoIds.has(topThree.second.videoId) ? (
                       <Check className="w-3.5 h-3.5" />
@@ -971,11 +1055,10 @@ export default function CompetitionPage() {
                   </div>
                   <button
                     onClick={(e) => handleVote(topThree.first!, e)}
-                    className={`px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-lg ${
-                      votedVideoIds.has(topThree.first.videoId)
-                        ? 'bg-emerald-500 text-white'
-                        : 'bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black shadow-amber-500/40'
-                    }`}
+                    className={`px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-lg ${votedVideoIds.has(topThree.first.videoId)
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black shadow-amber-500/40'
+                      }`}
                   >
                     {votedVideoIds.has(topThree.first.videoId) ? (
                       <Check className="w-4 h-4" />
@@ -1028,11 +1111,10 @@ export default function CompetitionPage() {
                   </div>
                   <button
                     onClick={(e) => handleVote(topThree.third!, e)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
-                      votedVideoIds.has(topThree.third.videoId)
-                        ? 'bg-purple-600 text-white shadow-md'
-                        : 'bg-white dark:bg-white/10 hover:bg-purple-600 hover:text-white border border-purple-500/30'
-                    }`}
+                    className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${votedVideoIds.has(topThree.third.videoId)
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'bg-white dark:bg-white/10 hover:bg-purple-600 hover:text-white border border-purple-500/30'
+                      }`}
                   >
                     {votedVideoIds.has(topThree.third.videoId) ? (
                       <Check className="w-3.5 h-3.5" />
@@ -1082,13 +1164,12 @@ export default function CompetitionPage() {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
-                  selectedCategory === cat
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-600/30 scale-105'
-                    : isLight
+                className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${selectedCategory === cat
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-600/30 scale-105'
+                  : isLight
                     ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
                     : 'bg-white/5 text-purple-200 hover:bg-white/10 border border-white/10'
-                }`}
+                  }`}
               >
                 {cat}
               </button>
@@ -1104,11 +1185,10 @@ export default function CompetitionPage() {
                 placeholder="Search reels or creators..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full pl-9 pr-3 py-1.5 rounded-full text-xs border focus:outline-none focus:border-purple-500 transition-colors ${
-                  isLight
-                    ? 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
-                    : 'bg-white/5 border-white/10 text-white placeholder-purple-300/50'
-                }`}
+                className={`w-full pl-9 pr-3 py-1.5 rounded-full text-xs border focus:outline-none focus:border-purple-500 transition-colors ${isLight
+                  ? 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+                  : 'bg-white/5 border-white/10 text-white placeholder-purple-300/50'
+                  }`}
               />
             </div>
 
@@ -1116,9 +1196,8 @@ export default function CompetitionPage() {
               <span className="text-[11px] font-semibold text-purple-300 hidden sm:inline">Sort:</span>
               <button
                 onClick={() => setSortBy(sortBy === 'votes' ? 'views' : 'votes')}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors cursor-pointer flex items-center gap-1 ${
-                  isLight ? 'bg-white border-slate-200 text-slate-700' : 'bg-white/5 border-white/10 text-purple-200'
-                }`}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors cursor-pointer flex items-center gap-1 ${isLight ? 'bg-white border-slate-200 text-slate-700' : 'bg-white/5 border-white/10 text-purple-200'
+                  }`}
               >
                 <TrendingUp className="w-3.5 h-3.5" />
                 <span>{sortBy === 'votes' ? 'Most Votes' : 'Most Views'}</span>
@@ -1165,13 +1244,12 @@ export default function CompetitionPage() {
                 <div
                   key={reel.id}
                   onClick={() => setActiveVideoModal(reel)}
-                  className={`relative aspect-[9/16] rounded-2xl overflow-hidden border group cursor-pointer select-none transition-all duration-300 hover:scale-[1.02] ${
-                    hasVoted
-                      ? 'border-purple-500 shadow-lg shadow-purple-600/25 ring-2 ring-purple-500/50'
-                      : isLight
+                  className={`relative aspect-[9/16] rounded-2xl overflow-hidden border group cursor-pointer select-none transition-all duration-300 hover:scale-[1.02] ${hasVoted
+                    ? 'border-purple-500 shadow-lg shadow-purple-600/25 ring-2 ring-purple-500/50'
+                    : isLight
                       ? 'bg-slate-100 border-purple-200 shadow-md hover:border-purple-400'
                       : 'bg-[#120726] border-purple-500/20 shadow-xl hover:border-purple-400 hover:shadow-purple-900/30'
-                  }`}
+                    }`}
                 >
                   {/* Thumbnail Image */}
                   <Image
@@ -1189,15 +1267,14 @@ export default function CompetitionPage() {
                   {/* Top Badges: Rank & Category */}
                   <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between z-10">
                     <span
-                      className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-md ${
-                        rank === 1
-                          ? 'bg-amber-400 text-black font-extrabold'
-                          : rank === 2
+                      className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-md ${rank === 1
+                        ? 'bg-amber-400 text-black font-extrabold'
+                        : rank === 2
                           ? 'bg-slate-200 text-slate-900'
                           : rank === 3
-                          ? 'bg-amber-700 text-white'
-                          : 'bg-black/60 backdrop-blur-md text-white border border-white/20'
-                      }`}
+                            ? 'bg-amber-700 text-white'
+                            : 'bg-black/60 backdrop-blur-md text-white border border-white/20'
+                        }`}
                     >
                       #{rank}
                     </span>
@@ -1245,11 +1322,10 @@ export default function CompetitionPage() {
                     {/* High Contrast Vote Action Button */}
                     <button
                       onClick={(e) => handleVote(reel, e)}
-                      className={`w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md ${
-                        hasVoted
-                          ? 'bg-emerald-500 text-white shadow-emerald-500/30'
-                          : 'bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white shadow-purple-600/40 hover:scale-[1.02] active:scale-[0.98]'
-                      }`}
+                      className={`w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md ${hasVoted
+                        ? 'bg-emerald-500 text-white shadow-emerald-500/30'
+                        : 'bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white shadow-purple-600/40 hover:scale-[1.02] active:scale-[0.98]'
+                        }`}
                     >
                       {hasVoted ? (
                         <>
@@ -1328,6 +1404,67 @@ export default function CompetitionPage() {
           </div>
         </div>
       </section>
+      </>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 5B. OFFICIAL RESULTS DECLARED BY ADMIN                                    */}
+      {/* ========================================================================= */}
+      {competitionsHistory.some((c) => c.winner_video) && (
+        <section className="mb-14 rounded-3xl border border-amber-400/30 p-6 sm:p-8 bg-gradient-to-br from-[#1A0B36] via-[#120726] to-[#080214] text-white space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-400 mb-1">
+                <Crown className="w-4 h-4" />
+                <span>Admin Verified Results</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight">
+                Official Championship Winners
+              </h3>
+            </div>
+            <span className="text-xs text-purple-300/80">
+              Finalized &amp; published by platform administrators
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {competitionsHistory
+              .filter((c) => c.winner_video)
+              .map((comp) => (
+                <div
+                  key={comp.id}
+                  className="p-4 rounded-2xl bg-white/5 border border-amber-400/30 flex items-center gap-4"
+                >
+                  {comp.winner_video?.thumbnail_url ? (
+                    <img
+                      src={comp.winner_video.thumbnail_url}
+                      alt={comp.winner_video.title}
+                      className="w-16 h-20 object-cover rounded-xl shrink-0 border border-amber-400/40"
+                    />
+                  ) : (
+                    <div className="w-16 h-20 rounded-xl bg-purple-900/50 flex items-center justify-center shrink-0">
+                      <Trophy className="w-6 h-6 text-amber-400" />
+                    </div>
+                  )}
+                  <div className="min-w-0 space-y-1">
+                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-400 text-black">
+                      Season {comp.season_number} Winner
+                    </span>
+                    <h4 className="font-bold text-sm text-white truncate">
+                      {comp.winner_video?.title}
+                    </h4>
+                    <p className="text-xs text-purple-200 truncate">
+                      By {comp.winner_video?.creator_name || 'Creator'}
+                    </p>
+                    <p className="text-[11px] text-amber-300/90 font-semibold">
+                      {comp.title}
+                    </p>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </section>
+      )}
 
       {/* ========================================================================= */}
       {/* 6. VOTE TOAST BANNER                                                      */}
@@ -1409,11 +1546,10 @@ export default function CompetitionPage() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => handleVote(activeVideoModal)}
-                  className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
-                    votedVideoIds.has(activeVideoModal.videoId)
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md hover:opacity-90'
-                  }`}
+                  className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${votedVideoIds.has(activeVideoModal.videoId)
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md hover:opacity-90'
+                    }`}
                 >
                   {votedVideoIds.has(activeVideoModal.videoId) ? (
                     <>
@@ -1581,11 +1717,10 @@ export default function CompetitionPage() {
                       <label
                         key={vid.id}
                         onClick={() => setSelectedVideoToSubmit(vid.id)}
-                        className={`flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-all ${
-                          selectedVideoToSubmit === vid.id
-                            ? 'bg-purple-600/20 border-purple-400 shadow-md'
-                            : 'bg-white/5 border-white/10 hover:border-white/20'
-                        }`}
+                        className={`flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-all ${selectedVideoToSubmit === vid.id
+                          ? 'bg-purple-600/20 border-purple-400 shadow-md'
+                          : 'bg-white/5 border-white/10 hover:border-white/20'
+                          }`}
                       >
                         <input
                           type="radio"
@@ -1626,11 +1761,10 @@ export default function CompetitionPage() {
 
                 {submitEntryMsg && (
                   <div
-                    className={`p-3 rounded-xl text-xs font-semibold flex items-center gap-2 ${
-                      submitEntryMsg.type === 'success'
-                        ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-300'
-                        : 'bg-rose-950/60 border border-rose-500/40 text-rose-300'
-                    }`}
+                    className={`p-3 rounded-xl text-xs font-semibold flex items-center gap-2 ${submitEntryMsg.type === 'success'
+                      ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-300'
+                      : 'bg-rose-950/60 border border-rose-500/40 text-rose-300'
+                      }`}
                   >
                     {submitEntryMsg.type === 'success' ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -1734,11 +1868,10 @@ export default function CompetitionPage() {
                           setLaunchTitle(`${t.name} Championship`);
                           setLaunchDescription(t.description);
                         }}
-                        className={`p-3 rounded-2xl border cursor-pointer transition-all ${
-                          isSelected
-                            ? 'bg-purple-600/30 border-amber-400 shadow-md ring-1 ring-amber-400/60'
-                            : 'bg-white/5 border-white/10 hover:bg-white/10'
-                        }`}
+                        className={`p-3 rounded-2xl border cursor-pointer transition-all ${isSelected
+                          ? 'bg-purple-600/30 border-amber-400 shadow-md ring-1 ring-amber-400/60'
+                          : 'bg-white/5 border-white/10 hover:bg-white/10'
+                          }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-base">{t.badgeEmoji || '🎬'}</span>
@@ -1843,11 +1976,10 @@ export default function CompetitionPage() {
                       key={d}
                       type="button"
                       onClick={() => setLaunchDurationDays(d)}
-                      className={`flex-1 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                        launchDurationDays === d
-                          ? 'bg-purple-600 text-white border-purple-400'
-                          : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
-                      }`}
+                      className={`flex-1 py-1.5 rounded-xl text-xs font-bold border transition-all ${launchDurationDays === d
+                        ? 'bg-purple-600 text-white border-purple-400'
+                        : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
+                        }`}
                     >
                       {d} Days
                     </button>
@@ -2003,9 +2135,8 @@ export default function CompetitionPage() {
                           setNewThemeGradient(p.value);
                           setNewThemeAccent(p.accent);
                         }}
-                        className={`p-2 rounded-xl border text-center cursor-pointer transition-all ${
-                          isSelected ? 'border-amber-400 bg-white/10 ring-1 ring-amber-400' : 'border-white/10 bg-white/5 hover:bg-white/10'
-                        }`}
+                        className={`p-2 rounded-xl border text-center cursor-pointer transition-all ${isSelected ? 'border-amber-400 bg-white/10 ring-1 ring-amber-400' : 'border-white/10 bg-white/5 hover:bg-white/10'
+                          }`}
                       >
                         <div className={`h-4 w-full rounded bg-gradient-to-r ${p.value} mb-1 border border-white/10`} />
                         <span className="text-[10px] font-bold text-slate-300 block truncate">{p.name}</span>
@@ -2169,11 +2300,10 @@ export default function CompetitionPage() {
                           <span className="font-mono font-bold text-purple-400">S{comp.season_number || 1}</span>
                           <span className="font-extrabold text-white truncate">{comp.title}</span>
                           <span
-                            className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${
-                              isActive
-                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                                : 'bg-slate-500/20 text-slate-300 border border-slate-500/30'
-                            }`}
+                            className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${isActive
+                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                              : 'bg-slate-500/20 text-slate-300 border border-slate-500/30'
+                              }`}
                           >
                             {comp.status}
                           </span>
@@ -2436,6 +2566,98 @@ export default function CompetitionPage() {
                 Close Inspector
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 17. ADMIN DECLARE RESULTS / WINNER MODAL                                  */}
+      {/* ========================================================================= */}
+      {showDeclareResultsModal && isAdmin && competition && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setShowDeclareResultsModal(false)}
+        >
+          <div
+            className="relative w-full max-w-lg bg-[#0f0720] border border-emerald-500/40 rounded-3xl p-6 text-white space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2.5">
+                <Award className="w-5 h-5 text-emerald-400" />
+                <div>
+                  <h3 className="font-black text-base">Declare Official Winner</h3>
+                  <p className="text-[11px] text-purple-300/80">
+                    Season {competition.season_number}: {competition.title}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDeclareResultsModal(false)}
+                className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleDeclareResults} className="space-y-4">
+              <p className="text-xs text-slate-300">
+                Select the official winning reel to finalize Season {competition.season_number} and publish the results publicly.
+              </p>
+
+              <div className="max-h-64 overflow-y-auto space-y-2 pr-1">
+                {reels.map((r, idx) => (
+                  <label
+                    key={r.id}
+                    onClick={() => setSelectedWinnerVideoId(r.videoId)}
+                    className={`flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-all ${
+                      selectedWinnerVideoId === r.videoId
+                        ? 'bg-emerald-600/20 border-emerald-400 shadow-md'
+                        : 'bg-white/5 border-white/10 hover:border-white/25'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="winnerReel"
+                      checked={selectedWinnerVideoId === r.videoId}
+                      onChange={() => setSelectedWinnerVideoId(r.videoId)}
+                      className="accent-emerald-500"
+                    />
+                    <img
+                      src={r.thumbnail}
+                      alt={r.title}
+                      className="w-10 h-14 object-cover rounded-lg shrink-0 border border-white/10"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-black text-amber-300">#{idx + 1}</span>
+                        <p className="text-xs font-bold text-white truncate">{r.title}</p>
+                      </div>
+                      <p className="text-[10px] text-purple-300/80">
+                        {r.creator} • {r.votes.toLocaleString()} votes
+                      </p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+
+              <div className="pt-2 flex items-center gap-3">
+                <button
+                  type="submit"
+                  disabled={declaringResults || !selectedWinnerVideoId}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 disabled:opacity-50 text-black font-black text-xs uppercase tracking-wider cursor-pointer"
+                >
+                  {declaringResults ? 'Publishing Results...' : 'Publish Official Winner'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowDeclareResultsModal(false)}
+                  className="px-4 py-2.5 rounded-xl border border-white/20 text-xs font-semibold text-slate-300 hover:text-white cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

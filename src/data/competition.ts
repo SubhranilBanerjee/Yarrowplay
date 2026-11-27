@@ -52,6 +52,14 @@ export interface Competition {
   start_date: string;
   end_date: string;
   status: 'active' | 'completed' | 'upcoming';
+  winner_video_id?: string | null;
+  winner_video?: {
+    id: string;
+    title: string;
+    thumbnail_url?: string;
+    creator_name?: string;
+    votes_count?: number;
+  } | null;
   total_votes?: number;
   entries_count?: number;
   created_at: string;

@@ -14,6 +14,7 @@ import {
   deleteCompetitionInDb,
   deleteThemeInDb,
   getCompetitionVotesAuditFromDb,
+  declareCompetitionResultsInDb,
 } from '@/lib/supabase/competitionService';
 import { verifyAdminSession } from '@/lib/auth/serverAuth';
 
@@ -276,6 +277,34 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         message: 'Competition season and its votes deleted successfully.',
+        activeCompetition,
+        competitions: allCompetitions,
+      });
+    }
+
+    // ─── 6. ADMIN ACTION: Declare Official Results / Winner ─────────────────
+    if (action === 'declare_results') {
+      const adminAuth = await verifyAdminSession(req);
+      if (!adminAuth.isAdmin) {
+        return NextResponse.json({ error: adminAuth.error || 'Admin privileges required' }, { status: adminAuth.status || 403 });
+      }
+
+      const { competitionId, winnerVideoId } = body;
+      if (!competitionId || !winnerVideoId) {
+        return NextResponse.json({ error: 'competitionId and winnerVideoId are required.' }, { status: 400 });
+      }
+
+      const res = await declareCompetitionResultsInDb(competitionId, winnerVideoId);
+      if (!res.success) {
+        return NextResponse.json({ error: res.error || 'Failed to publish results' }, { status: 500 });
+      }
+
+      const allCompetitions = await getAllCompetitionsFromDb();
+      const activeCompetition = await getActiveCompetitionFromDb();
+      return NextResponse.json({
+        success: true,
+        message: 'Official competition results declared and published!',
+        competition: res.competition,
         activeCompetition,
         competitions: allCompetitions,
       });

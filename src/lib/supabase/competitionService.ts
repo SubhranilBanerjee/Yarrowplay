@@ -57,6 +57,19 @@ function mapDbCompetition(row: any, theme?: CompetitionTheme | null): Competitio
     start_date: row.start_date || row.created_at || new Date().toISOString(),
     end_date: row.end_date || new Date(Date.now() + 14 * 86400000).toISOString(),
     status: row.status || 'active',
+    winner_video_id: row.winner_video_id || null,
+    winner_video: row.winner_video
+      ? {
+          id: row.winner_video.id,
+          title: row.winner_video.title || 'Winning Reel',
+          thumbnail_url: row.winner_video.thumbnail_url || '',
+          creator_name:
+            row.winner_video.creator?.display_name ||
+            row.winner_video.creator?.username ||
+            'Creator',
+          votes_count: row.winner_votes_count,
+        }
+      : null,
     total_votes: Number(row.total_votes) || 0,
     entries_count: Number(row.entries_count) || 0,
     created_at: row.created_at || new Date().toISOString(),
@@ -173,7 +186,18 @@ export async function getAllCompetitionsFromDb(): Promise<Competition[]> {
     const supabase = await createServerClient();
     const { data, error } = await supabase
       .from('competitions')
-      .select('*')
+      .select(`
+        *,
+        winner_video:videos(
+          id,
+          title,
+          thumbnail_url,
+          creator:profiles(
+            display_name,
+            username
+          )
+        )
+      `)
       .order('start_date', { ascending: false });
 
     if (error || !data) {
@@ -699,6 +723,49 @@ export async function getCompetitionVotesAuditFromDb(params: {
   } catch (err) {
     console.warn('getCompetitionVotesAuditFromDb catch:', err);
     return { votes: [], stats: { totalVotes: 0, uniqueVoters: 0 } };
+  }
+}
+
+/**
+ * Admin-only: Declare official competition winner and publish final results.
+ */
+export async function declareCompetitionResultsInDb(
+  competitionId: string,
+  winnerVideoId: string
+): Promise<{ success: boolean; competition?: Competition; error?: string }> {
+  try {
+    const adminSupabase = await createAdminClient();
+    const { data, error } = await adminSupabase
+      .from('competitions')
+      .update({
+        winner_video_id: winnerVideoId,
+        status: 'completed',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', competitionId)
+      .select(`
+        *,
+        winner_video:videos(
+          id,
+          title,
+          thumbnail_url,
+          creator:profiles(
+            display_name,
+            username
+          )
+        )
+      `)
+      .single();
+
+    if (error || !data) {
+      console.error('declareCompetitionResultsInDb error:', error);
+      return { success: false, error: error?.message || 'Failed to publish competition results' };
+    }
+
+    return { success: true, competition: mapDbCompetition(data, null) };
+  } catch (err: any) {
+    console.error('declareCompetitionResultsInDb catch:', err);
+    return { success: false, error: err?.message || 'Failed to declare competition results' };
   }
 }
 

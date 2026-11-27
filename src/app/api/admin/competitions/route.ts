@@ -8,6 +8,8 @@ import {
   deleteCompetitionInDb,
   deleteThemeInDb,
   getCompetitionVotesAuditFromDb,
+  getCompetitionEntriesFromDb,
+  declareCompetitionResultsInDb,
 } from '@/lib/supabase/competitionService';
 import { verifyAdminSession } from '@/lib/auth/serverAuth';
 
@@ -43,6 +45,16 @@ export async function GET(req: NextRequest) {
         votes: auditData.votes,
         stats: auditData.stats,
       });
+    }
+
+    // ─── 1b. FETCH ENTRIES FOR A COMPETITION (for Admin Result Declaration) ──
+    if (action === 'entries') {
+      const competitionId = searchParams.get('competitionId');
+      if (!competitionId) {
+        return NextResponse.json({ error: 'competitionId is required' }, { status: 400 });
+      }
+      const entries = await getCompetitionEntriesFromDb(competitionId);
+      return NextResponse.json({ success: true, entries });
     }
 
     // ─── 2. DEFAULT: Load all competitions, active season, and themes ────────
@@ -135,8 +147,30 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    if (action === 'declare_results') {
+      const { competitionId, winnerVideoId } = body;
+      if (!competitionId || !winnerVideoId) {
+        return NextResponse.json({ error: 'competitionId and winnerVideoId are required.' }, { status: 400 });
+      }
+
+      const res = await declareCompetitionResultsInDb(competitionId, winnerVideoId);
+      if (!res.success) {
+        return NextResponse.json({ error: res.error || 'Failed to declare results.' }, { status: 500 });
+      }
+
+      const competitions = await getAllCompetitionsFromDb();
+      const activeCompetition = await getActiveCompetitionFromDb();
+      return NextResponse.json({
+        success: true,
+        message: 'Official competition results declared and published!',
+        competition: res.competition,
+        activeCompetition,
+        competitions,
+      });
+    }
+
     return NextResponse.json(
-      { error: 'Invalid action. Supported: create_theme, launch_competition' },
+      { error: 'Invalid action. Supported: create_theme, launch_competition, declare_results' },
       { status: 400 }
     );
   } catch (error: any) {

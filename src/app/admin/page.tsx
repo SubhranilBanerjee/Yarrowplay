@@ -117,6 +117,11 @@ export default function AdminHubPage() {
   const [auditSearchQuery, setAuditSearchQuery] = useState('');
   const [competitionToDelete, setCompetitionToDelete] = useState<any | null>(null);
   const [isDeletingCompetition, setIsDeletingCompetition] = useState(false);
+  const [compForResults, setCompForResults] = useState<any | null>(null);
+  const [resultsEntries, setResultsEntries] = useState<any[]>([]);
+  const [resultsLoading, setResultsLoading] = useState(false);
+  const [selectedWinnerId, setSelectedWinnerId] = useState('');
+  const [declaringWinner, setDeclaringWinner] = useState(false);
 
   // Launch Form State
   const [compThemeId, setCompThemeId] = useState('');
@@ -323,6 +328,59 @@ export default function AdminHubPage() {
       }
     } catch {
       showNotification('error', 'Network error deleting theme.');
+    }
+  };
+
+  // Open Declare Results Modal for a competition
+  const handleOpenDeclareResults = async (comp: any) => {
+    setCompForResults(comp);
+    setResultsLoading(true);
+    setResultsEntries([]);
+    setSelectedWinnerId(comp.winner_video_id || '');
+    try {
+      const res = await fetch(`/api/admin/competitions?action=entries&competitionId=${comp.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        const list = data.entries || [];
+        setResultsEntries(list);
+        if (!comp.winner_video_id && list[0]?.videoId) {
+          setSelectedWinnerId(list[0].videoId);
+        }
+      }
+    } catch {
+      showNotification('error', 'Failed to load competition entries.');
+    } finally {
+      setResultsLoading(false);
+    }
+  };
+
+  // Submit Official Winner Declaration
+  const handleAdminDeclareWinner = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!compForResults?.id || !selectedWinnerId) return;
+    setDeclaringWinner(true);
+    try {
+      const res = await fetch('/api/admin/competitions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'declare_results',
+          competitionId: compForResults.id,
+          winnerVideoId: selectedWinnerId,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification('success', data.message || 'Official winner declared!');
+        setCompForResults(null);
+        await loadAdminCompetitions();
+      } else {
+        showNotification('error', data.error || 'Failed to publish results.');
+      }
+    } catch {
+      showNotification('error', 'Network error declaring winner.');
+    } finally {
+      setDeclaringWinner(false);
     }
   };
 
@@ -3825,6 +3883,16 @@ export default function AdminHubPage() {
                                 <div className="flex items-center justify-end gap-2">
                                   <button
                                     type="button"
+                                    onClick={() => handleOpenDeclareResults(comp)}
+                                    className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-200 border border-emerald-500/30 flex items-center gap-1 transition-all cursor-pointer"
+                                    title="Declare official winner & publish results"
+                                  >
+                                    <Trophy className="w-3.5 h-3.5 text-emerald-300" />
+                                    <span className="hidden sm:inline">{comp.winner_video_id ? 'Update Winner' : 'Declare Winner'}</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
                                     onClick={() => handleOpenVotesAudit(comp)}
                                     className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-purple-600/20 hover:bg-purple-600/40 text-purple-200 border border-purple-500/30 flex items-center gap-1 transition-all cursor-pointer"
                                     title="Audit votes and check who voted"
@@ -4067,6 +4135,105 @@ export default function AdminHubPage() {
                 Close Inspector
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* ADMIN DECLARE OFFICIAL WINNER MODAL                                       */}
+      {/* ========================================================================= */}
+      {compForResults && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setCompForResults(null)}
+        >
+          <div
+            className="relative w-full max-w-lg bg-[#0f0720] border border-emerald-500/40 rounded-3xl p-6 text-white space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2.5">
+                <Trophy className="w-5 h-5 text-emerald-400" />
+                <div>
+                  <h3 className="font-black text-base">Declare Official Winner</h3>
+                  <p className="text-[11px] text-purple-300/80">
+                    Season {compForResults.season_number}: {compForResults.title}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setCompForResults(null)}
+                className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {resultsLoading ? (
+              <div className="py-10 flex flex-col items-center justify-center gap-2">
+                <RefreshCw className="w-5 h-5 animate-spin text-emerald-400" />
+                <p className="text-xs text-purple-300">Loading submitted entries...</p>
+              </div>
+            ) : resultsEntries.length === 0 ? (
+              <div className="py-8 text-center text-xs text-slate-400">
+                No entries have been submitted to this competition yet.
+              </div>
+            ) : (
+              <form onSubmit={handleAdminDeclareWinner} className="space-y-4">
+                <div className="max-h-64 overflow-y-auto space-y-2 pr-1">
+                  {resultsEntries.map((r, idx) => (
+                    <label
+                      key={r.id}
+                      onClick={() => setSelectedWinnerId(r.videoId)}
+                      className={`flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-all ${
+                        selectedWinnerId === r.videoId
+                          ? 'bg-emerald-600/20 border-emerald-400 shadow-md'
+                          : 'bg-white/5 border-white/10 hover:border-white/25'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="adminWinnerReel"
+                        checked={selectedWinnerId === r.videoId}
+                        onChange={() => setSelectedWinnerId(r.videoId)}
+                        className="accent-emerald-500"
+                      />
+                      <img
+                        src={r.thumbnail}
+                        alt={r.title}
+                        className="w-10 h-14 object-cover rounded-lg shrink-0 border border-white/10"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-black text-amber-300">#{idx + 1}</span>
+                          <p className="text-xs font-bold text-white truncate">{r.title}</p>
+                        </div>
+                        <p className="text-[10px] text-purple-300/80">
+                          {r.creator} • {(r.votes || 0).toLocaleString()} votes
+                        </p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+
+                <div className="pt-2 flex items-center gap-3">
+                  <button
+                    type="submit"
+                    disabled={declaringWinner || !selectedWinnerId}
+                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 disabled:opacity-50 text-black font-black text-xs uppercase tracking-wider cursor-pointer"
+                  >
+                    {declaringWinner ? 'Publishing Results...' : 'Publish Official Winner'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCompForResults(null)}
+                    className="px-4 py-2.5 rounded-xl border border-white/20 text-xs font-semibold text-slate-300 hover:text-white cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
