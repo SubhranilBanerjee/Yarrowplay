@@ -621,100 +621,6 @@ export default function CompetitionPage() {
         }`}
     >
       {/* ========================================================================= */}
-      {/* ADMIN CONTROLS TOOLBAR & NOTIFICATION                                     */}
-      {/* ========================================================================= */}
-      {isAdmin && (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-purple-900/20 border border-purple-500/30 backdrop-blur-xl shadow-lg">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center text-purple-300">
-              <ShieldCheck className="w-5 h-5 text-emerald-400" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black uppercase tracking-wider text-purple-200">
-                  Admin Mode: Active
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  Super Admin
-                </span>
-              </div>
-              <p className="text-[11px] text-purple-300/80">
-                Active Theme: &quot;{activeTheme?.name || 'Default'}&quot; • {themesList.length} Themes Available
-              </p>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                setLaunchTitle(`${activeTheme?.name || 'Creator'} Championship`);
-                setLaunchDescription(activeTheme?.description || '');
-                setShowLaunchModal(true);
-              }}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black shadow-md shadow-amber-500/30 flex items-center gap-1.5 transition-all cursor-pointer"
-            >
-              <Trophy className="w-3.5 h-3.5 fill-black" />
-              <span>Launch Competition</span>
-            </button>
-
-            <button
-              onClick={() => setShowCreateThemeModal(true)}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-md shadow-purple-600/30 flex items-center gap-1.5 transition-all cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Create Theme</span>
-            </button>
-
-            <button
-              onClick={() => setShowThemeCatalogModal(true)}
-              className="px-3 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Palette className="w-3.5 h-3.5 text-purple-300" />
-              <span className="hidden sm:inline">Theme Catalog ({themesList.length})</span>
-            </button>
-
-            <button
-              onClick={() => handleOpenVotesAudit(competition?.id)}
-              className="px-3 py-2 rounded-xl text-xs font-semibold bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Eye className="w-3.5 h-3.5 text-purple-300" />
-              <span>Audit Votes</span>
-            </button>
-
-            {competition && reels.length > 0 && (
-              <button
-                onClick={() => {
-                  setSelectedWinnerVideoId(reels[0]?.videoId || '');
-                  setShowDeclareResultsModal(true);
-                }}
-                className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-200 border border-emerald-500/40 flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <Award className="w-3.5 h-3.5 text-emerald-300" />
-                <span>Publish Results</span>
-              </button>
-            )}
-
-            <button
-              onClick={() => setShowSeasonsHistoryModal(true)}
-              className="px-3 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Clock className="w-3.5 h-3.5 text-amber-300" />
-              <span className="hidden sm:inline">Seasons ({competitionsHistory.length})</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Admin Notice Banner */}
-      {adminNotice && (
-        <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-emerald-950 to-slate-900 border border-emerald-500/40 text-emerald-200 text-xs sm:text-sm font-semibold flex items-center gap-2.5 shadow-xl animate-in fade-in">
-          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-          <span>{adminNotice}</span>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
       {/* 1. DYNAMIC HERO & COMPETITION SEASON BANNER (THEME-POWERED)               */}
       {/* ========================================================================= */}
       {isLoading ? (
@@ -739,33 +645,9 @@ export default function CompetitionPage() {
               No Active Competition Right Now
             </h1>
             <p className="text-xs sm:text-sm text-purple-200/80 leading-relaxed">
-              {isAdmin
-                ? 'Create a creative theme and launch a new competition season from your admin toolbar to open creator submissions and voting.'
-                : 'New competitions, themes, and official results are created and published exclusively by platform administrators. Check back soon!'}
+              New competitions, themes, and official results are created and published exclusively by platform administrators. Check back soon!
             </p>
           </div>
-          {isAdmin && (
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-              <button
-                onClick={() => setShowCreateThemeModal(true)}
-                className="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg cursor-pointer flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Create Theme</span>
-              </button>
-              <button
-                onClick={() => {
-                  setLaunchTitle(`${activeTheme?.name || 'Creator'} Championship`);
-                  setLaunchDescription(activeTheme?.description || '');
-                  setShowLaunchModal(true);
-                }}
-                className="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-amber-500 to-yellow-500 text-black shadow-lg cursor-pointer flex items-center gap-2"
-              >
-                <Trophy className="w-4 h-4 fill-black" />
-                <span>Launch Competition</span>
-              </button>
-            </div>
-          )}
         </section>
       ) : (
         <>
@@ -921,7 +803,6 @@ export default function CompetitionPage() {
             </div>
           </div>
         </section>
-      )}
 
       {/* ========================================================================= */}
       {/* 2. DYNAMIC LIVE LEADERBOARD PODIUM (TOP 3 CONTENDERS)                     */}
@@ -1279,24 +1160,9 @@ export default function CompetitionPage() {
                       #{rank}
                     </span>
 
-                    <div className="flex items-center gap-1.5">
-                      {isAdmin && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenVotesAudit(competition?.id, reel.videoId, reel.title);
-                          }}
-                          className="p-1 rounded-full bg-purple-950/80 border border-purple-400/50 text-purple-200 hover:text-white hover:bg-purple-800 transition-all cursor-pointer shadow-lg"
-                          title="Inspect who voted for this reel"
-                        >
-                          <Eye className="w-3 h-3 text-purple-300" />
-                        </button>
-                      )}
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white/90 border border-white/20">
-                        {reel.duration}
-                      </span>
-                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white/90 border border-white/20">
+                      {reel.duration}
+                    </span>
                   </div>
 
                   {/* Play Button Icon on Hover */}

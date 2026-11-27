@@ -29,14 +29,24 @@ export default function AdminAnalyticsPage() {
   const { user, profile } = useAuth();
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [serverAdminVerified, setServerAdminVerified] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/login')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((d) => {
+        if (d?.isAdmin) setServerAdminVerified(true);
+      })
+      .catch(() => {});
+  }, []);
 
   const isAdmin =
+    serverAdminVerified ||
     user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
-    user?.email === 'admin@dramabox.stream' ||
     profile?.role === 'admin';
 
   useEffect(() => {
-    if (!user) return;
+    if (!user && !serverAdminVerified) return;
     async function loadAnalytics() {
       setIsLoading(true);
       try {
@@ -56,18 +66,18 @@ export default function AdminAnalyticsPage() {
 
   if (!isAdmin && !isLoading) {
     return (
-      <div className="min-h-screen bg-[var(--lr-bg)] text-[var(--lr-text-primary)] flex items-center justify-center p-4">
-        <div className="text-center max-w-md p-6 rounded-2xl bg-[var(--lr-card-bg)] border border-[var(--lr-border)]">
-          <AlertTriangle className="w-12 h-12 text-[#ECC979] mx-auto mb-3" />
-          <h2 className="text-xl font-bold mb-1">Restricted Access</h2>
-          <p className="text-xs text-[var(--lr-text-muted)] mb-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center max-w-md p-8 rounded-3xl bg-[#120726]/80 backdrop-blur-2xl border border-purple-500/30 shadow-2xl">
+          <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto mb-3" />
+          <h2 className="text-xl font-black uppercase tracking-tight mb-1 text-white">Restricted Access</h2>
+          <p className="text-xs text-purple-200/80 mb-5">
             You must be an administrator to access platform analytics.
           </p>
           <Link
-            href="/home"
-            className="btn-primary inline-flex items-center gap-2 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-md"
+            href="/admin"
+            className="inline-flex items-center gap-2 text-white font-bold text-xs px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 shadow-lg shadow-purple-600/30"
           >
-            Return to Home
+            Go to Admin Console
           </Link>
         </div>
       </div>
@@ -82,32 +92,34 @@ export default function AdminAnalyticsPage() {
   const topSeries = data?.topSeries || [];
 
   return (
-    <div className="min-h-screen bg-[var(--lr-bg)] text-[var(--lr-text-primary)] py-8 px-4 sm:px-6">
+    <div className="min-h-screen py-8 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Navigation & Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-3xl bg-[#120726]/75 backdrop-blur-xl border border-purple-500/25 shadow-xl">
           <div className="flex items-center gap-3">
             <Link
               href="/admin"
-              className="w-10 h-10 rounded-full bg-[var(--lr-card-bg)] border border-[var(--lr-border)] flex items-center justify-center hover:border-[#ECC979] transition-colors"
+              className="w-10 h-10 rounded-full bg-purple-950/60 border border-purple-500/30 flex items-center justify-center hover:border-purple-400 transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-[var(--lr-text-muted)] hover:text-[#ECC979]" />
+              <ArrowLeft className="w-5 h-5 text-purple-200" />
             </Link>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight">Platform Analytics</h1>
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-500/15 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full">
+                <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight bg-gradient-to-r from-white via-purple-100 to-amber-200 bg-clip-text text-transparent">
+                  Platform Analytics
+                </h1>
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-200 border border-purple-400/30 px-2.5 py-0.5 rounded-full">
                   Realtime DB Data
                 </span>
               </div>
-              <p className="text-xs text-[var(--lr-text-muted)] mt-0.5">
+              <p className="text-xs text-purple-200/75 mt-0.5">
                 Authoritative platform-level metrics across users, content growth, engagement, and VIP subscriptions
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-[var(--lr-text-muted)]">
-            <Calendar className="w-4 h-4 text-[#ECC979]" />
+          <div className="flex items-center gap-2 text-xs text-purple-200/80">
+            <Calendar className="w-4 h-4 text-amber-400" />
             <span>Updated: Just now</span>
           </div>
         </div>

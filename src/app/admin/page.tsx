@@ -39,9 +39,12 @@ import {
   Trophy,
   Palette,
   Plus,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import { BrandLogo } from '@/components/landing/BrandLogo';
 import { getStoredSiteContent, saveStoredSiteContent, resetStoredSiteContent, SiteContent, DEFAULT_SITE_CONTENT } from '@/lib/siteContent';
 
 type AdminTab = 'analytics' | 'users' | 'moderation' | 'text' | 'competitions';
@@ -49,7 +52,7 @@ type AdminTab = 'analytics' | 'users' | 'moderation' | 'text' | 'competitions';
 export default function AdminHubPage() {
   const router = useRouter();
   const { user, profile } = useAuth();
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const isLight = theme === 'light';
 
   // Local admin bypass / session token
@@ -740,16 +743,12 @@ export default function AdminHubPage() {
   if (!isAdmin) {
     return (
       <div className={`min-h-screen flex items-center justify-center p-4 relative overflow-hidden transition-colors ${
-        isLight ? 'bg-slate-100 text-slate-900' : 'bg-[#070314] text-[#F3E8FF]'
+        isLight ? 'text-slate-900' : 'text-[#F3E8FF]'
       }`}>
-        {/* Glow ambient background */}
-        <div className="absolute top-1/4 -left-20 w-96 h-96 rounded-full bg-purple-600/20 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 -right-20 w-96 h-96 rounded-full bg-pink-600/15 blur-[120px] pointer-events-none" />
-
         <div className={`relative w-full max-w-md p-8 rounded-3xl backdrop-blur-2xl border shadow-2xl space-y-6 transition-colors ${
           isLight
-            ? 'bg-white/95 border-slate-200 text-slate-900 shadow-slate-200/50'
-            : 'bg-[#110926]/90 border-purple-500/30 text-white shadow-[0_0_80px_rgba(147,51,234,0.25)]'
+            ? 'bg-white/85 border-purple-200/80 text-slate-900 shadow-purple-200/40'
+            : 'bg-[#120726]/80 border-purple-500/30 text-white shadow-[0_0_80px_rgba(147,51,234,0.28)]'
         }`}>
           <div className="text-center space-y-2">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-500 p-0.5 mx-auto shadow-lg shadow-purple-600/40 flex items-center justify-center">
@@ -837,8 +836,8 @@ export default function AdminHubPage() {
   }
 
   return (
-    <div className={`min-h-screen pb-24 font-sans transition-colors ${
-      isLight ? 'bg-slate-50 text-slate-900' : 'bg-[#070314] text-[#F3E8FF] selection:bg-purple-600 selection:text-white'
+    <div className={`min-h-screen pb-24 pt-4 font-sans transition-colors ${
+      isLight ? 'text-slate-900' : 'text-[#F3E8FF] selection:bg-purple-600 selection:text-white'
     }`}>
       {/* Toast Notification */}
       {notification && (
@@ -854,59 +853,59 @@ export default function AdminHubPage() {
         </div>
       )}
 
-      {/* Top Admin Header */}
-      <header className={`sticky top-0 z-40 backdrop-blur-xl border-b px-4 sm:px-8 py-3.5 flex items-center justify-between transition-colors ${
-        isLight ? 'bg-white/95 border-slate-200 shadow-xs' : 'bg-[#0E0824]/90 border-purple-500/20'
-      }`}>
-        <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-500 p-0.5 shadow-md flex items-center justify-center group-hover:scale-105 transition-transform">
-              <div className={`w-full h-full rounded-[10px] flex items-center justify-center ${isLight ? 'bg-white' : 'bg-[#0E0824]'}`}>
-                <Sparkles className="w-4 h-4 text-purple-600" />
-              </div>
-            </div>
-            <div>
-              <span className={`text-lg font-black tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                LightHouse <span className="text-purple-600">Reels</span>
-              </span>
-              <span className="ml-2 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-xs">
-                ADMIN CONSOLE
-              </span>
-            </div>
-          </Link>
-        </div>
-
-        <div className="flex items-center gap-3 sm:gap-4">
-          <div className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs ${
-            isLight ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-[#1A1038] border-purple-500/30 text-purple-300'
-          }`}>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-            <span className="font-medium">Logged in as:</span>
-            <span className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{user?.email || 'Super Admin'}</span>
+      {/* Floating Pill Admin Header (Matching Main Project Vibe) */}
+      <header className="sticky top-4 z-40 px-4 sm:px-8 max-w-7xl mx-auto">
+        <div className={`px-4 sm:px-6 py-2.5 rounded-full border shadow-lg backdrop-blur-xl flex items-center justify-between transition-all ${
+          isLight
+            ? 'bg-white/85 border-purple-200/90 shadow-purple-200/40'
+            : 'bg-[#150B2D]/85 border-purple-500/25 shadow-black/40'
+        }`}>
+          <div className="flex items-center gap-3">
+            <BrandLogo href="/home" showText={true} />
+            <span className="hidden sm:inline-block text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 text-white shadow-sm">
+              ADMIN CONSOLE
+            </span>
           </div>
 
-          <Link
-            href="/"
-            className={`px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
-              isLight
-                ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800'
-                : 'bg-purple-950/60 hover:bg-purple-900/60 border-purple-400/30 text-purple-200 hover:text-white'
-            }`}
-          >
-            View Live Site ↗
-          </Link>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className={`hidden md:flex items-center gap-2 px-3 py-1 rounded-full border text-xs ${
+              isLight ? 'bg-purple-50 border-purple-200 text-purple-800' : 'bg-[#1A1038]/80 border-purple-500/30 text-purple-300'
+            }`}>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              <span className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{user?.email || 'Super Admin'}</span>
+            </div>
 
-          <button
-            onClick={handleAdminLogout}
-            title="Sign out of admin"
-            className={`p-2 rounded-xl border transition-all cursor-pointer ${
-              isLight
-                ? 'bg-red-50 hover:bg-red-100 border-red-200 text-red-600'
-                : 'bg-red-950/50 hover:bg-red-900/50 border-red-500/30 text-red-300 hover:text-white'
-            }`}
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle Theme"
+              className={`p-2 rounded-full border transition-all cursor-pointer ${
+                isLight
+                  ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 shadow-sm'
+                  : 'bg-[#150B2D]/80 border-white/10 text-purple-200 hover:text-white hover:bg-purple-950'
+              }`}
+            >
+              {isLight ? <Moon className="w-4 h-4 text-purple-700" /> : <Sun className="w-4 h-4 text-amber-300" />}
+            </button>
+
+            <Link
+              href="/"
+              className="px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white shadow-md shadow-purple-600/30 transition-all"
+            >
+              Live Site ↗
+            </Link>
+
+            <button
+              onClick={handleAdminLogout}
+              title="Sign out of admin"
+              className={`p-2 rounded-full border transition-all cursor-pointer ${
+                isLight
+                  ? 'bg-red-50 hover:bg-red-100 border-red-200 text-red-600'
+                  : 'bg-red-950/50 hover:bg-red-900/50 border-red-500/30 text-red-300 hover:text-white'
+              }`}
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </header>
 

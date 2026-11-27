@@ -21,14 +21,24 @@ export default function EpisodeReviewPage() {
   const [episodes, setEpisodes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeVideo, setActiveVideo] = useState<any | null>(null);
+  const [serverAdminVerified, setServerAdminVerified] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/login')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((d) => {
+        if (d?.isAdmin) setServerAdminVerified(true);
+      })
+      .catch(() => {});
+  }, []);
 
   const isAdmin =
+    serverAdminVerified ||
     user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
-    user?.email === 'admin@dramabox.stream' ||
     profile?.role === 'admin';
 
   useEffect(() => {
-    if (!user) return;
+    if (!user && !serverAdminVerified) return;
     async function loadEpisodes() {
       setIsLoading(true);
       try {
@@ -48,9 +58,9 @@ export default function EpisodeReviewPage() {
 
   if (!isAdmin && !isLoading) {
     return (
-      <div className="min-h-screen bg-[var(--lr-bg)] text-[var(--lr-text-primary)] flex items-center justify-center p-4">
-        <div className="text-center max-w-md p-6 rounded-2xl bg-[var(--lr-card-bg)] border border-[var(--lr-border)]">
-          <AlertTriangle className="w-12 h-12 text-[#ECC979] mx-auto mb-3" />
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center max-w-md p-8 rounded-3xl bg-[#120726]/80 backdrop-blur-2xl border border-purple-500/30 shadow-2xl">
+          <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto mb-3" />
           <h2 className="text-xl font-bold mb-1">Restricted Access</h2>
           <p className="text-xs text-[var(--lr-text-muted)] mb-4">
             Only administrators are authorized to access the Episode Review Portal.
@@ -73,7 +83,7 @@ export default function EpisodeReviewPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--lr-bg)] text-[var(--lr-text-primary)] py-8 px-4 sm:px-6">
+    <div className="min-h-screen py-8 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Navigation & Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

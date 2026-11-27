@@ -38,12 +38,22 @@ export default function AdminMustSeePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [serverAdminVerified, setServerAdminVerified] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/login')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((d) => {
+        if (d?.isAdmin) setServerAdminVerified(true);
+      })
+      .catch(() => {});
+  }, []);
 
   const isAdmin =
-    !!user?.email &&
-    (user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
-      user.email === 'admin@dramabox.stream' ||
-      profile?.role === 'admin');
+    serverAdminVerified ||
+    (!!user?.email &&
+      (user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
+        profile?.role === 'admin'));
 
   const fetchData = async () => {
     setLoading(true);
@@ -105,18 +115,20 @@ export default function AdminMustSeePage() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-[75vh] flex flex-col items-center justify-center p-4 text-center">
-        <ShieldAlert className="w-12 h-12 text-[#D96868] mb-3" />
-        <h2 className="text-xl font-bold text-[var(--lr-text-primary,#F5F1E8)]">Admin Access Required</h2>
-        <p className="text-xs text-[var(--lr-text-secondary,#9AA7B4)] mt-1 max-w-sm">
-          You must be an authorized platform administrator to manage Must See content.
-        </p>
-        <Link
-          href="/home"
-          className="mt-4 px-4 py-2 rounded-xl btn-primary text-white text-xs font-bold shadow-md"
-        >
-          Return Home
-        </Link>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
+        <div className="max-w-md p-8 rounded-3xl bg-[#120726]/80 backdrop-blur-2xl border border-purple-500/30 shadow-2xl">
+          <ShieldAlert className="w-12 h-12 text-rose-400 mx-auto mb-3" />
+          <h2 className="text-xl font-black uppercase tracking-tight text-white">Admin Access Required</h2>
+          <p className="text-xs text-purple-200/80 mt-1 max-w-sm">
+            You must be an authorized platform administrator to manage Must See content.
+          </p>
+          <Link
+            href="/admin"
+            className="mt-5 inline-block px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 text-white text-xs font-bold shadow-lg shadow-purple-600/30"
+          >
+            Go to Admin Console
+          </Link>
+        </div>
       </div>
     );
   }
